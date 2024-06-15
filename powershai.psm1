@@ -95,7 +95,7 @@ function Set-OpenaiToken {
 	
 	$TempToken = $creds.GetNetworkCredential().Password;
 	
-	write-host "Checking if token is valid...";
+	write-host "Checando se o token é válido";
 	try {
 		$result = InvokeOpenai 'models' -m 'GET' -token $TempToken
 	} catch [System.Net.WebException] {
@@ -107,7 +107,7 @@ function Set-OpenaiToken {
 		
 		throw;
 	}
-	write-host "	Sucess! Token is valid!";
+	write-host "	Tudo certo!";
 	
 	$Env:OPENAI_API_KEY = $TempToken
 	
@@ -960,7 +960,7 @@ function Invoke-PowershaiChat {
 		"Gere uma saudação inicial para o usuário que está conversando com você a partir do módulo powershell chamado PowerShai"
 	);
 	
-	write-host "Obtendo moels suportados..."
+	write-host "Obtendo models suportados..."
 	$SupportedModels = Get-OpenaiModels
 	
 	write-verbose "Gerando lista de Tools..."
