@@ -30,12 +30,235 @@
 #>
 
 
+# Função genérica para invocar HTTP e com um minimo de suporte a SSE (Server Sent Events)
+Function InvokeHttp {
+	[CmdLetBinding()]
+	param(
+		$url 			= $null
+		,[object]$data 	= $null
+		,$method 		= "GET"
+		,$contentType 	= "application/json; charset=utf-8"
+		,$headers 		= @{}
+		,$SseCallBack 	= $null
+	)
+	$ErrorActionPreference = "Stop";
+	
+
+	
+	#Converts a hashtable to a URLENCODED format to be send over HTTP requests.
+	Function verbose {
+		$ParentName = (Get-Variable MyInvocation -Scope 1).Value.MyCommand.Name;
+		write-verbose ( $ParentName +':'+ ($Args -Join ' '))
+	}
+		
+		
+	#Troca caracteres não-unicode por um \u + codigo!
+	#Solucao adapatada da resposta do Douglas em: http://stackoverflow.com/a/25349901/4100116
+	Function EscapeNonUnicodeJson {
+		param([string]$Json)
+		
+		$Replacer = {
+			param($m)
+			
+			return [string]::format('\u{0:x4}', [int]$m.Value[0] )
+		}
+		
+		$RegEx = [regex]'[^\x00-\x7F]';
+		verbose "  Original Json: $Json";
+		$ReplacedJSon = $RegEx.replace( $Json, $Replacer)
+		verbose "  NonUnicode Json: $ReplacedJson";
+		return $ReplacedJSon;
+	}
+		
+	#Converts objets to JSON and vice versa,
+	Function ConvertTojson2($o) {
+		
+		if(Get-Command ConvertTo-Json -EA "SilentlyContinue"){
+			verbose " Using ConvertTo-Json"
+			return EscapeNonUnicodeJson(ConvertTo-Json $o -Depth 10);
+		} else {
+			verbose " Using javascriptSerializer"
+			Movidesk_LoadJsonEngine
+			$jo=new-object system.web.script.serialization.javascriptSerializer
+			$jo.maxJsonLength=[int32]::maxvalue;
+			return EscapeNonUnicodeJson ($jo.Serialize($o))
+		}
+	}
+		
+	Function Hash2Qs {
+		param($Data)
+		
+		
+		$FinalString = @();
+		$Data.GetEnumerator() | %{
+			write-verbose "$($MyInvocation.InvocationName): Converting $($_.Key)..."
+			$ParamName = MoviDesk_UrlEncode $_.Key; 
+			$ParamValue = Movidesk_UrlEncode $_.Value; 
+		
+			$FinalString += "$ParamName=$ParamValue";
+		}
+
+		$FinalString = $FinalString -Join "&";
+		return $FinalString;
+	}
+
+
+	try {
+	
+		#building the request parameters
+		if($method -eq 'GET' -and $data){
+			if($data -is [hashtable]){
+					$QueryString = Hash2Qs $data;
+			} else {
+					$QueryString = $data;
+			}
+			
+			if($url -like '*?*'){
+				$url += '&' + $QueryString
+			} else {
+				$url += '?' + $QueryString;
+			}
+		}
+	
+		verbose "  Creating WebRequest method... Url: $url. Method: $Method ContentType: $ContentType";
+		$Web = [System.Net.WebRequest]::Create($url);
+		$Web.Method = $method;
+		$Web.ContentType = $contentType
+		
+		
+		@($headers.keys) | %{
+			$Web.Headers.add($_, $headers[$_]);
+		}
+
+		
+		#building the body..
+		if($data -and 'POST','PATCH','PUT' -Contains $method){
+			if($data -is [hashtable]){
+				verbose "Converting input object to json string..."
+				$data = $data | ConvertTo-Json;
+			}
+			
+			verbose "Data to be send:`n$data"
+	
+			# Transforma a string json em bytes...
+			[Byte[]]$bytes = [system.Text.Encoding]::UTF8.GetBytes($data);
+			
+			#Escrevendo os dados
+			$Web.ContentLength = $bytes.Length;
+			verbose "  Bytes lengths: $($Web.ContentLength)"
+			
+			
+			verbose "  Getting request stream...."W
+			$RequestStream = $Web.GetRequestStream();
+			
+			
+			try {
+				verbose "  Writing bytes to the request stream...";
+				$RequestStream.Write($bytes, 0, $bytes.length);
+			} finally {
+				verbose "  Disposing the request stream!"
+				$RequestStream.Dispose() #This must be called after writing!
+			}
+		}
+		
+		
+		$UrlUri = [uri]$Url;
+		$Unescaped  = $UrlUri.Query.split("&") | %{ [uri]::UnescapeDataString($_) }
+		verbose "Query String:`r`n$($Unescaped | out-string)"
+		
+
+
+		
+		verbose "  Making http request... Waiting for the response..."
+		try {
+			$HttpResp = $Web.GetResponse();
+		} catch [System.Net.WebException] {
+			verbose "ResponseError: $_... Processing..."
+			$ErrorResp = $_.Exception.Response;
+			
+			if($ErrorResp.StatusCode -ne "BadRequest"){
+				throw;
+			}
+			
+			verbose "Processing response error..."
+			$ErrorResponseStream = $ErrorResp.GetResponseStream();
+			verbose "Creating error response reader..."
+			$ErrorIO = New-Object System.IO.StreamReader($ErrorResponseStream);
+			verbose "Reading error response..."
+			$ErrorText = $ErrorIO.ReadToEnd();
+			throw $ErrorText;
+		}
+		
+		verbose "Request done..."
+		
+		$Result  = @{};
+		
+		if($HttpResp){
+			verbose "  charset: $($HttpResp.CharacterSet) encoding: $($HttpResp.ContentEncoding). ContentType: $($HttpResp.ContentType)"
+			verbose "  Getting response stream..."
+			$ResponseStream  = $HttpResp.GetResponseStream();
+			
+			verbose "  Response streamwq1 size: $($ResponseStream.Length) bytes"
+			
+			$IO = New-Object System.IO.StreamReader($ResponseStream);
+			
+			if($SseCallBack){
+				verbose "  Reading SSE..."
+				
+				$SseResult = $null;
+
+				$Lines = @();
+				
+				while($SseResult -ne $false){
+					verbose "  Reading next line..."
+					$line = $IO.ReadLine()
+					$Lines += $line;
+					$SseResult = & $SseCallBack @{ line = $line; req = $Web; res = $HttpResp; stream = $IO }
+				}
+				
+				$Result.text = $Lines;
+				$Result.stream = $true;
+			} else {
+				verbose "  Reading response stream...."
+				$Result.text = $IO.ReadToEnd();
+			}
+			
+			verbose "  response json is: $responseString"
+		}
+		
+		verbose " HttpResult:`n$($Result|out-string)"
+		return $Result
+	} finally {
+		if($IO){
+			$IO.close()
+		}
+		
+		if($ResponseStream){
+			$ResponseStream.Close()
+		}
+
+		if($RequestStream){
+			write-verbose "Finazling request stream..."
+			$RequestStream.Close()
+		}
+	}
+
+
+}
+
 
 <#
 	Esta função é usada como base para invocar a a API da OpenAI!
 #>
 function InvokeOpenai {
-    param($endpoint, $body, $method = 'POST', $token = $Env:OPENAI_API_KEY)
+	[CmdletBinding()]
+    param(
+		$endpoint
+		,$body
+		,$method = 'POST'
+		,$token = $Env:OPENAI_API_KEY
+		,$StreamCallback = $null
+	)
 
 
     if(!$token){
@@ -54,6 +277,10 @@ function InvokeOpenai {
 	}
     
     $url = "$BaseUrl/$endpoint"
+	
+	if($StreamCallback){
+		$body.stream = $true;
+	}
 
 	$JsonParams = @{Depth = 10}
 	$Global:Dbg_LastBody = $body;
@@ -63,21 +290,48 @@ function InvokeOpenai {
 	
 	$ReqBody = $body | ConvertTo-Json @JsonParams -Compress
     $ReqParams = @{
-        body            = $ReqBody
-        ContentType     = "application/json; charset=utf-8"
-        Uri             = $url
-        Method          = $method
-        UseBasicParsing = $true
+        data            = $ReqBody
+        url             = $url
+        method          = $method
         Headers         = $headers
     }
 
-	write-verbose "ReqParams:`n$($ReqParams|out-string)"
-    $RawResp 	= Invoke-WebRequest @ReqParams
-    $result 	= [System.Text.Encoding]::UTF8.GetString($RawResp.RawContentStream.ToArray())
-    
-    $ResponseResult = $result | ConvertFrom-Json
+	$StreamData = @{
+		answers = @()
+	}
+	
+	if($StreamCallback){
+		$ReqParams['SseCallBack'] = {
+			param($data)
 
-    return $ResponseResult;
+			$line = $data.line;
+			
+			if($line -like 'data: {*'){
+				$RawJson = $line.replace("data: ","");
+				$Answer = $RawJson | ConvertFrom-Json;
+				$StreamData.answers += $Answer
+				& $StreamCallback $Answer
+			}
+			elseif($line -eq 'data: [DONE]'){
+				return $false;
+			}
+		}
+	}
+
+
+	write-verbose "ReqParams:`n$($ReqParams|out-string)"
+    $RawResp 	= InvokeHttp @ReqParams
+	write-verbose "RawResp: `n$($RawResp|out-string)"
+	
+	if($RawResp.stream){
+		return @{
+			stream 	= $true
+			RawResp = $RawResp
+			answers = $StreamData.answers
+		}
+	}
+
+    return $RawResp.text | ConvertFrom-Json
 }
 
 
@@ -85,6 +339,7 @@ function InvokeOpenai {
 # Define o token a ser usado nas chamadas da OpenAI!
 # Faz um testes antes para certificar de que é acessível!
 function Set-OpenaiToken {
+	[CmdletBinding()]
 	param()
 	
 	$ErrorActionPreference = "Stop";
@@ -129,6 +384,7 @@ function Get-OpenaiModels(){
 	Por enquanto, apenas os parâmetros temperature, model e MaxTokens foram implementados!
 #>
 function Get-OpenAiTextCompletion {
+	[CmdletBinding()]
     param(
             $prompt 
             ,$temperature   = 0.6
@@ -228,6 +484,8 @@ function Get-OpenaiChat {
 		#overwite previous
 		,$RawParams	= @{}
 		
+		,$StreamCallback = $null
+		
     )
 	
 	if(!$model){
@@ -304,7 +562,7 @@ function Get-OpenaiChat {
 	}
 	
 	write-verbose "Body:$($body|out-string)"
-    InvokeOpenai -endpoint 'chat/completions' -body $Body
+    InvokeOpenai -endpoint 'chat/completions' -body $Body -StreamCallback $StreamCallback
 }
 
 
@@ -616,6 +874,7 @@ function Invoke-OpenAiChatFunctions {
 		#	func: disparado antes de iniciar a execução de uma tool solicitada pelo modelo.
 		# 	exec: disparado após o modelo executar a funcao.
 		# 	error: disparado quando a funcao executada gera um erro
+		# 	stream: disparado quando uma resposta foi enviada (pelo stream)
 			$on				= @{} 	
 									
 									
@@ -626,6 +885,8 @@ function Invoke-OpenAiChatFunctions {
 		
 		,#Adicionar parâmetros customizados diretamente na chamada (irá sobrescrever os parâmetros definidos automaticamente).
 			$RawParams			= $null
+			
+		,[switch]$Stream
 	)
 	
 	$ErrorActionPreference = "Stop";
@@ -660,6 +921,7 @@ function Invoke-OpenAiChatFunctions {
 	}
 	
 
+
 	
 	# Vamos iterar em um loop chamando o model toda vez.
 	# Sempre que o model retornar pedindo uma funcao, vamos iterar novamente, executar a funcao, e entregar o resultado pro model!
@@ -681,6 +943,19 @@ function Invoke-OpenAiChatFunctions {
 			Functions 		= $OpenAiTools.tools
 			model 			= $model
 			RawParams		= $RawParams
+		}
+		
+		$ProcessStream = {
+			param($Data)
+			
+			write-host "$Line";
+			
+			& $emit "stream" $AiInteraction
+		}
+	
+		
+		if($Stream){
+			$Params['StreamCallback'] = $ProcessStream
 		}
 		
 		if($Json){
@@ -955,7 +1230,7 @@ function Invoke-PowershaiChat {
 	
 	$VerboseEnabled = $False;
 	
-	write-host "Checando token..."
+	write-host "Iniciando conversa..."
 	$Ret = Invoke-OpenAiChatFunctions -temperature 1 -prompt @(
 		"Gere uma saudação inicial para o usuário que está conversando com você a partir do módulo powershell chamado PowerShai"
 	);
