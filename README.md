@@ -19,6 +19,15 @@ A opção mais simples de instalação é com o comando `Install-Module`:
 Install-Module -Name powershai -Scope CurrentUser
 ```
 
+Após instalar, basta importar na sua sessão:
+
+```powershell
+import-module powershai
+
+# Veja os comandos disponiveis
+Get-Command -mo powershai
+```
+
 Você também pode baixá-lo diretamente ou clonar este repositório para um diretório qualquer na sua máquina e importá-lo:
 
 ```powershell
