@@ -1573,3 +1573,6 @@ function Invoke-PowershaiChat {
 }
 
 Set-Alias -Name Chatest -Value Invoke-PowershaiChat;
+
+
+Export-ModuleMember -Function * -Alias * -Cmdlet *

@@ -13,7 +13,13 @@ No entanto, outros serviços serão adicionados em breve!
 [Este post contém mais detalhes (e um vídeo)](https://iatalk.ing/powershai-powershell-inteligencia-artificial/)
 
 Toda a funcionalidade está no arquivo `powershai.psm1`, que é um módulo PowerShell.  
-Você pode baixá-lo para um diretório qualquer na sua máquina e importá-lo:
+A opção mais simples de instalação é com o comando `Install-Module`:
+
+```powershell
+Install-Module -Name powershai -Scope CurrentUser
+```
+
+Você também pode baixá-lo diretamente ou clonar este repositório para um diretório qualquer na sua máquina e importá-lo:
 
 ```powershell
 Import-Module CAMINHO\powershai.psm1
