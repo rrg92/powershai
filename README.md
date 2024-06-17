@@ -10,6 +10,8 @@ Mas, outros serviços serão adicionados!
 
 # Como usar
 
+[Este post contém mais detalhes (e um vídeo)](https://iatalk.ing/powershai-powershell-inteligencia-artificial/)
+
 Toda a funcionalidade fica no arquivo powershai.psm1, que é um módulo powershell.  
 Você pode baixar para um diretório qualquer na sua máquina e importar:
 
