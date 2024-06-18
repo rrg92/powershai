@@ -139,7 +139,7 @@ Function InvokeHttp {
 			}
 			
 			verbose "Data to be send:`n$data"
-	
+
 			# Transforma a string json em bytes...
 			[Byte[]]$bytes = [system.Text.Encoding]::UTF8.GetBytes($data);
 			
@@ -148,7 +148,7 @@ Function InvokeHttp {
 			verbose "  Bytes lengths: $($Web.ContentLength)"
 			
 			
-			verbose "  Getting request stream...."W
+			verbose "  Getting request stream...."
 			$RequestStream = $Web.GetRequestStream();
 			
 			
@@ -202,9 +202,11 @@ Function InvokeHttp {
 			
 			$IO = New-Object System.IO.StreamReader($ResponseStream);
 			
+			$LineNum = 0;
+			
 			if($SseCallBack){
 				verbose "  Reading SSE..."
-				
+				$LineNum++;
 				$SseResult = $null;
 
 				$Lines = @();
@@ -212,8 +214,13 @@ Function InvokeHttp {
 				while($SseResult -ne $false){
 					verbose "  Reading next line..."
 					$line = $IO.ReadLine()
+					
+					verbose "	Content: $line";
+					
 					$Lines += $line;
-					$SseResult = & $SseCallBack @{ line = $line; req = $Web; res = $HttpResp; stream = $IO }
+					
+					verbose "	Invoking callback..."
+					$SseResult = & $SseCallBack @{ line = $line; num = $LineNum; req = $Web; res = $HttpResp; stream = $IO }
 				}
 				
 				$Result.text = $Lines;
@@ -280,6 +287,7 @@ function InvokeOpenai {
 	
 	if($StreamCallback){
 		$body.stream = $true;
+		$body.stream_options = @{include_usage = $true};
 	}
 
 	$JsonParams = @{Depth = 10}
@@ -297,22 +305,72 @@ function InvokeOpenai {
     }
 
 	$StreamData = @{
+		#Todas as respostas enviadas!
 		answers = @()
+		
+		fullContent = ""
+		
+		FinishMessage = $null
+		
+		#Todas as functions calls
+		calls = @{
+			all = @()
+			funcs = @{}
+		}
+		
+		CurrentCall = $null
 	}
-	
+				
 	if($StreamCallback){
 		$ReqParams['SseCallBack'] = {
 			param($data)
 
 			$line = $data.line;
+			$StreamData.lines += $line;
 			
 			if($line -like 'data: {*'){
 				$RawJson = $line.replace("data: ","");
 				$Answer = $RawJson | ConvertFrom-Json;
+				
+				$FinishReason 	= $Answer.choices[0].finish_reason;
+				$DeltaResp 		= $Answer.choices[0].delta;
+				
+				$Role = $DeltaResp.role; #Parece vir somente no primeiro chunk...
+				
+				$StreamData.fullContent += $DeltaResp.content;
+				
+				if($FinishReason){
+					$StreamData.FinishMessage = $Answer
+				}
+				
+
+				foreach($ToolCall in $DeltaResp.tool_calls){
+					$CallId 		= $ToolCall.id;
+					$CallType 		= $ToolCall.type;
+					verbose "Processing tool`n$($ToolCall|out-string)"
+					
+					
+					if($CallId){
+						$StreamData.calls.all += $ToolCall;
+						$StreamData.CurrentCall = $ToolCall;
+						continue;
+					}
+					
+					$CurrentCall = $StreamData.CurrentCall;
+				
+					
+					if($CurrentCall.type -eq 'function' -and $ToolCall.function){
+						$CurrentCall.function.arguments += $ToolCall.function.arguments;
+					}
+				}
+				
+				
 				$StreamData.answers += $Answer
 				& $StreamCallback $Answer
 			}
 			elseif($line -eq 'data: [DONE]'){
+				#[DONE] documentando aqui:
+				#https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream
 				return $false;
 			}
 		}
@@ -324,10 +382,28 @@ function InvokeOpenai {
 	write-verbose "RawResp: `n$($RawResp|out-string)"
 	
 	if($RawResp.stream){
+		
+		#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
+		$MessageResponse = @{
+			role		 	= "assistant"
+			content 		= $StreamData.fullContent
+		}
+		
+		if($StreamData.calls.all){
+			$MessageResponse.tool_calls = $StreamData.calls.all;
+		}
+		
 		return @{
-			stream 	= $true
-			RawResp = $RawResp
-			answers = $StreamData.answers
+			stream = @{
+				RawResp = $RawResp
+				answers = $StreamData.answers
+				tools 	= $StreamData.calls.all
+			}
+			
+			message = $MessageResponse
+			finish_reason = $StreamData.FinishMessage.choices[0].finish_reason
+			usage = $StreamData.answers[-1].usage
+			model = $StreamData.answers[-1].model
 		}
 	}
 
@@ -589,7 +665,10 @@ function OpenAuxFunc2Tool {
 		$func
 	)
 	
+	write-verbose "Processing Func: $($func|out-string)";
+	
 	if($func.__is_functool_result){
+		write-verbose "Functions already processed. Ending...";
 		return $func;
 	}
 	
@@ -597,7 +676,7 @@ function OpenAuxFunc2Tool {
 	$FunctionDefs = @{};
 
 	# func é um file?
-	if($func -is [string]){
+	if($func -is [string] -and $func){
 		# existing path!
 		$IsPs1 			= $func -match '\.ps1$';
 		$ResolvedPath 	= Resolve-Path $func -EA SilentlyContinue;
@@ -607,6 +686,7 @@ function OpenAuxFunc2Tool {
 		}
 		
 		[string]$FilePath = $ResolvedPath
+		write-verbose "Loading function from file $FilePath"
 		
 		<#
 			Aqui é onde fazemos uma mágica interessante... 
@@ -618,6 +698,7 @@ function OpenAuxFunc2Tool {
 			Assim, conseguimos acessar tanto a DOC da funcao, quanto manter um objeto que pode ser usado para executá-la.
 		#>
 		$GetFunctionsScript = {
+			write-verbose "Running $FilePath"
 			. $FilePath
 			
 			$AllFunctions = @{}
@@ -625,9 +706,13 @@ function OpenAuxFunc2Tool {
 			#Obtem todas as funcoes definidas no arquivo.
 			#For each function get a object 
 			Get-Command | ? {$_.scriptblock.file -eq $FilePath} | %{
+				write-verbose "Function: $($_.name)"
+				
+				$help = get-help $_.name;
+				
 				$AllFunctions[$_.name] = @{
 						func = $_
-						help = get-help $_.name
+						help = get-help $_.Name
 					}
 			}
 			
@@ -639,13 +724,18 @@ function OpenAuxFunc2Tool {
 	
 	[object[]]$AllTools = @();
 	
+	
+	
 	#for each function!
-	foreach($func in $FunctionDefs.GetEnumerator()){
+	foreach($KeyName in @($FunctionDefs.keys) ){
+		$Def = $FunctionDefs[$KeyName];
+
+		$FuncName 	= $KeyName
+		$FuncDef 	= $Def
+		$FuncHelp 	= $Def.help;
+		$FuncCmd 	= $Def.func;
 		
-		$FuncName 	= $func.key;
-		$FuncDef 	= $func.value;
-		$FuncHelp 	= $FuncDef.help;
-		$FuncCmd 	= $FuncDef.func;
+		write-verbose "Creating Tool for Function $FuncName"
 		
 		$OpenAiFunction = @{
 					name = $null 
@@ -870,13 +960,14 @@ function Invoke-OpenAiChatFunctions {
 		,# Event handler
 		# Cada key é um evento que será disparado em algum momento por esse comando!
 		# eventos:
-		#	answer: disparado após obter a resposta do modelo
+		#	answer: disparado após obter a resposta do modelo (ou quando uma resposta fica disponivel ao usar stream).
 		#	func: disparado antes de iniciar a execução de uma tool solicitada pelo modelo.
 		# 	exec: disparado após o modelo executar a funcao.
 		# 	error: disparado quando a funcao executada gera um erro
-		# 	stream: disparado quando uma resposta foi enviada (pelo stream)
+		# 	stream: disparado quando uma resposta foi enviada (pelo stream) e -DifferentStreamEvent
+		# 	beforeAnswer: Disparado após todas as respostas. Util quando usado em stream!
+		# 	afterAnswer: Disparado antes de iniciar as respostas. Util quando usado em stream!
 			$on				= @{} 	
-									
 									
 		,# Envia o response_format = "json", forçando o modelo a devolver um json.
 			[switch]$Json				
@@ -912,16 +1003,14 @@ function Invoke-OpenAiChatFunctions {
 		}
 		
 		try {
-			$null = & $evtScript $interaction
+			$null = & $evtScript $interaction @{event=$evtName}
 		} catch {
 			write-warning "EventCallBackError: $evtName";
 			write-warning $_
 			write-warning $_.ScriptStackTrace
 		}
 	}
-	
-
-
+			
 	
 	# Vamos iterar em um loop chamando o model toda vez.
 	# Sempre que o model retornar pedindo uma funcao, vamos iterar novamente, executar a funcao, e entregar o resultado pro model!
@@ -945,10 +1034,19 @@ function Invoke-OpenAiChatFunctions {
 			RawParams		= $RawParams
 		}
 		
+		$StreamProcessingData = @{
+			num = 1
+		}
 		$ProcessStream = {
-			param($Data)
+			param($Answer)
 			
-			write-host "$Line";
+			$AiInteraction.stream = @{
+				answer 	= $Answer
+				emiNum 	= 0
+				num 	= $StreamProcessingData.num++
+			}
+			
+			
 			
 			& $emit "stream" $AiInteraction
 		}
@@ -984,7 +1082,13 @@ function Invoke-OpenAiChatFunctions {
 		
 		& $emit "answer" $AiInteraction
 		
-		$ModelResponse = $Answer.choices[0];
+		if($Answer.stream){
+			$ModelResponse = $Answer
+		} else {
+			$ModelResponse = $Answer.choices[0];
+		}
+		
+		write-verbose "FinishReason: $($ModelResponse.finish_reason)"
 		
 		$WarningReasons = 'length','content_filter';
 		
@@ -994,6 +1098,7 @@ function Invoke-OpenAiChatFunctions {
 	
 		# Model asked to call a tool!
 		if($ModelResponse.finish_reason -eq "tool_calls"){
+			
 			# A primeira opcao de resposta...
 			$AnswerMessage = $ModelResponse.message;
 		
@@ -1001,15 +1106,16 @@ function Invoke-OpenAiChatFunctions {
 			$Message += $AnswerMessage;
 			
 			$ToolCalls = $AnswerMessage.tool_calls
-				
+			
 			write-verbose "TotalToolsCals: $($ToolCalls.count)"
 			foreach($ToolCall in $ToolCalls){
-				
 				$CallType = $ToolCall.type;
 				$ToolCallId = $ToolCall.id;
 				
+				write-verbose "ProcessingTooll: $ToolCallId"
+				
 				try {
-					if($CallType -ne'function'){
+					if($CallType -ne 'function'){
 						throw "Tool type $CallType not supported"
 					}
 					
@@ -1017,6 +1123,7 @@ function Invoke-OpenAiChatFunctions {
 					
 					#Get the called function name!
 					$FuncName = $FuncCall.name
+					write-verbose "	FuncName: $FuncName"
 					
 					#Build the response message that will sent back!
 					$FuncResp = @{
@@ -1044,12 +1151,13 @@ function Invoke-OpenAiChatFunctions {
 					$TheFunc = $FuncDef.func;
 					
 					if(!$TheFunc){
-						write-warning "Model asked function $FuncName but the body was not found. Fix that bug!!!";
+						write-warning "Model asked function $FuncName but the body was not found. This is a bug of PowershIA";
 						throw "Function was defined, but code not found. This is a bug of function source."
 					}
 					
 					#Here wil have all that we need1
 					$FuncArgsRaw =  $FuncCall.arguments
+					write-verbose "	Arguments: $FuncArgsRaw";
 					
 					#We assuming model sending something that can be converted...
 					$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
@@ -1195,21 +1303,52 @@ function Invoke-PowershaiChat {
 		,$MaxRequests	= 10
 		,$SystemMessages = @()
 		
+		,#Desliga o stream 
+			[switch]$NoStream
+		
 		,#Specify a hash table where you want store all results 
 			$ChatMetadata 	= @{}
 	)
 	
 	$ErrorActionPreference = "Stop";
 	
-	function WriteModelAnswer($interaction){
-		$ans = $interaction.rawAnswer;
-		$cont = $ans.choices[0].message.content;
-		$model = $ans.model;
+	function WriteModelAnswer($interaction, $evt){
+		$WriteParams = @{
+			NoNewLine = $false
+			ForegroundColor = "Cyan"
+		}
 		
-		if($cont){
-			write-host ""
-			write-host "`🤖 $($model):" $cont -ForegroundColor Cyan
-			write-host ""
+		$Stream = $interaction.stream;
+		$str = "";
+		$EventName = $evt.event;
+
+
+		if($Stream){
+			$PartNum 	= $Stream.num;
+			$text 		= $Stream.answer.choices[0].delta.content;
+			$WriteParams.NoNewLine = $true;
+			
+			if($PartNum -eq 1){
+				$str = "🤖 $($model):"
+			}
+
+			if($text){
+				$Str += $text
+			}
+			
+			if($EventName -eq "answer"){
+				$str = "`n`n";
+			}
+		} else {
+			#So entrará nesse quando o stream estiver desligado!
+			$ans 	= $interaction.rawAnswer;
+			$text 	= $ans.choices[0].message.content;
+			$model 	= $ans.model;
+			$str 	= "`🤖 $($model): $text`n`n" 
+		}
+		
+		if($str){
+			write-host @WriteParams $Str;
 		}
 	}
 
@@ -1229,20 +1368,37 @@ function Invoke-PowershaiChat {
 	$ChatMetadata.stats 	= $ChatStats
 	
 	$VerboseEnabled = $False;
+	$MustStream = $true;
 	
-	write-host "Iniciando conversa..."
-	$Ret = Invoke-OpenAiChatFunctions -temperature 1 -prompt @(
-		"Gere uma saudação inicial para o usuário que está conversando com você a partir do módulo powershell chamado PowerShai"
-	);
+	if($NoStream){
+		$MustStream = $False;
+	}
 	
-	write-host "Obtendo models suportados..."
+	write-host "Carregando lista de modelos..."
 	$SupportedModels = Get-OpenaiModels
 	
-	write-verbose "Gerando lista de Tools..."
+	write-host "Montando estrutura de functions..."
 	$Funcs = OpenAuxFunc2Tool $Functions;
 	
+	try {
+		$CurrentUser = Get-LocalUser -SID ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
+		$FullName = $CurrentUser.FullName;
+		$UserAllNames = $FullName.split(" ");
+		$UserFirstName = $UserAllNames[0];
+	} catch {
+		write-verbose "Cannot get logged username: $_"
+	}
 	
-	WriteModelAnswer $Ret.interactions
+
+	
+	write-host "Iniciando..."
+	# $Ret = Invoke-OpenAiChatFunctions -temperature 1 -prompt @(
+	# 	"Gere uma saudação inicial para o usuário que está conversando com você a partir do módulo powershell chamado PowerShai"
+	# )  -on @{
+	# 	stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
+	# 	answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
+	# }  -Stream:$MustStream
+	
 	
 	$model = $null
 	$UseJson = $false;
@@ -1402,11 +1558,33 @@ function Invoke-PowershaiChat {
 		}
 	}
 	
+	$LoopNum = 0;
 	:MainLoop while($true){
 		try {
 			write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
-			write-host -NoNewLine "Você>>> "
-			$prompt = read-host
+			$LoopNum++;
+			
+			if($LoopNum -eq 1){
+				$Prompt = @(
+					"Olá, estou conversando com você a partir do PowershAI, um módulo powershell para interagir com IA"
+				)
+				
+				if($UserFirstName){
+					$Prompt += "Meu nome é: "+$UserFirstName;
+				}
+				
+				$Prompt = $Prompt -Join "`n";
+			} else {
+				
+				if($UserFirstName){
+					$PromptLabel = $UserFirstName
+				} else {
+					$PromptLabel = "Você"
+				}
+				
+				write-host -NoNewLine "$PromptLabel>>> "
+				$prompt = read-host
+			}
 			
 			$parsedPrompt = ParsePrompt $Prompt
 			
@@ -1434,9 +1612,11 @@ function Invoke-PowershaiChat {
 				write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
 			}
 			
+			
 			$ChatParams = $ChatUserParams + @{
 				prompt 		= $ChatContext.messages
 				Functions 	= $Funcs 
+				Stream		= $MustStream
 				on 			= @{
 							
 							send = {
@@ -1445,11 +1625,9 @@ function Invoke-PowershaiChat {
 								}
 							}
 							
-							answer = {
-								param($interaction)
-								
-								WriteModelAnswer $interaction
-							}
+							stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
+							answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
+
 							
 							func = {
 								param($interaction)
@@ -1482,7 +1660,14 @@ function Invoke-PowershaiChat {
 			$Total = $End-$Start;
 			
 			foreach($interaction in $Ret.interactions){ 
-				$Msg = $interaction.rawAnswer.choices[0].message;
+			
+				if($interaction.stream){
+					$Msg = $interaction.rawAnswer.message
+				} else {
+					$Msg = $interaction.rawAnswer.choices[0].message;
+				}
+			
+				
 
 				AddContext $Msg
 				
@@ -1573,6 +1758,9 @@ function Invoke-PowershaiChat {
 }
 
 Set-Alias -Name Chatest -Value Invoke-PowershaiChat;
+Set-Alias -Name PowerShait -Value Invoke-PowershaiChat;
+Set-Alias -Name PowerShai -Value Invoke-PowershaiChat;
+Set-Alias -Name ia -Value Invoke-PowershaiChat;
 
 
 Export-ModuleMember -Function * -Alias * -Cmdlet *
