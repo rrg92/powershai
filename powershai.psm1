@@ -29,6 +29,39 @@
 	Além disso, esta é uma versão sem testes e para uso livre por sua própria conta e risco.
 #>
 
+if(!$Global:POWERSHAI_SETTINGS){
+	$Global:POWERSHAI_SETTINGS = @{
+		provider = 'openai' #ollama, huggingface
+		baseUrl  = $null
+		providers = @{
+			openai 	= @{
+				RequireToken 	= $true
+				DefaultUrl 		= "https://api.openai.com/v1"
+				DefaultModel 	= "gpt-3.5-turbo"
+			}
+			
+			ollama	= @{
+				RequireToken 	= $false
+				DefaultUrl 		= "http://localhost:11434/v1"
+				ApiUrl 			= "http://localhost:11434/api"
+				DefaultModel	=  $null
+			}
+		}
+	}
+}
+
+if(!$Global:POWERSHAI_SETTINGS.chats){
+	$Global:POWERSHAI_SETTINGS.chats = @{}
+}
+
+
+
+function Get-AiCurrentProvider {
+	$ProviderName = $POWERSHAI_SETTINGS.provider;
+	$ProviderSlot = $POWERSHAI_SETTINGS.providers[$ProviderName];
+	return $ProviderSlot;
+}
+
 
 # Função genérica para invocar HTTP e com um minimo de suporte a SSE (Server Sent Events)
 Function InvokeHttp {
@@ -267,24 +300,31 @@ function InvokeOpenai {
 		,$StreamCallback = $null
 	)
 
-
-    if(!$token){
+	$Provider = Get-AiCurrentProvider
+	
+	
+    if(!$token -and $Provider.RequireToken){
         throw "OPENAI_NO_KEY";
     }
+
 
 
     $headers = @{
         "Authorization" = "Bearer $token"
     }
 	
-	$BaseUrl = $Env:OPENAI_API_BASE;
-	
-	if(!$BaseUrl){
-		$BaseUrl = "https://api.openai.com/v1"
+	if($endpoint -match '^https?://'){
+		$url = $endpoint
+	} else {
+		$BaseUrl = $POWERSHAI_SETTINGS.baseUrl;
+
+		if(!$BaseUrl){
+			$BaseUrl = $Provider.DefaultUrl
+		}
+		
+		$url = "$BaseUrl/$endpoint"
 	}
-    
-    $url = "$BaseUrl/$endpoint"
-	
+
 	if($StreamCallback){
 		$body.stream = $true;
 		$body.stream_options = @{include_usage = $true};
@@ -412,6 +452,7 @@ function InvokeOpenai {
 
 
 
+
 # Define o token a ser usado nas chamadas da OpenAI!
 # Faz um testes antes para certificar de que é acessível!
 function Set-OpenaiToken {
@@ -445,9 +486,77 @@ function Set-OpenaiToken {
 	return;
 }
 
+# Configura a Url base a ser usada!
+function Set-OpenaiBase {
+	[CmdletBinding()]
+	param($url)
+	
+	$CurrentBase = $Env:OPENAI_API_BASE;
+	$Env:OPENAI_API_BASE = $url
+}
+
+# Muda o provider!
+function Set-AiProvider {
+	[CmdletBinding()]
+	param($provider, $url)
+	
+	if(!$POWERSHAI_SETTINGS.providers.contains($provider)){
+		throw "POWERSHAI_PROVIDER_INVALID: $provider";
+	}
+	
+	$POWERSHAI_SETTINGS.baseUrl = $url
+	$POWERSHAI_SETTINGS.provider = $provider;
+}
+
+# Configura o default model!
+function Set-AiDefaultModel {
+	param($model)
+	
+	$SelectedModel = Get-AiModels | ? { $_.name -eq $model }
+	
+	if(!$SelectedModel){
+		throw "POWERSHAI_SET_MODEL: Model NotFound $Model";
+	}
+	
+	$Provider = Get-AiCurrentProvider
+	$Provider.DefaultModel = $model;
+}
+
 # Get all models!
 function Get-OpenaiModels(){
 	return (InvokeOpenai 'models' -m 'GET').data
+}
+
+# Get all models!
+function Get-OllamaTags(){
+	[CmdletBinding()]
+	param()
+	$BaseUrl 	= $POWERSHAI_SETTINGS.baseUrl
+	$DefaultUrl = $POWERSHAI_SETTINGS.providers.ollama.ApiUrl;
+	
+	if(!$baseUrl){
+		$BaseUrl = $DefaultUrl
+	}
+	
+	#http://localhost:11434/api/tags
+	return (InvokeOpenai "$BaseUrl/tags" -m 'GET').models
+}
+
+# Get all models!
+function Get-AiModels(){
+	$AiProvider = $POWERSHAI_SETTINGS.provider;
+	
+	$Models = $null
+	
+	if($AiProvider -eq 'openai'){
+		$Models = (InvokeOpenai 'models' -m 'GET').data
+	}
+	
+	if($AiProvider -eq 'ollama'){
+		$Models = Get-OllamaTags
+	}
+	
+	return $Models;
 }
 
 <#
@@ -564,10 +673,6 @@ function Get-OpenaiChat {
 		
     )
 	
-	if(!$model){
-		$model  = $Env:OPENAI_DEFAULT_MODEL 
-	}
-
     $Messages = @();
 
     $ShortRoles = @{
@@ -576,27 +681,33 @@ function Get-OpenaiChat {
         a = "assistant"
     }
 	
-	if(!$model){
-		$model = "gpt-3.5-turbo"
-	}
-	
-	
 	if($PrevContext){
 		$Messages += $PrevContext;
 	}
 
-	
+	$Provider = Get-AiCurrentProvider;
+	if(!$model){
+		$DefaultModel = $Provider.DefaultModel;
+		
+		if(!$DefaultModel){
+			throw "POWERSHAI_NODEFAULT_MODEL: Must set default model using Set-AiDefaultModel"
+		}
+		
+		$model = $DefaultModel
+	}
+
 
 	[object[]]$InputMessages = @($prompt);
+	
 	foreach($m in $InputMessages){
-		
 		$ChatMessage =  $null;
 		
-		if($m -is [PsCustomObject] -or $m -is [hashtable]){
+		
+		if($m -isnot [string]){
 			write-verbose "Adding chat message directly:`n$($m|out-string)"
 			$ChatMessage = $m;
 		} else {
-			if($m -match '(?s)^([s|u|a]): (.+)'){
+			if($m -match '(?s)^([sua]): (.+)'){
 				$ShortName  = $matches[1];
 				$Content    = $matches[2];
 
@@ -613,6 +724,8 @@ function Get-OpenaiChat {
 			
 			$ChatMessage = @{role = $RoleName; content = $Content};
 		}
+		
+		write-verbose "	ChatMessage: $($ChatMessage|out-string)"
 
 		$Messages += $ChatMessage
 	}
@@ -1294,6 +1407,7 @@ function SplitOpenAiString {
 	Syntaxe:
 		Converse com
 	
+	DEPRECIADO. SErá substuido em beve polos *-PowershaiChat
 #>
 function Invoke-PowershaiChat {
 	[CmdletBinding()]
@@ -1375,7 +1489,7 @@ function Invoke-PowershaiChat {
 	}
 	
 	write-host "Carregando lista de modelos..."
-	$SupportedModels = Get-OpenaiModels
+	$SupportedModels = Get-AiModels
 	
 	write-host "Montando estrutura de functions..."
 	$Funcs = OpenAuxFunc2Tool $Functions;
@@ -1412,6 +1526,11 @@ function Invoke-PowershaiChat {
 		MaxRequest 	= $MaxRequests
 		MaxTokens 	= $MaxTokens
 		Json 		= $false
+		RawParams	= @{
+			options = @{
+				stop = "|fim|"
+			}
+		}
 	}
 	
 	function ParsePrompt($prompt) {
@@ -1559,6 +1678,7 @@ function Invoke-PowershaiChat {
 	}
 	
 	$LoopNum = 0;
+	$InternalMessages = @();
 	:MainLoop while($true){
 		try {
 			write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
@@ -1566,15 +1686,23 @@ function Invoke-PowershaiChat {
 			
 			if($LoopNum -eq 1){
 				$Prompt = @(
-					"Olá, estou conversando com você a partir do PowershAI, um módulo powershell para interagir com IA"
+					
 				)
 				
+				$InternalMessages += @(
+					"Você é um agente que está conversando com o usuário partir do PowershAI, um módulo powershell para interagir com IA"
+				)
+				
+
+				
 				if($UserFirstName){
-					$Prompt += "Meu nome é: "+$UserFirstName;
+					$InternalMessages += "O nome do usuário é: "+$UserFirstName;
 				}
 				
+				$Prompt = "Conversa iniciada: Gere uma mensagem inicial:"
 				$Prompt = $Prompt -Join "`n";
 			} else {
+				$InternalMessages = @();
 				
 				if($UserFirstName){
 					$PromptLabel = $UserFirstName
@@ -1602,17 +1730,20 @@ function Invoke-PowershaiChat {
 				}
 			}
 			
-			AddContext "u: $prompt";
 			$Msg = @(
-				@($SystemMessages|%{"s: $_"})
-				"u: $prompt"
+				@($SystemMessages|%{ [string]"s: $_"})
+				@($InternalMessages|%{ [string]"s: $_"})
+				[string]"u: $prompt"
 			)
+			
+			
+			$Msg | %{ AddContext $_ };
 			
 			if($ShowFullSend){
 				write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
 			}
-			
-			
+		
+	
 			$ChatParams = $ChatUserParams + @{
 				prompt 		= $ChatContext.messages
 				Functions 	= $Funcs 
@@ -1757,10 +1888,730 @@ function Invoke-PowershaiChat {
 	return $ChatHistory;
 }
 
-Set-Alias -Name Chatest -Value Invoke-PowershaiChat;
-Set-Alias -Name PowerShait -Value Invoke-PowershaiChat;
-Set-Alias -Name PowerShai -Value Invoke-PowershaiChat;
-Set-Alias -Name ia -Value Invoke-PowershaiChat;
+Set-Alias -Name Chatest -Value Invoke-PowershaiChat
+Set-Alias -Name PowerShait -Value Invoke-PowershaiChat
+Set-Alias -Name PowerShai -Value Invoke-PowershaiChat
+Set-Alias -Name ia -Value Invoke-PowershaiChat
+
+
+
+<#
+	Inicializa o chat, mas sem travar o prompt!
+#>
+function New-PowershaiChat {
+	[CmdletBinding()]
+	param(
+		$ChatId
+		,$Functions 	= $null
+		,$model  		= $null
+		,$MaxRequests 	= 10
+		,$MaxTokens 	= 1024
+		,[switch]$Json
+		
+		,#Desliga o stream 
+			[switch]$NoStream
+			
+		,[switch]$IfNotExists
+	)
+	
+	if(!$ChatId){
+		$ChatId = (Get-Date).toString("yyyyMMddHHmmss")
+	}
+	
+	# Create chat!
+	$Chats = $POWERSHAI_SETTINGS.chats;
+	
+	$ChatSlot = $Chats[$ChatId];
+	
+	if($ChatSlot){
+		if($IfNotExists){
+			return;
+		}
+		
+		throw "POWERSHAI_START_CHAT: Chat $ChatId already exists";
+	}
+	
+	write-verbose "Montando estrutura de functions..."
+	$Funcs = OpenAuxFunc2Tool $Functions;
+	
+	
+	write-verbose "Carregando lista de modelos..."
+	$SupportedModels = Get-AiModels
+	
+	
+	try {
+		$CurrentUser = Get-LocalUser -SID ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
+		$FullName = $CurrentUser.FullName;
+		$UserAllNames = $FullName.split(" ");
+		$UserFirstName = $UserAllNames[0];
+	} catch {
+		write-verbose "Cannot get logged username: $_"
+	}
+	
+	$ApiParams = @{					
+		#Parametros que vão para a api...
+		model 		= $model
+		MaxRequest 	= $MaxRequests
+		MaxTokens 	= $MaxTokens
+		Json 		= ([bool]$Json)
+		RawParams	= @{}
+	}
+	
+	$ChatSlot = [PsCustomObject]@{
+		id 			 	= $ChatId
+		CreateDate 		= (Get-Date)
+		num 			= 0
+		LastPrompt 		= $null
+		metadata 		= @{}
+		history 		= @()
+		ApiParams 		= $ApiParams
+		params 			= $ApiParams + @{
+				stream 			= !([bool]$NoStream)
+				VerboseEnabled 	= $False;
+				UseJson 		= $false;
+				ShowFullSend 	= $false;
+				ShowTokenStats 	= $false;
+				MaxContextSize 	= 8192  # Vou considerar isso como o número de caracter por uma questão simples...
+										# futuramente, o correto é trabalhar com tokens!
+		}
+		
+		context  = @{
+			messages = @()
+			size = 0
+		}
+		Functions 		= @{
+			src = $functions
+			parsed = $Funcs
+		}
+		SupportedModels = $SupportedModels
+		UserInfo = @{
+			FullName = $FullName
+			AllNames = @($UserAllNames)
+		}
+		stats = @{
+			TotalChats 	= 0
+			
+			TotalCost 	= 0
+			TotalInput 	= 0
+			TotalOutput = 0
+			
+			TotalTokensI = 0
+			TotalTokensO = 0
+		}
+	}
+	
+	$Chats[$ChatId] = $ChatSlot;
+	$POWERSHAI_SETTINGS.ActiveChat = $ChatId;
+	
+	return $ChatSlot;
+}
+
+function Invoke-PowershaiChatStart {
+	$InternalMessages = @(
+		"Você é um agente que está conversando com o usuário partir do PowershAI, um módulo powershell para interagir com IA"
+		"O chat está sendo iniciado agora"
+	)
+
+	if($UserFirstName){
+		$InternalMessages += "O nome do usuário é: "+$UserFirstName;
+	}
+	$Prompt = @(
+		"Gere uma saudação inicial para o usuário"
+	)
+	$Prompt = $Prompt -Join "`n";
+	Send-PowershaiChat -Prompt $Prompt -SystemMessages $InternalMessages;
+}
+
+# Get a chatid!
+function Get-PowershaiChat {
+	param(
+		$ChatId # . active chat
+		,[switch]$SetActive
+	)
+	
+	if(!$ChatId){
+		throw "POWERSHAI_GET_CHAT: Must inform -ChatId"
+	}
+	
+	if($ChatId -eq '*'){
+		@($POWERSHAI_SETTINGS.chats) | sort CreateDate
+		return;
+	}
+	
+	# Create chat!
+	$Chats 	= $POWERSHAI_SETTINGS.chats;
+	
+	if(!$Chats){
+		 $POWERSHAI_SETTINGS.chats = @();
+	}
+	
+	$OriginalChatId =$ChatId 
+	
+	if($ChatId -eq "."){
+		$ChatId = $POWERSHAI_SETTINGS.ActiveChat;
+		
+		if(!$ChatId -or $ChatId -isnot [string]){
+			throw "POWERSHAI_GET_CHAT: No active ChatId!"
+		}
+		
+	}
+	
+	$Chat = $Chats[$ChatId];
+	
+	if(!$Chat){
+		throw "POWERSHAI_GET_CHAT: Chat $ChatId not found!";
+	}
+	
+	if($SetActive -and $OriginalChatId -ne "."){
+		$POWERSHAI_SETTINGS.ActiveChat = $ChatId;
+	}
+	
+	return $Chat
+}
+
+function Set-PowershaiChatParameter {
+	param($parameter, $value, $ChatId = ".")
+	
+	$Chat = Get-PowershaiChat $ChatId;
+	$CurrentValue = $Chat.params[$parameter];
+	
+	$Chat.params[$parameter] = $value;
+	write-host "Changed $parameter from $CurrentValue to $value";
+}
+
+function Get-PowershaiChatParameter {
+	param($ChatId = ".")
+	
+	$Chat = Get-PowershaiChat $ChatId;
+	$Chat.params
+}
+
+
+function Send-PowershaiChat {
+	[CmdletBinding()]
+	param(
+		[parameter(mandatory=$false, position=1, ValueFromRemainingArguments=$true)]
+		$prompt
+		
+		,$SystemMessages = @()
+		
+		,[parameter(mandatory=$false, ValueFromPipeline=$true)]
+			$context = $null
+			
+		,[switch]$ForEach
+		,[switch]$Json
+		,[switch]$NoContext #Desliga o historico anterior, mas colcoa a resposta atual no historico!
+		,[switch]$Temporary #DEsliga o historico e nao inclui o atual no historico!
+	)
+	
+	
+	begin {
+		$ErrorActionPreference = "Stop";
+		
+		$AllContext = @()
+		$IsPipeline = $PSCmdlet.MyInvocation.ExpectingInput   
+		
+		function ProcessPrompt {
+			param($prompt)
+			
+			$prompt = $prompt -join " ";
+			
+			function WriteModelAnswer($interaction, $evt){
+				$WriteParams = @{
+					NoNewLine = $false
+					ForegroundColor = "Cyan"
+				}
+				
+				$Stream = $interaction.stream;
+				$str = "";
+				$EventName = $evt.event;
+
+
+				if($Stream){
+					$PartNum 	= $Stream.num;
+					$text 		= $Stream.answer.choices[0].delta.content;
+					$WriteParams.NoNewLine = $true;
+					
+					if($PartNum -eq 1){
+						$str = "🤖 $($model):"
+					}
+
+					if($text){
+						$Str += $text
+					}
+					
+					if($EventName -eq "answer"){
+						$str = "`n`n";
+					}
+				} else {
+					#So entrará nesse quando o stream estiver desligado!
+					$ans 	= $interaction.rawAnswer;
+					$text 	= $ans.choices[0].message.content;
+					$model 	= $ans.model;
+					$str 	= "`🤖 $($model): $text`n`n" 
+				}
+				
+				if($str){
+					write-host @WriteParams $Str;
+				}
+			}
+
+			#Get active chat!
+			$Chat = Get-PowershaiChat "."
+			
+			if(!$Chat){
+				throw "POWERSHAI_SEND: No active chats"
+			}
+			
+			#Parameters 
+			$ChatHistory 		= $Chat.history;
+			$ChatStats 			= $Chat.stats;
+			$ChatMetadata 		= $Chat.metadata;
+			$SupportedModels 	= $Chat.SupportedModels
+			$UserFirstName		= $Chat.UserInfo.AllNames[0];
+			$ChatUserParams		= $Chat.params;
+			$ApiParamsKeys		= @($Chat.ApiParams.keys);
+			$ChatContext 		= $Chat.context;
+			
+			write-verbose "Iniciando..."
+			
+			$VerboseEnabled = $ChatUserParams.VerboseEnabled;
+			$model 			= $ChatUserParams.model;
+			$UseJson 		= $ChatUserParams.UseJson
+			$ShowFullSend 	= $ChatUserParams.ShowFullSend
+			$ShowTokenStats = $ChatUserParams.ShowTokenStats
+			# Vou considerar isso como o número de caracter por uma questão simples...
+			 # futuramente, o correto é trabalhar com tokens!
+			$MaxContextSize = $ChatUserParams.MaxContextSize 
+			
+			function ParsePrompt($prompt) {
+				$parts 		= $prompt -split ' ',2
+				$cmdName	= $parts[0];
+				$remain		= $parts[1];
+				
+				$result = @{
+					action = $null
+					prompt = $null;
+				}
+				
+				write-verbose "InputPrompt: $cmdName"
+				
+				$ShortCut = @{
+					'/von' 		= "VerboseEnabled true"
+					'/voff' 	= "VerboseEnabled false"
+					'/json' 	= "UseJson true"
+					'/jsoff' 	= "UseJson false"
+					'/fullon' 	= "ShowFullSend true"
+					'/fulloff' 	= "ShowFullSend false"
+					'/tokon' 	= "ShowTokenStats true"
+					'/tokoff' 	= "ShowTokenStats false"
+					'/reqs' 	= "MaxRequest "+$remain
+				}[$cmdName]
+				
+				if($ShortCut){
+					$cmdName = "/p";
+					$remain = $ShortCut;
+				}
+				
+				switch($cmdName){
+					"/reload" {
+						write-host "Reloading function list...";
+						
+						$FuncFile = $remain;
+					
+						if(!$FuncFile){
+							$FuncFile = $Chat.Functions.src;
+						}
+						
+						$Chat.Functions.parsed = OpenAuxFunc2Tool $FuncFile;
+						$Chat.Functions.src = $remain
+					}
+					
+					"/models" {
+							write-host $($Chat.SupportedModels|out-string)
+					}
+					
+					{'.cls','/clear','/cls','.c' -contains $_}{
+							clear-host
+					}
+					
+					
+					"/p" { 
+						#Split!
+						$paramPair 		= $remain -split ' ',2
+						$paramName 		= $paramPair[0]
+						$paramValStr 	= $paramPair[1];
+						
+						if(!$paramValStr){
+							write-host $($ChatUserParams|out-string);
+							return;
+						}
+						
+						if(!$ChatUserParams.contains($paramName)){
+							write-warning "No parameter existing with name: $paramName"
+							return;
+						}
+
+						$ParamVal = $ChatUserParams[$paramName];
+						
+						if($ParamVal -eq $null){
+							write-warning "Value is null. Setting as str value!";
+							$NewVal = $paramValStr
+							return;
+						} else {
+							$NewVal = $ParamVal.getType()::Parse($paramValStr);
+						}
+						
+						$ChatUserParams[$paramName] = $NewVal;
+						write-host "Changed PARAM $paramName from $ParamVal to $NewVal" 
+					}
+					
+					"/ps" {
+						function prompt(){ "PowershAI>> " }
+						write-warning "Entering in nested prompt";
+						$host.EnterNestedPrompt();
+					}
+					
+					"/model" {
+						write-host "Changing model...";
+						$newModel 		= $remain;
+						$chosenModel 	= $null;
+						
+						#find all candidates!
+						while($true){
+							$ElegibleModels = @( $Chat.SupportedModels | ? { $_.id -like $newModel } );
+							
+							if($ElegibleModels.length -eq 1){
+								$model = $ElegibleModels[0].id;
+								break;
+							}
+							
+							write-warning "Refine your search (search:$newModel)";
+							write-host $($ElegibleModels|sort id|out-string)
+							$newModel = read-host "Filter model"
+						}
+						
+						$ChatUserParams['model'] = $model
+						write-host "	Changed model to: $model"
+					}
+					
+					{'/exit','/end' -contains $_} {
+						$result.action = "ExplicitExit";
+						$result.prompt = $prompt;
+					}
+					
+					default {
+						$result.action = "prompt";
+						$result.prompt = $prompt;
+					}
+				}
+				
+				return $result;
+			}
+
+			function AddContext($msg) {
+
+				if($Temporary){
+					return;
+				}
+					
+				while($ChatContext.size -ge $MaxContextSize -and $ChatContext.messages){
+					$removed,$LeftMessages = $ChatContext.messages;
+					
+					$ChatContext.messages = $LeftMessages;
+					
+					$RemovedCount = $removed.length;
+					if($removed.content){
+						$RemovedCount = $removed.content.length;
+					}
+					
+					write-verbose "Removing Length: $removed $RemovedCount"
+					$ChatContext.size -= [int]$RemovedCount;
+				}
+				
+				$ChatContext.messages += @($msg);
+
+				if($msg.content){
+					$ChatContext.size += $msg.content.length;
+				} else {
+					$ChatContext.size += $msg.length;
+				}
+			}
+			
+			
+			$Chat.num++
+			$InternalMessages = @();
+			try {
+				write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
+				
+				$parsedPrompt = ParsePrompt $Prompt
+				$Chat.LastPrompt = $parsedPrompt
+				
+				switch($parsedPrompt.action){
+					"prompt" {
+						$prompt = $parsedPrompt.prompt;
+					}
+					
+					default {
+						return;
+					}
+				}
+				
+				$Msg = @(
+					@($SystemMessages|%{ [string]"s: $_"})
+					@($InternalMessages|%{ [string]"s: $_"})
+					[string]"u: $prompt"
+				)
+				
+				$Msg | %{ AddContext $_ };
+				
+				if($ShowFullSend){
+					write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
+				}
+				
+				$ApiParams = @{};
+				$ApiParamsKeys | %{
+					$ApiParams[$_] = $ChatUserParams[$_]
+				}
+				
+				$FullPrompt = $ChatContext.messages;
+				
+				
+				if($NoContext){
+					$FullPrompt = $Msg
+				}
+			
+				$ChatParams = $ApiParams + @{
+					prompt 		= $FullPrompt
+					Functions 	= $Chat.Functions.parsed 
+					Stream		= $Chat.params.stream
+					on 			= @{
+								
+								send = {
+									if($VerboseEnabled){
+										write-host -ForegroundColor DarkYellow "-- waiting model... --";
+									}
+								}
+								
+								stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
+								answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
+
+								
+								func = {
+									param($interaction)
+									
+									$ans = $interaction.rawAnswer;
+									$model = $ans.model;
+									$funcName = $interaction.toolResults[-1].name
+									
+									write-host -ForegroundColor Blue "$funcName{..." -NoNewLine
+								}
+						
+								exec = {
+									param($interaction)
+									
+									write-host -ForegroundColor Blue "}"
+									write-host ""
+								}
+						}
+				}
+				
+				if($Json){
+					$ChatParams.Json = $true;
+				}
+				
+				if($VerboseEnabled){
+					$ChatParams.Verbose = $true;
+				}
+				
+				$Start = (Get-Date);
+				$Ret 	= Invoke-OpenAiChatFunctions @ChatParams;
+				$End = Get-Date;
+				$Total = $End-$Start;
+				
+				foreach($interaction in $Ret.interactions){ 
+				
+					if($interaction.stream){
+						$Msg = $interaction.rawAnswer.message
+					} else {
+						$Msg = $interaction.rawAnswer.choices[0].message;
+					}
+				
+					AddContext $Msg
+					
+					$toolsResults = $interaction.toolResults;
+					if($toolsResults){
+						$toolsResults | %{ AddContext $_.resp }
+					}
+
+				}
+				
+				
+				#Store the historu of chats!
+				$ChatHistory += @{
+							Ret = $Ret
+							Elapsed = $Total
+						}
+				
+				$AllAnswers 	= @($Ret.interactions | %{$_.rawAnswer});
+				$AnswersCost	= $Ret.costs
+				
+				
+				# current chat
+				$AnswerCount 	= $AllAnswers.count;
+				$TotalCost 		= $AnswersCost.total
+				$InputCost 		= $AnswersCost.input
+				$OutputCost 	= $AnswersCost.output
+				$TotalTokens 	= $AnswersCost.tokensTotal
+				$InputTokens 	= $AnswersCost.tokensInput
+				$OutputTokens 	= $AnswersCost.tokensOutput
+				
+				# all chats
+				$ChatStats.TotalChats += $ChatHistory.count;
+				$TotalChats = $ChatStats.TotalChats
+				
+				## COSTS (total, input,output)
+				$ChatStats.TotalCost += $TotalCost 
+				$ChatStats.TotalInput += $InputCost
+				$ChatStats.TotalOutput += $OutputCost
+				
+				## TOKENS QTY (total, input, output)
+				$ChatStats.TotalTokens += $TotalTokens 
+				$ChatStats.TotalTokensI += $InputTokens
+				$ChatStats.TotalTokensO += $OutputTokens
+				
+				
+				$AnswerLog = @(
+					"Answer: $AnswerCount"
+					"Cost: $TotalCost (i:$InputCost/o:$OutputCost)"
+					"Tokens: $TotalTokens (i:$InputTokens/o:$OutputTokens)"
+					"time: $($Total.totalMilliseconds) ms"
+				) -Join " "
+				
+				$HistoryLog = @(
+					"AllChats: $($ChatStats.TotalChats)"
+					
+					@(
+						"Cost: $($ChatStats.TotalCost)"
+						"(i:$($ChatStats.TotalInput)"
+						"/"
+						"o:$($ChatStats.TotalOutput))"
+					) -Join ""
+					
+					@(
+						"Tokens: $($ChatStats.TotalTokens)"
+						"(i:$($ChatStats.TotalTokensI)"
+						"/"
+						"o:$($ChatStats.TotalTokensO))"
+					) -Join ""
+					
+				) -Join " "
+				
+				if($ShowTokenStats){
+					write-host "** $AnswerLog"
+					write-host "** $HistoryLog"
+				}
+			} catch {
+				write-host ($_|out-string)
+				write-host "==== ERROR STACKTRACE ==="
+				write-host "StackTrace: " $_.ScriptStackTrace;
+				throw;
+			}
+		}
+
+		function ProcessContext {
+			param($context)
+			
+			$FinalPrompt = @(
+				"Responda a mensagem com base nas informacoes de contexto que estao na tag <contexto></contexto>"
+				"<contexto>"
+				$context
+				"</contexto>"
+				"Mensagem:"
+				$prompt
+			)
+			
+			ProcessPrompt $FinalPrompt
+		}
+	}
+	
+	process {
+		if($ForEach -and $IsPipeline){
+			ProcessContext $context;
+		} else {
+			$AllContext += $context
+		}
+	}
+	
+	
+	end {
+		if(!$IsPipeline){
+			ProcessPrompt $prompt
+			return;
+		}
+		
+		if($AllContext.length){
+			ProcessContext $AllContext;
+		}
+	}
+	
+	
+	
+
+}
+
+function Enter-PowershaiChat {
+	param(
+		$ChatId = "."
+		,[switch]$StartMessage
+	)
+	
+	$Chat = Get-PowershaiChat $ChatId -SetActive
+	$UserFirstName = $Chat.UserInfo.AllNames[0];
+	
+	if($UserFirstName){
+		$PromptLabel = $UserFirstName
+	} else {
+		$PromptLabel = "Você"
+	}
+	
+	if($StartMessage){
+		Invoke-PowershaiChatStart
+	}
+		
+	while($true){
+		$InternalMessages = @();
+		write-host -NoNewLine "$PromptLabel>>> "
+		$prompt = read-host
+		
+		try {
+			Send-PowershaiChat -prompt $prompt
+			
+			if($Chat.LastPrompt.action -eq "ExplicitExit"){
+				break;
+			}
+		} catch {
+			$ErrorActionPreference = "Continue";
+			write-error -ErrorRecord $_
+			$ErrorActionPreference = "Stop";
+		}
+	}
+}
+
+function Start-PowershaiChat {
+	param(
+		$ChatId = "default"
+	)
+	
+	if(!$NoCreate){
+		$NewChat = New-PowershaiChat -ChatId $ChatId -IfNotExists
+	}
+	
+	Enter-PowershaiChat -StartMessage
+}
+
+
+
 
 
 Export-ModuleMember -Function * -Alias * -Cmdlet *

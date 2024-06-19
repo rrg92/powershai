@@ -23,7 +23,7 @@ copy-item -Path "powershai.psm1" -Destination $TempModPath
 
 $moduleSettings = @{
     PowerShellVersion = "3.0.0"
-    ModuleVersion  = "1.0.2"
+    ModuleVersion  = "1.2"
 	RootModule = 'powershai.psm1'
     Path   = "$TempModPath\powershai.psd1"
 	Author = 'Rodrigo Ribeiro Gomes'
