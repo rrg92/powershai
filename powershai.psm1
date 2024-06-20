@@ -54,6 +54,10 @@ if(!$Global:POWERSHAI_SETTINGS.chats){
 	$Global:POWERSHAI_SETTINGS.chats = @{}
 }
 
+if(!$Global:POWERSHAI_SETTINGS.OriginalPrompt){
+	$Global:POWERSHAI_SETTINGS.OriginalPrompt = $Function:prompt
+}
+
 
 
 function Get-AiCurrentProvider {
@@ -157,6 +161,12 @@ Function InvokeHttp {
 		$Web = [System.Net.WebRequest]::Create($url);
 		$Web.Method = $method;
 		$Web.ContentType = $contentType
+		
+		#Faz o close do connection group!
+		#$AllSp = [Net.ServicePointManager]::FindServicePoint($url)
+		#if($AllSp){
+		#	
+		#}
 		
 		
 		@($headers.keys) | %{
@@ -269,18 +279,30 @@ Function InvokeHttp {
 		verbose " HttpResult:`n$($Result|out-string)"
 		return $Result
 	} finally {
+		$BackupErrorAction = $ErrorActionPreference
+		$ErrorActionPreference = "Continue";
+		
 		if($IO){
 			$IO.close()
 		}
+
+		if($HttpResp){
+			write-verbose "Ending http stream..."
+			$HttpResp.Close();
+		}
+		
 		
 		if($ResponseStream){
+			write-verbose "Ending response stream..."
 			$ResponseStream.Close()
 		}
 
 		if($RequestStream){
-			write-verbose "Finazling request stream..."
+			write-verbose "Ending request stream..."
 			$RequestStream.Close()
 		}
+		
+		$ErrorActionPreference = $BackupErrorAction;
 	}
 
 
@@ -500,16 +522,33 @@ function Set-AiProvider {
 	[CmdletBinding()]
 	param($provider, $url)
 	
-	if(!$POWERSHAI_SETTINGS.providers.contains($provider)){
+	$ProviderSettings = $POWERSHAI_SETTINGS.providers[$provider];
+	
+	if(!$ProviderSettings){
 		throw "POWERSHAI_PROVIDER_INVALID: $provider";
 	}
 	
-	$POWERSHAI_SETTINGS.baseUrl = $url
+	switch($provider){
+		"ollama" {
+			if($url){
+				$ProviderSettings.DefaultUrl 	= "$url/v1"
+				$ProviderSettings.ApiUrl 		= "$url/api"	
+			}
+		}
+		
+		default {
+			if($url){
+				$ProviderSettings.DefaultUrl 	= "$url/v1"
+			}
+		}
+	}
+	
 	$POWERSHAI_SETTINGS.provider = $provider;
 }
 
 # Configura o default model!
 function Set-AiDefaultModel {
+	[CmdletBinding()]
 	param($model)
 	
 	$SelectedModel = Get-AiModels | ? { $_.name -eq $model }
@@ -544,6 +583,8 @@ function Get-OllamaTags(){
 
 # Get all models!
 function Get-AiModels(){
+	[CmdletBinding()]
+	param()
 	$AiProvider = $POWERSHAI_SETTINGS.provider;
 	
 	$Models = $null
@@ -1890,8 +1931,6 @@ function Invoke-PowershaiChat {
 
 Set-Alias -Name Chatest -Value Invoke-PowershaiChat
 Set-Alias -Name PowerShait -Value Invoke-PowershaiChat
-Set-Alias -Name PowerShai -Value Invoke-PowershaiChat
-Set-Alias -Name ia -Value Invoke-PowershaiChat
 
 
 
@@ -1925,15 +1964,11 @@ function New-PowershaiChat {
 	
 	if($ChatSlot){
 		if($IfNotExists){
-			return;
+			return $ChatSlot;
 		}
 		
 		throw "POWERSHAI_START_CHAT: Chat $ChatId already exists";
 	}
-	
-	write-verbose "Montando estrutura de functions..."
-	$Funcs = OpenAuxFunc2Tool $Functions;
-	
 	
 	write-verbose "Carregando lista de modelos..."
 	$SupportedModels = Get-AiModels
@@ -1955,6 +1990,7 @@ function New-PowershaiChat {
 		MaxTokens 	= $MaxTokens
 		Json 		= ([bool]$Json)
 		RawParams	= @{}
+		MaxSeqErrors = 5
 	}
 	
 	$ChatSlot = [PsCustomObject]@{
@@ -1980,8 +2016,8 @@ function New-PowershaiChat {
 			size = 0
 		}
 		Functions 		= @{
-			src = $functions
-			parsed = $Funcs
+			src = $Functions
+			parsed = $null
 		}
 		SupportedModels = $SupportedModels
 		UserInfo = @{
@@ -1999,10 +2035,11 @@ function New-PowershaiChat {
 			TotalTokensO = 0
 		}
 	}
-	
+
 	$Chats[$ChatId] = $ChatSlot;
-	$POWERSHAI_SETTINGS.ActiveChat = $ChatId;
 	
+	$null = Get-PowershaiChat -SetActive $ChatId
+	Update-PowershaiChatFunctions -File $Functions
 	return $ChatSlot;
 }
 
@@ -2024,49 +2061,62 @@ function Invoke-PowershaiChatStart {
 
 # Get a chatid!
 function Get-PowershaiChat {
+	[CmdletBinding()]
 	param(
-		$ChatId # . active chat
+		[string]$ChatId # . active chat
 		,[switch]$SetActive
+		,[switch]$NoError
 	)
 	
-	if(!$ChatId){
-		throw "POWERSHAI_GET_CHAT: Must inform -ChatId"
-	}
-	
-	if($ChatId -eq '*'){
-		@($POWERSHAI_SETTINGS.chats) | sort CreateDate
-		return;
-	}
-	
-	# Create chat!
-	$Chats 	= $POWERSHAI_SETTINGS.chats;
-	
-	if(!$Chats){
-		 $POWERSHAI_SETTINGS.chats = @();
-	}
-	
-	$OriginalChatId =$ChatId 
-	
-	if($ChatId -eq "."){
-		$ChatId = $POWERSHAI_SETTINGS.ActiveChat;
-		
-		if(!$ChatId -or $ChatId -isnot [string]){
-			throw "POWERSHAI_GET_CHAT: No active ChatId!"
+	try {
+		if(!$ChatId){
+			throw "POWERSHAI_GET_CHAT: Must inform -ChatId"
 		}
 		
+		if($ChatId -eq '*'){
+			@($POWERSHAI_SETTINGS.chats) | sort CreateDate
+			return;
+		}
+		
+		# Create chat!
+		$Chats 	= $POWERSHAI_SETTINGS.chats;
+		
+		if(!$Chats){
+			 $POWERSHAI_SETTINGS.chats = @();
+		}
+		
+		$OriginalChatId =$ChatId 
+		
+		if($ChatId -eq "."){
+			$ChatId = $POWERSHAI_SETTINGS.ActiveChat;
+			
+			if(!$ChatId -or $ChatId -isnot [string]){
+				throw "POWERSHAI_GET_CHAT: No active ChatId!"
+			}
+			
+		}
+		
+		$Chat = $Chats[$ChatId];
+		
+		if(!$Chat){
+			throw "POWERSHAI_GET_CHAT: Chat $ChatId not found!";
+		}
+		
+		if($SetActive -and $OriginalChatId -ne "."){
+			$POWERSHAI_SETTINGS.ActiveChat = $ChatId;
+		}
+	
+		return $Chat
+	} catch {
+		if($NoError){
+			return;
+		}
+		
+		throw;
 	}
 	
-	$Chat = $Chats[$ChatId];
 	
-	if(!$Chat){
-		throw "POWERSHAI_GET_CHAT: Chat $ChatId not found!";
-	}
 	
-	if($SetActive -and $OriginalChatId -ne "."){
-		$POWERSHAI_SETTINGS.ActiveChat = $ChatId;
-	}
-	
-	return $Chat
 }
 
 function Set-PowershaiChatParameter {
@@ -2086,11 +2136,10 @@ function Get-PowershaiChatParameter {
 	$Chat.params
 }
 
-
 function Send-PowershaiChat {
 	[CmdletBinding()]
 	param(
-		[parameter(mandatory=$false, position=1, ValueFromRemainingArguments=$true)]
+		[parameter(mandatory=$false, position=1)]
 		$prompt
 		
 		,$SystemMessages = @()
@@ -2107,6 +2156,16 @@ function Send-PowershaiChat {
 	
 	begin {
 		$ErrorActionPreference = "Stop";
+		
+		$ActiveChat = Get-PowershaiChat "." -NoError
+		
+		if(!$ActiveChat){
+			write-verbose "Creating new default chat..."
+			$NewChat = New-PowershaiChat -ChatId "default" -IfNotExists
+			
+			write-verbose "Setting active...";
+			$null = Get-PowershaiChat -SetActive $NewChat.id;
+		}
 		
 		$AllContext = @()
 		$IsPipeline = $PSCmdlet.MyInvocation.ExpectingInput   
@@ -2599,19 +2658,71 @@ function Enter-PowershaiChat {
 }
 
 function Start-PowershaiChat {
+	[CmdletBinding()]
 	param(
 		$ChatId = "default"
+		,$Functions = $null
 	)
 	
 	if(!$NoCreate){
 		$NewChat = New-PowershaiChat -ChatId $ChatId -IfNotExists
 	}
 	
+	if($Functions){
+		Update-PowershaiChatFunctions -ChatId $NewChat.id -File $Functions;
+	}
+	
+	
 	Enter-PowershaiChat -StartMessage
 }
 
+function Update-PowershaiChatFunctions {
+	[CmdletBinding()]
+	param($File, $ChatId = ".")
+	
+	$Chat = Get-PowershaiChat $ChatId
+	
+	if($File){
+		$FunctionSrc = $File;
+	} else {
+		$FunctionSrc = $Chat.src
+	}
+	
+	write-verbose "Loading functions from $FunctionSrc"
+	$Chat.Functions.src 	= $FunctionSrc;
+	$Chat.Functions.parsed 	= OpenAuxFunc2Tool $FunctionSrc;
+}
+
+function prompt {
+	$ExistingPrompt = [scriptblock]::create($POWERSHAI_SETTINGS.OriginalPrompt);
+	
+	try {
+		$Chat = Get-PowershaiChat ".";
+		$Id = $Chat.id;
+	} catch {
+		
+	}
+	
+	if($Id){
+		$Id = "💬 $Id"
+	} else {
+		$Id = ""
+	}
+	
+	
+	
+	$NewPrompt = (& $ExistingPrompt);
+	
+	if($Id){
+		$NewPrompt = "$Id $NewPrompt"
+	}
+	
+	return $NewPrompt
+}
 
 
+Set-Alias -Name PowerShai -Value Start-PowershaiChat
+Set-Alias -Name ia -Value Send-PowershaiChat
 
 
 Export-ModuleMember -Function * -Alias * -Cmdlet *
