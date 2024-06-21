@@ -1,0 +1,14 @@
+name: Publicar
+on:
+  push:
+    tags:
+    - v*
+
+jobs:
+  PsGallery:
+    name: PsGallery 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish
+        shell: pwsh
+        run: ./publish.ps1
