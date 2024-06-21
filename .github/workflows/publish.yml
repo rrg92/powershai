@@ -1,5 +1,5 @@
 name: Publicar
-on: push
+on: *
 
 jobs:
   PsGallery:
