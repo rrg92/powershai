@@ -8,33 +8,21 @@ param(
 
 $ErrorActionPreference = "Stop";
 
-
-$TempDir = [IO.Path]::GetTempFileName()
-get-item $TempDir -EA SilentlyContinue | Remove-Item;
-
-$TempModPath = Join-Path $TempDir "powershai";
-
-echo "Creating $TempModPath"
-New-Item $TempModPath -ItemType Directory -Force;
+$ModuleRoot = Join-Path "$PsScriptRoot" powershai
 
 
-copy-item -Path "powershai.psm1" -Destination $TempModPath
+# Current version!
+$LastTaggedVersion = git describe --tags --match "v*" --abbrev=0;
 
+$TaggedVersion = [Version]($LastTaggedVersion.replace("v",""))
 
-$moduleSettings = @{
-    PowerShellVersion = "3.0.0"
-    ModuleVersion  = "1.2"
-	RootModule = 'powershai.psm1'
-    Path   = "$TempModPath\powershai.psd1"
-	Author = 'Rodrigo Ribeiro Gomes'
-	Description = "Permite usar Inteligência Artificial direto do PowerShell"
-	CompanyName = 'IA Talking'
-	Copyright = '(c) IA Talking. Todos os direitos reservados'
-	FunctionsToExport	= "*"
-	CmdletsToExport  	= "*"
-	AliasesToExport   	= "*"
-	HelpInfoURI 		= "https://github.com/rrg92/powershai"
+# Module version!
+$Mod = import-module .\powershai -force -PassThru;
+
+if($TaggedVersion -ne $Mod.Version){
+	throw "POWERSHAI_PUBLISH_INCORRECT_VERSION: Module = $($Mod.Version) Git = $TaggedVersion";
 }
-New-ModuleManifest @moduleSettings
 
-Publish-Module -Path $TempModPath -NuGetApiKey $ApiKey -Force -Verbose
+
+
+Publish-Module -Path $ModuleRoot -NuGetApiKey $ApiKey -Force -Verbose
