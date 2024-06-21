@@ -8,8 +8,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-            fetch-tags: true
+      - name: Fetch tags
+        run: git fetch --prune --unshallow --tags
       - name: Publish
         shell: pwsh
         run: ./publish.ps1
