@@ -7,7 +7,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Publish
-        run: ls
-      - name: Publish
         shell: pwsh
-        run: ./publish.ps1
+        run: pwsh ./publish.ps1
