@@ -1,11 +1,13 @@
 name: Publicar
-on: push
+on: *
 
 jobs:
   PsGallery:
     name: PsGallery 
     runs-on: ubuntu-latest
     steps:
+      - name: Publish
+        run: ls
       - name: Publish
         shell: pwsh
         run: ./publish.ps1
