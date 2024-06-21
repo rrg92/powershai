@@ -17,7 +17,7 @@ $LastTaggedVersion = git describe --tags --match "v*" --abbrev=0;
 $TaggedVersion = [Version]($LastTaggedVersion.replace("v",""))
 
 # Module version!
-$Mod = import-module .\powershai -force -PassThru;
+$Mod = import-module $ModuleRoot -force -PassThru;
 
 if($TaggedVersion -ne $Mod.Version){
 	throw "POWERSHAI_PUBLISH_INCORRECT_VERSION: Module = $($Mod.Version) Git = $TaggedVersion";
