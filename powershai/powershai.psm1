@@ -1125,8 +1125,6 @@ function Invoke-OpenAiChatFunctions {
 									
 		,# Envia o response_format = "json", forçando o modelo a devolver um json.
 			[switch]$Json				
-	
-		
 		
 		,#Adicionar parâmetros customizados diretamente na chamada (irá sobrescrever os parâmetros definidos automaticamente).
 			$RawParams			= $null
@@ -1333,7 +1331,13 @@ function Invoke-OpenAiChatFunctions {
 					& $emit "func" $AiInteraction $CurrentToolResult
 					
 					write-verbose "Calling function $FuncName ($FuncInfo)"
-					$FuncResp.content = & $TheFunc @ArgsHash | ConvertTo-Json -Depth 10
+					$FuncResult = & $TheFunc @ArgsHash 
+					
+					if($FuncResult -eq $null){
+						$FuncResult = @{};
+					}
+					
+					$FuncResp.content = $FuncResult | ConvertTo-Json -Depth 10;
 					$FuncSeqErrors = 0;
 				} catch {
 					$err = $_;
@@ -1933,6 +1937,12 @@ Set-Alias -Name Chatest -Value Invoke-PowershaiChat
 Set-Alias -Name PowerShait -Value Invoke-PowershaiChat
 
 
+function NewChatContext {
+	return @{
+		messages = @()
+		size = 0
+	}
+}
 
 <#
 	Inicializa o chat, mas sem travar o prompt!
@@ -2011,10 +2021,7 @@ function New-PowershaiChat {
 										# futuramente, o correto é trabalhar com tokens!
 		}
 		
-		context  = @{
-			messages = @()
-			size = 0
-		}
+		context  = (NewChatContext)
 		Functions 		= @{
 			src = $Functions
 			parsed = $null
@@ -2119,6 +2126,13 @@ function Get-PowershaiChat {
 	
 }
 
+function Set-PowershaiActiveChat {
+	[CmdletBinding()]
+	param($ChatId)
+	
+	Get-PowershaiChat -SetActive $ChatId;
+}
+
 function Set-PowershaiChatParameter {
 	param($parameter, $value, $ChatId = ".")
 	
@@ -2137,25 +2151,60 @@ function Get-PowershaiChatParameter {
 }
 
 function Send-PowershaiChat {
+	<#
+		.SYNOPSIS 
+			Envia uma mensagem para o modelo do provider configurado e escreve a resposta na tela!
+	#>
 	[CmdletBinding()]
 	param(
 		[parameter(mandatory=$false, position=1)]
-		$prompt
+		# o prompt a ser enviado ao modelo 
+			$prompt
 		
-		,$SystemMessages = @()
+		,#System messages 
+			$SystemMessages = @()
 		
-		,[parameter(mandatory=$false, ValueFromPipeline=$true)]
+		,#O contexto 
+		 #Esse parâmetro é pra usado preferencialmente pelo pipeline.
+		 #Ele irá fazer com que o comando coloque os dados em tags <contexto></contexto> e injeterá junto no prompt.
+		[parameter(mandatory=$false, ValueFromPipeline=$true)]
 			$context = $null
 			
-		,[switch]$ForEach
-		,[switch]$Json
-		,[switch]$NoContext #Desliga o historico anterior, mas colcoa a resposta atual no historico!
-		,[switch]$Temporary #DEsliga o historico e nao inclui o atual no historico!
+		,#Força o cmdlet executar para cada objeto do pipeline
+		 #Por padrão, ele acumula todos os objetos em uma string só e envia de um só vez pro LLM.
+			[switch]$ForEach
+			
+		,#Habilia o modo json 
+		 #nesse modo os resultados retornados sempre serão 
+			[switch]$Json
+			
+		,#Modo Object!
+		 #neste modo o modo JSON será ativado automaticamente!
+		 #O comando não vai escrever nada na tela, e vai retornar os resultados como um objeto!
+		 #Que serão jogados de volta no pipeline!
+			[switch]$Object
+			
+		,#Desliga o historico anterior, mas colcoa a resposta atual no historico!
+			[switch]$NoContext 
+		,#DEsliga o historico e nao inclui o atual no historico!
+			[switch]$Temporary 
+			
+		,# Desliga o function call para esta execução somente!
+			[Alias('NoCalls')]
+			[switch]$DisableFunctions
 	)
 	
 	
 	begin {
 		$ErrorActionPreference = "Stop";
+		
+		$MyInvok = $MyInvocation;
+		$CallName = $MyInvok.InvocationName;
+		
+		if($CallName -eq "io"){
+			write-verbose "Invoked vias io alias. Setting Object to true!";
+			$Object = $true;
+		}
 		
 		$ActiveChat = Get-PowershaiChat "." -NoError
 		
@@ -2176,6 +2225,12 @@ function Send-PowershaiChat {
 			$prompt = $prompt -join " ";
 			
 			function WriteModelAnswer($interaction, $evt){
+				
+				if($Object){
+					write-verbose "ObjectMode enabled. No writes...";
+					return;
+				}
+				
 				$WriteParams = @{
 					NoNewLine = $false
 					ForegroundColor = "Cyan"
@@ -2223,7 +2278,6 @@ function Send-PowershaiChat {
 			}
 			
 			#Parameters 
-			$ChatHistory 		= $Chat.history;
 			$ChatStats 			= $Chat.stats;
 			$ChatMetadata 		= $Chat.metadata;
 			$SupportedModels 	= $Chat.SupportedModels
@@ -2416,6 +2470,24 @@ function Send-PowershaiChat {
 					}
 				}
 				
+				if($Object){
+					$Exemplo1Json = @{PowerShaiJsonResult = @{
+						prop1 = 123
+						prop2 = "text value..."
+						someArray = 1,2,3
+					}} | ConvertTo-Json -Compress;
+					
+					$Exemplo2Json = @{PowerShaiJsonResult = "valor 1",123,"valor 3"} | ConvertTo-Json -Compress;
+					
+					$InternalMessages += @(
+						"
+							Retornar o resultado como JSON no formato: PowerShaiJsonResult:{JSON}
+							EXEMPLO 1: $Exemplo1Json
+							EXEMPLO 2: $Exemplo2Json
+						"
+					)
+				}
+				
 				$Msg = @(
 					@($SystemMessages|%{ [string]"s: $_"})
 					@($InternalMessages|%{ [string]"s: $_"})
@@ -2439,6 +2511,7 @@ function Send-PowershaiChat {
 				if($NoContext){
 					$FullPrompt = $Msg
 				}
+				
 			
 				$ChatParams = $ApiParams + @{
 					prompt 		= $FullPrompt
@@ -2479,15 +2552,24 @@ function Send-PowershaiChat {
 					$ChatParams.Json = $true;
 				}
 				
+				if($Object){
+					$ChatParams.Json = $true;
+					$ChatParams.Stream = $false;
+				}
+				
 				if($VerboseEnabled){
 					$ChatParams.Verbose = $true;
+				}
+				
+				if($DisableFunctions){
+					$ChatParams.Remove('Functions');
 				}
 				
 				$Start = (Get-Date);
 				$Ret 	= Invoke-OpenAiChatFunctions @ChatParams;
 				$End = Get-Date;
 				$Total = $End-$Start;
-				
+
 				foreach($interaction in $Ret.interactions){ 
 				
 					if($interaction.stream){
@@ -2505,16 +2587,35 @@ function Send-PowershaiChat {
 
 				}
 				
+				#Store the history of chats!
+				$HistoryEntry = @{
+					Ret = $Ret
+					Elapsed = $Total
+					object = $null
+				}
+				$Chat.history += $HistoryEntry
+						
+				if($Object){
+					write-verbose "Object mode! Parsing json..."
+					$JsonContent = $Ret.answer[0].choices[0].message.content
+					write-verbose "Converting json to object: $JsonContent";
+					$JsonObject = $JsonContent | ConvertFrom-Json;
+					$ResultObj = $JsonObject;
+					
+					if($JsonObject.PowerShaiJsonResult){
+						$ResultObj = $JsonObject.PowerShaiJsonResult
+					}
+					
+					$HistoryEntry.object = $ResultObj
+					write-output $ResultObj
+				}
 				
-				#Store the historu of chats!
-				$ChatHistory += @{
-							Ret = $Ret
-							Elapsed = $Total
-						}
 				
 				$AllAnswers 	= @($Ret.interactions | %{$_.rawAnswer});
 				$AnswersCost	= $Ret.costs
 				
+				
+
 				
 				# current chat
 				$AnswerCount 	= $AllAnswers.count;
@@ -2526,7 +2627,7 @@ function Send-PowershaiChat {
 				$OutputTokens 	= $AnswersCost.tokensOutput
 				
 				# all chats
-				$ChatStats.TotalChats += $ChatHistory.count;
+				$ChatStats.TotalChats += $Chat.history.count;
 				$TotalChats = $ChatStats.TotalChats
 				
 				## COSTS (total, input,output)
@@ -2565,6 +2666,7 @@ function Send-PowershaiChat {
 					) -Join ""
 					
 				) -Join " "
+				
 				
 				if($ShowTokenStats){
 					write-host "** $AnswerLog"
@@ -2693,6 +2795,38 @@ function Update-PowershaiChatFunctions {
 	$Chat.Functions.parsed 	= OpenAuxFunc2Tool $FunctionSrc;
 }
 
+function Clear-PowershaiChat {
+	<#
+		.SYNOPSIS
+			Apaga elementos de um chat!
+	#>
+	param(
+		
+		#Apaga todo o histórico
+			[switch]$History
+			
+		,#Apaga o contexto 
+			[switch]$Context
+		
+		#Id do chat. Padrão: ativo.
+		,$ChatId = "."
+	)
+	
+	$Chat = Get-PowershaiChat -ChatId $ChatId;
+	
+	if($context){
+		write-verbose "Clearing context..."
+		$Chat.context = NewChatContext
+	}
+	
+	if($history){
+		write-verbose "Clearing history"
+		$Chat.history = @();
+	}
+	
+}
+
+
 function prompt {
 	$ExistingPrompt = [scriptblock]::create($POWERSHAI_SETTINGS.OriginalPrompt);
 	
@@ -2723,6 +2857,9 @@ function prompt {
 
 Set-Alias -Name PowerShai -Value Start-PowershaiChat
 Set-Alias -Name ia -Value Send-PowershaiChat
+Set-Alias -Name io -Value Send-PowershaiChat
+Set-Alias -Name iaf -Value Update-PowershaiChatFunctions
+
 
 
 Export-ModuleMember -Function * -Alias * -Cmdlet *
