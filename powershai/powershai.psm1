@@ -591,13 +591,15 @@ function Get-AiModels(){
 	
 	if($AiProvider -eq 'openai'){
 		$Models = (InvokeOpenai 'models' -m 'GET').data
+		$Models | Add-Member -Type noteproperty -Name name -Value $null 
+		$Models | %{ $_.name = $_.id }
 	}
 	
 	if($AiProvider -eq 'ollama'){
 		$Models = Get-OllamaTags
 	}
 	
-	return $Models;
+	return $Models | select ;
 }
 
 <#
