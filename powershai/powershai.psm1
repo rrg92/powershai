@@ -1032,7 +1032,7 @@ function Get-OpenAiAnswerCost($answers){
 		
 		if(!$CachedMatch){
 			# Find high pricing...
-			$SortedPrices = $Pricings.GetEnumerator() | ? {$model -match $_.value.match} | sort {$_.value.match.length} -Desc
+			$SortedPrices = $Pricings.GetEnumerator() | ? {$model -match $_.value.match} | Sort-Object {$_.value.match.length} -Desc
 			
 			if($SortedPrices){
 				$BestMatch = $SortedPrices[0];
@@ -1678,7 +1678,7 @@ function Invoke-PowershaiChat {
 					}
 					
 					write-warning "Refine your search (search:$newModel)";
-					write-host $($ElegibleModels|sort id|out-string)
+					write-host $($ElegibleModels|Sort-Object id|out-string)
 					$newModel = read-host "Filter model"
 				}
 				
@@ -2083,7 +2083,7 @@ function Get-PowershaiChat {
 		}
 		
 		if($ChatId -eq '*'){
-			@($POWERSHAI_SETTINGS.chats) | sort CreateDate
+			@($POWERSHAI_SETTINGS.chats) | Sort-Object CreateDate
 			return;
 		}
 		
@@ -2402,7 +2402,7 @@ function Send-PowershaiChat {
 							}
 							
 							write-warning "Refine your search (search:$newModel)";
-							write-host $($ElegibleModels|sort id|out-string)
+							write-host $($ElegibleModels|Sort-Object id|out-string)
 							$newModel = read-host "Filter model"
 						}
 						
