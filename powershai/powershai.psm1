@@ -37,7 +37,7 @@ if(!$Global:POWERSHAI_SETTINGS){
 			openai 	= @{
 				RequireToken 	= $true
 				DefaultUrl 		= "https://api.openai.com/v1"
-				DefaultModel 	= "gpt-3.5-turbo"
+				DefaultModel 	= "gpt-4o-mini"
 			}
 			
 			ollama	= @{
