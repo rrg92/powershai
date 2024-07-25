@@ -7,32 +7,43 @@ function InvokeOpenai {
 		$endpoint
 		,$body
 		,$method = 'POST'
-		,$token = $Env:OPENAI_API_KEY
 		,$StreamCallback = $null
+		,$Token = $null
 	)
 
 	$Provider = Get-AiCurrentProvider
+	write-verbose "InvokeOpenAI, current provider = $($Provider.name)"
+	$TokenRequired = GetCurrentProviderData RequireToken;
+
+	if(!$Token){
+		$TokenEnvName = GetCurrentProviderData TokenEnvName;
+		
+		if($TokenEnvName){
+			write-verbose "Trying get token from environment var: $($TokenEnvName)"
+			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
+		}
+	}	
 	
+	if($TokenRequired -and !$Token){
+			$Token = GetCurrentProviderData Token;
+			
+			if(!$token){
+				throw "POWERSHAI_OPENAI_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
+			}
+	}
 	
-    if(!$token -and $Provider.RequireToken){
-        throw "OPENAI_NO_KEY";
-    }
+    $headers = @{}
+	
+	if($TokenRequired){
+		 $headers["Authorization"] = "Bearer $token"
+	}
 
 
-
-    $headers = @{
-        "Authorization" = "Bearer $token"
-    }
 	
 	if($endpoint -match '^https?://'){
 		$url = $endpoint
 	} else {
-		$BaseUrl = $POWERSHAI_SETTINGS.baseUrl;
-
-		if(!$BaseUrl){
-			$BaseUrl = $Provider.DefaultUrl
-		}
-		
+		$BaseUrl = GetCurrentProviderData BaseUrl
 		$url = "$BaseUrl/$endpoint"
 	}
 
@@ -174,7 +185,9 @@ function Set-OpenaiToken {
 	
 	write-host "Forneça o token no campo senha na tela em que se abrir";
 	
-	$creds = Get-Credential "OPENAI TOKEN";
+	$Provider = Get-AiCurrentProvider
+	$ProviderName = $Provider.name.toUpper();
+	$creds = Get-Credential "$ProviderName API TOKEN";
 	
 	$TempToken = $creds.GetNetworkCredential().Password;
 	
@@ -190,10 +203,9 @@ function Set-OpenaiToken {
 		
 		throw;
 	}
-	write-host "	Tudo certo!";
+	write-host -ForegroundColor green "	TOKEN ALTERADO!";
 	
-	$Env:OPENAI_API_KEY = $TempToken
-	
+	SetCurrentProviderData Token $TempToken;
 	return;
 }
 
@@ -211,6 +223,16 @@ function Set-OpenaiBase {
 function Get-OpenaiModels(){
 	return (InvokeOpenai 'models' -m 'GET').data
 }
+
+function openai_GetModels(){
+	param()
+	
+	$Models = Get-OpenaiModels
+	$Models | Add-Member -Type noteproperty -Name name -Value $null 
+	$Models | %{ $_.name = $_.id }
+}
+
+
 
 
 <#
@@ -300,7 +322,7 @@ function Get-OpenAiTextCompletion {
 		$res = OpenAiChat $Prompt -MaxTokens 1000
 		
 		DICA: Note que na última mensagem, e não precisei especificar o "u: mensagem", visto que ele ja usa como default se não encontra o prefixo.
-		DICA 2: Note que eu usei o parâmetro MaxTokens para aumentar o limite padrão de 200.
+		DICA 2: Note que eu usei o parâmetro MaxTokens para aumentar o limite padrão.
 #>
 function Get-OpenaiChat {
     [CmdletBinding()]
@@ -308,7 +330,7 @@ function Get-OpenaiChat {
          $prompt
         ,$temperature   = 0.6
         ,$model         = $null
-        ,$MaxTokens     = 200
+        ,$MaxTokens     = 1000
 		,$ResponseFormat = $null
 		
 		,#Function list, as acceptable by Openai
@@ -772,7 +794,13 @@ function SplitOpenAiString {
 
 return @{
 	RequireToken 	= $true
-	DefaultUrl 		= "https://api.openai.com/v1"
+	BaseUrl 		= "https://api.openai.com/v1"
 	DefaultModel 	= "gpt-4o-mini"
+	TokenEnvName 	= "OPENAI_API_KEY"
+	
+	info = @{
+		desc	= "OpenAI"
+		url 	= "https://openai.com/"
+	}
 }
 

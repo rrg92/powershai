@@ -34,22 +34,9 @@ if(!$Global:POWERSHAI_SETTINGS){
 	$Global:POWERSHAI_SETTINGS = @{
 		provider = 'openai' #ollama, huggingface
 		baseUrl  = $null
-		providers = @{
-			grok = @{
-				RequireToken 	= $true
-				DefaultUrl 		= "https://api.groq.com/openai/v1"
-				DefaultModel 	= "llama-3.1-70b-versatile"
-			}
-			
-			ollama	= @{
-				RequireToken 	= $false
-				DefaultUrl 		= "http://localhost:11434/v1"
-				ApiUrl 			= "http://localhost:11434/api"
-				DefaultModel	=  $null
-			}
-			
-
-		}
+		
+		#providers settings!
+		providers = @{}
 	}
 }
 
@@ -355,6 +342,10 @@ function PowerShaiProviderFunc {
 	$FuncPrefix = $POWERSHAI_SETTINGS.funcbase;
 	$FullFuncName = $FuncPrefix + $FuncName;
 	
+	if(!$FuncParams){
+		$FuncParams = @{}
+	}
+	
 	if(Get-Command $FullFuncName -EA SilentlyContinue){
 		& $FullFuncName @FuncParams
 	} else {
@@ -365,44 +356,90 @@ function PowerShaiProviderFunc {
 	
 }
 
-# Configura o default model!
-function Set-AiDefaultModel {
-	[CmdletBinding()]
-	param($model)
+# function 
+function GetProviderData {
+	param($name, $Key)
 	
-	$SelectedModel = Get-AiModels | ? { $_.name -eq $model }
+	$provider = $POWERSHAI_SETTINGS.providers[$name];
 	
-	if(!$SelectedModel){
-		throw "POWERSHAI_SET_MODEL: Model NotFound $Model";
+	$UserDefined = $provider.UserDefined;
+	
+	$UserSetting 	= $UserDefined[$Key];
+	$DefaultSetting	= $provider[$key];
+	
+	if($UserDefined.contains($Key)){
+		return $UserSetting
 	}
 	
-	$Provider = Get-AiCurrentProvider
-	$Provider.DefaultModel = $model;
+	return $DefaultSetting
 }
+
+function SetProviderData {
+	param($name, $Key, $value)
+	
+	$provider = $POWERSHAI_SETTINGS.providers[$name];
+	
+	$UserDefined = $provider.UserDefined;
+	$UserDefined[$key] = $value;
+}
+
+function GetCurrentProviderData {
+	param($key)
+	
+	$Provider = Get-AiCurrentProvider
+	GetProviderData -name $Provider.name -key $key
+}
+
+function SetCurrentProviderData {
+	param($key, $value)
+	$Provider = Get-AiCurrentProvider
+	SetProviderData -name $provider.name -key $key -value $value;
+}
+
+# obtem a lista de providers !
+function Get-AiProviders {
+	param()
+	
+	@($POWERSHAI_SETTINGS.providers.keys) | %{
+		$Provider = $POWERSHAI_SETTINGS.providers[$_];
+		$ProviderInfo = [PSCustomObject](@{name = $_} + $Provider.info)
+		
+		$ProviderInfo
+	}
+}
+
 
 # Get all models!
 function Get-AiModels {
 	[CmdletBinding()]
 	param()
-	$AiProvider = $POWERSHAI_SETTINGS.provider;
-	
-	$models = $null
-	#TODO: Migrar tudo para PowerShaiProviderFunc
-	
-	if($AiProvider -eq 'ollama'){
-		$Models = Get-OllamaTags
-	} 
-	elseif($AiProvider -eq "maritalk"){
-		$Models = PowerShaiProviderFunc "GetModels"
-	}
-	else {
-		$Models = (InvokeOpenai 'models' -m 'GET').data
-		$Models | Add-Member -Type noteproperty -Name name -Value $null 
-		$Models | %{ $_.name = $_.id }
-	}
-	
-	return $Models | select ;
+	PowerShaiProviderFunc "GetModels"
 }
+
+
+# Configura o default model!
+function Set-AiDefaultModel {
+	[CmdletBinding()]
+	param($model)
+	
+	$ElegibleModels = @(Get-AiModels | ? { $_.name -like $model+"*" })
+	$ExactModel 	= $ElegibleModels | ?{ $_.name -eq $model }
+	
+	write-verbose "ElegibleModels: $($ElegibleModels|out-string)"
+	
+	if($ElegibleModels.count -ge 2 -and !$ExactModel){
+		throw "POWERSHAI_DEFAULTMODEL_AMBIGUOUS: Existem vários modelos com o mesmo nome $model e nenhum com este nome exato. Seja mais específico."
+	}
+	
+	$model = $ElegibleModels[0].name
+	
+	if($ElegibleModels.count -eq 1 -and !$ExactModel){
+		write-warning "Modelo exato $model nao encontrado. Usnado o único mais próximo: $model"
+	}
+	
+	SetCurrentProviderData DefaultModel $model;
+}
+
 
 # Funcao generica de chat. Segue a especificacao da OpenAI
 function Get-AiChat {
@@ -429,7 +466,7 @@ function Get-AiChat {
 	$FuncParams = $PsBoundParameters;
 	
 	if(!$model){
-		$FuncParams['model'] = $Provider.DefaultModel;
+		$FuncParams['model'] = GetCurrentProviderData DefaultModel
 	}
 	
 	PowerShaiProviderFunc "Chat" -FuncParams $FuncParams;
@@ -2213,8 +2250,8 @@ foreach($File in $ProvidersFiles){
 	
 	$ProviderData = . $File.FullName;
 	
-	if($ProviderData -eq $null){
-		$ProviderData = @{};
+	if(!$ProviderData.info.desc){
+		throw "POWERSHAI_PROVIDER_NODESC: Provider $ProviderName must have desc"
 	}
 	
 	if($ProviderData -isnot [hashtable]){
@@ -2224,17 +2261,17 @@ foreach($File in $ProvidersFiles){
 	$ProviderData.name = $ProviderName;
 	$ExistingProvider = $POWERSHAI_SETTINGS.providers[$ProviderName];
 	
-	$CurrentDefaultModel = $null
+	
 	if($ExistingProvider){
-		$CurrentDefaultModel = $ExistingProvider.DefaultModel;
+		$UserDefinedSettings = $ExistingProvider.UserDefined;
+	}
+	
+	if(!$UserDefinedSettings){
+		$UserDefinedSettings = @{};
 	}
 	
 	$POWERSHAI_SETTINGS.providers[$ProviderName] = $ProviderData
-	
-	if($CurrentDefaultModel){
-		$ProviderData.DefaultModel = $CurrentDefaultModel
-	}
-	
+	$ProviderData.UserDefined = $UserDefinedSettings;	
 }
 
 Export-ModuleMember -Function * -Alias * -Cmdlet *

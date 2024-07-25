@@ -324,6 +324,12 @@ function Set-MaritalkToken {
 
 
 return @{
+	info = @{
+		desc	= "LLM Brasileiro, feito pela empresa Maritaca.ai"
+		url 	= "https://www.maritaca.ai/"
+	}
+	
+	desc 			= "Maritalk" 			
 	DefaultModel 	= "sabia-2-medium"
 }
 
