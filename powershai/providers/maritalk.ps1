@@ -173,10 +173,13 @@ function Invoke-MaritalkInference {
 		}
 	}
 	
-	[object[]]$FinalMessages = @(
-		@{role="system";content = $SystemMessage}
-		$NewMessages
-	)
+	[object[]]$FinalMessages = @()
+	
+	if($SystemMessage){
+		$FinalMessages += @{role="system";content = $SystemMessage}
+	}
+		
+	$FinalMessages += $NewMessages
 	
 	$data = @{
 		messages 	= $FinalMessages 

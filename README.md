@@ -20,14 +20,16 @@ Atualmente, o PowershAI suporta alguns serviços de IA.
 No entanto, outros serviços serão adicionados em breve!
 Providers de AI suportados e que planejo implementar:
 
-[x] OpenAI
-[] Azure OpenAI
-[x] Ollama
-[] Hugging face
-[] Google Gemini
-[] Anthropic Claude
-[] Cohere Command R
-[] Sapiens chat (LLM brasileiro)
+- [x] OpenAI
+- [] Azure OpenAI
+- [x] Ollama
+- [] Hugging face
+- [] Google Gemini
+- [x] Anthropic Claude (parcial, pendente: json mode)
+- [] Cohere Command R
+- [] Sapiens chat (LLM brasileiro)
+- [x] Maritalk (LLM brasileiro)
+- [x] Groq Cloud
 
 [Este post contém mais detalhes (e um vídeo)](https://iatalk.ing/powershai-powershell-inteligencia-artificial/)
 
