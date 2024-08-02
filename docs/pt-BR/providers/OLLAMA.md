@@ -2,7 +2,7 @@
 
 # Configurações iniciais 
 
-* Use Set-AiProvicer ollama URL  
-Opcionalmente pode passar uma URL alternativa
+* Use Set-OllamaUrl URL  
+Use para Opcionalmente pode passar uma URL alternativa.
 
-* Cofnigure um modelo padrão com Set-AiDefaultMode Nome.  
+* Configure um modelo padrão com `Set-AiDefaultMode Nome`

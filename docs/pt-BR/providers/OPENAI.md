@@ -5,4 +5,4 @@
 * Use Set-AiProvider openai (é o padrão)
 Opcionalmente pode passar uma URL alternativa
 
-* Use Set-OpenaiToken
+* Use Set-OpenaiToken para configurar o token!

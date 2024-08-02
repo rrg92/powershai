@@ -7,9 +7,15 @@ Essa seção documentação cada provider suportado pelo PowershAI!
 
 |Provider 		| Descrição					|
 ----------------|---------------------------|
-[openai] 		| Providers que usam a OpenAI ou são compatíveis com a API da OpenAI|
-[ollama] 		| Ollama, que você pode rodar na sua própria máquina|
+[openai] 		| API da OpenAI
+[ollama] 		| API Ollama (que pode rodar em uma máquina própria)
+[groq] 			| Groq Cloud|
+[maritalk] 		| LLM Brasileiro, criado pela empresa Maritaca AI |
+[claude] 		| LLM criado pela Anthropic|
 
 
 [openai]: OPENAI.md
 [ollama]: OLLAMA.md
+[groq]: GROQ.md
+[maritalk]: MARITALK.md
+[claude]: CLAUDE.md
