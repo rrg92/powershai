@@ -1,5 +1,8 @@
 name: Publicar
-on: push
+on: 
+    push:
+        tags:
+            - v*
 
 jobs:
   PsGallery:
