@@ -1,4 +1,4 @@
-![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/powershai)
+﻿![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/powershai)
 ![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/powershai)
 ![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/iatalking)
 ![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCtNVhWslzx_yjbIX8JIYang)
@@ -8,35 +8,23 @@
 
 # PowershAI
 
-[english](docs/en)
+[english](docs/en-US)
 
 PowershAI (PowerShell + AI) é um módulo que integra serviços de Inteligência Artificial diretamente no PowerShell.  
 Você pode invocar os comandos tanto em scripts quanto na linha de comando.
 
 Este módulo é ideal para testar chamadas ou integrar tarefas simples com serviços de IA.  
-É ideal para quem já está acostumado com o PowerShell e quer trazer a IA pro seus scripts e uso.  
+É ideal para quem já está acostumado com o PowerShell e quer trazer a IA pro seus scripts de uma maneira mais simples e fácil!
 
-Atualmente, o PowershAI suporta alguns serviços de IA.
-No entanto, outros serviços serão adicionados em breve!
-Providers de AI suportados e que planejo implementar:
+A ideia é que o PowershAI seja integrado às principais APIs de IA e LLM existentes, permitindo um jeito fácil de acessar a API deles a partir do seu terminal!  
+Para isso, dentro do PowershAI, criamos o conceito de _provedor de IA_, que representa cada fabricante ou serviço que expoe alguma IA através de uma API.
+A lista de providers suportados e/ou que estão sendo implementandos pode ser conferida na issue #3.
 
-- [x] OpenAI
-- [] Azure OpenAI
-- [x] Ollama
-- [] Hugging face
-- [] Google Gemini
-- [x] Anthropic Claude (parcial, pendente: json mode)
-- [] Cohere Command R
-- [] Sapiens chat (LLM brasileiro)
-- [x] Maritalk (LLM brasileiro)
-- [x] Groq Cloud
+[Este post contém um vídeo antigo de uso do PowershAI. Pode conferir para ter uma ideia do funcionamento geral](https://iatalk.ing/powershai-powershell-inteligencia-artificial/)
 
-[Este post contém mais detalhes (e um vídeo)](https://iatalk.ing/powershai-powershell-inteligencia-artificial/)
-
-**IMPORTANTE: Este é um projeto em construção e muita coisa ainda pode mudar**
+**IMPORTANTE: Desde que o post acima foi publicado, muita coisa mudou. Use apenas para ter ideias rapidas de como usar na prática. Mas recomendo que leia esta doc sempre, se ainda não está familiarizado!**
 
 ## Instalação
-
 
 Toda a funcionalidade está no diretório `powershai`, que é um módulo PowerShell.  
 A opção mais simples de instalação é com o comando `Install-Module`:
@@ -86,7 +74,7 @@ O PowershAI pode conversar com vários serviços de IA.
 Por padrão, ele usa a API da OpenAI (a criadora do ChatGPT). 
 Dependendo do provider que você quer usar, você precisará realizar algumas configurações antes de invocar o chat: 
 
-A [documentação de providers](docs/providers) contém os detalhes que você precisa saber para usar com cada um!
+A [documentação de providers](docs/pt-BR/providers) contém os detalhes que você precisa saber para usar com cada um!
 
 ### Guia rápido dos principais providers
 
@@ -98,9 +86,20 @@ Você configura a API Token com o comando `Set-OpenaiToken`. Siga as instruçõe
 
 ** Ollama  
 Para usar o ollama, você precisa mudar o provider usando o comando `Set-AiProvider ollama`.  
-Por padrão, ele usa a URL http://localhost:11434, mas voce pode mudar passando o segundo argumento `Set-AiProvider ollama http://meuserverollama`  
+Por padrão, ele usa a URL http://localhost:11434, mas voce pode mudar passando o segundo argumento `Set-OllamaUrl http://meuserverollama`  
 Você então deve configurar um model para ser usado.  Use o comando `Get-AiModels` para listar os models disponíveis.  
-Use o comando `Set-AiModel NAME` para definir o model a ser usado, usando o campo `name` resultante da listagem do comando anterior.  
+Use o comando `Set-AiDefaultModel NAME` para definir o model a ser usado, usando o campo `name` resultante da listagem do comando anterior.  
+
+** Groq  
+O Groq é um serviço que provê acesso a vários LLM open source, usando uma tecnologia nova chamada LPU. A resposta realmente é muito rápida.  
+Para usar o Groq no PowershAI é muito simples: Defina o provider com `Set-AiProvider groq`.  
+Adicionei a API key usando `Set-OpenaiToken` (sim, você pode usar a mesma função, pois a API do groq é compatível com a openai).  
+Liste os modelos usando `Get-AiModels` e defina um default com `Set-AiDefaultModel` 
+
+** Maritalk  
+Maritalk é um LLM desenvolvido por brasileiros! Para usá-lo:  `Set-AiProvider maritalk` e depois defina o token com `Set-MaritalkToken`.  
+Você deve gerar o token na plataforma da Maritalk.  
+O Maritalk suporta apenas algumas funcoes simples e por isso você pode usar com os comandos `ia` (veja abaixo) e/ou `Get-AiChat`
 
 ### Conversando com a IA
 
@@ -141,8 +140,14 @@ Quando este parâmetro é ativado, ele pede ao LLM que gere o resultado em JSON 
 ISso significa, que você pode fazer algo assim:
 
 ```powershell
-ia -Obj "5 numeros aleatorios, com seu valor escrito por extenso" | %{  }
+ia -Obj "5 numeros aleatorios, com seu valor escrito por extenso"
+
+#ou usando o alias, io/powershellgallery/dt/powershai
+
+io "5 numeros aleatorios, com seu valor escrito por extenso"
 ```  
+
+**IMPORTANTE: Note que nem todo provider pode suportar este modo, pois o modelo precisa ser capaz de suportar JSON! Caso receba erros, confirme se o mesmo comando funciona com um modelo da OpenAI. VocÇe pode abrir uma issue também**
 
 
 ### Modo interativo  
@@ -167,13 +172,26 @@ Cada chat tem seu próprio histórico de mensagens, configurações e contexto.
 
 Você pode definir o chat atual usando o comando `Set-PowershaiActiveChat ChatId`.  
 A maioria dos comandos, como o `ia`, operam no chat ativo.
+
+Você pode limpar o histórico e contexto do chat atual usando o comando `Reset-PowershaiCurrentChat`
  
+### Export e Import  de Configurações e Tokens
+
+Para facilitar o reuso dos dados (tokens, default models, histórico de chats, etc.) o PowershAI permite que você exporte a sessão.  
+Para isso, use o comando `Export-PowershaiSettings`. Você vai precisar fornecer uma senha, que será usada para criar um chave e criptografar esse arquivo.  
+Somente com essa senha, você consegue importá-lo novamente. Para importar, use o comando `Import-PowershaiSettings`.  
+Por padrão, os Chats não exportados. Para exportá-los, você pode adicionar o parâmetro -Chats: `Export-PowershaiSettings -Chats`.  
+Note que isso pode deixar o arquivo maior, além de aumentar o tempo de export/import.  A vantagem é que você consegue continuar a conversa entre diferentes sessões.  
+Essa funcionalidade foi criada originalmente com o intuito de evitar ter que ficar gerando Api Key toda vez que precisasse usar o PowershAI. Com ela, você gera 1 vez suas api keys em cada provider, e exporta a medida que atualiza. Como está protegido por senha, você pode deixar salvo tranquilamente em um arquivo no seu computador.  
+Use a ajuda no comando para obter mais informacoes de como usá-lo.
 
 ###  Function Calling
 
 Uma das grandes funcionalidades implementadas é o suporte a Function Calling (ou Tool Calling).  
 Este recurso, disponível em vários LLMs, permite que a IA decida invocar funções para ajudar na resposta.  
 Basicamente, você descreve uma ou mais funções e seus parâmetros, e o modelo pode decidir invocá-las.  
+
+**IMPORTANTE: Você só vai conseguir usar esse recurso em providers que expõe function calling usando a mesma especificação da OpenAI**
 
 Para mais detalhes, veja a documentação oficial da OpenAI sobre Function Calling: [Function Calling](https://platform.openai.com/docs/guides/function-calling).
 
