@@ -32,13 +32,15 @@ $ErrorActionPreference = "Stop";
 
 if(!$Global:POWERSHAI_SETTINGS){
 	$Global:POWERSHAI_SETTINGS = @{
-		provider = 'openai' #ollama, huggingface
+		provider = $null #ollama, huggingface
 		baseUrl  = $null
 		
 		#providers settings!
 		providers = @{}
 	}
 }
+
+$PROVIDERS = @{}
 
 if(!$Global:POWERSHAI_SETTINGS.chats){
 	$Global:POWERSHAI_SETTINGS.chats = @{}
@@ -295,12 +297,125 @@ function JoinPath {
 	$Args -Join [IO.Path]::DirectorySeparatorChar
 }
 
+#Thanks from: https://www.powershellgallery.com/packages/DRTools/4.0.2.3/Content/Functions%5CInvoke-AESEncryption.ps1
+function Invoke-AESEncryption {
+    [CmdletBinding()]
+    [OutputType([string])]
+    Param
+    ( 
+        [Parameter(Mandatory = $true)]
+        [ValidateSet('Encrypt', 'Decrypt')]
+        [String]$Mode,
+
+        [Parameter(Mandatory = $true)]
+        [String]$Key,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "CryptText")]
+        [String]$Text,
+
+        [Parameter(Mandatory = $true, ParameterSetName = "CryptFile")]
+        [String]$Path
+    )
+
+    Begin {
+        $shaManaged = New-Object System.Security.Cryptography.SHA256Managed
+        $aesManaged = New-Object System.Security.Cryptography.AesManaged
+        $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
+        $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
+        $aesManaged.BlockSize = 128
+        $aesManaged.KeySize = 256
+    }
+
+    Process {
+        $aesManaged.Key = $shaManaged.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($Key))
+
+        switch ($Mode) {
+            'Encrypt' {
+                if ($Text) {$plainBytes = [System.Text.Encoding]::UTF8.GetBytes($Text)}
+                
+                if ($Path) {
+                    $File = Get-Item -Path $Path -ErrorAction SilentlyContinue
+                    if (!$File.FullName) {
+                        Write-Error -Message "File not found!"
+                        break
+                    }
+                    $plainBytes = [System.IO.File]::ReadAllBytes($File.FullName)
+                    $outPath = $File.FullName + ".aes"
+                }
+
+                $encryptor = $aesManaged.CreateEncryptor()
+                $encryptedBytes = $encryptor.TransformFinalBlock($plainBytes, 0, $plainBytes.Length)
+                $encryptedBytes = $aesManaged.IV + $encryptedBytes
+                $aesManaged.Dispose()
+
+                if ($Text) {return [System.Convert]::ToBase64String($encryptedBytes)}
+                
+                if ($Path) {
+                    [System.IO.File]::WriteAllBytes($outPath, $encryptedBytes)
+                    (Get-Item $outPath).LastWriteTime = $File.LastWriteTime
+                    return "File encrypted to $outPath"
+                }
+            }
+
+            'Decrypt' {
+                if ($Text) {$cipherBytes = [System.Convert]::FromBase64String($Text)}
+                
+                if ($Path) {
+                    $File = Get-Item -Path $Path -ErrorAction SilentlyContinue
+                    if (!$File.FullName) {
+                        Write-Error -Message "File not found!"
+                        break
+                    }
+                    $cipherBytes = [System.IO.File]::ReadAllBytes($File.FullName)
+                    $outPath = $File.FullName -replace ".aes"
+                }
+
+                $aesManaged.IV = $cipherBytes[0..15]
+                $decryptor = $aesManaged.CreateDecryptor()
+                $decryptedBytes = $decryptor.TransformFinalBlock($cipherBytes, 16, $cipherBytes.Length - 16)
+                $aesManaged.Dispose()
+
+                if ($Text) {return [System.Text.Encoding]::UTF8.GetString($decryptedBytes).Trim([char]0)}
+                
+                if ($Path) {
+                    [System.IO.File]::WriteAllBytes($outPath, $decryptedBytes)
+                    (Get-Item $outPath).LastWriteTime = $File.LastWriteTime
+                    return "File decrypted to $outPath"
+                }
+            }
+        }
+    }
+
+    End {
+        $shaManaged.Dispose()
+        $aesManaged.Dispose()
+    }
+}
+
+function PowerShaiEncrypt {
+	param($str, $password)
+	
+	Invoke-AESEncryption -Mode Encrypt -text $str -key $password
+}
+
+function PowerShaiDecrypt {
+	param($str, $password)
+	
+	Invoke-AESEncryption -Mode Decrypt -text $str -key $password
+}
+
+function PowershaiHash {
+	param($str)
+	
+	$shaManaged = New-Object System.Security.Cryptography.SHA256Managed
+	[System.Convert]::ToBase64String($shaManaged.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($str)))
+}
 
 # Meta functions
 # Esssas funcoes devem ser usadas para obter informacoes!
 function Get-AiCurrentProvider {
 	$ProviderName = $POWERSHAI_SETTINGS.provider;
-	$ProviderSlot = $POWERSHAI_SETTINGS.providers[$ProviderName];
+	$ProviderSlot = $PROVIDERS[$ProviderName];
 	return $ProviderSlot;
 }
 
@@ -309,7 +424,7 @@ function Set-AiProvider {
 	[CmdletBinding()]
 	param($provider, $url)
 	
-	$ProviderSettings = $POWERSHAI_SETTINGS.providers[$provider];
+	$ProviderSettings = $PROVIDERS[$provider];
 	
 	if(!$ProviderSettings){
 		throw "POWERSHAI_PROVIDER_INVALID: $provider";
@@ -360,12 +475,11 @@ function PowerShaiProviderFunc {
 function GetProviderData {
 	param($name, $Key)
 	
-	$provider = $POWERSHAI_SETTINGS.providers[$name];
-	
-	$UserDefined = $provider.UserDefined;
+	$UserDefined 	= $POWERSHAI_SETTINGS.providers[$name];
+	$provider 		= $PROVIDERS[$name]
 	
 	$UserSetting 	= $UserDefined[$Key];
-	$DefaultSetting	= $provider[$key];
+	$DefaultSetting	= $Provider[$key];
 	
 	if($UserDefined.contains($Key)){
 		return $UserSetting
@@ -377,9 +491,7 @@ function GetProviderData {
 function SetProviderData {
 	param($name, $Key, $value)
 	
-	$provider = $POWERSHAI_SETTINGS.providers[$name];
-	
-	$UserDefined = $provider.UserDefined;
+	$UserDefined = $POWERSHAI_SETTINGS.providers[$name];
 	$UserDefined[$key] = $value;
 }
 
@@ -400,8 +512,8 @@ function SetCurrentProviderData {
 function Get-AiProviders {
 	param()
 	
-	@($POWERSHAI_SETTINGS.providers.keys) | %{
-		$Provider = $POWERSHAI_SETTINGS.providers[$_];
+	@($PROVIDERS.keys) | %{
+		$Provider = $PROVIDERS[$_];
 		$ProviderInfo = [PSCustomObject](@{name = $_} + $Provider.info)
 		
 		$ProviderInfo
@@ -420,12 +532,22 @@ function Get-AiModels {
 # Configura o default model!
 function Set-AiDefaultModel {
 	[CmdletBinding()]
-	param($model)
+	param($model, [switch]$Force)
 	
 	$ElegibleModels = @(Get-AiModels | ? { $_.name -like $model+"*" })
 	$ExactModel 	= $ElegibleModels | ?{ $_.name -eq $model }
 	
 	write-verbose "ElegibleModels: $($ElegibleModels|out-string)"
+	
+	if(!$ElegibleModels){
+		if($Force){
+			write-warning "Model not found with that name. Forcing usage...";
+			SetCurrentProviderData DefaultModel $model;
+			return;
+		} else {
+			throw "POWERSHAI_INVALID_MODEL: $model. Use -force to for usage!";
+		}
+	}
 	
 	if($ElegibleModels.count -ge 2 -and !$ExactModel){
 		throw "POWERSHAI_DEFAULTMODEL_AMBIGUOUS: Existem vários modelos com o mesmo nome $model e nenhum com este nome exato. Seja mais específico."
@@ -785,6 +907,124 @@ function Invoke-AiChatFunctions {
 }
 
 
+# security FUNCTIONS
+
+
+<#
+	.SYNOPSIS 
+		Export current settings protected by user password
+#>
+function Export-PowershaiSettings {
+	[CmdletBinding()]
+	param(
+		$ExportDir = $Env:POWERSHAI_EXPORT_DIR
+		,[switch]$Chats
+	)
+	
+	$Password = Get-Credential "ExportPassword";
+	
+	$FinalData = @{
+		IsRemoved = $true
+	}
+	
+	if(!$ExportDir){
+		$ExportDir = JoinPath $Home .powershai 
+		$null = New-Item -Force -Itemtype Directory -Path $ExportDir;
+	}
+	
+	write-verbose "ExportDir: $ExportDir";
+	$ExportFile = JoinPath $ExportDir "exportedsession.xml"
+	
+	$Check 		= [Guid]::NewGuid().Guid
+	
+	write-verbose "Hashing check: $Check";
+	$CheckHash 	= PowershaiHash $Check
+	
+	$ExportData = @{};
+	
+	foreach($KeyName in @($POWERSHAI_SETTINGS.keys) ){
+		$ExportData[$KeyName] = $POWERSHAI_SETTINGS[$KeyName];
+	}
+	
+	if(!$Chats){
+		$ExportData.Remove("chats");
+	}
+	
+	write-verbose "Serializaing..."
+	$Serialized =  [System.Management.Automation.PSSerializer]::Serialize($ExportData);
+	$Decrypted = @(
+		"PowerShai:$($Check):$CheckHash"
+		$Serialized;
+	) -Join "`n"
+	
+	
+	write-verbose "Encrypting... Serialized: $($Serialized.length)"
+	$Encrypted = PowerShaiEncrypt -str 	$Decrypted -password $Password.GetNetworkCredential().Password
+	
+	Set-Content -Path $ExportFile  -Value $Encrypted;
+	
+	write-host "Exported to: $ExportFile";
+	#$POWERSHAI_SETTINGS | Export-CliXml $ExportFile
+}
+
+<#
+	.SYNOPSIS 
+		Import current settings
+#>
+function Import-PowershaiSettings {
+	[CmdletBinding()]
+	param($ExportDir = $Env:POWERSHAI_EXPORT_DIR)
+	
+
+	if(!$ExportDir){
+		$ExportDir = JoinPath $Home .powershai;
+	}
+	
+	write-verbose "ExportDir: $ExportDir";
+	$ExportedFile = JoinPath $ExportDir "exportedsession.xml"
+	
+	if(-not(Test-Path $ExportedFile)){
+		write-warning "Nothing to import at $ExportedFile";
+		return;
+	}
+	
+	$Encrypted = Get-Content $ExportedFile;
+	write-verbose "	Encrypted content length: $($Encrypted.length)"
+	$Password = Get-Credential "file password";
+	$DecryptKey = $Password.GetNetworkCredential().Password
+	
+	try {
+		$Decrypted = PowerShaiDecrypt $Encrypted $DecryptKey;
+	} catch {
+		write-warning "Decrypted process failed. Can be some bug of powershai. Check errors!";
+		throw;
+	}
+	
+	$Lines 		= $Decrypted -split "`n",2
+	$CheckData 	= $Lines[0]
+	$Data 		= $Lines[1];
+	
+	write-verbose "CheckData: $CheckData";
+	$CheckParts = $CheckData -split ":";
+	$CheckGuid  = $CheckParts[1]
+	$CheckExpected = $CheckParts[2];
+	$CurrentCheckGuid = PowershaiHash $CheckGuid
+	
+	
+		
+	if($CheckExpected -ne $CurrentCheckGuid){
+		write-verbose "Expected: $CheckExpected | Current = $CurrentCheckGuid | SavedGuid = $CheckGuid"
+		throw "POWERSHAI_IMPORTSESSION_INVALIDGUID: Failed decrypt. Check if your password is correct!";
+	}
+	
+	$ExportedObject =  [System.Management.Automation.PSSerializer]::Deserialize($Data);
+	
+	foreach($key in @($ExportedObject.keys)){
+		write-verbose "Importing setting key $key";
+		$POWERSHAI_SETTINGS[$key] = $ExportedObject[$key]
+	}
+	write-host "Session settings imported";
+}
 
 # POWESHAI CHAT 
 # Implementacao do Chat Client do POWERSHAI
@@ -2203,6 +2443,18 @@ function Clear-PowershaiChat {
 	
 }
 
+function Reset-PowershaiCurrentChat {
+	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
+	param($ChatId = ".")
+	
+	$Chat = Get-PowershaiChat -ChatId $ChatId
+	
+    if($PSCmdlet.ShouldProcess("Current chat: $($Chat.id)")) {
+        Clear-PowershaiChat -History -Context
+    }
+}
+
+
 Set-Alias -Name PowerShai -Value Start-PowershaiChat
 Set-Alias -Name ia -Value Send-PowershaiChat
 Set-Alias -Name io -Value Send-PowershaiChat
@@ -2259,19 +2511,20 @@ foreach($File in $ProvidersFiles){
 	}
 	
 	$ProviderData.name = $ProviderName;
-	$ExistingProvider = $POWERSHAI_SETTINGS.providers[$ProviderName];
-	
-	
-	if($ExistingProvider){
-		$UserDefinedSettings = $ExistingProvider.UserDefined;
-	}
-	
+	$UserDefinedSettings = $POWERSHAI_SETTINGS.providers[$ProviderName];
+
 	if(!$UserDefinedSettings){
 		$UserDefinedSettings = @{};
 	}
 	
-	$POWERSHAI_SETTINGS.providers[$ProviderName] = $ProviderData
-	$ProviderData.UserDefined = $UserDefinedSettings;	
+	$PROVIDERS[$ProviderName] = $ProviderData;
+	$POWERSHAI_SETTINGS.providers[$ProviderName] = $UserDefinedSettings;	
+}
+
+# Set default provider to openai!
+if(!$POWERSHAI_SETTINGS.provider){
+	Set-AiProvider openai
 }
 
 Export-ModuleMember -Function * -Alias * -Cmdlet *
+

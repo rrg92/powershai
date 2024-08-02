@@ -230,6 +230,7 @@ function openai_GetModels(){
 	$Models = Get-OpenaiModels
 	$Models | Add-Member -Type noteproperty -Name name -Value $null 
 	$Models | %{ $_.name = $_.id }
+	return $models;
 }
 
 
@@ -683,6 +684,10 @@ function Get-OpenAiAnswerCost($answers){
 		
 		if(!$outputTokens){
 			$outputTokens = 0;
+		}
+		
+		if(!$model){
+			break;
 		}
 		
 		#Is in cache?

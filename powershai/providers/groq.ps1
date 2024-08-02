@@ -1,6 +1,6 @@
 ﻿# Compativel com openai!
-Set-Alias grok_GetModels Get-OpenaiModels
-Set-Alias grok_Chat Get-OpenAiChat 			
+Set-Alias groq_GetModels openai_GetModels
+Set-Alias groq_Chat openai_Chat		
 
 
 
@@ -8,7 +8,7 @@ return @{
 	RequireToken 	= $true
 	BaseUrl 		= "https://api.groq.com/openai/v1"
 	DefaultModel	= "llama-3.1-70b-versatile"
-	TokenEnvName 	= "GROK_API_KEY"
+	TokenEnvName 	= "GROQ_API_KEY"
 	
 	info = @{
 		desc	= "Modelos disponibilizados pela GroqCloud"

@@ -1,17 +1,29 @@
 ﻿function Invoke-MaritalkApi {
+	[CmdletBinding()]
 	param(
 		$endpoint
 		,$body
 		,$method = 'GET'
-		,$token = $Env:MARITALK_API_KEY
+		,$Token = $Env:MARITALK_API_KEY
 		,$StreamCallback = $null
+		,[switch]$OpenAI
 	)
 	
 	$Provider = Get-AiCurrentProvider
+	$TokenRequired = $true;
 
-
-	if(!$token){
-		throw "POWERSHAI_MARITALK_NOTOKEN"
+	if(!$Token){
+			$Token = GetCurrentProviderData Token;
+			
+			if(!$token){
+				throw "POWERSHAI_MARITALK_NOTOKEN: No token was defined and is required!";
+			}
+	}
+	
+    $headers = @{}
+	
+	if($TokenRequired){
+		 $headers["Authorization"] = "Bearer $token"
 	}
 	
     $headers = @{
@@ -48,6 +60,7 @@
 		CurrentCall = $null
 		EndReceived = $false
 		MessageMeta = $null
+		EmptySeq	= 0
 	}
 	
 	if($StreamCallback){
@@ -57,11 +70,24 @@
 			$line = $data.line;
 			$StreamData.lines += $line;
 			
+			if(!$line -or $line.length -eq 0){
+				$StreamData.EmptySeq++;
+				
+				if($StreamData.EmptySeq -ge 3){
+					return $false;
+				}
+				
+				return;
+			}
+			
+			$StreamData.EmptySeq = 0;
+			
 			#End callback!
 			if($line -eq "event: end"){
 				$StreamData.EndReceived = $true;
 				return;
 			}
+			
 			
 			if($line -like 'data: {*'){
 				$RawJson = $line.replace("data: ","");
@@ -72,7 +98,17 @@
 					return $false;
 				}
 				
-				$TextChunk = $Answer.text;
+				if($Answer.choices){
+					$DeltaResp 	= $Answer.choices[0].delta;
+					$TextChunk = $DeltaResp.content;
+				}
+				
+			
+				if($TextChunk -eq $null){
+					$TextChunk 	= $Answer.text;
+				}
+				
+				
 				
 				$Role = $DeltaResp.role; #Parece vir somente no primeiro chunk...
 				
@@ -114,6 +150,12 @@
 		#	$MessageResponse.tool_calls = $StreamData.calls.all;
 		#}
 		
+		$Usage = $StreamData.MessageMeta
+		
+		if(!$Usage){
+			$Usage = @{}
+		}
+		
 		return @{
 			stream = @{
 				RawResp = $RawResp
@@ -124,7 +166,7 @@
 			
 			message = $MessageResponse
 			finish_reason = $null #$StreamData.FinishMessage.choices[0].finish_reason
-			usage = $StreamData.MessageMeta
+			usage = $Usage
 			model = $StreamData.MessageMeta.model
 		}
 	}
@@ -140,9 +182,10 @@
 function Invoke-MaritalkInference {
 	[CmdletBinding()]
     param(
-		$messages 
+		[Alias('prompt')]
+			$messages 
 		,[switch]$do_sample
-		,$max_tokens = 1000
+		,$MaxTokens = 1000
 		,$temperature = 0.5
 		,$top_p = 0.95
 		,$model = "sabia-2-medium"
@@ -184,7 +227,7 @@ function Invoke-MaritalkInference {
 	$data = @{
 		messages 	= $FinalMessages 
 		do_sample	= ([bool]$do_sample)
-		max_tokens	= $max_tokens
+		max_tokens	= $MaxTokens
 		temperature	= $temperature
 		top_p		= $top_p
 		model		= $model
@@ -192,6 +235,92 @@ function Invoke-MaritalkInference {
 	
 	Invoke-MaritalkApi "chat/inference" -method POST -body $data -StreamCallback $StreamCallback;
 }
+
+function Get-MaritalkChat {
+    [CmdletBinding()]
+	param(
+		 $prompt
+        ,$temperature   = 0.6
+        ,$model         = $null
+        ,$MaxTokens     = 1000
+		,$ResponseFormat = $null
+		
+		,#Function list, as acceptable by Openai
+		 #OpenAuxFunc2Tool can be used to convert from powershell to this format!
+			$Functions 	= @()	
+			
+		#Add raw params directly to api!
+		#overwite previous
+		,$RawParams	= @{}
+		
+		,$StreamCallback = $null
+	)
+
+	$Provider = Get-AiCurrentProvider;
+	if(!$model){
+		$DefaultModel = $Provider.DefaultModel;
+		
+		if(!$DefaultModel){
+			throw "POWERSHAI_NODEFAULT_MODEL: Must set default model using Set-AiDefaultModel"
+		}
+		
+		$model = $DefaultModel
+	}
+
+	[object[]]$Messages = @(ConvertTo-OpenaiMessage $prompt);
+	
+	#Junta todas as system message sem uma só!
+	$NewMessages = @()
+	$SystemMessage = "";
+	$PrevMessage = $null
+	foreach($m in $messages){
+		if($m.role -eq "system"){
+			$SystemMessage += $m.content;
+		} else {
+			$NewMessage = @{ role = $m.role; content = $m.content };
+			if($PrevMessage.role -eq $NewMessage.role){
+				$PrevMessage.content += $NewMessage.content;
+			} else {
+				$NewMessages +=  $NewMessage;
+			}
+			
+			$PrevMessage =  $NewMessage;
+		}
+	}
+	
+	[object[]]$FinalMessages = @()
+	
+	if($SystemMessage){
+		$FinalMessages += @{role="system";content = $SystemMessage}
+	}
+		
+	$FinalMessages += $NewMessages
+	
+    $Body = @{
+        model       = $model
+        messages    = $FinalMessages 
+        max_tokens  = $MaxTokens
+        temperature = $temperature 
+    }
+	
+	if($RawParams){
+		$RawParams.keys | %{ $Body[$_] = $RawParams[$_] }
+	}
+	
+	if($ResponseFormat){
+		$Body.response_format = @{type = $ResponseFormat}
+	}
+	
+	#if($Functions){
+	#	$Body.tools = $Functions
+	#	$Body.tool_choice = "auto";
+	#}
+	
+	write-verbose "Body:$($body|out-string)"
+	Invoke-MaritalkApi -openai -method POST -endpoint 'chat/completions' -body $Body -StreamCallback $StreamCallback	
+}
+
+Set-Alias maritalk_Chat Get-MaritalkChat
 
 function maritalk_Chat {
 	param(
@@ -217,10 +346,10 @@ function maritalk_Chat {
 	
 
 	$Params = @{
-		messages = $prompt
+		prompt = $prompt
 		temperature = $temperature 
 		model = $model
-		max_tokens = $MaxTokens
+		MaxTokens = $MaxTokens
 		StreamCallback = $StreamCallback
 	}
 	
@@ -229,6 +358,8 @@ function maritalk_Chat {
 			$Params[$key] = $RawParams[$Key]
 		}
 	}
+	
+	
 	
 	$result = Invoke-MaritalkInference @Params
 	
@@ -277,11 +408,15 @@ function maritalk_Chat {
 
 # Retorna os models!
 function Get-MaritalkModels {
-	@(
-		[PsCustomObject]@{name = "sabia-2-small"}
-		[PsCustomObject]@{name = "sabia-2-medium"}
-		[PsCustomObject]@{name = "sabia-3"}
-	)
+	$Result = Invoke-MaritalkApi "chat/models" -method GET
+	
+	$ModelList = $Result.models
+	
+	$m.models.psobject.Properties | %{ 
+		$ModelInfo = $_.Value 
+		$ModelInfo | Add-Member Noteproperty name $_.Name -Force;
+		$ModelInfo;
+	}
 }
 
 Set-Alias maritalk_GetModels Get-MaritalkModels
@@ -317,7 +452,9 @@ function Set-MaritalkToken {
 	#}
 	#write-host "	Tudo certo!";
 	
-	$Env:MARITALK_API_KEY = $TempToken
+	$Provider = Get-AiCurrentProvider
+	
+	SetCurrentProviderData Token $TempToken;
 	
 	return;
 }
@@ -332,6 +469,8 @@ return @{
 		url 	= "https://www.maritaca.ai/"
 	}
 	
+	RequireToken 	= $true
+	BaseUrl 		= "https://chat.maritaca.ai/api"
 	desc 			= "Maritalk" 			
 	DefaultModel 	= "sabia-2-medium"
 }
