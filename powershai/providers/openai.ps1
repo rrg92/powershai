@@ -210,11 +210,15 @@ function Set-OpenaiToken {
 }
 
 # Configura a Url base a ser usada!
-function Set-OpenaiBase {
+function Set-OpenaiBaseUrl {
 	[CmdletBinding()]
 	param($url)
 	
-	$Global:POWERSHAI_SETTINGS.baseUrl = $url
+	SetCurrentProviderData BaseUrl $url
+}
+
+function Reset-OpenaiBaseUrl {
+	SetCurrentProviderData BaseUrl (GetCurrentProviderData ResetUrl)
 }
 
 
@@ -800,6 +804,7 @@ function SplitOpenAiString {
 return @{
 	RequireToken 	= $true
 	BaseUrl 		= "https://api.openai.com/v1"
+	ResetUrl 		= "https://api.openai.com/v1"
 	DefaultModel 	= "gpt-4o-mini"
 	TokenEnvName 	= "OPENAI_API_KEY"
 	

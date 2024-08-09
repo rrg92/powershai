@@ -1,0 +1,28 @@
+TOPIC
+    about_Powershai
+
+SHORT DESCRIPTION
+   PowershAI é um modulo que adiciona acesso a IA através do Powershell
+
+LONG DESCRIPTION
+    Com o PowershAI você pode facilment invocar a API de diferentes fornecedores diretamente do shell.  
+	A grande sacada do PowershAI é que ele usa os vários elementos e conceitos do próprio PowerShell, facilitando a criação de scripts que usam IA.  
+	Por exemplo, você pode criar um script e documentá-lo usando comentários (comment based help) e permitir que o Gpt da OpenAI invoque essas funcoes conforme a conversa.
+	Também, você pode usar o pipeline e usar o resultado da ia como entrada para outros comandos.
+	
+	
+
+EXAMPLES
+	Usando o powershai com o Gpt da OpenAI:
+	
+		# PRimeiro, garanta que está usando a openai!
+		Set-AiProvider openai
+		
+		# Adicione o token (se não adicionou ainda)
+		Set-OpenaiToken 
+		
+		# Converse
+		ia "Ola, estou falando do Powershai com voce!"
+
+KEYWORDS
+    powershell,ai,inteligencia artificial,chatgpt,openai,maritalk,groq
