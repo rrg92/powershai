@@ -412,7 +412,7 @@ function Get-MaritalkModels {
 	
 	$ModelList = $Result.models
 	
-	$m.models.psobject.Properties | %{ 
+	$ModelList.psobject.Properties | %{ 
 		$ModelInfo = $_.Value 
 		$ModelInfo | Add-Member Noteproperty name $_.Name -Force;
 		$ModelInfo;
