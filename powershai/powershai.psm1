@@ -1805,9 +1805,18 @@ $POWERSHAI_FORMATTERS_SHORTCUTS['str'] = 'ConvertTo-PowershaiContextOutString'
 function ConvertTo-PowershaiContextList  {
 	param($context, $FlParams = @{})
 	
-	$context | Format-List @FlParams
+	$context | Format-List @FlParams | out-string
 }
 $POWERSHAI_FORMATTERS_SHORTCUTS['list'] = 'ConvertTo-PowershaiContextList'
+
+function ConvertTo-PowershaiContextTable {
+	param($context, $FlParams = @{})
+	
+	$context | Format-Table -AutoSize @FlParams | out-string
+}
+$POWERSHAI_FORMATTERS_SHORTCUTS['table'] = 'ConvertTo-PowershaiContextTable'
+
+
 
 function Format-PowershaiContext {
 	[CmdletBinding()]
@@ -1827,12 +1836,13 @@ function Format-PowershaiContext {
 		if(!$func){
 			$func = "str"
 		}
-		
-		$ShortCut = $POWERSHAI_FORMATTERS_SHORTCUTS[$Func];
-		if($ShortCut){
-			$Func = $ShortCut
-		}
 	}
+	
+	$ShortCut = $POWERSHAI_FORMATTERS_SHORTCUTS[$Func];
+	if($ShortCut){
+		$Func = $ShortCut
+	}
+	
 	write-verbose "FormatFunction: $func"
 	
 	if(!$params){
@@ -1898,6 +1908,12 @@ function Send-PowershaiChat {
 		,# Desliga o function call para esta execução somente!
 			[Alias('NoCalls')]
 			[switch]$DisableFunctions
+			
+		,# Alterar a funcao de formatacao  para esta execucao apenas!
+			$FormatterFunc = $null
+			
+		,# Parametros da funcao de formatacao
+			$FormatterParams = $null
 	)
 	
 	
@@ -2424,16 +2440,21 @@ function Send-PowershaiChat {
 		}
 	
 
-	
+		$ContextFormatParams = @{
+			func = $FormatterFunc
+			params = $FormatterParams
+			ChatId = $ActiveChat.id
+		}
 	}
 	
 	process {
+		
 		
 
 		
 		if($ForEach -and $IsPipeline){
 			# Convete o contexto para string!
-			$StrContext = Format-PowershaiContext -obj $context -ChatId $ActiveChat.id;
+			$StrContext = Format-PowershaiContext -obj $context @ContextFormatParams;
 			ProcessContext $StrContext;
 		} else {
 			$AllContext += $context
@@ -2449,7 +2470,7 @@ function Send-PowershaiChat {
 		
 		if($AllContext.length){
 			# Convete o contexto para string!
-			$StrContext = Format-PowershaiContext -obj $AllContext -ChatId $ActiveChat.id;
+			$StrContext = Format-PowershaiContext -obj $AllContext @ContextFormatParams;
 			ProcessContext $StrContext;
 		}
 
