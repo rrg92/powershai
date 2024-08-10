@@ -1621,6 +1621,9 @@ function New-PowershaiChat {
 				ShowTokenStats 	= $false;
 				MaxContextSize 	= 8192  # Vou considerar isso como o número de caracter por uma questão simples...
 										# futuramente, o correto é trabalhar com tokens!
+										
+				ContextFormatterFunc = "ConvertTo-PowershaiContextOutString"
+				ContextFormatterParams = $null
 		}
 		
 		context  = (NewChatContext)
@@ -1749,8 +1752,106 @@ function Get-PowershaiChatParameter {
 	param($ChatId = ".")
 	
 	$Chat = Get-PowershaiChat $ChatId;
-	$Chat.params
 }
+
+<#
+	.SYNOPSIS
+		Define qual será a funcao usada para formatar os objetos passados pro parâmetro Send-PowershaiChat -Context
+	
+	.DESCRIPTION
+		Ao invocar Send-PowershaiChat em um pipe, ou passando diretamente o parâmetro -Context, ele irá injetar esse objeto no prompt do LLM.  
+		Antes de injetar, ele deve converter esse objeto para uma string.  
+		Essa conversão é chamada de "Context Formatter" aqui no Powershai.  
+		O Context Formatter é uma funcao que irá pegar cada objeto passado e convertê-lo para uma string para ser injetada no prompt.
+		A função usada deve receber como primeiro parametro o objeto a ser convertido.  
+		Os demais parametros ficam a criterio. Os valor deles pode ser especicicados usando o parametro -Params dessa funcao!
+#>
+$POWERSHAI_FORMATTERS_SHORTCUTS = @{}
+function Set-PowershaiChatContextFormatter {
+	param(
+		$ChatId = "."
+		,#Nome da funcao powershell
+		 #Use o comando Get-PowershaiContextFormatters para ver a lista
+			$Func = "Str"
+		
+		,$Params = $null
+	)
+	
+	$Chat = Get-PowershaiChat -ChatId $ChatId
+	$Chat.params.ContextFormatterFunc 	=  $Func 
+	$Chat.params.ContextFormatterParams =  $Params
+}
+
+function  Get-PowershaiContextFormatters {
+	param()
+	
+	@($POWERSHAI_FORMATTERS_SHORTCUTS.keys) |  %{ [PsCustomObject]@{name = $_; func = $POWERSHAI_FORMATTERS_SHORTCUTS[$_]} }
+}
+
+function ConvertTo-PowershaiContextJson {
+	param($context)
+	
+	$context | convertto-json @params
+}
+$POWERSHAI_FORMATTERS_SHORTCUTS['json'] = 'ConvertTo-PowershaiContextJson'
+
+function ConvertTo-PowershaiContextOutString {
+	param($context)
+	
+	$context | out-string @params
+}
+$POWERSHAI_FORMATTERS_SHORTCUTS['str'] = 'ConvertTo-PowershaiContextOutString'
+
+function ConvertTo-PowershaiContextList  {
+	param($context, $FlParams = @{})
+	
+	$context | Format-List @FlParams
+}
+$POWERSHAI_FORMATTERS_SHORTCUTS['list'] = 'ConvertTo-PowershaiContextList'
+
+function Format-PowershaiContext {
+	[CmdletBinding()]
+	param(
+		$obj
+		,$params
+		,$func 
+		,$ChatId = "."
+	)
+	
+	write-verbose "Getting ChatId..."
+	$Chat = Get-PowershaiChat -ChatId $ChatId
+	
+	if(!$func){
+		$func = $Chat.params.ContextFormatterFunc
+		
+		if(!$func){
+			$func = "str"
+		}
+		
+		$ShortCut = $POWERSHAI_FORMATTERS_SHORTCUTS[$Func];
+		if($ShortCut){
+			$Func = $ShortCut
+		}
+	}
+	write-verbose "FormatFunction: $func"
+	
+	if(!$params){
+		$params =  $Chat.params.ContextFormatterParams
+	}
+	
+	
+	if($params -eq $null){
+		$params = @{}
+	}
+	
+	write-verbose "FormatParams: $($params|out-string)";
+
+	
+	write-verbose "Invoking formatter..."
+	& $func $obj @params
+
+}
+
 
 function Send-PowershaiChat {
 	<#
@@ -1786,6 +1887,9 @@ function Send-PowershaiChat {
 		 #Que serão jogados de volta no pipeline!
 			[switch]$Object
 			
+		,# Mostra os dados de contexto enviados ao LLM antes da resposta!
+			[switch]$PrintContext
+			
 		,#Desliga o historico anterior, mas colcoa a resposta atual no historico!
 			[switch]$NoContext 
 		,#DEsliga o historico e nao inclui o atual no historico!
@@ -1815,7 +1919,7 @@ function Send-PowershaiChat {
 			$NewChat = New-PowershaiChat -ChatId "default" -IfNotExists
 			
 			write-verbose "Setting active...";
-			$null = Get-PowershaiChat -SetActive $NewChat.id;
+			$ActiveChat = Get-PowershaiChat -SetActive $NewChat.id;
 		}
 		
 		$AllContext = @()
@@ -1824,7 +1928,7 @@ function Send-PowershaiChat {
 		function ProcessPrompt {
 			param($prompt)
 			
-			$prompt = $prompt -join " ";
+			$prompt = @($prompt) -join "`n";
 			
 			function WriteModelAnswer($interaction, $evt){
 				
@@ -2105,6 +2209,7 @@ function Send-PowershaiChat {
 					)
 				}
 				
+				
 				$Msg = @(
 					@($SystemMessages|%{ [string]"s: $_"})
 					@($InternalMessages|%{ [string]"s: $_"})
@@ -2300,6 +2405,12 @@ function Send-PowershaiChat {
 		function ProcessContext {
 			param($context)
 			
+			IF($PrintContext){
+				write-host -ForegroundColor Blue Contexto:
+				write-host -ForegroundColor Blue $Context;
+			}
+			
+			write-verbose "Adding to context: $($Context|out-string)"
 			$FinalPrompt = @(
 				"Responda a mensagem com base nas informacoes de contexto que estao na tag <contexto></contexto>"
 				"<contexto>"
@@ -2311,11 +2422,19 @@ function Send-PowershaiChat {
 			
 			ProcessPrompt $FinalPrompt
 		}
+	
+
+	
 	}
 	
 	process {
+		
+
+		
 		if($ForEach -and $IsPipeline){
-			ProcessContext $context;
+			# Convete o contexto para string!
+			$StrContext = Format-PowershaiContext -obj $context -ChatId $ActiveChat.id;
+			ProcessContext $StrContext;
 		} else {
 			$AllContext += $context
 		}
@@ -2329,8 +2448,12 @@ function Send-PowershaiChat {
 		}
 		
 		if($AllContext.length){
-			ProcessContext $AllContext;
+			# Convete o contexto para string!
+			$StrContext = Format-PowershaiContext -obj $AllContext -ChatId $ActiveChat.id;
+			ProcessContext $StrContext;
 		}
+
+		
 	}
 	
 	
