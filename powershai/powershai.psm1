@@ -1,32 +1,59 @@
 ﻿<#
-	POWERSHAI
-	Autor: Rodrigo Ribeiro Gomes (https://iatalk.ing)
+	POWERSHAI - Powershell + Inteligência Artificial 
+	Autor: Rodrigo Ribeiro Gomes
+	https://powertuning.com.br/
+	https://iatalk.ing
 	
-	NÃO ESTÁ PRONTO PARA USO EM PRODUÇÃO!
-	Você é livre para usar e modificar, mas deve deixar o crédito ao projeto original!
 	
-	
-	Este script implementa algumas funções simples para facilitar sua interação com a API da OpenAI!
-	O objetivo deste script é mostrar como você pode facilmente invocar a API do OpenAI com PowerShell, ao mesmo tempo que prover uma interface simples para 
-	as chamadas mais importantes.  
-	
-	Antes de continuar, o que você precisa?
-	
-		Gere um token no site da OpenAI!
-		Coloca na variável de ambiente OPENAI_API_KEY.
+	LICENÇA DE USO 
 		
-	# AUTENTICAÇÃO
-	
-		> import-module Caminho\powershai.psm1
-		> Set-OpenaiToken # Define a sua api token
-		> $res = OpenAiTextCompletion "Olá, estou falando com você direto do PowerShell"
-		> $res.choices[0].text
+		Este projeto tomou várias horas minhas, da minha família e até com minha filha recém nascida.
+		Dia, tarde, madrugada. Vários conhecimentos embutidos aqui da PowerShell que acumulei em uma vida...
 		
-	Verifique os comentáros em cada funçã abaixo para mais informações!
+		Mas, mesmo assim, eu resolvi manter ele aberto e free, e o objetivo é mantê-lo FREE para sempre!
+		É uma forma também de retribuir a comunidade técnica por tudo que já aprendi com ela!
+		
+		Isto é, você pode baixar, usar no seu computador, na sua empresa, vender embutido com algum produto, etc.
+		Em suma, você é livre para usá-lo de forma comercial e não-comercial.
+		
+		Meu único pedido é que sempre mantenha a menção ao projeto original: https://github.com/rr92/powershai
+		Deixe os créditos para o autor Rodrigo Ribeiro Gomes, da empresa Power Tuning, o qual também permitiu que eu usasse horas do meu trabalho para mexer com este código.
+		Se o PowershAI te ajuda em algum projeto, eu ficarei muito orgulhoso em saber disso e essa menção certamente ajudará minha carreira de algum forma!
+		Esta menção pode ser feita em qualquer lugar do seu projeto, como:
+			- créditos 
+			- help 
+			- documentações públicas
+			- Git do seu projeto 
+			- menu de help
+		
 	
-	ATENÇÃO: LEMBRE-SE que as chamadas realizadas irão consumir seus créditos da OpenAI!  
-	Certifique-se que você compreendeu o modelo de cobrança da OpenAI para evitar surpresas.  
-	Além disso, esta é uma versão sem testes e para uso livre por sua própria conta e risco.
+		Um OBRIGADO ESPECIAL à Power Tuning que sempre me deu a liberdade para conduzir esses projetos, mesmo usando horas da empresa!
+		https://powertuning.com.br/
+	
+	
+	USAGE LICENSE (English)
+
+		This project took several hours of my time, my family’s time, and even time with my newborn daughter.  
+		Day, afternoon, and late night. Several pieces of PowerShell knowledge accumulated over a lifetime are embedded here...
+
+		But even so, I decided to keep it open and free, and the goal is to keep it FREE forever!  
+		It's also a way of giving back to the technical community for everything I've learned from it!
+
+		That means you can download it, use it on your computer, in your company, sell it embedded with a product, etc.  
+		In short, you are free to use it commercially and non-commercially.
+
+		My only request is that you always keep the mention of the original project: https://github.com/rr92/powershai  
+		Give credit to the author, Rodrigo Ribeiro Gomes, from Power Tuning, who also allowed me to use work hours to deal with this code.  
+		If PowershAI helps you in any project, I would be very proud to know that, and this mention will certainly help my career in some way!  
+		This mention can be made anywhere in your project, such as:  
+		  - credits  
+		  - help  
+		  - public documentation  
+		  - your project’s Git  
+		  - help menu
+
+		A SPECIAL THANK YOU to Power Tuning, who has always given me the freedom to lead these projects, even using company hours!  
+		https://powertuning.com.br/  
 #>
 $ErrorActionPreference = "Stop";
 
@@ -37,10 +64,15 @@ if(!$Global:POWERSHAI_SETTINGS){
 		
 		#providers settings!
 		providers = @{}
+		
+		# commands 
+		# Lista de comandos adicionados pelo usuario!
+		UserTools = @{}
 	}
 }
 
 $PROVIDERS = @{}
+$POWERSHAI_USER_TOOLBOX = $null;
 
 if(!$Global:POWERSHAI_SETTINGS.chats){
 	$Global:POWERSHAI_SETTINGS.chats = @{}
@@ -49,6 +81,11 @@ if(!$Global:POWERSHAI_SETTINGS.chats){
 if(!$Global:POWERSHAI_SETTINGS.OriginalPrompt){
 	$Global:POWERSHAI_SETTINGS.OriginalPrompt = $Function:prompt
 }
+
+if(!$Global:POWERSHAI_SETTINGS.UserTools){
+	$Global:POWERSHAI_SETTINGS.UserTools = @{}
+}
+
 
 # Aux/helper functions!
 # funcoes usadas para auxiliar alguma operacao ou encasuplar logica complexa!
@@ -297,6 +334,21 @@ function JoinPath {
 	$Args -Join [IO.Path]::DirectorySeparatorChar
 }
 
+
+function RegArgCompletion {
+	param(
+		$Command
+		,$Parameter
+		,$Script
+	)
+	
+	if(Get-Command -EA SilentlyContinue Register-ArgumentCompleter){
+		@($Command) | %{
+			Register-ArgumentCompleter -CommandName $_ -ParameterName $Parameter -ScriptBlock $Script
+		}
+	}
+}
+
 #Thanks from: https://www.powershellgallery.com/packages/DRTools/4.0.2.3/Content/Functions%5CInvoke-AESEncryption.ps1
 function Invoke-AESEncryption {
     [CmdletBinding()]
@@ -450,6 +502,8 @@ function Set-AiProvider {
 	$POWERSHAI_SETTINGS.funcbase = $provider+"_";
 }
 
+
+
 # Invoca uma funcao do provider atual!
 function PowerShaiProviderFunc {
 	param($FuncName, $FuncParams, [switch]$Ignore)
@@ -522,10 +576,44 @@ function Get-AiProviders {
 
 
 # Get all models!
+$POWERSHAI_MODEL_CACHE = @{
+	Provider = $null
+	ModelList = $null
+}
+
+<#
+	.DESCRIPTION
+		Lista os modelos disponíveis no provider atual.  
+		A única informação garantida de retorno em qualquer provider é o "id", ue é o id do modelo.  
+		As demais proproiedades são exclusivas de cada provider.
+		O id é o valor referenciado nos demais cmdlets desse módulo.
+#>
 function Get-AiModels {
 	[CmdletBinding()]
 	param()
-	PowerShaiProviderFunc "GetModels"
+	$ModelList = PowerShaiProviderFunc "GetModels"
+	
+	$POWERSHAI_MODEL_CACHE.ModelList = $ModelList | %{$_.name} 
+	$POWERSHAI_MODEL_CACHE.Provider = (Get-AiCurrentProvider).name
+	
+	return $ModelList
+}
+
+
+function GetModelsId {
+	
+	$CurrentProvider = Get-AiCurrentProvider
+	
+	
+	if(!$POWERSHAI_MODEL_CACHE.ModelList){
+		$null = Get-AiModels
+	}
+	
+	if($CurrentProvider.name -ne $POWERSHAI_MODEL_CACHE.Provider){
+		$null = Get-AiModels
+	}
+
+	$POWERSHAI_MODEL_CACHE.ModelList
 }
 
 
@@ -563,6 +651,12 @@ function Set-AiDefaultModel {
 }
 
 
+RegArgCompletion Set-AiDefaultModel model {
+	param($cmd,$param,$word,$ast,$fake)
+	
+	GetModelsId | ? {$_ -like "$word*"} | %{$_}
+}
+
 # Funcao generica de chat. Segue a especificacao da OpenAI
 function Get-AiChat {
 	[CmdletBinding()]
@@ -573,8 +667,11 @@ function Get-AiChat {
         ,$MaxTokens     = 200
 		,$ResponseFormat = $null
 		
-		,#Function list, as acceptable by Openai
-		 #OpenAuxFunc2Tool can be used to convert from powershell to this format!
+		,#Sobrescrever a lista de funcoes!
+		 #Por padrão, este cmdlet irá checar adicionar estas funcoes a lista:
+		 #		InternalFunctions 	- Lista de funcoes internas
+		 #		UserFunctions		- Lista de funcoes adiconadas usandos os cmdslet *-AiTool
+		 #Ao usar este parametro, voce sobrescreve esse comportamento
 			$Functions 	= @()	
 			
 		#Add raw params directly to api!
@@ -586,33 +683,78 @@ function Get-AiChat {
 	
 	$Provider = Get-AiCurrentProvider
 	$FuncParams = $PsBoundParameters;
-	
+
 	if(!$model){
 		$FuncParams['model'] = GetCurrentProviderData DefaultModel
 	}
+
 	
 	PowerShaiProviderFunc "Chat" -FuncParams $FuncParams;
 }
 
 
 <#
-	Esta é uma função auxiliar para ajudar a fazer o processamento de tools mais fácil com powershell.
-	Ele lida com o processamento das "Tools", executando quando o modelo solicita!
-	Apenas converse normalmente, defina as funções e deixe que este comando faça o resto!
-	Não se preocupe em processar a resposta do modelo, se tem que executar a função, etc.
-	O comando abaixo já faz tudo isso pra você. 
-	Você precisa apenas concentrar em definir as funções que podem ser invocadas e o prompt(veja o comando OpenAuxFunc2Tool).
+	.DESCRIPTION
+		Esta é uma função auxiliar para ajudar a fazer o processamento de tools mais fácil com powershell.
+		Ele lida com o processamento das "Tools", executando quando o modelo solicita!
+		Apenas converse normalmente, defina as funções e deixe que este comando faça o resto!
+		Não se preocupe em processar a resposta do modelo, se tem que executar a função, etc.
+		O comando abaixo já faz tudo isso pra você. 
+		
+
+		COMO AS TOOLS SÃO INVOCADAS  
+
+			Este comando irá usar as tools enviadas no parâmetro -Functions para invocá-las e executá-las diretamente nesta sessão do Powershell.
+			Ele espera um objeto que chamammos de OpenaiTool, contendo as seguintes props:
+			
+			@{
+				# é o objeto com o schema, documentado da OpenAI, a ser passado ao modelo (parametro tools da API)
+				# O nome das funcoes enviados segue um padrão, documentado abaixo.
+				tools = @{} 
+				
+				#Este é um scriptblock que deve retonar um comando a ser executado 
+				# se nao informaod, usa o proprio nome de comando como executável!
+				map = {
+					param(
+						$Name # Nome da tool 
+						$OpenaiTool #Este proprio objeto Openaitool
+					)
+					
+					return @{
+						# comando a ser executado!
+						# Deve ser um comando invocavel pelo powershell como scrip block, nome de funcao, funao em arquivo, script, etc.
+						func = function|scriptblock|funcao
+					}
+				}
+			}
+			
+			Além dessas propriedades, qualquer outra é livre para ser retornado, que pode ser usada pelo script de map!
+			
+			Quando o modelo solicita a execucao de uma (ou mais) funcoes, este cmdlet irá determinar qual a OpenaiTool onde este comando foi definido.
+			Ele faz isso olhando o "tools" que é apssado e filtrando pelo nome retronado pelo modelo.  
+			
+			Então, ele executa o script "map" dessa tool passando o nome da tool invocada e o proprio obejto OpenaiTool onde foi definido.  
+			E o script então segue sua logica para devolver uma funcao executável.  
+			Cada cmdlet de cada provider deve implementar sua propria logica para execucao dessa funcao!
+			
+			Os argumentos dessas funcoes são enviados pelo modelo, conforme o schema que foi montando e enviado em tools.  
+			Note que, este recurso só funciona com providers que suportem modelos que suportem o Tool Calling com exatamente o mesmo params e retorno da OpenAI.  
+				
+				
+					
+
+		Para um exemplo de como implementar funcoes que retornem esse format, veja no provider openai.ps1, os comandos que comecam com Get-OpenaiTool*
 #>
-function Invoke-AiChatFunctions {
+function Invoke-AiChatTools {
 	[CmdletBinding()]
 	param(
 		$prompt
 		
-		,# Passe as funcoes aqui
-		 # Atualmente, suporta apenas um arquivo .ps1 onde as fucnoes estao definidas.
-		 # Crie seu arquivo e documente ele usando a propria sintaxe do powershell.
-		 # Essa documentação será enviada ao modelo. Quanto melhor você documentar, melhor o modelo saberá quando invocar.
-			$Functions		= $null
+		,# Array de tools, conforme explicado na doc deste comando
+		 # Use os resultado de Get-OpenaiTool* para gerar os valores possíveis.  
+		 # Você pode passar um array de objetos do tipo OpenaiTool.
+		 # Se uma mesma funcoes estiver definida em mais de 1 tool, a primeira encontrada na ordem definida será usada!
+			$Tools		= $null
 			
 		,$PrevContext		= $null
 		,# máx output!
@@ -650,7 +792,25 @@ function Invoke-AiChatFunctions {
 	$ErrorActionPreference = "Stop";
 	
 	# Converts the function list user passed to format acceptable by openai!
-	$OpenAiTools = OpenAuxFunc2Tool $Functions
+	$OpenaiTools = @()
+
+	#toolbox = conjutno de várias tools que foi gerada a partir de um script file, grupo de funcoes, etc.
+	# é cada item passado em Tools (Chamamos de toolbox para desambiguar com o cocneito original de tool da openai)
+	$FunctionMap = @{}
+	foreach($Toolbox in @($Tools)){
+		foreach($Tool in $Toolbox.tools){
+			$OpenaiTools += $Tool ;
+			$FunctionName 	= $Tool.function.name;
+			
+			if($FunctionMap[$FunctionName]){
+				write-warning "Tool $ToolName duplicate..."
+			} else {
+				$FunctionMap[$FunctionName] = @{
+					SrcBox = $Toolbox
+				}
+			}
+		}
+	}
 	
 	# initliza message!
 	[object[]]$Message 	= @($prompt);
@@ -696,7 +856,7 @@ function Invoke-AiChatFunctions {
 			prompt 			= $Message
 			temperature   	= $temperature
 			MaxTokens     	= $MaxTokens
-			Functions 		= $OpenAiTools.tools
+			Functions 		= $OpenaiTools
 			model 			= $model
 			RawParams		= $RawParams
 		}
@@ -783,7 +943,7 @@ function Invoke-AiChatFunctions {
 				
 				try {
 					if($CallType -ne 'function'){
-						throw "Tool type $CallType not supported"
+						throw "POWERSHAI_CHATTOOLS_INVALID_LLM_CALLTYPE: Tool type $CallType not supported"
 					}
 					
 					$FuncCall = $ToolCall.function
@@ -801,25 +961,30 @@ function Invoke-AiChatFunctions {
 						content	= "ERROR: Some error ocurred processing function!";
 					}
 					
+					# acha a tool na lista!
+					$FunctionInfo = $FunctionMap[$FuncName]
 					
-					# Lets get func defintion!
-					$FuncDef = $OpenAiTools.functions[$FuncName];
-					
-					#Functino not found!
-					#This can be erros of model? Or bug of code...
-					#Say back this to model...
-					if(!$FuncDef){
-						throw "Function $FuncName not found!";
+					if(!$FunctionInfo){
+						throw "POWERSHAI_CHATTOOLS_NOFUNCTIONMAP: Function $FuncName was invoked, but no function map found. This can be PowershAI bug or LLM incorrect call!"
 					}
 					
-					# Get the function itself!
-					# TODO: Talvez o GPT tenha pedido uma funcao erraa também, precisamos tratar este caso!
-					# Por enquanto, assumimos que ele sempre manda uma funcao existente...
-					$TheFunc = $FuncDef.func;
+					$SrcToolbox = $FunctionInfo.SrcBox;
+					$NoSplatArgs = $false;
+					if($SrcToolbox.map){
+						try {
+							$MapResult = (& $SrcToolbox.map $FuncName $SrcToolbox)
+							$TheFunc = $MapResult.Func
+							$NoSplatArgs = $MapResult.NoSplatArgs;
+						} catch {
+							write-warning "POWERSHAI_CHATTOOLS_PSMAP_ERROR: ChatTools failed get command name for tool $FuncName"
+							throw
+						}
+					} else {
+						$TheFunc = $FuncName
+					}
 					
 					if(!$TheFunc){
-						write-warning "Model asked function $FuncName but the body was not found. This is a bug of PowershIA";
-						throw "Function was defined, but code not found. This is a bug of function source."
+						throw "POWERSHAI_CHATTOOLS_NOFUNCTION: No function name was returned by map of $FuncName. This can be a bug of Powershai or LLM wrong call."
 					}
 					
 					#Here wil have all that we need1
@@ -846,13 +1011,25 @@ function Invoke-AiChatFunctions {
 					& $emit "func" $AiInteraction $CurrentToolResult
 					
 					write-verbose "Calling function $FuncName ($FuncInfo)"
+					
+					if($NoSplatArgs){
+						$ArgsHash = @($ArgsHash)
+					}
+					
 					$FuncResult = & $TheFunc @ArgsHash 
 					
 					if($FuncResult -eq $null){
 						$FuncResult = @{};
 					}
 					
-					$FuncResp.content = $FuncResult | ConvertTo-Json -Depth 10;
+					$FuncResp.content = (Format-PowershaiContext $FuncResult)
+					& $emit "funcresult" $AiInteraction $CurrentToolResult $FuncResult
+					
+					
+					
+					# TODO: Add formatter!
+					
+					
 					$FuncSeqErrors = 0;
 				} catch {
 					$err = $_;
@@ -905,6 +1082,11 @@ function Invoke-AiChatFunctions {
 		costs 			= $AnswerCost
 	}
 }
+
+
+
+
+
 
 
 # security FUNCTIONS
@@ -1153,7 +1335,7 @@ function Invoke-PowershaiChat {
 
 	
 	write-host "Iniciando..."
-	# $Ret = Invoke-AiChatFunctions -temperature 1 -prompt @(
+	# $Ret = Invoke-AiChatTools -temperature 1 -prompt @(
 	# 	"Gere uma saudação inicial para o usuário que está conversando com você a partir do módulo powershell chamado PowerShai"
 	# )  -on @{
 	# 	stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
@@ -1326,209 +1508,188 @@ function Invoke-PowershaiChat {
 	
 	$LoopNum = 0;
 	$InternalMessages = @();
-	:MainLoop while($true){
-		try {
-			write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
-			$LoopNum++;
+	
+	try {
+		write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
+		$LoopNum++;
+		
+		if($LoopNum -eq 1){
+			$Prompt = @()
 			
-			if($LoopNum -eq 1){
-				$Prompt = @(
-					
-				)
-				
-				$InternalMessages += @(
-					"Você é um agente que está conversando com o usuário partir do PowershAI, um módulo powershell para interagir com IA"
-				)
-				
-
-				
-				if($UserFirstName){
-					$InternalMessages += "O nome do usuário é: "+$UserFirstName;
-				}
-				
-				$Prompt = "Conversa iniciada: Gere uma mensagem inicial:"
-				$Prompt = $Prompt -Join "`n";
-			} else {
-				$InternalMessages = @();
-				
-				if($UserFirstName){
-					$PromptLabel = $UserFirstName
-				} else {
-					$PromptLabel = "Você"
-				}
-				
-				write-host -NoNewLine "$PromptLabel>>> "
-				$prompt = read-host
-			}
-			
-			$parsedPrompt = ParsePrompt $Prompt
-			
-			switch($parsedPrompt.action){
-				"stop" {
-					break MainLoop;
-				}
-				
-				"prompt" {
-					$prompt = $parsedPrompt.prompt;
-				}
-				
-				default {
-					continue MainLoop;
-				}
-			}
-			
-			$Msg = @(
-				@($SystemMessages|%{ [string]"s: $_"})
-				@($InternalMessages|%{ [string]"s: $_"})
-				[string]"u: $prompt"
+			$InternalMessages += @(
+				"Você é um agente que está conversando com o usuário partir do PowershAI, um módulo powershell para interagir com IA"
 			)
+
+			if($UserFirstName){
+				$InternalMessages += "O nome do usuário é: "+$UserFirstName;
+			}
 			
+			$Prompt = "Conversa iniciada: Gere uma mensagem inicial:"
+			$Prompt = $Prompt -Join "`n";
+		} else {
+			$InternalMessages = @();
 			
-			$Msg | %{ AddContext $_ };
+			if($UserFirstName){
+				$PromptLabel = $UserFirstName
+			} else {
+				$PromptLabel = "Você"
+			}
 			
-			if($ShowFullSend){
-				write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
+			write-host -NoNewLine "$PromptLabel>>> "
+			$prompt = read-host
+		}
+		
+		$Msg = @(
+			@($SystemMessages|%{ [string]"s: $_"})
+			@($InternalMessages|%{ [string]"s: $_"})
+			[string]"u: $prompt"
+		)
+		
+		
+		$Msg | %{ AddContext $_ };
+		
+		if($ShowFullSend){
+			write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
+		}
+	
+
+		$ChatParams = $ChatUserParams + @{
+			prompt 		= $ChatContext.messages
+			Functions 	= $Funcs 
+			Stream		= $MustStream
+			on 			= @{
+						
+						send = {
+							if($VerboseEnabled){
+								write-host -ForegroundColor DarkYellow "-- waiting model... --";
+							}
+						}
+						
+						stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
+						answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
+
+						
+						func = {
+							param($interaction)
+							
+							$ans = $interaction.rawAnswer;
+							$model = $ans.model;
+							$funcName = $interaction.toolResults[-1].name
+							
+							write-host -ForegroundColor Blue "$funcName{..." -NoNewLine
+						}
+				
+						exec = {
+							param($interaction)
+							
+							write-host -ForegroundColor Blue "}"
+							write-host ""
+						}
+				}
+		}
+		
+		if($VerboseEnabled){
+			$ChatParams.Verbose = $true;
+		}
+		
+		
+		
+		$Start = (Get-Date);
+		$Ret 	= Invoke-AiChatTools @ChatParams;
+		$End = Get-Date;
+		$Total = $End-$Start;
+		
+		foreach($interaction in $Ret.interactions){ 
+		
+			if($interaction.stream){
+				$Msg = $interaction.rawAnswer.message
+			} else {
+				$Msg = $interaction.rawAnswer.choices[0].message;
 			}
 		
-	
-			$ChatParams = $ChatUserParams + @{
-				prompt 		= $ChatContext.messages
-				Functions 	= $Funcs 
-				Stream		= $MustStream
-				on 			= @{
-							
-							send = {
-								if($VerboseEnabled){
-									write-host -ForegroundColor DarkYellow "-- waiting model... --";
-								}
-							}
-							
-							stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
-							answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
+			
 
-							
-							func = {
-								param($interaction)
-								
-								$ans = $interaction.rawAnswer;
-								$model = $ans.model;
-								$funcName = $interaction.toolResults[-1].name
-								
-								write-host -ForegroundColor Blue "$funcName{..." -NoNewLine
-							}
-					
-							exec = {
-								param($interaction)
-								
-								write-host -ForegroundColor Blue "}"
-								write-host ""
-							}
-					}
-			}
+			AddContext $Msg
 			
-			if($VerboseEnabled){
-				$ChatParams.Verbose = $true;
+			$toolsResults = $interaction.toolResults;
+			if($toolsResults){
+				$toolsResults | %{ AddContext $_.resp }
 			}
 			
 			
 			
-			$Start = (Get-Date);
-			$Ret 	= Invoke-AiChatFunctions @ChatParams;
-			$End = Get-Date;
-			$Total = $End-$Start;
-			
-			foreach($interaction in $Ret.interactions){ 
-			
-				if($interaction.stream){
-					$Msg = $interaction.rawAnswer.message
-				} else {
-					$Msg = $interaction.rawAnswer.choices[0].message;
-				}
-			
-				
-
-				AddContext $Msg
-				
-				$toolsResults = $interaction.toolResults;
-				if($toolsResults){
-					$toolsResults | %{ AddContext $_.resp }
-				}
-				
-				
-				
-			}
-			
-			
-			#Store the historu of chats!
-			$ChatMetadata.history += @{
-									Ret = $Ret
-									Elapsed = $Total
-								}
-			$ChatHistory = $ChatMetadata.history;
-			
-			$AllAnswers 	= @($Ret.interactions | %{$_.rawAnswer});
-			$AnswersCost	= $Ret.costs
-			
-			
-			# current chat
-			$AnswerCount 	= $AllAnswers.count;
-			$TotalCost 		= $AnswersCost.total
-			$InputCost 		= $AnswersCost.input
-			$OutputCost 	= $AnswersCost.output
-			$TotalTokens 	= $AnswersCost.tokensTotal
-			$InputTokens 	= $AnswersCost.tokensInput
-			$OutputTokens 	= $AnswersCost.tokensOutput
-			
-			# all chats
-			$ChatStats.TotalChats += $ChatHistory.count;
-			$TotalChats = $ChatStats.TotalChats
-			
-			## COSTS (total, input,output)
-			$ChatStats.TotalCost += $TotalCost 
-			$ChatStats.TotalInput += $InputCost
-			$ChatStats.TotalOutput += $OutputCost
-			
-			## TOKENS QTY (total, input, output)
-			$ChatStats.TotalTokens += $TotalTokens 
-			$ChatStats.TotalTokensI += $InputTokens
-			$ChatStats.TotalTokensO += $OutputTokens
-			
-			
-			$AnswerLog = @(
-				"Answer: $AnswerCount"
-				"Cost: $TotalCost (i:$InputCost/o:$OutputCost)"
-				"Tokens: $TotalTokens (i:$InputTokens/o:$OutputTokens)"
-				"time: $($Total.totalMilliseconds) ms"
-			) -Join " "
-			
-			$HistoryLog = @(
-				"AllChats: $($ChatStats.TotalChats)"
-				
-				@(
-					"Cost: $($ChatStats.TotalCost)"
-					"(i:$($ChatStats.TotalInput)"
-					"/"
-					"o:$($ChatStats.TotalOutput))"
-				) -Join ""
-				
-				@(
-					"Tokens: $($ChatStats.TotalTokens)"
-					"(i:$($ChatStats.TotalTokensI)"
-					"/"
-					"o:$($ChatStats.TotalTokensO))"
-				) -Join ""
-				
-			) -Join " "
-			
-			if($ShowTokenStats){
-				write-host "** $AnswerLog"
-				write-host "** $HistoryLog"
-			}
-		} catch {
-			write-host ($_|out-string)
-			write-host "==== ERROR STACKTRACE ==="
-			write-host "StackTrace: " $_.ScriptStackTrace;
 		}
+		
+		
+		#Store the historu of chats!
+		$ChatMetadata.history += @{
+								Ret = $Ret
+								Elapsed = $Total
+							}
+		$ChatHistory = $ChatMetadata.history;
+		
+		$AllAnswers 	= @($Ret.interactions | %{$_.rawAnswer});
+		$AnswersCost	= $Ret.costs
+		
+		
+		# current chat
+		$AnswerCount 	= $AllAnswers.count;
+		$TotalCost 		= $AnswersCost.total
+		$InputCost 		= $AnswersCost.input
+		$OutputCost 	= $AnswersCost.output
+		$TotalTokens 	= $AnswersCost.tokensTotal
+		$InputTokens 	= $AnswersCost.tokensInput
+		$OutputTokens 	= $AnswersCost.tokensOutput
+		
+		# all chats
+		$ChatStats.TotalChats += $ChatHistory.count;
+		$TotalChats = $ChatStats.TotalChats
+		
+		## COSTS (total, input,output)
+		$ChatStats.TotalCost += $TotalCost 
+		$ChatStats.TotalInput += $InputCost
+		$ChatStats.TotalOutput += $OutputCost
+		
+		## TOKENS QTY (total, input, output)
+		$ChatStats.TotalTokens += $TotalTokens 
+		$ChatStats.TotalTokensI += $InputTokens
+		$ChatStats.TotalTokensO += $OutputTokens
+		
+		
+		$AnswerLog = @(
+			"Answer: $AnswerCount"
+			"Cost: $TotalCost (i:$InputCost/o:$OutputCost)"
+			"Tokens: $TotalTokens (i:$InputTokens/o:$OutputTokens)"
+			"time: $($Total.totalMilliseconds) ms"
+		) -Join " "
+		
+		$HistoryLog = @(
+			"AllChats: $($ChatStats.TotalChats)"
+			
+			@(
+				"Cost: $($ChatStats.TotalCost)"
+				"(i:$($ChatStats.TotalInput)"
+				"/"
+				"o:$($ChatStats.TotalOutput))"
+			) -Join ""
+			
+			@(
+				"Tokens: $($ChatStats.TotalTokens)"
+				"(i:$($ChatStats.TotalTokensI)"
+				"/"
+				"o:$($ChatStats.TotalTokensO))"
+			) -Join ""
+			
+		) -Join " "
+		
+		if($ShowTokenStats){
+			write-host "** $AnswerLog"
+			write-host "** $HistoryLog"
+		}
+	} catch {
+		write-host ($_|out-string)
+		write-host "==== ERROR STACKTRACE ==="
+		write-host "StackTrace: " $_.ScriptStackTrace;
 	}
 	
 	
@@ -1547,13 +1708,115 @@ function NewChatContext {
 }
 
 <#
-	Inicializa o chat, mas sem travar o prompt!
+	.DESCRIPTION
+		Cria um ojbeto padrao contendo todos o spossveis parametros que podem ser usados no chat!
+		O usuário pode usar um get-help New-PowershaiParameters para obter a doc dos parametros.  
+#>
+function New-PowershaiParameters {
+	[CmdLetBinding()]
+	param(
+		#Quando true, usa o modo stream, isto é, as mensagens são mostradas a medida que o modelo as produz
+		$stream = $true 
+		
+		,#Sem funcao. Será removido emnbeve 
+			$VerboseEnabled = $false
+			
+		,# Habilia o modo JSON. Nesse modo, o modelo é forçado a retornar uma resposta com JSON.  
+		 # Quandoa ativado, as mensagens geradas via stream não sãoe xibidas a medida que são produzidas, e somente o resultado final é retornado.  
+			$UseJson
+		
+		,#Printa o prompt inteiro que está sendo enviado ao LLM 
+			$ShowFullSend = $False 
+			
+		,#Ao final de cada mensagem, exibe as estatísticas de consumo, em tokens, retornadas pela API 
+			$ShowTokenStats  = $False 
+			
+		,#Tamanho máximo do contexto, em caracteres 
+		 #No futuro, será em tokens 
+		 #Controla a quantidade de mensagens no contexto atual do chat. Quando esse número ultrapassar, o Powershai limpa automaticamente as mensagens mais antigas.
+			$MaxContextSize = 8192
+		
+		,#Função usada para formatação dos objetos passados via pipeline 
+			$ContextFormatterFunc = "ConvertTo-PowershaiContextOutString"
+			
+		,#Argumentos para ser passados para a ContextFormatterFunc
+			$ContextFormatterParams = $null 
+			
+		,#Se true, exibe os argumenots das funcoes quando o Tool Calling é ativado para executar alguma funcao 
+			$ShowArgs = $true 
+			
+		,#Exibe os resultados das tools quando são executadas pelo PowershAI em resposta ao tool calling do modelo 
+			$PrintToolsResults = $false
+			
+		,#System Message que é garantida ser enviada sempre, independente do histórico e clenaup do chat!
+			$SystemMessageFixed = $null
+	)
+	
+    # Get the command name
+    $CommandName = $PSCmdlet.MyInvocation.InvocationName;
+    # Get the list of parameters for the command
+    $ParameterList = (Get-Command -Name $CommandName).Parameters;
+	
+	$NewParams = @{}
+	
+	foreach($ParamName in @($ParameterList.keys) ){
+		
+		if($ParamName -in [System.Management.Automation.PSCmdlet]::CommonParameters){
+			continue;
+		}
+		
+		$ParamValue = Get-Variable $ParamName -ValueOnly -EA SilentlyContinue
+		
+		$NewParams[$ParamName] = $ParamValue;
+	}
+	
+	return $NewParams;
+	
+}
+
+<#
+	.SYNOPSIS 
+		Cria um novo Powershai Chat.
+		
+	.DESCRIPTION 
+		O PowershaAI traz um conceito de "chats", semelhantes aos chats que você vê na OpenAI, ou as "threads" da API de Assistants.  
+		Cada chat criado tem seu próprio conjunto de parâmetros, contexto e histórico.  
+		Quando você usa o cmdlet Send-PowershaiChat (alias ia), ele está enviando mensagens ao modelo, e o histórico dessa conversa com o modelo fica no chat criado aqui pelo PowershAI.  
+		Ou seja, todo o histórico da sua conversa com o modelo é mantido aqui na sua sessão do PowershAI, e não lá no modelo ou na API.  
+		Com isso o PowershAI mantém todo o controle do que enviar ao LLM e não depende de mecanismos das diferentes APIs de diferentes providers para gerenciar o histórico. 
+		
+		
+		Cada Chat possui um conjunto de parâmetros que ao serem alterados afetam somente quele chat.  
+		Certos parâmetros do PowershAI são globais, como por exemplo, o provider usado. Ao mudar o provider, o Chat passa a usar o novo provider, mas mantém o mesmo histórico.  
+		Isso permite conversar com diferentes modelos, enquanto mantém o mesmo histórico.  
+		
+		Além destes parâmetros, cada Chat possui um histórico.  
+		O histórico contém todas as conversas e interações feitas com os modelos, guardando as repostas retornadas pelas APIs.
+		
+		Um Chat também tem um contexto, que é nada mais do que todas as mensagesn enviadas.  
+		Cada vez que uma nova mensagem é enviada em um chat, o Powershai adiciona esta mensage ao contexto.  
+		Ao receber a resposta do modelo, esta resposta é adicionada ao contexto.  
+		Na próxima mensagem enviada, todo ess ehistórico de mensagem do contexto é enviado, fazendo com que o modelo, independente do provider, tenha a memória da conversa.  
+		
+		o fato do contexto ser mantido aqui na sua sessão do Powershell permite funcionaldiades como gravar o seu histórico em disco, implementar um provider exclusivo para guardar o seu hitórico na nuvem, manter apenas no seu Pc, etc. Futuras funcionalidades podem se beneficiar disso.
+		
+		Todos os comandos *-PowershaiChat giram em todos do chat ativo ou do chat que voce explicitamente especifica no parametro (geralmente com o nome -ChatId).  
+		O ChatAtivo é o chat em que as mensagens serão enviadas, caso nao seja especificado o ChatId  (ou se o comando não permite especificar um chat explicito).  
+
+		Existe um chat especial chamado "default" que é o chat criado sempre que voce usa o Send-PowershaiChat sem especifciar um chat e se não houver chat ativo definido.  
+		
+		Se você fechar sua sessão do Powershell, todo esse histoico de Chats é perdido.  
+		Você pode salvar em disco, usando o comando Export-PowershaiSettings. O conteudo é salvo criptografado por uma senha que voce especificar.
+		
+		Ao emviar mensagens, o PowershaAI mantém um mecanismo interno que limpa o contexto do chat, para evitar enviar mais do que o necessário.
+		O tamanho do contexto local (aqui na sua sessao do Powershai, e nao do LLM), é controlado por um parametro (use Get-PowershaiChatParameter para ver a lista de parametros)
+		
+		Note que, devido a essa maneira do Powershai funcionar, dependendo da quantidade de informacoes enviadas e retornadas, mais as configuracoes dos parametros, voce pode fazer seu Powershell consumir bastante memória. Voce pode limpar o contexto e historico manualmente do seu chat usando Reset-PowershaiCurrentChat
 #>
 function New-PowershaiChat {
 	[CmdletBinding()]
 	param(
 		$ChatId
-		,$Functions 	= $null
 		,$model  		= $null
 		,$MaxRequests 	= 10
 		,$MaxTokens 	= 1024
@@ -1563,6 +1826,8 @@ function New-PowershaiChat {
 			[switch]$NoStream
 			
 		,[switch]$IfNotExists
+		,#Forçar recriar o chat se ele já estiver criado!
+			[switch]$Recreate
 	)
 	
 	if(!$ChatId){
@@ -1579,12 +1844,10 @@ function New-PowershaiChat {
 			return $ChatSlot;
 		}
 		
-		throw "POWERSHAI_START_CHAT: Chat $ChatId already exists";
+		if(!$Recreate){
+			throw "POWERSHAI_START_CHAT: Chat $ChatId already exists";
+		}
 	}
-	
-	write-verbose "Carregando lista de modelos..."
-	$SupportedModels = Get-AiModels
-	
 	
 	try {
 		$CurrentUser = Get-LocalUser -SID ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
@@ -1605,37 +1868,43 @@ function New-PowershaiChat {
 		MaxSeqErrors = 5
 	}
 	
+	$ChatParams = New-PowershaiParameters -stream (!([bool]$NoStream))
+	
 	$ChatSlot = [PsCustomObject]@{
+		#Id unico e interno do chat!
 		id 			 	= $ChatId
-		CreateDate 		= (Get-Date)
-		num 			= 0
-		LastPrompt 		= $null
-		metadata 		= @{}
-		history 		= @()
-		ApiParams 		= $ApiParams
-		params 			= $ApiParams + @{
-				stream 			= !([bool]$NoStream)
-				VerboseEnabled 	= $False;
-				UseJson 		= $false;
-				ShowFullSend 	= $false;
-				ShowTokenStats 	= $false;
-				MaxContextSize 	= 8192  # Vou considerar isso como o número de caracter por uma questão simples...
-										# futuramente, o correto é trabalhar com tokens!
-										
-				ContextFormatterFunc = "ConvertTo-PowershaiContextOutString"
-				ContextFormatterParams = $null
-		}
 		
+		#Data/hora de criacao do chat!
+		CreateDate 		= (Get-Date)
+		
+		#Numero sequencia da msg atual enviada
+		num 			= 0
+		
+		#Ultimo prompt enviado!
+		LastPrompt 		= $null
+		
+		#Metados de controle do chat!
+		metadata 		= @{}
+		
+		#Historico completo de todas as mensagens enviadas, com os objetos
+		history 		= @()
+		
+		#Parametros especifos do provider 
+		ApiParams 		= $ApiParams
+		
+		#Parametros configuraveis do chat
+		params 			= $ApiParams + $ChatParams 
+		
+		#Contexto dos chats. é onde fica as mensagens que deve ser enviadas
 		context  = (NewChatContext)
-		Functions 		= @{
-			src = $Functions
-			parsed = $null
-		}
-		SupportedModels = $SupportedModels
+		
+		#Informacoes do usuario atual
 		UserInfo = @{
 			FullName = $FullName
 			AllNames = @($UserAllNames)
 		}
+		
+		#Estatisticas de uso de tokens ao longo de todo o chat!
 		stats = @{
 			TotalChats 	= 0
 			
@@ -1646,12 +1915,17 @@ function New-PowershaiChat {
 			TotalTokensI = 0
 			TotalTokensO = 0
 		}
+		
+		#Slot contendo tudo o que é necessario para controlar as tools dos chats!
+		Tools = @{
+			compiled = $null
+			raw = @{}
+		}
 	}
 
 	$Chats[$ChatId] = $ChatSlot;
 	
 	$null = Get-PowershaiChat -SetActive $ChatId
-	Update-PowershaiChatFunctions -File $Functions
 	return $ChatSlot;
 }
 
@@ -1669,6 +1943,33 @@ function Invoke-PowershaiChatStart {
 	)
 	$Prompt = $Prompt -Join "`n";
 	Send-PowershaiChat -Prompt $Prompt -SystemMessages $InternalMessages;
+}
+
+<#
+	.SYNOPSIS
+		Remove um chat e retorna o objeto com todo o histórico e contexto
+#>
+function Remove-PowershaiChat {
+	[CmdletBinding()]
+	param(
+		#Id do chat a ser removido, ou objeto representando o chat!
+		[Parameter(ValueFromPipelineByPropertyName=$true)]
+		[Alias("id")]
+		$ChatId
+	)
+	
+	$CurrentChat = Get-PowershaiChat "."
+	$TargetChat = Get-PowershaiChat $ChatId
+	
+	if($CurrentChat -eq $TargetChat){
+		throw "POWERSHAI_REMOVECHAT: Cannot remove active chat!";
+	}
+	
+	#return removed!
+	$Chats = $POWERSHAI_SETTINGS.chats;
+	$Chats.remove($TargetChat.id);
+	
+	return $TargetChat;
 }
 
 # Get a chatid!
@@ -1738,8 +2039,32 @@ function Set-PowershaiActiveChat {
 	Get-PowershaiChat -SetActive $ChatId;
 }
 
-function Set-PowershaiChatParameter {
-	param($parameter, $value, $ChatId = ".")
+<#
+	.DESCRIPTION 
+		Atualiza o valor de um parâmetro do chat do Powershai Chat.  
+		Se o parâmetro não existe, o cmdlet retorna um erro, a menos que -Force é usado!
+		-Force deve ser usado normalmente em casos de testes internos ou em raras si
+#>
+function Update-PowershaiChatParameter {
+	param(
+		#Nome do parâmetro 
+			$parameter
+		,#Valor do parâmetro
+			$value
+		,# Chat que deseja atualizar. Por padrão atualiza o chat ativo 
+			$ChatId = "."
+			
+		,#Forçar atualização, mesmo se o parâmetro não existe na lista de parâmetros 
+			[switch]$Force
+	)
+	
+	$AllParameters = Get-PowershaiChatParameter
+	
+	$Param = $AllParameters | ? { $_.name -eq $parameter }
+	
+	if(!$Param -and $Force){
+		throw "POWERSHAI_CHAT_SETPARAM: Parameter $Parameter not found";
+	}
 	
 	$Chat = Get-PowershaiChat $ChatId;
 	$CurrentValue = $Chat.params[$parameter];
@@ -1748,11 +2073,90 @@ function Set-PowershaiChatParameter {
 	write-host "Changed $parameter from $CurrentValue to $value";
 }
 
+
 function Get-PowershaiChatParameter {
 	param($ChatId = ".")
 	
 	$Chat = Get-PowershaiChat $ChatId;
+	
+	$ParamsHelp = @()
+	$ParamBaseHelp = @(get-help New-PowershaiParameters).parameters.parameter
+	
+	#Lista tudo para garantir mesmo os chats criados previamente possam exibir novas opcoes que aparecem!
+	$AllParams = @($Chat.params.keys) + @($ParamBaseHelp | %{$_.name}) | sort -Unique
+	
+	foreach($ParamName in $AllParams){
+		$ParamHelp = $ParamBaseHelp | ? {$_.name -eq $ParamName}
+		
+		
+		if($ParamHelp){
+			$help = @($ParamHelp.description | %{$_.text}) -Join "`n"
+		} else {
+			$help = "Raw API param. Check model docs"
+		}
+		
+		$ParameterInfo = [PsCustomObject]@{}
+		$ParameterInfo | Add-Member Noteproperty name $ParamName
+		$ParameterInfo | Add-Member Noteproperty value $Chat.params[$ParamName]
+		$ParameterInfo | Add-Member Noteproperty description $help
+		
+		$ParamsHelp += $ParameterInfo
+	}
+	
+	return $ParamsHelp;
 }
+
+
+function Set-PowershaiChatParameter {
+	param($parameter, $value, $ChatId = ".")
+	
+	if($parameter -eq $null){
+		Get-PowershaiChatParameter $ChatId
+		return;
+	} 
+	
+	Update-PowershaiChatParameter $parameter $value $chatId
+}
+
+$PARAM_LIST = @();
+
+RegArgCompletion Set-PowershaiChatParameter,Update-PowershaiChatParameter parameter {
+	param($cmd,$param,$word,$ast,$fake)
+	 
+	Get-PowershaiChatParameter -ChatId . | ? {$_.name -like "$word*"} | %{$_.Name};
+}
+
+
+
+function Invoke-PowershaiCommand {
+	[CmdletBinding()]
+	param(
+		#Command name
+			[ValidateSet("params","tools")]
+			$CommandName
+		
+		,[Parameter(ValueFromRemainingArguments=$true)]
+			$RemArgs
+	)
+	
+	switch($CommandName){
+		"params" {
+			Set-PowershaiChatParameter @RemArgs
+		}
+		
+		"tools" {
+			Get-AiTools
+		}
+		
+		default {
+			write-warning "Unkown command";
+		}
+	}
+	
+}
+
+Set-Alias pshai Invoke-PowershaiCommand
+
 
 <#
 	.SYNOPSIS
@@ -1862,12 +2266,11 @@ function Format-PowershaiContext {
 
 }
 
-
+<#
+	.DESCRIPTION 
+		Envia uma mensagem para o modelo do provider configurado e escreve a resposta na tela!
+#>
 function Send-PowershaiChat {
-	<#
-		.SYNOPSIS 
-			Envia uma mensagem para o modelo do provider configurado e escreve a resposta na tela!
-	#>
 	[CmdletBinding()]
 	param(
 		[parameter(mandatory=$false, position=1)]
@@ -1926,6 +2329,11 @@ function Send-PowershaiChat {
 		if($CallName -eq "io"){
 			write-verbose "Invoked vias io alias. Setting Object to true!";
 			$Object = $true;
+		}
+		
+		if($CallName -eq "iat"){
+			write-verbose "Invoked vias iat alias. Setting Temporary to true!";
+			$Temporary = $true;
 		}
 		
 		$ActiveChat = Get-PowershaiChat "." -NoError
@@ -2017,7 +2425,6 @@ function Send-PowershaiChat {
 			#Parameters 
 			$ChatStats 			= $Chat.stats;
 			$ChatMetadata 		= $Chat.metadata;
-			$SupportedModels 	= $Chat.SupportedModels
 			$UserFirstName		= $Chat.UserInfo.AllNames[0];
 			$ChatUserParams		= $Chat.params;
 			$ApiParamsKeys		= @($Chat.ApiParams.keys);
@@ -2034,131 +2441,6 @@ function Send-PowershaiChat {
 			 # futuramente, o correto é trabalhar com tokens!
 			$MaxContextSize = $ChatUserParams.MaxContextSize 
 			
-			function ParsePrompt($prompt) {
-				$parts 		= $prompt -split ' ',2
-				$cmdName	= $parts[0];
-				$remain		= $parts[1];
-				
-				$result = @{
-					action = $null
-					prompt = $null;
-				}
-				
-				write-verbose "InputPrompt: $cmdName"
-				
-				$ShortCut = @{
-					'/von' 		= "VerboseEnabled true"
-					'/voff' 	= "VerboseEnabled false"
-					'/json' 	= "UseJson true"
-					'/jsoff' 	= "UseJson false"
-					'/fullon' 	= "ShowFullSend true"
-					'/fulloff' 	= "ShowFullSend false"
-					'/tokon' 	= "ShowTokenStats true"
-					'/tokoff' 	= "ShowTokenStats false"
-					'/reqs' 	= "MaxRequest "+$remain
-				}[$cmdName]
-				
-				if($ShortCut){
-					$cmdName = "/p";
-					$remain = $ShortCut;
-				}
-				
-				switch($cmdName){
-					"/reload" {
-						write-host "Reloading function list...";
-						
-						$FuncFile = $remain;
-					
-						if(!$FuncFile){
-							$FuncFile = $Chat.Functions.src;
-						}
-						
-						$Chat.Functions.parsed = OpenAuxFunc2Tool $FuncFile;
-						$Chat.Functions.src = $remain
-					}
-					
-					"/models" {
-							write-host $($Chat.SupportedModels|out-string)
-					}
-					
-					{'.cls','/clear','/cls','.c' -contains $_}{
-							clear-host
-					}
-					
-					
-					"/p" { 
-						#Split!
-						$paramPair 		= $remain -split ' ',2
-						$paramName 		= $paramPair[0]
-						$paramValStr 	= $paramPair[1];
-						
-						if(!$paramValStr){
-							write-host $($ChatUserParams|out-string);
-							return;
-						}
-						
-						if(!$ChatUserParams.contains($paramName)){
-							write-warning "No parameter existing with name: $paramName"
-							return;
-						}
-
-						$ParamVal = $ChatUserParams[$paramName];
-						
-						if($ParamVal -eq $null){
-							write-warning "Value is null. Setting as str value!";
-							$NewVal = $paramValStr
-							return;
-						} else {
-							$NewVal = $ParamVal.getType()::Parse($paramValStr);
-						}
-						
-						$ChatUserParams[$paramName] = $NewVal;
-						write-host "Changed PARAM $paramName from $ParamVal to $NewVal" 
-					}
-					
-					"/ps" {
-						function prompt(){ "PowershAI>> " }
-						write-warning "Entering in nested prompt";
-						$host.EnterNestedPrompt();
-					}
-					
-					"/model" {
-						write-host "Changing model...";
-						$newModel 		= $remain;
-						$chosenModel 	= $null;
-						
-						#find all candidates!
-						while($true){
-							$ElegibleModels = @( $Chat.SupportedModels | ? { $_.id -like $newModel } );
-							
-							if($ElegibleModels.length -eq 1){
-								$model = $ElegibleModels[0].id;
-								break;
-							}
-							
-							write-warning "Refine your search (search:$newModel)";
-							write-host $($ElegibleModels|Sort-Object id|out-string)
-							$newModel = read-host "Filter model"
-						}
-						
-						$ChatUserParams['model'] = $model
-						write-host "	Changed model to: $model"
-					}
-					
-					{'/exit','/end' -contains $_} {
-						$result.action = "ExplicitExit";
-						$result.prompt = $prompt;
-					}
-					
-					default {
-						$result.action = "prompt";
-						$result.prompt = $prompt;
-					}
-				}
-				
-				return $result;
-			}
-
 			function AddContext($msg) {
 
 				if($Temporary){
@@ -2194,18 +2476,7 @@ function Send-PowershaiChat {
 			try {
 				write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
 				
-				$parsedPrompt = ParsePrompt $Prompt
-				$Chat.LastPrompt = $parsedPrompt
-				
-				switch($parsedPrompt.action){
-					"prompt" {
-						$prompt = $parsedPrompt.prompt;
-					}
-					
-					default {
-						return;
-					}
-				}
+				$Chat.LastPrompt = $prompt
 				
 				if($Object){
 					$Exemplo1Json = @{PowerShaiJsonResult = @{
@@ -2232,28 +2503,54 @@ function Send-PowershaiChat {
 					[string]"u: $prompt"
 				)
 				
-				$Msg | %{ AddContext $_ };
-				
 				if($ShowFullSend){
 					write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
 				}
 				
+				if($Temporary){
+					write-warning "Temporary Chat enabled";
+					$FullPrompt = $Msg;
+				} else {
+					$Msg | %{ AddContext $_ };
+					$FullPrompt = $ChatContext.messages;
+				}
+				
+
 				$ApiParams = @{};
 				$ApiParamsKeys | %{
 					$ApiParams[$_] = $ChatUserParams[$_]
 				}
-				
-				$FullPrompt = $ChatContext.messages;
-				
-				
+						
+
 				if($NoContext){
 					$FullPrompt = $Msg
 				}
 				
-			
+				#Generate functions!
+				if($Chat.Tools.compiled -eq $null){
+					$Chat.Tools.compiled  = @{
+						CachedTime 	= (Get-Date)
+						Tools 		= $null
+					}
+					
+					write-verbose "Updating ParsedTools cached...";
+					$Chat.Tools.compiled = Get-AiUserToolbox
+				}
+				
+				
+				$ToolList = @(
+					$Chat.Tools.compiled
+				)
+				
+				if($Chat.params.SystemMessageFixed){
+					#Envia essa system message sempre!
+					$FullPrompt = @("s: " + $Chat.params.SystemMessageFixed) + @($FullPrompt)
+				}
+				
+
 				$ChatParams = $ApiParams + @{
 					prompt 		= $FullPrompt
-					Functions 	= $Chat.Functions.parsed 
+					Tools 		= $ToolList
 					Stream		= $Chat.params.stream
 					on 			= @{
 								
@@ -2274,7 +2571,30 @@ function Send-PowershaiChat {
 									$model = $ans.model;
 									$funcName = $interaction.toolResults[-1].name
 									
-									write-host -ForegroundColor Blue "$funcName{..." -NoNewLine
+									
+									write-host -ForegroundColor Blue "$funcName{" -NoNewLine
+									
+									if($Chat.params.ShowArgs){
+										write-host ""
+										write-host "Args:"
+										$ToolArgs = $interaction.toolResults[-1].obj;
+										write-host ($ToolArgs|fl|out-string)
+									} else {
+										write-host -ForegroundColor Blue -NoNewLine ...
+									}
+									
+								}
+								
+								funcresult = {
+									param($interaction)
+									
+									$LastResult = $funcName = $interaction.toolResults[-1].resp.content;
+									
+									if($Chat.params.PrintToolsResults){
+										write-host "Result:"
+										write-host $LastResult
+									}
+									
 								}
 						
 								exec = {
@@ -2303,8 +2623,10 @@ function Send-PowershaiChat {
 					$ChatParams.Remove('Functions');
 				}
 				
+				write-verbose "Params: $($ChatParams|out-string)"
+				
 				$Start = (Get-Date);
-				$Ret 	= Invoke-AiChatFunctions @ChatParams;
+				$Ret 	= Invoke-AiChatTools @ChatParams;
 				$End = Get-Date;
 				$Total = $End-$Start;
 
@@ -2445,6 +2767,8 @@ function Send-PowershaiChat {
 			params = $FormatterParams
 			ChatId = $ActiveChat.id
 		}
+		
+
 	}
 	
 	process {
@@ -2474,7 +2798,9 @@ function Send-PowershaiChat {
 			ProcessContext $StrContext;
 		}
 
-		
+		if($Temporary){
+			write-warning "Temporary chat"
+		}
 	}
 	
 	
@@ -2553,7 +2879,7 @@ function Update-PowershaiChatFunctions {
 	
 	write-verbose "Loading functions from $FunctionSrc"
 	$Chat.Functions.src 	= $FunctionSrc;
-	$Chat.Functions.parsed 	= OpenAuxFunc2Tool $FunctionSrc;
+	$Chat.Functions.Tools 	= Get-OpenaiToolFromScript $FunctionSrc;
 }
 
 function Clear-PowershaiChat {
@@ -2599,8 +2925,401 @@ function Reset-PowershaiCurrentChat {
 }
 
 
+
+<#
+	.SYNOPSIS
+		Limpa o cache de de tools
+	
+	.DESCRIPTION
+		O PowershAI mantém um cache com as tools "compiladas".
+		Quando o PowershAI envia a lsita de tools pro LLM, ele precisa enviar junto a descrição da tools, lista de paraemtros, descrição, etc.  
+		Montar essa lista pode consumir um tempo signifciativo, uma vez que ele vai varrer a lista de tools, funcoes, e pra cada um, varrer o help (e o help de cada parametro).
+		
+		Ao dicionar um cmdlet como Add-AiTool, ele não compila naquele momento.
+		Ele deixa para fazer isso quando ele precisa invocar o LLM, na funcao Send-PowershaiChat.  
+		Se o cache não existe, então ele compila ali na hora, o que pode fazer com que esse primeiro envio ao LLM, demora alguns millisegundos ou segundos a mais que o normal.  
+		
+		Esse impacto é proprocional ao numero de funcoes e parâmetros enviados.  
+		
+		Sempre que você usa o Add-AiTool ou Add-AiScriptTool, ele invalida o cache, fazendo com que na proxima execução, ele seja gerado.  
+		ISso permite adicionar muitas funcoes de uma só vez, sem que seja compilado cada vez que você adicona.
+		
+		Porém, se você altera sua função, o cache não é recalcuado.  
+		Então, você deve usar esse cmdlet para que a proxima execução contenha os dados atualizados das suas tools após alteracoes de código ou de script.
+#>
+function Reset-PowershaiChatToolsCache {
+	param($ChatId = ".")
+	
+	$Chat = Get-PowershaiChat $ChatId
+	
+	$ChatTools = $Chat.Tools
+	
+	if($ChatTools.compiled){
+		$ChatTools.compiled = $null
+	}
+}
+
+<#
+	.SYNOPSIS
+		Adiciona um ou mais cmdlets, ou scripts, para a lista de comandos que podem ser invocados pela IA, via tool caling!
+	
+	.DESCRIPTION
+		Adiciona funcoes na sessao atual para a lista de Tool caling permitidos!
+		Quando um comando é adicionado, ele é enviado ao modelo atual como uma opcao para Tool Calling.
+		O help dsponivel da função será usado para descrevê-la, iuncluindo os parâmetros.
+		Com isso, você pode, em runtime, adicionar novas habilidades na IA que poderão ser invocadas pelo LLM e executadas pelo PowershAI.  
+		
+		AO adicionar scritps, todas as funcoes dentro do script são adicionadas de uma só vez.
+		
+		MUITO IMPORTANTE: 
+		NUNCA ADICIONEI COMANDOS QUE VOCÊ NÃO CONHEÇA OU QUE POSSAM COMPROMETER SEU COMPUTADOR.  
+		O POWERSHELL VAI EXECUTÁ-LO A PEDIDO DO LLM E COM OS PARÂMETROS QUE O LLM INVOCAR, E COM AS CREDENCIAIS DO USUÁRIO ATUAL.  
+		SE VOCÊ ESTIVER LOGADO COM UMA CONTA PRIVILEGIADA, COMO O ADMINISTRADOR, NOTE QUE VOCÊ PODERÁ EXECUTAR QUALQUER AÇÃO A PEDIDO DE UM SERVER REMOTO (O LLM).
+#>
+function Add-AiTool {
+	param(
+		$names
+		,$parameters
+		,$description
+		,$formatter
+		,[switch]$script
+		,$ChatId = "."
+		,[switch]$Global
+	)
+	
+	$Chat = Get-PowershaiChat $ChatId
+	$Tools = $Chat.tools.raw;
+	
+	if($Global){
+		$Tools = $POWERSHAI_SETTINGS.UserTools
+	}
+	
+	
+	foreach($CommandName in $names){
+		$ToolIndex = $CommandName;
+		$ToolType = "command"
+		
+		if($script){
+			[string]$AbsPath = Resolve-Path $CommandName -EA SilentlyContinue
+			
+			if(!$AbsPath){
+				throw "POWERSHAI_AITOOL_SCRIPT_FILENOTFOUND: $CommandName";
+			}
+	
+			$ToolIndex = "Path:" + $AbsPath;
+			$CommandName = $AbsPath;
+			$ToolType = "file"
+		}
+		
+		$ToolInfo = @{
+			name 			= $CommandName
+			UserDescription = $description
+			type 			= $ToolType 
+			formatter 		= $formatter
+			enabled 		= $true
+			chats 			= @()
+		}
+		
+		$Tools[$ToolIndex] = $ToolInfo;
+	}
+	
+	#Atualiza o cache das tools!
+	Reset-PowershaiChatToolsCache -ChatId $ChatId
+}
+
+<#
+	.SYNOPSIS
+		Lista todas as Tools disponíveis e seu tipo
+	
+	.DESCRIPTION
+		Obtém a lista de tools
+#>
+function Get-AiTools {
+	param(
+		[switch]$Enabled
+		,$ChatId = "."
+	)
+	
+	$Chat = Get-PowershaiChat $ChatId
+
+	function ListTools {
+		param($src, $scope)
+		
+		$Names = @($src.keys)
+		foreach($ToolName in $Names){
+			$ToolInfo = $src[$ToolName];
+			
+			
+			if($Enabled -and !$ToolInfo.enabled){
+				continue
+			}
+			
+			$Result = [PsCustomObject]@{};
+			$Result | Add-Member Noteproperty type $ToolInfo.type;
+			$Result | Add-Member Noteproperty name $ToolInfo.name;
+			$Result | Add-Member Noteproperty enabled $ToolInfo.enabled;
+			$Result | Add-Member Noteproperty formatter $ToolInfo.formatter;
+			$Result | Add-Member Noteproperty scope $scope
+
+			
+			$Result
+		}
+	}
+
+	
+	ListTools $Chat.Tools.raw "chat"
+	ListTools $POWERSHAI_SETTINGS.UserTools "global"
+}
+
+<#
+	.SYNOPSIS
+		Remove uma tool definitivamente
+#>
+function Remove-AiTool {
+	[CmdletBinding()]
+	param(
+		[parameter(ValueFromPipeline=$true)]
+		$tool
+		,[switch]$script
+		,$ChatId = "."
+		,[switch]$global
+	)
+	
+	$Chat = Get-PowershaiChat $ChatId
+	$Tools = $Chat.Tools.Raw;
+	
+	if($tool -is [string]){
+		$name = $tool
+	} else {
+		$name = $tool.name 
+		
+		if($tool.type -eq "file"){
+			$IsPath = $True
+		}
+	}
+		
+	if($global){
+		$Tools = $POWERSHAI_SETTINGS.UserTools
+	}
+	
+	$ToolIndex = $name;
+	if($script){
+		[string]$AbsPath = Resolve-Path $CommandName -EA SilentlyContinue
+		$ToolIndex = "Path:" + $AbsPath;
+	}
+	
+	
+	if($Tools.contains($ToolIndex)){
+		$Tools.Remove($ToolIndex);
+	}
+	
+	#Atualiza o cache das tools!
+	Reset-PowershaiChatToolsCache -ChatId $ChatId
+}
+
+<#
+	.SYNOPSIS
+		Desabilita um tool (mas não remove). Tool desabiltiada não é enviada ao LLM.
+#>
+function Set-AiTool {
+	[CmdletBinding()]
+	param(
+		#The name of tool or object 
+			[parameter(ValueFromPipeline=$true)]
+			$tool 
+		
+		,#habilita
+			[Parameter(ParameterSetName="Enable")]
+			[switch]$Enable
+			
+		,#desabilita
+			[Parameter(ParameterSetName="Disable")]
+			[switch]$Disable
+		
+		,#Se informado, resolve o name como um path 
+			[switch]$Script
+			
+		,$ChatId = "."
+		,[switch]$Global
+	)
+	
+	begin {
+		$Chat = Get-PowershaiChat $ChatId
+		$Tools = $Chat.Tools.Raw;
+		if($global){
+			$Tools = $POWERSHAI_SETTINGS.UserTools
+		}
+	}
+	
+	process {	
+		[bool]$IsPath = $Script
+	
+		if($tool -is [string]){
+			$name = $tool
+		} else {
+			$name = $tool.name 
+			
+			if($tool.type -eq "file"){
+				$IsPath = $True
+			}
+		}
+		
+		if($IsPath){
+			$name = "path:" + (Resolve-Path $name -EA SilentlyContinue)
+		}
+		
+		write-verbose "Processing tool $name"
+		
+		
+
+		
+		$Tool = $Tools[$name];
+		
+		if($Tool){
+			$OldState = $Tool.enabled
+			
+			if($Enable){
+				$Tool.enabled = $true
+			}
+			
+			if($Disable){
+				$Tool.enabled = $false
+			}
+			
+			write-verbose "	Setting from $OldState to $($Tool.enabled)"
+		}
+		
+	}
+	
+	end {
+		Reset-PowershaiChatToolsCache
+	}
+	
+}
+
+
+RegArgCompletion Set-AiTool,Remove-AiTool tool {
+	param($cmd,$param,$word,$ast,$fake)
+	
+	Get-AiTools | ? { $_.name -like "$word*" } | %{
+		if($_.type -eq "file"){
+			"path:" + $_.name
+		} else {
+			$_.name
+		}
+		
+	}
+}
+
+
+
+<#
+	.DESCRIPTION  
+		Obtém todas as tools cadastradas pelo usuário com Set-AiTool e compila em um único objeto para ser enviado ao LLM usando Invoke-AiChatTools.  
+		
+#>
+function Get-AiUserToolbox {
+	[CmdletBinding()]
+	param(
+		$ChatId = "."
+	)
+	
+	$Chat = Get-PowershaiChat $ChatId
+	$Compiled = @{
+		ToolList = @()
+	}
+	
+	function CompileTools {
+		param($src, $scope)
+		
+		$Names = @($src.keys)
+		
+		
+		
+		$CmdIndex = @{}
+		$CmdTools = @{
+			tools = @()
+			CmdIndex = $CmdIndex
+			src = $scope
+			type = "toolbox"
+			map = {
+				param($ToolName,$Me)
+				
+				$ToolData = $Me.CmdIndex[$ToolName];
+				$Original = $ToolData.original
+				
+				# obtém a tool!
+				$Tool = & $Original.map $ToolName $Original
+				
+				$Script = {
+					param($HashArgs)
+					
+					$Result = & $Tool.func @HashArgs
+					
+					if($ToolData.formatter -and $ToolData.formatter -is [scriptblock]){
+						return & $ToolData.formatter $Result
+					} else {
+						return $Result
+					}
+				}.GetNewClosure()
+				
+				@{func = $Script; NoSplatArgs = $true}
+			}
+			
+		}
+			
+		foreach($name in $names){
+			$Tool = $src[$name];
+			
+			if(!$Tool.enabled){
+				continue;
+			}
+			
+			if($Tool.type -eq "file"){
+				$Compiled.ToolList += Get-OpenaiToolFromScript $Tool.name
+			}
+			
+			if($Tool.type -eq "command"){
+				
+				$ParamList = "*"
+				
+				if($Tool.parameter){
+					$ParamList = $Tool.parameter 
+				}
+				
+				$OpenaiTools = @(Get-OpenaiToolFromCommand -functions $Tool.name -parameters $ParamList -UserDescription $Tool.UserDescription)
+				$OriginalTool = $OpenaiTools[0]
+				
+				$ToolData = @{
+					original 	= $OriginalTool
+					formatter 	= $Tool.formatter
+				}
+				
+				$CmdIndex[$Tool.name] = $ToolData
+				$CmdTools.tools += $OriginalTool.tools;
+			}
+		}
+		
+		$Compiled.ToolList += $CmdTools
+	}
+	
+
+	CompileTools $Chat.Tools.raw "chat"
+	CompileTools $POWERSHAI_SETTINGS.UserTools "global"
+	
+	
+	return $Compiled.ToolList
+}
+
+
+
+
+
+
+
 Set-Alias -Name PowerShai -Value Start-PowershaiChat
 Set-Alias -Name ia -Value Send-PowershaiChat
+Set-Alias -Name iat -Value Send-PowershaiChat
 Set-Alias -Name io -Value Send-PowershaiChat
 Set-Alias -Name iaf -Value Update-PowershaiChatFunctions
 

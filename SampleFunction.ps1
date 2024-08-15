@@ -43,3 +43,32 @@ function Sql($sql)
 	$result | ConvertTo-Json -Compress -Depth 1
 }
 
+<#
+	.DESCRIPTION
+		Filtra os logs do Windows dos últimos segundos
+#>
+function GetLastLogs {
+	param(
+		#Quantas unidades , #5min
+		$LastSeconds = 300
+	)
+	
+	$AllLogs = @()
+	
+	$LogList = Get-WinEvent -ListLog * -EA SilentlyContinue
+	
+	foreach($Log in $LogList){
+		$LogName = $Log.LogName;
+		write-host "Filtrando log: $LogName"
+		$Filters = @{
+			LogName 	= $LogName
+			StartTime 	= (Get-Date).addSeconds(-$LastSeconds)
+			Level 		= 1,2,3
+		}
+		
+		$AllLogs += Get-WinEvent -FilterHashTable $Filters -EA SilentlyContinue;
+	}
+	
+
+	return $AllLogs
+}

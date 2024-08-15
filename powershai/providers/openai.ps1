@@ -463,83 +463,89 @@ function ConvertTo-OpenaiMessage {
 }
 
 
+<#	
+	Cmdlets Get-OpenaiTool*  
+	Comandos com este prefixo transformam um objeto de entrada em um OpenaiTool.  
+	Um OpenaiTools é um objeto que pode ser usado com Invoke-AiChatFunctions, parametro -Functions.  
+	Com eles, você adiciona a capacidade do modelo decidir executar código, e o PowershAI é a propria engine usada para rodar esse codigo e responder ao modelo.  
+	A doc desse comando esclarece melhor como ele utiliza esses objetos! 
+#>
+
 <#
 
-	Função auxiliar para converter um script .ps1 em um formato de schema esperado pela OpenAI.
-	Basicamente, o que essa fução faz é ler um arquivo .ps1 (ou string) juntamente com sua help doc.  
-	Então, ele retorna um objeto no formato especifiado pela OpenAI para que o modelo possa invocar!
-	
-	Retorna um hashtable contendo as seguintes keys:
-		functions - A lista de funções, com seu codigo lido do arquivo.  
-					Quando o modelo invocar, você pode executar diretamente daqui.
-					
-		tools - Lista de tools, para ser enviando na chamada da OpenAI.
+	.DESCRIPTION
+		Função auxiliar para converter um script .ps1 em um formato de schema esperado pela OpenAI.
+		Basicamente, o que essa fução faz é ler um arquivo .ps1 (ou string) juntamente com sua help doc.  
+		Então, ele retorna um objeto no formato especifiado pela OpenAI para que o modelo possa invocar!
 		
-	Você pode documentar suas funções e parâmetros seguindo o Comment Based Help do PowerShell:
-	https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4
+		Retorna um hashtable contendo as seguintes keys:
+			functions - A lista de funções, com seu codigo lido do arquivo.  
+						Quando o modelo invocar, você pode executar diretamente daqui.
+						
+			tools - Lista de tools, para ser enviando na chamada da OpenAI.
+			
+		Você pode documentar suas funções e parâmetros seguindo o Comment Based Help do PowerShell:
+		https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4
 #>
-function OpenAuxFunc2Tool {
+function Get-OpenaiToolFromScript {
 	[CmdLetBinding()]
 	param(
-		$func
+		$ScriptPath
 	)
-	
-	write-verbose "Processing Func: $($func|out-string)";
-	
-	if($func.__is_functool_result){
-		write-verbose "Functions already processed. Ending...";
-		return $func;
-	}
 	
 	#Defs is : @{ FuncName = @{}, FuncName2 ..., FuncName3... }
 	$FunctionDefs = @{};
+	
+	$ResolvedPath 	= Resolve-Path $ScriptPath -EA SilentlyContinue;
+	
+	if(!$ResolvedPath){
+		throw "POWERSHAI_OPENAI_sCRIPT2OPENAI_NOTFOUND: File not found $ScriptPath";
+	}
+	
 
 	# func é um file?
-	if($func -is [string] -and $func){
-		# existing path!
-		$IsPs1 			= $func -match '\.ps1$';
-		$ResolvedPath 	= Resolve-Path $func -EA SilentlyContinue;
-		
-		if(!$IsPs1 -or !$ResolvedPath){
-			throw "POSHAI_FUNC2TOOL_NOTSUPPORTED: $func"
-		}
-		
-		[string]$FilePath = $ResolvedPath
-		write-verbose "Loading function from file $FilePath"
-		
-		<#
-			Aqui é onde fazemos uma mágica interessante... 
-			Usamos um scriptblock para carregar o arquivo.
-			Logo, o arquivo será carregado apenas no contexto desse scriptblock.
-			Então, obtemos todas os comandos, usando o Get-Command, e filtramos apenas os que foram definidos no arquivo.
-			Com isso conseguimos trazer uma referencia para todas as funcoes definidas no arquivo, aproveitando o proprio interpretador
-			do PowerShell.
-			Assim, conseguimos acessar tanto a DOC da funcao, quanto manter um objeto que pode ser usado para executá-la.
-		#>
-		$GetFunctionsScript = {
-			write-verbose "Running $FilePath"
-			. $FilePath
-			
-			$AllFunctions = @{}
-			
-			#Obtem todas as funcoes definidas no arquivo.
-			#For each function get a object 
-			Get-Command | ? {$_.scriptblock.file -eq $FilePath} | %{
-				write-verbose "Function: $($_.name)"
-				
-				$help = get-help $_.name;
-				
-				$AllFunctions[$_.name] = @{
-						func = $_
-						help = get-help $_.Name
-					}
-			}
-			
-			return $AllFunctions;
-		}
-
-		$FunctionDefs = & $GetFunctionsScript
+	# existing path!
+	$IsPs1 			= $ScriptPath -match '\.ps1$';
+	
+	if(!$IsPs1 -or !$ResolvedPath){
+		throw "POWERSHAI_OPENAI_SCRIPT2OPENAI_ISNOTSCRIPT: $ScriptPath"
 	}
+	
+	[string]$FilePath = $ResolvedPath
+	write-verbose "Loading function from file $FilePath"
+	
+	<#
+		Aqui é onde fazemos uma mágica interessante... 
+		Usamos um scriptblock para carregar o arquivo.
+		Logo, o arquivo será carregado apenas no contexto desse scriptblock.
+		Então, obtemos todas os comandos, usando o Get-Command, e filtramos apenas os que foram definidos no arquivo.
+		Com isso conseguimos trazer uma referencia para todas as funcoes definidas no arquivo, aproveitando o proprio interpretador
+		do PowerShell.
+		Assim, conseguimos acessar tanto a DOC da funcao, quanto manter um objeto que pode ser usado para executá-la.
+	#>
+	$GetFunctionsScript = {
+		write-verbose "Running $FilePath"
+		. $FilePath
+		
+		$AllFunctions = @{}
+		
+		#Obtem todas as funcoes definidas no arquivo.
+		#For each function get a object 
+		Get-Command | ? {$_.scriptblock.file -eq $FilePath} | %{
+			write-verbose "Function: $($_.name)"
+			
+			$help = get-help $_.name;
+			
+			$AllFunctions[$_.name] = @{
+					func = $_
+					help = get-help $_.Name
+				}
+		}
+		
+		return $AllFunctions;
+	}
+
+	$FunctionDefs = & $GetFunctionsScript
 	
 	[object[]]$AllTools = @();
 	
@@ -558,7 +564,7 @@ function OpenAuxFunc2Tool {
 		
 		$OpenAiFunction = @{
 					name = $null 
-					description = $nul 
+					description = $null
 					parameters = @{}
 				}
 		
@@ -572,6 +578,11 @@ function OpenAuxFunc2Tool {
 		
 		$OpenAiFunction.name 		= $FuncHelp.name;
 		$description 				= ( @($FuncHelp.Synopsis) + @($FuncHelp.description|%{$_.text})) -join "`n"
+		
+		if($description.length -gt 1024){
+			$description = $description.substring(1,1024);
+		}
+		
 		$OpenaiFunction.description = $description;
 		
 		# get all parameters!
@@ -620,14 +631,197 @@ function OpenAuxFunc2Tool {
 	
 	
 	return @{
-		tools = $AllTools
-		functions = $FunctionDefs
+		src 		= $ScriptPath
+		type 		= "script"
+		tools 		= $AllTools
+		functions 	= $FunctionDefs
 		
-		#Esta é uma flag indicando que este objeto já foi processado.
-		#Caso envie novamente, ele apenas devolve!
-		__is_functool_result = $true
+		#mapeia um comando para um script!
+		map = {
+			param($ToolName, $me)
+			return $me.functions[$ToolName]
+		}
 	}
 }
+
+
+<#
+	.DESCRIPTION 
+		Converte comandos do powershell para OpenaiTool.
+#>
+function Get-OpenaiToolFromCommand {
+	[CmdletBinding()]
+	param(
+		$functions
+		,$parameters = "*"
+		,$UserDescription = $null
+	)
+	
+	$ToolList = @();
+	$ConvertErrors = @()
+	$Applications = @{};
+	
+	$ToolData = @{}
+	
+	
+	foreach($function in $functions){
+	
+		$Command = Get-Command -EA SilentlyContinue $function;
+		
+	
+		if($Command.CommandType -eq "Application"){
+			
+			$AppFriendName = $function.replace(".exe","");
+			$Applications[$AppFriendName] = $Command;
+			$CommandHelp = @{
+				name = $AppFriendName
+				Synopsis = @(
+					"Executable application"
+					"FullPath: $($Command.source)"
+					($Command.FileVersionInfo | select ProductVersion,ProductName,FileVersion,CompanyName  |out-string)
+				) -Join "`n"			
+			}
+		} else {
+			$CommandHelp = Get-Help $function;
+		}
+		
+		$ErrorSlot = @()
+
+		$OpenAiFunction = @{
+					name = $null 
+					description = $nul 
+					parameters = @{}
+				}
+			
+		$OpenAiTool = @{
+			type 		= "function"
+			'function' 	= $OpenAiFunction
+		}
+		
+		$ToolList += $OpenAiTool;
+
+		$OpenAiFunction.name 		= $CommandHelp.name;
+		$description 				= ( @($CommandHelp.Synopsis) + @($CommandHelp.description|%{$_.text})) -join "`n"
+		
+		if($description.length -gt 1024){
+			$description = $description.substring(1,1024);
+		}
+		
+		$OpenaiFunction.description = $description
+		
+		if($UserDescription){
+			$OpenAiFunction.description += "`n" + $UserDescription
+		}
+			
+		# get all parameters!
+		$FuncParams = $CommandHelp.parameters.parameter;
+			
+		$FuncParamSchema = @{}
+		$OpenaiFunction.parameters = @{
+			type 		= "object"
+			properties 	= $FuncParamSchema
+			required 	= @()
+		}
+		
+		if(!$FuncParams){
+			continue;
+		}
+		
+		$ParametersMeta = $Command.Parameters
+		
+		foreach($param in $FuncParams){
+			$ParamHelp = $param; 
+			$ParamName = $ParamHelp.name;
+			
+
+			write-verbose "Processing parameter $ParamName";
+			
+			if($parameters -ne "*" -and $ParamName -notin @($parameters)){
+				continue;
+			}
+			
+			
+			$ParamType = $ParamHelp.type;
+			$ParamDesc = @($ParamHelp.description|%{$_.text}) -Join "`n"
+			
+			#Obtem o metadatado do parametro!
+			if($ParametersMeta){
+				$ParamMeta  = $ParametersMeta[$ParamName]
+			} else {
+				$ParamMeta = $null
+			}
+			
+			
+			write-verbose "	Type = $ParamType"
+			
+			$ParamSchema = @{
+					type 		= "string"
+					description = $ParamDesc
+			}
+			
+			$FuncParamSchema[$ParamName] = $ParamSchema
+			
+			#Get the typename!
+			try {
+				$ParamRealType = [type]$ParamType.name
+				
+				if($ParamRealType -eq [int]){
+					$ParamSchema.type = "number"
+				}
+				
+				if($ParamRealType -eq [System.Management.Automation.SwitchParameter]){
+					$ParamSchema.type = "boolean"
+				}
+				
+				# Enum {}
+				$EnumList = @();
+				
+				if($ParamRealType.IsEnum){
+					$PossibleValues = $ParamRealType.GetEnumNames();
+					$EnumList += $PossibleValues
+				}
+				
+				if($ParamMeta){
+					$AttrValidateSet = $ParamMeta.Attributes | ? { $_ -is [ValidateSet] }
+					
+					if($AttrValidateSet){
+						$EnumList += $AttrValidateSet.ValidValues
+					}
+				}
+				
+				if($EnumList){
+					$ParamSchema.enum = $EnumList
+				}
+				
+			} catch{
+				write-warning "Cannot determined type of param $ParamName! TypeName = $($ParamType.name)"
+			}
+		}
+				
+	}
+
+	return @{
+		#Lista de tools que pode ser enviando na OpenAI
+		tools 	= $ToolList
+		apps 	= $Applications
+		type 	= "commands"
+		src 	= "commands"
+		
+		map = {
+			param($ToolName, $me)
+			
+			$FuncName = $ToolName;
+			$App = $me.apps[$ToolName];
+			
+			if($App){
+				$FuncName = $App.Name;
+			}
+			
+			return @{ func = $FuncName }
+		}
+	}
+}
+
 
 #Gets cost of answer!
 $POWERSHAI_CACHED_MODELS_PRICE = @{};
