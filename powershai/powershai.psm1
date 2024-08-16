@@ -276,7 +276,7 @@ Function InvokeHttp {
 
 				$Lines = @();
 				
-				while($SseResult -ne $false){
+				while($SseResult -ne $false -and !$IO.EndOfStream){
 					verbose "  Reading next line..."
 					$line = $IO.ReadLine()
 					
@@ -687,11 +687,12 @@ function Get-AiChat {
 	if(!$model){
 		$FuncParams['model'] = GetCurrentProviderData DefaultModel
 	}
+	
+
 
 	
 	PowerShaiProviderFunc "Chat" -FuncParams $FuncParams;
 }
-
 
 <#
 	.DESCRIPTION
