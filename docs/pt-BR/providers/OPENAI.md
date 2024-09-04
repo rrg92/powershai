@@ -1,4 +1,4 @@
-# Provider OLLAMA  
+# Provider OpenAI  
 
 # Configurações iniciais 
 

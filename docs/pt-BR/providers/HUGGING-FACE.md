@@ -1,4 +1,4 @@
-# Provider Hugging Face
+﻿# Provider Hugging Face
 
 O Hugging Face é o maior repositório de modelos de IA do mundo!  
 Lá, você tem acesso a uma gama incrível de modelos, datasets, demonstrações com o Gradio, e muito mais!  

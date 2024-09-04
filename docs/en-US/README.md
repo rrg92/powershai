@@ -56,7 +56,7 @@ get-command -full CommandName
 
 ## Usage
 
-PowershAI can interact with various AI services. By default, it uses the OpenAI API (the creator of ChatGPT). Depending on the provider you want to use, you will need to perform some configurations before invoking the chat. The [documentation for providers](docs/en-US/providers) contains the details you need to know for each one!
+PowershAI can interact with various AI services. By default, it uses the OpenAI API (the creator of ChatGPT). Depending on the provider you want to use, you will need to perform some configurations before invoking the chat. The [documentation for providers](providers/) contains the details you need to know for each one!
 
 ### Quick Guide to Main Providers
 
