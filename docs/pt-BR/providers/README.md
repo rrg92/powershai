@@ -12,6 +12,7 @@ Essa seção documentação cada provider suportado pelo PowershAI!
 [groq] 			| Groq Cloud|
 [maritalk] 		| LLM Brasileiro, criado pela empresa Maritaca AI |
 [claude] 		| LLM criado pela Anthropic|
+[huggingface] 	| Hugging Face e Gradio|
 
 
 [openai]: OPENAI.md
@@ -19,3 +20,4 @@ Essa seção documentação cada provider suportado pelo PowershAI!
 [groq]: GROQ.md
 [maritalk]: MARITALK.md
 [claude]: CLAUDE.md
+[huggingface]: HUGGING-FACE.md
