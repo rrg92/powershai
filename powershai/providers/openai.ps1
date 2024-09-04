@@ -24,17 +24,17 @@ function InvokeOpenai {
 		}
 	}	
 	
-	if($TokenRequired -and !$Token){
+	if(!$Token){
 			$Token = GetCurrentProviderData Token;
 			
-			if(!$token){
+			if(!$token -and $TokenRequired){
 				throw "POWERSHAI_OPENAI_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
 			}
 	}
 	
     $headers = @{}
 	
-	if($TokenRequired){
+	if($Token){
 		 $headers["Authorization"] = "Bearer $token"
 	}
 
@@ -348,6 +348,8 @@ function Get-OpenaiChat {
 		
 		,$StreamCallback = $null
 		
+		,#Overwrite endpoint url!
+			$endpoint = "chat/completions"
     )
 	
    
@@ -385,7 +387,7 @@ function Get-OpenaiChat {
 	}
 	
 	write-verbose "Body:$($body|out-string)"
-    InvokeOpenai -endpoint 'chat/completions' -body $Body -StreamCallback $StreamCallback
+    InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamCallback
 }
 
 
