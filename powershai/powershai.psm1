@@ -73,6 +73,7 @@ if(!$Global:POWERSHAI_SETTINGS){
 
 $PROVIDERS = @{}
 $POWERSHAI_USER_TOOLBOX = $null;
+$POWERSHAI_PROVIDERS_DIR = Join-Path $PsScriptRoot "providers"
 
 if(!$Global:POWERSHAI_SETTINGS.chats){
 	$Global:POWERSHAI_SETTINGS.chats = @{}
@@ -87,252 +88,110 @@ if(!$Global:POWERSHAI_SETTINGS.UserTools){
 }
 
 
-# Aux/helper functions!
-# funcoes usadas para auxiliar alguma operacao ou encasuplar logica complexa!
-# Função genérica para invocar HTTP e com um minimo de suporte a SSE (Server Sent Events)
-Function InvokeHttp {
-	[CmdLetBinding()]
-	param(
-		$url 			= $null
-		,[object]$data 	= $null
-		,$method 		= "GET"
-		,$contentType 	= "application/json; charset=utf-8"
-		,$headers 		= @{}
-		,$SseCallBack 	= $null
-	)
-	$ErrorActionPreference = "Stop";
-	
+ 
 
-	
-	#Converts a hashtable to a URLENCODED format to be send over HTTP requests.
-	Function verbose {
-		$ParentName = (Get-Variable MyInvocation -Scope 1).Value.MyCommand.Name;
-		write-verbose ( $ParentName +':'+ ($Args -Join ' '))
-	}
-		
-		
-	#Troca caracteres não-unicode por um \u + codigo!
-	#Solucao adapatada da resposta do Douglas em: http://stackoverflow.com/a/25349901/4100116
-	Function EscapeNonUnicodeJson {
-		param([string]$Json)
-		
-		$Replacer = {
-			param($m)
-			
-			return [string]::format('\u{0:x4}', [int]$m.Value[0] )
-		}
-		
-		$RegEx = [regex]'[^\x00-\x7F]';
-		verbose "  Original Json: $Json";
-		$ReplacedJSon = $RegEx.replace( $Json, $Replacer)
-		verbose "  NonUnicode Json: $ReplacedJson";
-		return $ReplacedJSon;
-	}
-		
-	#Converts objets to JSON and vice versa,
-	Function ConvertTojson2($o) {
-		
-		if(Get-Command ConvertTo-Json -EA "SilentlyContinue"){
-			verbose " Using ConvertTo-Json"
-			return EscapeNonUnicodeJson(ConvertTo-Json $o -Depth 10);
-		} else {
-			verbose " Using javascriptSerializer"
-			Movidesk_LoadJsonEngine
-			$jo=new-object system.web.script.serialization.javascriptSerializer
-			$jo.maxJsonLength=[int32]::maxvalue;
-			return EscapeNonUnicodeJson ($jo.Serialize($o))
-		}
-	}
-		
-	Function Hash2Qs {
-		param($Data)
-		
-		
-		$FinalString = @();
-		$Data.GetEnumerator() | %{
-			write-verbose "$($MyInvocation.InvocationName): Converting $($_.Key)..."
-			$ParamName = MoviDesk_UrlEncode $_.Key; 
-			$ParamValue = Movidesk_UrlEncode $_.Value; 
-		
-			$FinalString += "$ParamName=$ParamValue";
-		}
-
-		$FinalString = $FinalString -Join "&";
-		return $FinalString;
-	}
-
-
-	try {
-	
-		#building the request parameters
-		if($method -eq 'GET' -and $data){
-			if($data -is [hashtable]){
-					$QueryString = Hash2Qs $data;
-			} else {
-					$QueryString = $data;
-			}
-			
-			if($url -like '*?*'){
-				$url += '&' + $QueryString
-			} else {
-				$url += '?' + $QueryString;
-			}
-		}
-	
-		verbose "  Creating WebRequest method... Url: $url. Method: $Method ContentType: $ContentType";
-		$Web = [System.Net.WebRequest]::Create($url);
-		$Web.Method = $method;
-		$Web.ContentType = $contentType
-		
-		#Faz o close do connection group!
-		#$AllSp = [Net.ServicePointManager]::FindServicePoint($url)
-		#if($AllSp){
-		#	
-		#}
-		
-		
-		@($headers.keys) | %{
-			$Web.Headers.add($_, $headers[$_]);
-		}
-
-		
-		#building the body..
-		if($data -and 'POST','PATCH','PUT' -Contains $method){
-			if($data -is [hashtable]){
-				verbose "Converting input object to json string..."
-				$data = $data | ConvertTo-Json;
-			}
-			
-			verbose "Data to be send:`n$data"
-
-			# Transforma a string json em bytes...
-			[Byte[]]$bytes = [system.Text.Encoding]::UTF8.GetBytes($data);
-			
-			#Escrevendo os dados
-			$Web.ContentLength = $bytes.Length;
-			verbose "  Bytes lengths: $($Web.ContentLength)"
-			
-			
-			verbose "  Getting request stream...."
-			$RequestStream = $Web.GetRequestStream();
-			
-			
-			try {
-				verbose "  Writing bytes to the request stream...";
-				$RequestStream.Write($bytes, 0, $bytes.length);
-			} finally {
-				verbose "  Disposing the request stream!"
-				$RequestStream.Dispose() #This must be called after writing!
-			}
-		}
-		
-		
-		$UrlUri = [uri]$Url;
-		$Unescaped  = $UrlUri.Query.split("&") | %{ [uri]::UnescapeDataString($_) }
-		verbose "Query String:`r`n$($Unescaped | out-string)"
-		
-
-
-		
-		verbose "  Making http request... Waiting for the response..."
-		try {
-			$HttpResp = $Web.GetResponse();
-		} catch [System.Net.WebException] {
-			verbose "ResponseError: $_... Processing..."
-			$ErrorResp = $_.Exception.Response;
-			
-			if($ErrorResp.StatusCode -ne "BadRequest"){
-				throw;
-			}
-			
-			verbose "Processing response error..."
-			$ErrorResponseStream = $ErrorResp.GetResponseStream();
-			verbose "Creating error response reader..."
-			$ErrorIO = New-Object System.IO.StreamReader($ErrorResponseStream);
-			verbose "Reading error response..."
-			$ErrorText = $ErrorIO.ReadToEnd();
-			throw $ErrorText;
-		}
-		
-		verbose "Request done..."
-		
-		$Result  = @{};
-		
-		if($HttpResp){
-			verbose "  charset: $($HttpResp.CharacterSet) encoding: $($HttpResp.ContentEncoding). ContentType: $($HttpResp.ContentType)"
-			verbose "  Getting response stream..."
-			$ResponseStream  = $HttpResp.GetResponseStream();
-			
-			verbose "  Response streamwq1 size: $($ResponseStream.Length) bytes"
-			
-			$IO = New-Object System.IO.StreamReader($ResponseStream);
-			
-			$LineNum = 0;
-			
-			if($SseCallBack){
-				verbose "  Reading SSE..."
-				$LineNum++;
-				$SseResult = $null;
-
-				$Lines = @();
-				
-				while($SseResult -ne $false -and !$IO.EndOfStream){
-					verbose "  Reading next line..."
-					$line = $IO.ReadLine()
-					
-					verbose "	Content: $line";
-					
-					$Lines += $line;
-					
-					verbose "	Invoking callback..."
-					$SseResult = & $SseCallBack @{ line = $line; num = $LineNum; req = $Web; res = $HttpResp; stream = $IO }
-				}
-				
-				$Result.text = $Lines;
-				$Result.stream = $true;
-			} else {
-				verbose "  Reading response stream...."
-				$Result.text = $IO.ReadToEnd();
-			}
-			
-			verbose "  response json is: $responseString"
-		}
-		
-		verbose " HttpResult:`n$($Result|out-string)"
-		return $Result
-	} finally {
-		$BackupErrorAction = $ErrorActionPreference
-		$ErrorActionPreference = "Continue";
-		
-		if($IO){
-			$IO.close()
-		}
-
-		if($HttpResp){
-			write-verbose "Ending http stream..."
-			$HttpResp.Close();
-		}
-		
-		
-		if($ResponseStream){
-			write-verbose "Ending response stream..."
-			$ResponseStream.Close()
-		}
-
-		if($RequestStream){
-			write-verbose "Ending request stream..."
-			$RequestStream.Close()
-		}
-		
-		$ErrorActionPreference = $BackupErrorAction;
-	}
-
-
+#Converts a hashtable to a URLENCODED format to be send over HTTP requests.
+Function verbose {
+	$ParentName = (Get-Variable MyInvocation -Scope 1).Value.MyCommand.Name;
+	write-verbose ( $ParentName +':'+ ($Args -Join ' '))
 }
 
+function Get-PowershaiDefaultParams {
+	return $PSDefaultParameterValues
+}
+
+function IsType($obj, $name){
+	return $($Obj.psobject.TypeNames -contains "PowershaiType:$name");
+}
+
+function SetType($obj, $name){
+	
+	if(-not(IsType $obj $name)){
+		$Obj.psobject.TypeNames.insert(0,"PowershaiType:$name")
+	}
+}
+
+<#
+	.DESCRIPTION  
+		FAciltia a criação de exceptions customizadas!
+#>
+function New-PowershaiError {
+	param(
+		#A mensagem da exception!
+			$Message
+		
+		,#Propriedades personazalidas 
+			$Props  = @{}
+			
+		,#Tipo adicional!
+			$Type = $null
+			
+		,#Exception pai!
+			$Parent = $null
+	)
+	
+	$Ex = New-Object System.Exception($Message,$Parent)
+	
+	foreach($PropName in @($Props.keys)){
+		$Ex | Add-Member -force Noteproperty $PropName $Props[$PropName]
+	}
+	
+	if($Type){
+		SetType $Ex $Type
+	}
+	
+	return $ex;
+}
+
+	
+<#
+	.DESCRIPTION 
+		Obtém uma string codificada com um encoding específico.  
+		Internamente, o Powershell (.NET) armazena tudo como unicode utf16 (https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-encoding-introduction)
+		Mas, podemos usar as classes de Text.Encoding para obter strings formadas por oturas sequências.  
+		Isso é útil para enviar via protocolos (como HTTP), etc.  
+		Se você tentar printar o resultado dessa função, pode não ser legível, devido a sequência de bytes diferentes.  
+#>
+function Get-EncodedString {
+	param(
+		$SourceStr
+		,$TargetEncoding = "UTF-8"
+		,#Se especifciado retorna apenas os bytes 
+			[switch]$Bytes
+	)
+	
+	#Aqui obtemos os bytes no encoding desejado.  
+	#Internamente, o Powershell armazena os caraceres como UTF-16. As classes Text.Encoding convertem de UTF-16 para a sequencia de bytes no encoding desejado.  
+	#FOr exemplo, innternamente, a string "á" é armazenada como um array contendo apenas 1 elemento: [char]225 (225 é o codepoint do á no Unicode).
+	#Quando  usamos UTF8.Getbytes("á"), estamos pedindo que o powershel retorne o UTF-8 equiuvalente de "á", que é um array cim 2 posicoes: 195,196 (é assim que o "á" é representando no UTF-8)
+	[byte[]]$TargetEncBytes = [Text.Encoding]::GetEncoding($TargetEncoding).GetBytes($SourceStr)
+	
+	if($Bytes){
+		return $TargetEncBytes
+	}
+	
+	#Uma vez que temos um array de bytes, podemos construir um tipo string de volta. 
+	#Assi,podemos concatenar essa string em lugares que aceitam string, como concatenção.
+	#Aqui, usamos uma "gambi": O encoding iso-8859-1 não faz nenhuma conversão de bytes. Por isso, podemos usar ele para ober a string a partir do byte.  
+	#Assim, considerando o exemplo, anterior, será retornada uma string, formada peçla sequencia 195,196. Ao printar ela, vai parecer uma string completamente difernete (pos o Powershell exibe em outra codificação).
+	return [Text.Encoding]::GetEncoding("iso-8859-1").GetString($TargetEncBytes)
+}
+
+
+
+
+
+
+
+
+# Aux/helper functions!
+# funcoes usadas para auxiliar alguma operacao ou encasuplar logica complexa!
 function JoinPath {
 	$Args -Join [IO.Path]::DirectorySeparatorChar
 }
+
+#Carrega a http lib!
+. (JoinPath $PSSCriptRoot "lib" "http.ps1")
 
 
 function RegArgCompletion {
@@ -463,12 +322,48 @@ function PowershaiHash {
 	[System.Convert]::ToBase64String($shaManaged.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($str)))
 }
 
+
+
+
 # Meta functions
 # Esssas funcoes devem ser usadas para obter informacoes!
 function Get-AiCurrentProvider {
+	param(
+		#Se habilitado, usa o provider de contexto, isto é, se o códigoe stá rodando em um arquivo no diretorio de um provider, assume este provider.
+		#Caso contrario, obtem o provider habilitado atualmente.
+		[switch]$ContextProvider
+	)
+	
+	if($ContextProvider){
+		$Provider = Get-AiNearProvider
+		
+		if($Provider){
+			return $Provider;
+		}
+	}
+	
+	
 	$ProviderName = $POWERSHAI_SETTINGS.provider;
 	$ProviderSlot = $PROVIDERS[$ProviderName];
 	return $ProviderSlot;
+}
+
+
+function Get-AiNearProvider {
+	$CallStack = Get-PSCallStack
+	
+	$NearProvider = $CallStack | ? { $_.ScriptName -like (JoinPath $POWERSHAI_PROVIDERS_DIR '*.ps1') } | select -last 1;
+	
+	if(!$NearProvider){
+		return;
+	}
+	
+
+	$RelPath 	= $NearProvider.ScriptName.replace((JoinPath $POWERSHAI_PROVIDERS_DIR ''),'');
+	$Parts 		= $RelPath -split '[\\/]',2
+	$ProviderName = $Parts[0].replace(".ps1","");
+	
+	return $PROVIDERS[$ProviderName];
 }
 
 # Muda o provider!
@@ -550,15 +445,20 @@ function SetProviderData {
 }
 
 function GetCurrentProviderData {
-	param($key)
+	param($key,[switch]$ContextProvider)
 	
-	$Provider = Get-AiCurrentProvider
+	$Provider = Get-AiCurrentProvider -ContextProvider:$ContextProvider
 	GetProviderData -name $Provider.name -key $key
 }
 
 function SetCurrentProviderData {
-	param($key, $value)
-	$Provider = Get-AiCurrentProvider
+	param(
+		$key,
+		$value
+		,[switch]$ContextProvider
+	)
+	
+	$Provider = Get-AiCurrentProvider -ContextProvider:$ContextProvider
 	SetProviderData -name $provider.name -key $key -value $value;
 }
 
@@ -3356,7 +3256,7 @@ function prompt {
 
 
 # Carrega os providers!
-$ProvidersPath = JoinPath $PsScriptRoot "providers" "*.ps1"
+$ProvidersPath = JoinPath $POWERSHAI_PROVIDERS_DIR "*.ps1"
 
 $ProvidersFiles = gci $ProvidersPath
 
