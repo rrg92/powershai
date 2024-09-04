@@ -78,9 +78,6 @@ function InvokeGoogleApi {
     return $RawResp.text | ConvertFrom-Json
 }
 
-
-
-
 <#
 	.SYNOPSIS
 		Define a API Key (o Token) da Api do Google.
@@ -397,8 +394,8 @@ return @{
 	TokenEnvName 	= "GOOGLE_API_KEY"
 	
 	info = @{
-		desc	= "OpenAI"
-		url 	= "https://openai.com/"
+		desc	= "Google Gemini"
+		url 	= "https://ai.google.dev/"
 	}
 }
 
