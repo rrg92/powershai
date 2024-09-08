@@ -226,18 +226,16 @@ This command returns an object that contains various information about the diffu
 Since it is a Gradio space, you can connect it with the other cmdlets (the GradioSession cmdlets can understand when an object returned by Get-HuggingFaceSpace is passed to them!)
 
 ```
+# connect with space (and this will generate a new gradio session also)
 $diff = Get-HuggingFaceSpace rrg92/diffusers-labs
-
-# create a new gradiosession for the Gradio app that exists in this space!
-$diff | Connect-HuggingFaceSpaceGradio
 
 #Default
 Set-GradioSession -Default $diff
 
-# Create functions!
+# Create proxy functions
 New-GradioSessionApiProxyFunction
 
-# invoke!
+# call api!d
 Invoke-GradioApiGenerateimage -Prompt "a car flying"
 ```
 

@@ -182,7 +182,10 @@ Function Start-HttpRequest {
 	
 	
 	@($headers.keys) | %{
-		$Web.Headers.add($_, $headers[$_]);
+		$HeaderName = $_;
+		$HeaderVal = $headers[$_];
+		verbose "Adding header $HeaderName $HeaderVal";
+		$Web.Headers.add($_, $HeaderVal);
 	}
 	
 	$Utf8Enc = [Text.Encoding]::UTF8;

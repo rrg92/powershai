@@ -15,6 +15,31 @@
 ###
 #>	
 
+# Obtem o heder authorization para ser usado!
+function ResolveHfTokenHeader {
+	param($token)
+	
+	if(!$token){
+		$TokenEnvName = GetCurrentProviderData -Context TokenEnvName;
+		
+		if($TokenEnvName){
+			verbose "Trying get token from environment var: $($TokenEnvName)"
+			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
+		}
+		
+		if(!$Token){
+			verbose "Trying get token from provi"
+			$Token = GetCurrentProviderData -Context Token;
+		}
+	}
+	
+	if($token -and $token -ne "public"){
+		 @{Authorization = "Bearer $token"}
+	} else {
+		verbose "No token added!";
+		return @{}
+	}	
+}
 
 <#
 	.DESCRIPTION
@@ -28,33 +53,12 @@ function Invoke-GradioHttp {
 		,$data
 		,$ContentType = "application/json"
 		,$StreamCallback = $null
+		,$token = $null
 	)
 	
 	$TokenRequired = $false;
-
-	if(!$Token){
-		$TokenEnvName = GetCurrentProviderData TokenEnvName;
-		
-		if($TokenEnvName){
-			write-verbose "Trying get token from environment var: $($TokenEnvName)"
-			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
-		}
-	}	
 	
-	$headers = @{}
-	if(!$NoToken){
-		if($TokenRequired -and !$Token){
-				$Token = GetCurrentProviderData Token;
-				
-				if(!$token){
-					throw "POWERSHAI_HUGGINGFACE_GRADIOAPI_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
-				}
-		}
-		
-		if($TokenRequired){
-			 $headers["Authorization"] = "Bearer $token"
-		}
-	}
+	$headers = ResolveHfTokenHeader -token $token
 	
 	
 	$ReqParams = @{
@@ -222,8 +226,11 @@ function Send-GradioApi {
 		$AppUrl
 		,$ApiName
 		,$Params
+		,$SessionHash = $null
 		,#Se informado, não chamada a API, mas cria o objeto e usa esse valor como se fosse o retorno 
 			$EventId = $null
+		
+		,$token = $null
 	)
 	
 
@@ -242,14 +249,20 @@ function Send-GradioApi {
 		data = $ApiParamsValue
 	}
 	
+	if($SessionHash){
+		$DataBody.session_hash = $SessionHash
+	}
+	
 			
 	$InvokeParams = @{
 		method 	= "POST"
 		url 	= "$AppUrl/call/$ApiName"
 		data 	= $DataBody
+		token 	= $token
 	}
 	
 	if(!$EventId){
+		verbose "Sending POST to Gradio API $ApiName, at url $AppUrl"
 		$ApiResult = InvokeGradioApi @InvokeParams
 		$EventId = $ApiResult.event_id;
 	}
@@ -258,20 +271,27 @@ function Send-GradioApi {
 	SetType $ApiEvent "GradioApiEvent"
 	
 	$QueryUrl = "$AppUrl/call/$ApiName/$EventId"
-	
+
 	#Status vai servir para controlar o status!
 	$ApiEvent | Add-Member Noteproperty EventId $EventId
 	$ApiEvent | Add-Member Noteproperty Status $null
+	
+	
+	
+	verbose "Creating http request to query updates... url: $QueryUrl"
+	$headers = ResolveHfTokenHeader -token $token
 	$ApiEvent | Add-Member Noteproperty update @{
 		url 	= $QueryUrl
-		http	= Start-HttpRequest -Url $QueryUrl
+		http	= Start-HttpRequest -Url $QueryUrl -Headers $headers
 	} 
+	
 	$ApiEvent | Add-Member Noteproperty data @()
 	$ApiEvent | Add-Member Noteproperty events @()
 	$ApiEvent | Add-Member Noteproperty LastEventNum 0
 	$ApiEvent | Add-Member Noteproperty error $null
 	$ApiEvent | Add-Member Noteproperty LastQueryStatus $null
 	$ApiEvent | Add-Member Noteproperty req $InvokeParams
+	$ApiEvent | Add-Member Noteproperty SessionHash  $SessionHash
 	
 	return $ApiEvent;
 }
@@ -542,14 +562,17 @@ function Update-GradioApiResult {
 				"data" {
 					verbose "Parsing event data from JSON: $MsgContent";
 					$CurrentEvent.data =  $MsgContent | ConvertFrom-Json;
+					
+					
+					
 				}
 			}
 		}
 	
 	} finally {
 		
-		if($ApiEvent.status -eq "completed"){
-			verbose "Closing HTTP connection";
+		if($ApiEvent.status -eq "complete"){
+			verbose "Closing HTTP connection of event $($ApiEvent.EventId)";
 			 $HttpRequest | Close-HttpRequest -Force 
 		}
 		
@@ -664,8 +687,8 @@ function New-GradioSession {
 		
 		# Opcoes que podem ser alteradas pelo usuairos 
 		options = @{
-			MaxCalls 		= 10		# Max calls que podem ser feitos na API
-			MaxCallsPolicy 	= "error"	# O que fazer quando MaxCalls for atingido.  Valore spossveis:
+			MaxCalls 		= 100		# Max calls que podem ser feitos na API
+			MaxCallsPolicy 	= "warning"	# O que fazer quando MaxCalls for atingido.  Valore spossveis:
 										#	error 	- gera um erro e nao deixa criar mais.
 										#	remove 	- Remove a mais antiga.
 										#	warning - Avisa somente, e prossegue com a criacao!
@@ -740,7 +763,6 @@ function Get-GradioSession {
 	if(IsType $Session "HuggingFaceSpace"){
 		verbose "Is a HuggingFaceSpace"
 		
-		$ById = $true;
 		$Session = $Session.control.GradioSession
 		$IsHfSpace = $true;
 	}
@@ -752,12 +774,8 @@ function Get-GradioSession {
 		if($Session){
 			return $Session;
 		}
-
-		if($IsHfSpace){
-			throw "POWERSHAI_HUGGINGFACE_GETSESSION_HFNOSESSION: Must connect to gradio using  Connect-HuggingFaceSpaceGradio"
-		}
 		
-		throw "POWERSHAI_HUGGINGFACE_GETSESSION_HFNOSESSIONID: No session id foind (Id = $Session)";
+		throw "POWERSHAI_HUGGINGFACE_GETSESSION_HFNOSESSIONID: No session id found (Id = $Session)";
 		
 		return;
 	}
@@ -794,8 +812,12 @@ function Get-GradioSession {
 	} else {
 		verbose "Getting by name $name";
 		$Session = $GradioSessions[$Name];
-		
+
 		if(!$Session){
+			if($IsHfSpace){
+				throw "POWERSHAI_HUGGINGFACE_GETSESSION_HFNOSESSION: Must connect to gradio using  Connect-HuggingFaceSpaceGradio"
+			}
+		
 			throw "POWERSHAI_HUGGINGFACE_GRADIO_GETSESSIONS_NOTFOUND: $Name"
 		}
 		
@@ -845,6 +867,7 @@ function Remove-GradioSession {
 function Set-GradioSession {
 	param(
 		#Sessão Gradio 
+			[Parameter(ValueFromPipeline)]
 			$Session = "."
 		 
 		,#Define a session como a default 
@@ -858,24 +881,25 @@ function Set-GradioSession {
 			$MaxCallsPolicy = $null
 	)
 	
-	
-	$Session = Get-GradioSession $Session;
-	
-	if($Default){
-		SetCurrentProviderData -Context DefaultGradioSession $Session.name;
-	}
-	
-	[string[]]$NonOptionsParams = "default";
-	
-	foreach($ParamName in @($PsBoundParameters.keys)){
-		$ParamValue = $PsBoundParameters[$ParamName];
+	process {
+		$Session = Get-GradioSession $Session;
 		
-		if($ParamName -in $NonOptionsParams){
-			continue;
+		if($Default){
+			SetCurrentProviderData -Context DefaultGradioSession $Session.name;
 		}
 		
-		verbose "Option $ParamName set";
-		$Session.options[$ParamName] = $ParamValue;
+		[string[]]$NonOptionsParams = "default";
+		
+		foreach($ParamName in @($PsBoundParameters.keys)){
+			$ParamValue = $PsBoundParameters[$ParamName];
+			
+			if($ParamName -in $NonOptionsParams){
+				continue;
+			}
+			
+			verbose "Option $ParamName set";
+			$Session.options[$ParamName] = $ParamValue;
+		}
 	}
 	
 	
@@ -900,23 +924,55 @@ function Send-GradioSessionFiles {
 	
 	foreach($file in $files){
 		
+		$FileItem = $file
+		
 		if($file -is [string]){
-			$file = Get-Item (Resolve-Path $file) -EA SilentlyContinue;
+			verbose "File is string: $file";
 			
-			if(!$file){
-				throw "POWERSHAI_HUGGINGFACE_GRADIO_SENDFILESESSIN_NOTFOUND: $file";
+			if($file -match '^https?\:\/\/'){
+				$FileItem = [PsCustomObject]@{
+						path = $file 
+						url = $file 
+						orig_name = $file.split("/")[-1]
+						meta = @{ _type = "gradio.FileData" }
+					}
+			} else {
+				$file = Get-Item (Resolve-Path $file) -EA SilentlyContinue;
+				
+				if(!$file){
+					throw "POWERSHAI_HUGGINGFACE_GRADIO_SENDFILESESSIN_NOTFOUND: $file";
+				}	
+				
+				$FileItem = $file
 			}
 		}
+		elseif( $file.meta._type -eq "gradio.FileData" ){
+			$FileItem = [PsCustomObject]@{
+						path = $file.url
+						url = $file.url 
+						orig_name = $file.orig_name
+						meta = @{ _type = "gradio.FileData" }
+					}
+		}
 		
-		$FileItems += $file;
+		$FileItems += $FileItem
 	}
 	
 	
 	foreach($file in $fileItems){
 		verbose "Uploading file $file"
-		$Uploaded = Send-GradioFile -AppUrl $Session.AppUrl -files $file
-		$Session.uploads[$file.FullName] = $Uploaded
-		$Uploaded
+		
+		$FileData = $null
+		
+		if($file.meta._type -eq "gradio.FileData"){
+			$FileData = $file
+		} else {
+			$Uploaded = Send-GradioFile -AppUrl $Session.AppUrl -files $file
+			$Session.uploads[$file.FullName] = $Uploaded
+			$FileData = $Uploaded
+		}
+		
+		write-output $FileData
 	}
 }
 
@@ -963,8 +1019,12 @@ function Invoke-GradioSessionApi {
 		,#SE especificado, cria com um evento id ja existente (pode ter sido gerado fora do modulo).
 			$EventId = $null
 			
-		,#Sessao 
+		,#Sessao
+			[Parameter(ValueFromPipeline)]
 			$session = "."
+			
+		,#Forçar o uso de um novo token. Se "public", então não usa nenhum token!
+			$Token = $null
 	)
 
 	verbose "Starting invoke api $ApiName"
@@ -1042,7 +1102,7 @@ function Invoke-GradioSessionApi {
 	
 	
 	verbose "Invoking api..."
-	$Evt 		= Send-GradioApi -AppUrl $Session.AppUrl -ApiName $ApiName -Params $ParamArray -EventId $EventId
+	$Evt 		= Send-GradioApi -AppUrl $Session.AppUrl -ApiName $ApiName -Params $ParamArray -EventId $EventId -token $token
 	verbose "	Event: $($Evt.EventId)"
 	
 	$Id = $Evt.EventId;
@@ -1069,7 +1129,6 @@ function Invoke-GradioSessionApi {
 	$MyCalls.ById[$Id] = $SessionEvent;
 	SetType $SessionEvent "SessionApiEvent" 
 	return $SessionEvent;
-	
 }
 
 <#
@@ -1080,7 +1139,6 @@ function Invoke-GradioSessionApi {
 		Este cmdlet segue o mesmo princípcio dos seus equivalentes em Send-GradioApi e Update-GradioApiResult.
 		Porém ele funciona apenas para os eventos gerados em uma sessão específica.
 		Retorna o próprio evento para que possa ser usado com outos cmdlets que deendam do evento atualizado!
-		
 #>
 function Update-GradioSessionApiResult {
 	[CmdletBinding()]
@@ -1098,6 +1156,8 @@ function Update-GradioSessionApiResult {
 		,#Id da sessão 
 			$session = "."
 			
+		,#Adiciona o eventos no histórico de eventos do objeto GradioApiEvent informado em -Id
+			[switch]$History
 	)
 	
 	$Session 	= Get-GradioSession $Session;
@@ -1112,132 +1172,22 @@ function Update-GradioSessionApiResult {
 		throw "POWERSHAI_HUGGINGFACE_UPDATESESSIONAPI_INVALIDEVENT: Event with id $Id not found! Current session ok?";
 	}
 	
-	$Evt.ApiEvent | Update-GradioApiResult -NoOutput:$NoOutput -MaxHeartBeats $MaxHeartBeats
-}
-
-
-
-
-
-
-<#
-	.SYNOPSIS
-		Retorna os dados recebidos por uma call da api e marca como recebido
+	$Evt.ApiEvent | Update-GradioApiResult -History:$History -NoOutput:$NoOutput -MaxHeartBeats $MaxHeartBeats | %{ 
+		$EvtData = $_.data;
 		
-	.DESCRIPTION
-		Retorna os dados enviados pela API e marca como recebido (flag Received)
-		O cmdlet irá marcar como recebido apenas quando o status for "complete". 
-	
-		Quando uma call é marcada como "received", é considerado que o usuário já processou os dados retornados.  
-		Neste caso, assumimos que o objeto iuntero que represetna esta call não é mais necessário, e pode ser, por exemplo, removido autoamticamente!
-		
-		Por padrão, a função retorna todas os dados disponíveis.  
-		Caso queria um retorno parcial, use parâmetro -Incremental, que ele irá retornar soemnte o pedaço retornado desde o último
-		
-		
-		A chamadas e resultados das Apis do Gradio são feitos com Send-GradioApi e Update-GradioApiResult.
-		Eles seguem a arquitetura da API do gradio , enviando as respostas gerados através de eventos.  
-		Por isso, as chamadas da API nem sempre estarão disponíveis de imediato. 
-		E, por isso, temos estes recursos de "receber" os dados de forma completa ou parcial.  
-		Esta é apenas uma extensão do funcionamento da API Do Gradio de uma forma que funcione  melhro aqui no PowerShell.  
-		Verifique a doc dos cmdlets mencionaods acimas para mais detalhes de como  API do Gradio e funciona e para conhecer os termos comuns.
-		
-		Retorna um objeto do tipo "GradioCallResult", que contém as seguintes props:
-		
-			data 		- Os dados recebeidos. Se -Incremental, somente os dados recebidos desde o último.
-			start 		- Índice do array de ApiEvent.data onde o resultado começa.
-			end 		- Último indcice do array em ApiEvent.data retornado. A próxima chamada incremental começará a partir desse.
-			complete 	- Se true, indica que a api retornou todos os dados já e não há mais resultados 
-			incremental - Se trye, indica que essa foi uma resposta incrementlal  
-			error 		- Se houve erros, conterám os erros retornados pelo server.
+		# Fix issue reported in https://github.com/gradio-app/gradio/issues/9049
+		@($EvtData) | %{
 			
-		Se este cmdlet retornar $null, indica que ainda não há dados para retornar (ou não foi gerado nenhum desde o último , se -Incremental foi usado).
-#>
-function Receive-GradioSessionApi {
-	[CmdletBinding()]
-	param(
-		 #Especifica o evento, ou eventos, a serem removidos
-		 #Id também pode ser um desses valores especiais:
-			[Parameter(ValueFromPipeline=$true)]
-			$Id
-			
-		,#Obtém os dados que chegaram desde o últimor eceive!
-			[switch]$Incremental
-
-		,#Id da sessão 
-			$session = "."
-	)
-	
-	begin {
-		$Session = Get-GradioSession $Session;
-		$MyCalls = $Session.ApiCalls
-	}
-	
-	process {
-		
-		if(IsType $Id "SessionApiEvent"){
-			$EvtId = $Id.Id;
-		} else {
-			$EvtId = $Id;
-		}
-		
-		$Evt = $MyCalls.ById[$EvtId]
-		
-
-		$CurrentIndex = $Evt.ApiEvent.data.length - 1;
-		
-		if($CurrentIndex -eq -1){
-			#No data available!
-			return;
-		}
-		
-		$LastReceived 			= $Evt.LastReceivedIndex
-		
-		$RecData = [PsCustomObject]@{
-			data 	= $Evt.ApiEvent.Data
-			start 	= 0
-			end 	= $CurrentIndex
-			complete 	= $false 
-			incremental = $Incremental.IsPresent
-			error 		= $RecData.ApiEvent.error
-		}
-		
-		if($Incremental){
-			if($CurrentIndex -eq $LastReceivedIndex){
-				#No new data!	
-				return;
+			if($_.meta._type -eq "gradio.FileData"){
+				$_.url = $Session.AppUrl + "/file=" + [Uri]::EscapeDataString( $_.path )
 			}
-			
-			if($LastReceivedIndex -eq $null){
-				$Start = 0
-			} else {
-				$Start = $LastReceivedIndex + 1
-			}
-			
-			$End = $CurrentIndex
-			
-			$RecData.start 	= $Start
-			$RecData.end 	= $End 
-			$RecData.data 	= $RecData.data[$Start..$End]
 		}
 		
-		
-		$Evt.LastReceivedIndex 	= $CurrentIndex;
-		
-		if($Evt.ApiEvent.status -eq "complete"){
-			$Evt.Received = $true;
-			$RecData.complete = $true
-		}
-		
-		
-		SetType $RecData "GradioCallResult"
-		write-output $RecData
+		write-output $_
 	}
 	
 	
 }
-
-
 
 
 <#
@@ -1270,21 +1220,21 @@ function Get-GradioSessionApi {
 		
 #>
 function Remove-GradioSessionApi {
-	[CmdletBinding()]
+	[CmdletBinding(SupportsShouldProcess,ConfirmImpact = 'High')]
 	param(
 		 #Especifica o evento, ou eventos, a serem removidos
 		 #Id também pode ser um desses valores especiais:
-		 #	clean - Remove todos as calls que não são mais necessária
-		 
+		 #	clean 	- Remove somente as calls que já completaram!
+		 #  all 	- Remove tudo, inclunido os que não concluiram!
 			[Parameter(ValueFromPipeline=$true)]
-			$Id
+			$Target
 			
-		,#Força a remoção dos eventos, independente do status.  
-		 #Por padrão, este cmdlet só remove os eventos em que o usuário marcou como "Recebido", usando Receive-GradioSessionApi
-		 #Usando o -Force, ignora essa trava!
-		 #Ao usar esta opção, uma confirmação é requerida, se está no modo interativo!
+		,#Por padrão, apenas os eventos passados com status "completed" são removidos!
+		 #Use -Force para remover inpdenente do status!
 			[switch]$Force 
 			
+		,#Nao faz nenhuma remocação, mas retorna os candidados!
+			[switch]$Elegible
 		
 		
 		,#Id da sessão 
@@ -1299,54 +1249,73 @@ function Remove-GradioSessionApi {
 	
 	process {
 		
-		if(IsType $Id "SessionApiEvent"){
-			$EvtId = $Id.Id;
-		} else {
-			$EvtId = $Id;
+		if(IsType $Target "SessionApiEvent"){
+			$EvtId = $Target.Id;
+		} 
+		else {
+			$EvtId = $Target;
 		}
 		
-		$RemoveCandidatesIds += $EvtId
+		$RemoveCandidatesIds += @($EvtId)
 		
-		if($Id -eq "clean"){
+		if($Target -eq "clean"){
 			$force = $false
+		}
+		
+		if($Target -eq "all"){
+			$force = $true
 		}
 	}
 	
 	end {
 		
 		$RemovedEvents = @();
-		$UpdatedList = @()
+		$KeepList = @()
+		$RemoveCandidates = @();
 		
 		verbose "CurrentCallCount: $($MyCalls.AllEvents.count)"
+		
 		
 		foreach($Event in $MyCalls.AllEvents){
 			verbose "Checking call $($Event.id)";
 			
-			$IsCandidate = $Event.id -in $RemoveCandidatesIds -or $id -eq "clean"
+			$ApiEvent = $Event.ApiEvent;
+			
+			$IsCandidate = ($Target -eq "clean" `
+							-or $Target -eq "all" `
+							-or $Event.id -in $RemoveCandidatesIds `
+							) `
+							-and ($ApiEvent.Status -eq "complete") -or $force;
+			
 			
 			if($IsCandidate){
-				verbose "	IsCandidate!"
-				
-				$MustRemove = $Event.received -eq $true -or $Force;
-				
-				verbose "	MustRemove? $MustRemove";
-				
-				if($MustRemove){
-					verbose "	Added to removed list!"
-					$RemovedEvents += $Event;
-					$MyCalls.ById.Remove($Event.id);
-					continue;
-				}
+				verbose "	Event $($Event.id) is candidate! Status = $($ApiEvent.Status)"
+				$RemoveCandidates += $Event;
+			} else {
+				$KeepList += $Event;
 			}
-			
-			
-			$UpdatedList += $Event;
 		}
 		
-		verbose "UpdatedCallCount: $($UpdatedList.count)"
-		$MyCalls.AllEvents = $UpdatedList;
+		if($Elegible){
+			return $RemoveCandidates;
+		}
 		
-		return $RemovedEvents;
+		if($RemoveCandidates){
+			if($PsCmdlet.ShouldProcess("Remove $($RemoveCandidates.length) events?")){
+				
+				foreach($Evt in $RemoveCandidates){
+					$Evt.ApiEvent = $null;  #destroy!
+					$MyCalls.ById.Remove($Evt.id)  
+				}
+				
+				$MyCalls.AllEvents = $KeepList;
+			}
+		}
+		
+		
+		verbose "UpdatedCallCount: $($MyCalls.AllEvents.count)"
+		
+		return $RemoveCandidates;
 	}
 	
 	
@@ -1467,36 +1436,137 @@ function Convert-GradioParamPowershell {
 <#
 	.DESCRIPTION
 		Cria funcoes que encapsulam as chamadas de um endpoint do Gradio (ou todos os endpoints).  
-		Este cmdlet é muito útil para criar um interface (ou uma proxy funcitons) paraa API do Gradio, onde os parâmetros da API são criados como parâmetros da função.  
+		Este cmdlet é muito útil para criar funcoes powershell que encapsulam um endpoint API do Gradio, onde os parâmetros da API são criados como parâmetros da função.  
 		Assim, recursos nativos do powershell, como auto complete, tipo de dados e documentação, podem ser usados e fica muito fácil invocar qualquer endpoint de uma sessão.
 		
 		O comando consulta os metadados dos endpoints e parâmetros e cria as funcoes powershell no escopo global.  
-		Com isso, o usu[ario consegue invocar as funções diretamente, como se fossem funcoes normal.  
+		Com isso, o usuario consegue invocar as funções diretamente, como se fossem funcoes normal.  
 		
-		O nome das funcoes criado segue o formato:  <Prefix><NomeOp>
-			<Prefix> é o valor do parametro -Prefix deste cmdlet. 
-			<NomeOp> é o nome da operacao, mantido somente letras e números
+		Por exemplo, suponha que uma aplicação Gradio no endereço http://mydemo1.hf.space tenho um endpoint chamado /GenerateImage para gerar imagens com o Stable Diffusion.  
+		Assuma que essa aplicação aceite 2 parâmetros: Prompt (a descriao da imagem a ser gerada) e Steps (o numero total de steps).
+		
+		Normalmente, voce poderia usar o comando Invoke-GradioSessionApi, assim: 
+		
+		$MySession = Get-GradioSession http://mydemo1.hf.space
+		$ApiEvent = $MySession | Invoke-GradioSessionApi -ApiName 'GenerateImage' -params "A car",100
+		
+		Isso iria dar inicio a API, e você poderia obter os resultados usando Update-GradioApiResult:
+		
+		$ApiEvent | Update-GradioApiResult
+		
+		Com este cmdlet, você consegue encapsular um pouco mais estas chamadas:
+		
+		$MySession = Get-GradioSession http://mydemo1.hf.space
+		$MySession | New-GradioSessionApiProxyFunction
+		
+		O comando acima criará uma funcao chamada Invoke-GradioApiGenerateimage.
+		Então, voc poe usar de maneira simples para gerar a imagem:
+		
+		Invoke-GradioApiGenerateimage -Prompt "A car" -Steps 100 
+		
+		Por padrão, o comando executaria e já iria obter os eventos de resultados, escrevendo no pipeline para que você possa integrar com outros comandos.  
+		Inclusive, conectar vários spaces é muito simples, veja abaixo sobre pipeline.
+		
+		NOMENCLATURA 
+		
+			O nome das funcoes criadas segue o formato:  <Prefix><NomeOp>
+				<Prefix> é o valor do parametro -Prefix deste cmdlet. 
+				<NomeOp> é o nome da operacao, mantido somente letras e números
+				
+				Por exemploi, se a operção é /Op1, e o Prefixo INvoke-GradioApi, a seguinte funcao será criad: Invoke-GradioApiOp1
+		
 			
-			Por exemploi, se a operção é /Op1, e o PRefixo INvoke-GradioApi, a seguinte funcao será criad: Invoke-GradioApiOp1
-	
+		PARAMETROS
+			As funcoes criadas contém a lógica necessária para transformar os parâmetros passados e executar o cmdlet Invoke-GradioSessionApi.  
+			Ou seja, o mesmo retorno se aplica como se estivesse invocando este cmdlet diretamente.  (Isto é, um evento será retornado e adicionaod alista de eventos da sessao atual).
+			
+			Os parâmetros das funcoes podem variar conforme o endpoint da API, pois cada endpoint possui um conjunto diferente de parâmetros e tipos de dados.
+			Parâmetros que são arquivos (ou lista de arquivos), possuem um passo adicional de upload. O arquivo pode ser referenciado localmente e o upload dele sera feito para o servidor.  
+			Caso seja informado uma URL, ou um objeto FileData recebido de outro comando, nenhum upload adicional será feito, apenas será gerado um objeto FileData correspondente para envio via API.
 		
-		As funcoes criadas contém a lógica necessária para transformar os parâmetros passados e executar o cmdlet Invoke-GradioSessionApi.  
-		Ou seja, o mesmo retorno se aplica como se estivesse invocando este cmdlet diretamente.  
-		(Isto é, um evento será retornado e adicionaod alista de eventos da sessao atual).
+			Além dos parâmetros do endpoint, há um conjunto adicional de parâmetros que sempre serão adicionados a funcao criada.  
+			São eles:
+				- Manual  
+				Se usado, faz com que o cmdlet retorne o evento gerado por INvoke-GradioSessionApi.  
+				Neste caso você terá que manualmente obter os resultados usando Update-GradioSessionApiResult
+				
+				- ApiResultMap 
+				Mapeia os resultados de outros comandos para os parâmetros. Veha mais sobre na seção PIPELINE.
+				
+				- DebugData
+				Para fins de debug pelos desenvolvedores.
+				
+		UPLOAD 	
+			Parametros que aceitam arquivos são tratados de uma maneira especial.  
+			Antes da invocacao da API, o cmdlet Send-GradioSessionFiles éusado para fazer o upload desses arquivos para o respectivo app gradio.  
+			Isso é uma oura grande vantagem de se usar esse cmdlet, pois isso fica transparente, e o usuário não precisa lidar com uploads.
 		
-		Os parâmetros das funcoes podem variar conforme o endpoint, pois depende do endpoint. 
-		Parâmetros que são arquivos, possuem um passo adicional de upload. O arquivo pode ser referenciado localemnte e o upload dele sera feito para o servidor.  
-		Isso é uma oura grande vantagem de se usar esse cmdlet, pois isso fica transparente, e o usuário não precisa lidar com uploads.
+		PIPELINE 
+			
+			Uma das funcionalidades mais poderosas do powershell é o pipeline, one é possível conectar vários comandos usando o pipe |.
+			E este cmdlet procura também usurfruir ao máximo desse recurso.  
+			
+			Todas as funcoes criadas podem ser conectadas com o |.
+			Ao fazer isso, cada evento gerado pelo cmdlet anterior é passado para o próximo.  
+			
+			Considere duas apps gradios, App1 e App2.
+			App1 possui o endpoint Img, com um parametro chamado Text, que gera imagens usando Diffusers, exibindo as parciais de cada imagem a medida que são geradas.
+			App2 possui um endpoint Ascii, com um parametor chamado Image, que transforma uma iamgem em uma versão ascii em texto.
+			
+			Você pode conectar estes dois comandos de uma maneira muito simpels com o pipeline.  
+			Primeiro, crie as sessoes
+		
+				$App1 = New-GradioSession http://stable-diffusion
+				$App2 = New-GradioSession http://ascii-generator
+				
+			Crie as funcoes 
+				$App1 | New-GradioSessionApiProxy -Prefix App # isso criar a funcao AppImg
+				$App2 | New-GradioSessionApiProxy -Prefix App # isso criar a funcao AppAscii
+				
+			Gere a imagem e conecte com o gerador asciii :
+			
+			AppImg -Text "A car" | AppAscii -Map ImageInput=0 | %{  $_.data[0]; write-host $_.pipeline[0].data[0].url } 
+			
+			Agora vamos quebrar a sequencia acima.
+			
+			Antes do primeiro pipe, temos o comando que gera a imagem: AppImg -Text "A car" 
+			Esta funcao está chamado o endpoint /Img de App1. Este endpoint produz uma saida para etapa da geracao de imagens com a lib Diffusers do hugging face.  
+			Neste caso, cada saida será uma imagem (bem embaraçada), até a última saida que será a iamgem final.  
+			Este resultado fica na proprodade data do objeto do pipeline. Ela é um array com os resultados.
+			
+			Logo em seguida no pipe, temos o comando: AppAscii -Map ImageInput=0
+			Este comando irá recber cada objeto gerado pelo comando AppImg, que no caso, são as imagens parciais do processo de difusão.  
+			
+			Devido ao fato os comandos podem gerar uma rray de saidas, é preciso mapear exatamente qual dos resultados devem ser associados com quais parametros.  
+			Por isso, usamos o parametro -Map (-Map é um Alias, na verdade, o nome correto é ApiResultMap)
+			A sintaxe é simples: NomeParam=DataIndex,NomeParam=DataIndex  
+			No comando acima, estamos dizendo: AppAscii, utilize o primeiro valor da proprodiade data no parametro ImageInput.  
+			Por exemplo, se AppImg retornasse 4 valores, e imagem estivesse na ultima posicao, vc deveria usar ImageInput=3 (0 é a primeira).
+			
+			
+			Por fim, o ultiomo pipe apenas evole o resultado de AppAscii, que agora se encontrano objeto do pipeline, $_, na proprodade .data (igual o resultado de AppImg).  
+			E, para complementar, o objeto do pipeline possui uma proprodade especial, chamada pipeline. Com ela, voce acessar todos os resultados dos comandos geraod.s  
+			Por exemplo, $_.pipeline[0], contém o resultado do primeiro comando (AppImg). 
+			
+			Graça a esse mecanismo, fica muito mais fácil conectar diferentes apps Gradio em unico pipeline.
+			Note que esta sequencia funciona apenas entre comandos gerados por New-GradioSessionApiProxy. Fazer o pipe de outros comanos, não irá produzir esse mesmo efeito (terá qiue usar algo como o For-EachObject e associar os parametros diretamente)
+		
+		
+		SESSOES 
+			Quando a funcao é criada, a sessao de origem é cravada junto com a funcao .  
+			Se a sessao for removida, o cmdlet irá gerar um erro. NEste caso, voce deve criar a funcao invocando este cmdlet novamente.  
+
 		
 		O seguinte diagrama resume as dependencias envolvidas:
 		
 			New-GradioSessionApiProxyFunction(Prefix)
 				---> function <Prefix><OpName>
 					---> Send-GradioSessionFiles (quando houer arquivos)
-					---> return Invoke-GradioSessionApi
+					---> Invoke-GradioSessionApi | Update-GradioSessionApiResult
 		
 		Uma vez que Invoke-GradioSessionApi é a executada no fim das contas, todas as regras delas se aplicam.
-		Você pode usar Remove-Item para remover estas funcoes!
+		Voce pode ser Get-GradioSessionApiProxyFunction para obter uma lista do que foi craido e Remove-GradioSessionApiProxyFunction para remover uma ou mais funcoes criadas.  
+		As funcoes são criadas com um modulo dinamico.
 #>
 function New-GradioSessionApiProxyFunction {
 	[CmdletBinding()]
@@ -1506,7 +1576,7 @@ function New-GradioSessionApiProxyFunction {
 		
 		,#Prefixo das funcoes criadas 
 			$Prefix 	= "Invoke-GradioApi"
-		
+			
 		,#Sessao 
 			[Parameter(ValueFromPipeline=$true)]
 			$Session 	= "."
@@ -1515,315 +1585,427 @@ function New-GradioSessionApiProxyFunction {
 			[switch]$Force
 	)
 		
-	$Session 	= Get-GradioSession $session	
-	$AllProps	= $Session.info.named_endpoints.psobject.properties;
-	
-	foreach($Prop in $AllProps){
-		$EpName = $Prop.Name -replace '^/','';
-	
-		if($ApiName -and $EpName -notin @($ApiName) ){
-			continue;
-		}
+	process {
+		$Session 	= Get-GradioSession $session	
+		$AllProps	= $Session.info.named_endpoints.psobject.properties;
 		
-		$ApiEndpoint = $Prop.Value;
+		foreach($Prop in $AllProps){
+			$EpName = $Prop.Name -replace '^/','';
 		
-		$EpNameClean = (Get-Culture).TextInfo.ToTitleCase($EpName) -replace '[^A-z0-9]|_',''
-		
-		$FunctionName = $Prefix + $EpNameClean
-		
-		$FunctionParams = @();
-		
-		$ApiParams = $ApiEndpoint.parameters
-		
-		$DefaultParams = @(
-			@{
-					name 		= "Manual"
-					type 		= '[switch]'
-					IsDefault 	= $true
-					Help		= 'Retorna o objeto que pode ser usado com Update-GradioSessionApiResult para manualmente obter os resultados!'
-				}
-				
-			@{
-					name 		= "DebugData"
-					type 		= '[switch]'
-					IsDefault 	= $true
-					help 		= "Apenas para fins e debug. Retorna dados uteis para o debug da execucao da funcao"
-			}
-		)
-		
-		$ApiParams += $DefaultParams
-	
-		#Mapearo nome do prametro para o nome real!
-		#Alguns nomes  de parametro podem não ser exatamente o nome na api, devido a limitacoes de nomenclatura do powershell!
-		#Com esse map, consegumos manter a relacao!
-		$ParamMap = @{}
-		
-		# Reserved Param anmes
-		$ReserverParamsNames = $DefaultParams| %{ $_.name  }
-		
-		$ParamNum = -1;
-		foreach($Param in $ApiParams){
-			$ParamNum++;
-			verbose "	Processig param $ParamNum"
-			
-			if($Param.IsDefault){
-				
-				$ParamDef = $Param.type + '$'+$Param.name
-			
-				$FunctionParams += @(
-					($Param.help|%{"#$_"})
-					$ParamDef
-				) -Join "`n"	
-				
+			if($ApiName -and $EpName -notin @($ApiName) ){
 				continue;
 			}
 			
-			$ParamHelp 			= @();
-			$GradioParamName 	= $Param.parameter_name;
+			$ApiEndpoint = $Prop.Value;
 			
-			if($GradioParamName -in $ReserverParamsNames){
-				$GradioParamName = $null
-			}
+			$EpNameClean = (Get-Culture).TextInfo.ToTitleCase($EpName) -replace '[^A-z0-9]|_',''
 			
-			if(!$GradioParamName){
-				$GradioParamName = "param" + $ParamNum;
-			}
+			$FunctionName = $Prefix + $EpNameClean
 			
+			$FunctionParams = @();
 			
-			$PsParamName 	= (Get-Culture).TextInfo.ToTitleCase($GradioParamName) -replace '[^A-z0-9]|_',''
-			verbose "	GradioName: $GradioParamName, PsName: $PsParamName"
+			$ApiParams = $ApiEndpoint.parameters
 			
-			$ParamName 		= '$' + $PsParamName
-			$ParamDefault 	= '$null'
-			
-
-			$MapData = @{
-				ParamNum 	= $ParamNum
-				SrcParam 	= $Param
-				MustUpload  = $false
-				IsArray 	= $false
-			}
-			$ParamMap[$PsParamName] = $MapData;
-		
-			verbose "Getting type"
-			$ParamType = Convert-GradioParamPowershell $Param
-			verbose "	ParamType: $ParamType"
-
-			$MapData.IsArray = $ParamType.IsArray
-			$ElType = $ParamType.GetElementType()
-			
-			$TypeName = $ParamType.name;
-			if($ElType){
-				$TypeName = $ElType.Name;
-			}
-			
-			if( [IO.FileInfo] -in $ElType,$ParamType){
-				$MapData.MustUpload = $true
-			}
-
-			
-			if($Param.parameter_has_default -and $Param.parameter_default){
-				verbose "Parameter has default"
-				$ParamDefault = $Param.parameter_default
-				
-				if($ParamType -eq [string]){
-					$ParamDefault = "`"$ParamDefault`""
+			$DefaultParams = @(
+				@{
+						name 		= "Manual"
+						type 		= '[switch]'
+						IsDefault 	= $true
+						Help		= 'Retorna o objeto que pode ser usado com Update-GradioSessionApiResult para manualmente obter os resultados!'
+					}
+					
+				@{
+						name 		= "ApiResultMap"
+						type 		= '[Alias("map","arm")][string[]]'
+						IsDefault 	= $true
+						help 		= @(
+							"Mapeia elementos da propridade data para parametros, quando o objeto do pipeline é um GradioApiEventResult"
+							"Isso é util para conectar varias funcoes proxy no pipeline, fazendo com que o resultado de um seja usado em otura de uma maneira simples"
+							"por padrao, o cmdlet tenta fazer essa associacao usando o tipo de dados, mas voce pode inteferir no processo usando esse parametro"
+							"Voce deve especificar um array de string no formato ParamName=Num,ParamName=Num, onde ParamName é o nome do parametro nestecmdlet e Num é numero do index retornado na proprodade data do objeto GradioApiEventResult"
+						)
 				}
-			}
+				
+				@{
+						name 		= "DebugData"
+						type 		= '[switch]'
+						IsDefault 	= $true
+						help 		= "Apenas para fins e debug. Retorna dados uteis para o debug da execucao da funcao"
+				}
+				
+				@{
+						name 		= "ApiToken"
+						type 		= '[string]'
+						IsDefault 	= $true
+						help 		= "Token alternativo para ser usado. SE 'public', então forçar não uar nenhum token!"
+				}
+				
+				@{
+						name 		= "PipeObj"
+						type 		= '[Parameter(ValueFromPipeline)]'
+						IsDefault 	= $true
+				}
+				
+			)
 			
-			$ParamDef = "[$ParamType]$ParamName = $ParamDefault"
-			
-			if($Param.label){
-				$ParamHelp += $Param.label
-			}
-			
-			if($Param.Component){
-				$ParamHelp += "Gradio Component: " + $Param.Component;
-			}
-			
-			if($MapData.MustUpload){
-				$ParamHelp += "Upload!"
-			}
-			
-			$FunctionParams += @(
-					($ParamHelp|%{"#$_"})
-					$ParamDef
-				) -Join "`n"
-		}
+			$ApiParams += $DefaultParams
 		
-		$ParamBlock = $FunctionParams -Join "`n,"
-		
-
+			#Mapearo nome do prametro para o nome real!
+			#Alguns nomes  de parametro podem não ser exatamente o nome na api, devido a limitacoes de nomenclatura do powershell!
+			#Com esse map, consegumos manter a relacao!
+			$ParamMap = @{}
 			
-		$FuncScript = {
-			[CmdletBinding()]
-			param($FuncData)
+			# Reserved Param anmes
+			$ReserverParamsNames = $DefaultParams| %{ $_.name  }
 			
-			$ErrorActionPreference = "Stop";
-			
-			if($FuncData.BoundParams.DebugData){
-				return $FuncData;
-			}
-			
-			$InvokedParams = @{};
-			
-			foreach($ParamName in $FuncData.ParamNames){
-				$InvokedParams[$ParamName] = ($FuncData.Vars | ?{$_.Name -eq $ParamName}).Value
+			$ParamNum = -1;
+			foreach($Param in $ApiParams){
+				$ParamNum++;
+				verbose "	Processig param $ParamNum"
 				
-			}
-			
-			[bool]$IsVerbose = [bool]($FuncData.BoundParams.Verbose)
-			
-			#garante que usará a versão mais recente da sessão!
-			write-verbose "checking existing session"
-			$ExistingSession = Get-GradioSession -Name $Session.Name -EA SilentlyContinue -Verbose:$IsVerbose;
-			
-			if(!$ExistingSession){
-				$msg = "POWERSHAI_HUGGINGFACE_GRADIO_APIPROXY_INVOKE_NOSESSION: Session was deleted or name was changed since proxy creation. Recreate the functions (SessonId = $($Session.SessionId))"
-				throw New-PowershaiError $msg @{Session=$Session}
-			}
-			
-			$Session = $ExistingSession
-			
-			
-
-			
-			#Construir o param map!
-			$ParamNames = @($InvokedParams.keys);
-			$ParamIndexes = @{}
-			
-			write-verbose "Processing Script..."
-			
-			
-			
-			foreach($ParamName in $ParamNames){
-				write-verbose "	Processing parameter $ParamName";
+				if($Param.IsDefault){
+					
+					$ParamDef = $Param.type + '$'+$Param.name
 				
-				$PsParam = $ParamMap[$ParamName];
-				
-				if(!$PsParam){ # common parameter...
+					$FunctionParams += @(
+						($Param.help|%{"#$_"})
+						$ParamDef
+					) -Join "`n"	
+					
 					continue;
 				}
 				
-				$SrcParam = $PsParam.SrcParam;
-				$MustUpload = $PsParam.MustUpload;
+				$ParamHelp 			= @();
+				$GradioParamName 	= $Param.parameter_name;
+				
+				if($GradioParamName -in $ReserverParamsNames){
+					$GradioParamName = $null
+				}
+				
+				if(!$GradioParamName){
+					$GradioParamName = "param" + $ParamNum;
+				}
 				
 				
-				$ParamValue = $InvokedParams[$ParamName];
+				$PsParamName 	= (Get-Culture).TextInfo.ToTitleCase($GradioParamName) -replace '[^A-z0-9]|_',''
+				verbose "	GradioName: $GradioParamName, PsName: $PsParamName"
+				
+				$ParamName 		= '$' + $PsParamName
+				$ParamDefault 	= '$null'
+				
+
+				$MapData = @{
+					ParamNum 	= $ParamNum
+					SrcParam 	= $Param
+					MustUpload  = $false
+					IsArray 	= $false
+				}
+				$ParamMap[$PsParamName] = $MapData;
+			
+				verbose "Getting type"
+				$ParamType = Convert-GradioParamPowershell $Param
+				verbose "	ParamType: $ParamType"
+
+				$MapData.IsArray = $ParamType.IsArray
+				$ElType = $ParamType.GetElementType()
+				
+				$TypeName = $ParamType.name;
+				if($ElType){
+					$TypeName = $ElType.Name;
+				}
+				
+				if( [IO.FileInfo] -in $ElType,$ParamType){
+					$MapData.MustUpload = $true
+					
+					#Troca para array, pois podemos ter os casos onde passa um objeto FileData direto!
+					if($MapData.IsArray){
+						$ParamType = [object[]]
+					} else {
+						$ParamType = [object]
+					}
+				}
 
 				
-				if($MustUpload){
-					write-verbose "	Uploading...";
-					$ParamValue = Send-GradioSessionFiles $ParamValue -Session $Session.Name
+				if($Param.parameter_has_default -and $Param.parameter_default){
+					verbose "Parameter has default"
+					$ParamDefault = $Param.parameter_default
+					
+					if($ParamType -eq [string]){
+						$ParamDefault = "`"$ParamDefault`""
+					}
 				}
 				
-				if($PsParam.IsArray -and $ParamValue -isnot [Array]){
-					$ParamValue = ,$ParamValue
+				$ParamDef = "[$ParamType]$ParamName = $ParamDefault"
+				
+				if($Param.label){
+					$ParamHelp += $Param.label
 				}
 				
-				write-verbose "Setting param num $($PsParam.ParamNum)"
-				$ParamIndexes[$PsParam.ParamNum] = $ParamValue;
+				if($Param.Component){
+					$ParamHelp += "Gradio Component: " + $Param.Component;
+				}
+				
+				if($MapData.MustUpload){
+					$ParamHelp += "Upload!"
+				}
+				
+				$FunctionParams += @(
+						($ParamHelp|%{"#$_"})
+						$ParamDef
+					) -Join "`n"
 			}
 			
-			$v = @{ ParamList = @() }
-			@($ParamIndexes.keys) | Sort-Object | %{ $v.ParamList += ,$ParamIndexes[$_] }
+			$ParamBlock = $FunctionParams -Join "`n,"
 			
-	
-			$InvokeParams = @{
-				Session = $Session.Name # Força usar o name da session para busca, plois caso não exista mais forçará o erro!
-				ApiName = $EpName
-				Params 	= $v.ParamList
-				Verbose = $IsVerbose 
-			}
-			
-			$ApiResult = Invoke-GradioSessionApi @InvokeParams
-			
-			if($FuncData.BoundParams.Manual){
-				return $ApiResult
-			} 
-			
-			$ApiResult | Update-GradioSessionApiResult -Session $session.name
-		}.GetNewClosure()
-	
-		#Este script cria a funcao com os parametros da API e suas docs.
-		#Basicamente é um wrapper
-		#Devido ao fato de ser uma func dinamica, quero evitar o maximo de codigo possível dentro dela, devido aos escapes
-		#A maior parte do processamento é delgado pro ScriptBlock FuncScript. Nessa deixamos apenas a passagem dos parametros essenciais.
-		$FunctionCreateScript = "
-			<#
-				.DESCRIPTION
-					Proxy para App $($Session.AppUrl), Api: $EpName
-			#>
-			function global:$FunctionName {
+
+				
+			$FuncScript = {
 				[CmdletBinding()]
-				param(
-					$ParamBlock	
-				)
+				param($FuncData)
 				
-				[bool]`$IsVerbosePresent = [bool](`$PsBoundParameters.Verbose)
+				$ErrorActionPreference = "Stop";
 				
-				write-verbose `"Wrapper Function: Calling internal FuncScript...`"
-				& `$FuncScript -Verbose:`$IsVerbosePresent @{
-					ParamNames 	= @(`$MyInvocation.MyCommand.parameters.keys) 
-					BoundParams = `$PsBoundParameters
-					Args 		= `$Args
-					Vars 		= Get-Variable
+				if($FuncData.BoundParams.DebugData){
+					return $FuncData;
+				}
+				
+				#objeto passado no pipeline!
+				$PipeObj = $FuncData.PipeObj;
+				
+				
+				$InvokedParams = @{};
+				
+				foreach($ParamName in $FuncData.ParamNames){
+					$InvokedParams[$ParamName] = ($FuncData.Vars | ?{$_.Name -eq $ParamName}).Value
+					
+				}
+				
+				[bool]$IsVerbose = [bool]($FuncData.BoundParams.Verbose)
+				
+				#garante que usará a versão mais recente da sessão!
+				write-verbose "checking existing session"
+				$ExistingSession = Get-GradioSession -Name $Session.Name -EA SilentlyContinue -Verbose:$IsVerbose;
+				
+				if(!$ExistingSession){
+					$msg = "POWERSHAI_HUGGINGFACE_GRADIO_APIPROXY_INVOKE_NOSESSION: Session was deleted or name was changed since proxy creation. Recreate the functions (SessonId = $($Session.SessionId))"
+					throw New-PowershaiError $msg @{Session=$Session}
+				}
+				
+				$Session = $ExistingSession
+				
+				
+
+				
+				#Construir o param map!
+				$ParamNames = @($InvokedParams.keys);
+				$ParamIndexes = @{}
+				
+				write-verbose "Processing Script..."
+			
+				$ParamApiMapValues = @{};
+				if(IsType $PipeObj "GradioApiEventResult"){
+					verbose "Trying get value from pipeline object...";
+					
+					$DataProp = $PipeObj.data
+					
+					if($DataProp){
+						$ApiMap = $InvokedParams.ApiResultMap
+						
+						foreach($MapExpr in $ApiMap){
+							$MapParts 		= $MapExpr -split "=",2
+							$MapParamName 	= $MapParts[0];
+							$MapParamValue 	= $MapParts[1];
+							
+							verbose " Converting $MapParamName index $IndexNum to int..."
+							$IndexNum = [int]$MapParamValue
+							$ParamApiMapValues[$MapParamName] = @($DataProp)[$IndexNum]
+						}
+					}
+				}
+				
+				foreach($ParamName in $ParamNames){
+					write-verbose "	Processing parameter $ParamName";
+					
+					if($ParamName -in $ReserverParamsNames){
+						verbose "IsReserved..."
+						continue;
+					}
+					
+					$PsParam = $ParamMap[$ParamName];
+					
+					if(!$PsParam){ # common parameter...
+						continue;
+					}
+					
+					$SrcParam = $PsParam.SrcParam;
+					$MustUpload = $PsParam.MustUpload;
+					
+					
+					$ParamValue = $InvokedParams[$ParamName];
+					
+					if($ParamApiMapValues.Contains($ParamName)){
+						verbose "	Changing parameter value to defined in api map"
+						$ParamValue = $ParamApiMapValues[$ParamName];
+					}
+
+					
+					if($MustUpload){
+						write-verbose "	Uploading...";
+						$ParamValue = Send-GradioSessionFiles $ParamValue -Session $Session.Name
+					}
+					
+					if($PsParam.IsArray -and $ParamValue -isnot [Array]){
+						$ParamValue = ,$ParamValue
+					}
+					
+					write-verbose "Setting param num $($PsParam.ParamNum)"
+					$ParamIndexes[$PsParam.ParamNum] = $ParamValue;
+				}
+				
+				$v = @{ ParamList = @() }
+				@($ParamIndexes.keys) | Sort-Object | %{ $v.ParamList += ,$ParamIndexes[$_] }
+				
+		
+				$InvokeParams = @{
+					Session = $Session.Name # Força usar o name da session para busca, plois caso não exista mais forçará o erro!
+					ApiName = $EpName
+					Params 	= $v.ParamList
+					Verbose = $IsVerbose 
+					Token 	= $InvokedParams.ApiToken
+				}
+				
+				$ApiResult = Invoke-GradioSessionApi @InvokeParams
+				
+				if($FuncData.BoundParams.Manual){
+					return $ApiResult
 				} 
+				
+
+
+
+				
+				$ApiResult | Update-GradioSessionApiResult -Verbose:$IsVerbose -Session $session.name | %{
+					
+					$EvtResult = $_
+					
+					if($EvtResult.event -eq "heartbeat"){
+						verbose "Ignoring hearbear event: $($EvtResult.num)";
+						return;
+					}
+					
+					#Adiciona o pipe de objetos!
+					$EvtResult | Add-Member -Force Noteproperty pipeline @()
+				
+				
+					#Add o api result de outros objetos do ppipeline!
+					if(IsType $PipeObj "GradioApiEventResult"){
+						if($PipeObj.pipeline){
+							$EvtResult.pipeline += @($PipeObj.pipeline)
+						}
+						
+						$EvtResult.pipeline += $PipeObj;
+					}
+					
+					
+					write-output $EvtResult
+				}
+				
+
+			}.GetNewClosure()
+		
+			#Este script cria a funcao com os parametros da API e suas docs.
+			#Basicamente é um wrapper
+			#Devido ao fato de ser uma func dinamica, quero evitar o maximo de codigo possível dentro dela, devido aos escapes
+			#A maior parte do processamento é delgado pro ScriptBlock FuncScript. Nessa deixamos apenas a passagem dos parametros essenciais.
+			$FunctionCreateScript = "
+				<#
+					.DESCRIPTION
+						Proxy para App $($Session.AppUrl), Api: $EpName
+				#>
+				function global:$FunctionName {
+					[CmdletBinding()]
+					param(
+						$ParamBlock	
+					)
+					
+					begin {
+						[bool]`$IsVerbosePresent = [bool](`$PsBoundParameters.Verbose)
+					}
+					
+					process {
+						write-verbose `"Wrapper Function: Calling internal FuncScript...`"
+						& `$FuncScript -Verbose:`$IsVerbosePresent @{
+							ParamNames 	= @(`$MyInvocation.MyCommand.parameters.keys) 
+							BoundParams = `$PsBoundParameters
+							Args 		= `$Args
+							Vars 		= Get-Variable
+							PipeObj   	= `$_
+						}
+					}
+					
+					 end {
+						 
+					 }
+					
+					
+					
+	 
+				}
+			"
+			
+			$ExistingCommand = Get-Command $FunctionName -EA SilentlyContinue
+			$IsProxyFunction = IsType $ExistingCommand "GradioProxyFunction"
+			
+			if($ExistingCommand -and !$IsProxyFunction -and !$Force) {
+				throw "POWERSHAI_HUGGINGFACE_NEWGRADIOPROXY_EXISTS: A function with name $FunctionName already exists. Remove it or use -force";
 			}
-		"
-		
-		$ExistingCommand = Get-Command $FunctionName -EA SilentlyContinue
-		$IsProxyFunction = IsType $ExistingCommand "GradioProxyFunction"
-		
-		if($ExistingCommand -and !$IsProxyFunction -and !$Force) {
-			throw "POWERSHAI_HUGGINGFACE_NEWGRADIOPROXY_EXISTS: A function with name $FunctionName already exists. Remove it or use -force";
-		}
-		
-		$ModScript = {
-			param($data)
 			
-			$ErrorActionPreference = "Stop";
+			$ModScript = {
+				param($data)
+				
+				$ErrorActionPreference = "Stop";
+				
+				$FuncScript = $data.FunctionBody
+				
+				Invoke-Expression $data.CreateScript
+				Export-ModuleMember -Function $data.FunctionName
+			}
 			
-			$FuncScript = $data.FunctionBody
+			$ModData = @{
+				CreateScript 	= $FunctionCreateScript
+				FunctionBody 	= $FuncScript
+				FunctionName  	= $FunctionName
+			}
 			
-			Invoke-Expression $data.CreateScript
-			Export-ModuleMember -Function $data.FunctionName
-		}
-		
-		$ModData = @{
-			CreateScript 	= $FunctionCreateScript
-			FunctionBody 	= $FuncScript
-			FunctionName  	= $FunctionName
-		}
-		
-		verbose "Creating dummy module... FunctionScript:`n$FunctionCreateScript"
-		$DummyMod = New-Module -Name PowershaiHfGradioProxy -ScriptBlock $ModScript  -ArgumentList $ModData
-		verbose "	Importing dummy module"
-		import-module -force $DummyMod 
-		
+			verbose "Creating dummy module... FunctionScript:`n$FunctionCreateScript"
+			$DummyMod = New-Module -Name "HfGradio/$($session.name)" -ScriptBlock $ModScript  -ArgumentList $ModData
+			verbose "	Importing dummy module"
+			import-module -force $DummyMod 
+			
 
-		#verbose "	Getting function object...";
-		#$DummyFunc = Get-Command -mo $DummyMod.name -name DummyFunction
+			#verbose "	Getting function object...";
+			#$DummyFunc = Get-Command -mo $DummyMod.name -name DummyFunction
 
 
-		
-		#Aqui vamos criar a funcao, no global scope, para ser acessivel ao user!
-		#Um novo closure é necessario para que o script tenha acesso as variaveis FuncScript.
-		#Set-Item "Function:$FunctionName" -Value $DummyFunc.ScriptBlock.GetNewClosure();
-		
-		$Function = Get-Command $FunctionName
-		
-		SetType $Function "GradioProxyFunction"
-		
-		$ProxyInfo = [PsCustomObject]@{
-			session 	= $Session
-			script 		= $FuncScript
-			ApiName 	= $ApiName
+			
+			#Aqui vamos criar a funcao, no global scope, para ser acessivel ao user!
+			#Um novo closure é necessario para que o script tenha acesso as variaveis FuncScript.
+			#Set-Item "Function:$FunctionName" -Value $DummyFunc.ScriptBlock.GetNewClosure();
+			
+			$Function = Get-Command $FunctionName
+			
+			SetType $Function "GradioProxyFunction"
+			
+			$ProxyInfo = [PsCustomObject]@{
+				session 	= $Session
+				script 		= $FuncScript
+				ApiName 	= $ApiName
+			}
+			
+			$Function | Add-Member -Force Noteproperty GradioProxy $ProxyInfo
+			
+			write-output $Function;
 		}
-		
-		$Function | Add-Member -Force Noteproperty GradioProxy $ProxyInfo
-		
-		write-output $Function;
 	}
 }
 Set-Alias GradioApiFunction New-GradioSessionApiProxyFunction
@@ -1836,18 +2018,21 @@ Set-Alias GradioApiFunction New-GradioSessionApiProxyFunction
 function Get-GradioSessionApiProxyFunction {
 	[CmdletBinding()]
 	param(
+		[Parameter(ValueFromPipeline)]
 		$Session = "."
 	)
 
-	if($session -eq '*'){
-		$filter = { $true }
-	} else {
-		$session = Get-GradioSession $Session
-		$filter = { (IsType $_ "GradioProxyFunction") -and $_.GradioProxy.session -in @($session) }
-	}
-	
+	process {
+		if($session -eq '*'){
+			$filter = { $true }
+		} else {
+			$session = Get-GradioSession $Session
+			$filter = { (IsType $_ "GradioProxyFunction") -and $_.GradioProxy.session -in @($session) }
+		}
+		
 
-	Get-Command -Module PowershaiHfGradioProxy | ? $filter
+		Get-Command -Module "HfGradio/*" | ? $filter
+	}
 }
 
 
@@ -2244,8 +2429,8 @@ Set-alias Get-HfModel Get-HuggingFaceModel
 function Get-HuggingFaceSpace {
 	[CmdletBinding()]
 	param(
-		#Filtra por um space especifico
-			[Parameter(Position=0,ParameterSetName="Single")]
+		#Filtra por um space especifico (ou array de spaces)
+			[Parameter(Position=0,ParameterSetName="Single",ValueFromPipeline)]
 			$Space 
 			
 		,#Filtrar todos os spaces por autor
@@ -2255,33 +2440,56 @@ function Get-HuggingFaceSpace {
 		,#Filtrar todos os spaces do usuario atual!
 			[Parameter(ParameterSetName="Multiple")]
 			[switch]$My
+			
+		,#Não cria uma sessão gradio automatica.
+		 #Por padrao, em spaces gradios, ele ja cria uma gradio session!
+			[switch]$NoGradioSession
 	)
 	
-	if(IsType $space "HuggingFaceSpace"){
-		return $Space;
+	begin {
+		
+		if($My){
+			$Me = Get-HuggingFaceWhoami
+			$author = $Me.name;
+		}
+		
+		if($author){
+			write-output (Invoke-HuggingFaceHub "spaces" -author $author)
+			$space = @()
+			return;
+		}
+		
 	}
 	
-	if($My){
-		$Me = Get-HuggingFaceWhoami
-		$author = $Me.name;
+	process {
+	
+		foreach($SpaceItem in @($space)){
+			if(IsType $SpaceItem "HuggingFaceSpace"){
+				return $SpaceItem;
+			}
+
+			$ResultSpace = Invoke-HuggingFaceHub "spaces/$SpaceItem" -full
+			
+			$control = @{
+				GradioSession = $null
+			}
+			
+			$ResultSpace | Add-Member -Force Noteproperty control $control
+			
+			SetType $ResultSpace "HuggingFaceSpace"
+			
+			if(!$NoGradioSession -and $ResultSpace.sdk -eq "gradio") {
+				try {
+					$GradioSession = $ResultSpace | Connect-HuggingFaceSpaceGradio
+					verbose "	Conected to session: $($GradioSession.SessionId)"
+				} catch {
+					write-warning "Failed connect gradio. USe Connect-HuggingFaceSpaceGradio. Error: $_";
+				}
+			}
+		
+			write-output $ResultSpace;
+		}
 	}
-	
-	if($author){
-		Invoke-HuggingFaceHub "spaces" -author $author
-		return;
-	}
-	
-	$ResultSpace = Invoke-HuggingFaceHub "spaces/$space" -full
-	
-	$control = @{
-		GradioSession = $null
-	}
-	
-	$ResultSpace | Add-Member -Force Noteproperty control $control
-	
-	SetType $ResultSpace "HuggingFaceSpace"
-	
-	return $ResultSpace;
 	
 }
 Set-alias Get-HfSpace Get-HuggingFaceSpace
@@ -2432,9 +2640,23 @@ function Connect-HuggingFaceSpaceGradio {
 	
 	$Space = Get-HuggingFaceSpace $Space;
 	
-	$GradioSession = $Space.control.GradioSession
+	$SessionName = $Space.control.GradioSession
 	
-	$SessionExists = Get-GradioSession -ById $GradioSession -EA SilentlyContinue;
+	$IsDefault = $False;
+	if(!$SessionName){
+		$IsDefault = $true;
+		$SessionName = "Space:$($space.id)"
+	}
+	
+	try {
+		verbose "checking if session (name = $SessionName) exists..."
+		$SessionExists = Get-GradioSession $SessionName
+	} catch {
+		verbose "Session not exists: $_"
+		$SessionExists = $null
+	}
+	
+	$Space.control.GradioSession = $SessionName;
 	
 	if($SessionExists -and !$Force){
 		verbose "Session already connected";
@@ -2443,11 +2665,13 @@ function Connect-HuggingFaceSpaceGradio {
 	
 	$GradioHost = $Space.Host;
 	verbose "Creating session: $GradioHost"
-	$GradioSession = New-GradioSession -Name "Space:$($space.id)" -AppUrl $GradioHost
-	$Space.control.GradioSession = $GradioSession.SessionId
-	return $GradionSession
-}
+	$GradioSession = New-GradioSession -Name $SessionName -AppUrl $GradioHost -Force;
 
+	verbose "Generated Session: $SessionName";
+
+	return $GradioSession
+}
+Set-Alias Connect-HfSpaceGradio Connect-HuggingFaceSpaceGradio
 
 
 return @{

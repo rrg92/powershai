@@ -322,7 +322,93 @@ function PowershaiHash {
 	[System.Convert]::ToBase64String($shaManaged.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($str)))
 }
 
+# misc functions...
 
+<#
+	.DESCRIPTION 
+		Cria um quadro de desenho no console, que é atualizado em somente uma região específica!
+		Você pode enviar várias linhas de texto e afuncao cuidará de manter o desenho no mesmo quadro, dando a impressão que apenas uma região está sendo atualizada.
+		Para o efeito desejado, esta funcao deve ser invocada repetidamente, sem outros writes entre as invocacoes!
+		Só funciona com o modo interativo.
+#>
+function Invoke-PowerhsaiConsoleDraw {
+	[CmdletBinding()]
+	param(
+		#Texto a ser escrito. Pode ser um array. Se ultrapassar os limties de W e H, será truncado 
+		#Se é um script bloc, invoca o codigo passando o objeto do pipeline!
+			$Text
+			
+		,#Max de caracteres em cada linha 
+			$w = 10
+			
+		,#Max de linhas 
+			$h = 10
+			
+		,#Caractere usado como espaço vazio 
+			$BlankChar = " "
+			
+		,#Objeto do pipeline 
+			[Parameter(ValueFromPipeline)]
+			$PipeObj
+			
+		,#Repassa o objeto 
+			[switch]$PassThru
+	)
+	
+	begin {
+		$CurrentPos = $Host.UI.RawUI.CursorPosition
+		$NewXPos = 0
+		$NewYPos = $CurrentPos.Y + 1;
+		
+		if($w -is [string]){
+			$Parts = $w -Split "x"
+			$w = [int]$Parts[0];
+			$h = [int]$Parts[1];
+		}
+		
+	}
+	
+	process {
+		
+		$VirtualScreen = @()
+		$RawText = $text;
+
+		if($RawText -is [scriptblock]){
+			$Result = $PipeObj | % $RawText
+			$RawText = $Result
+		}
+		elseif($RawText -eq $null){
+			$RawText = $PipeObj
+		}
+		
+		if($RawText -is [Array]){
+			$Lines = $RawText
+		} else {
+			$Lines = $RawText -split "`r?`n"
+		}
+		
+		$CurrLine = -1;
+		while($CurrLine -lt $h){
+			$CurrLine++;
+			$Line = $Lines[$CurrLine]
+			
+			if($Line.length -gt $w){
+				$Line = $line.substring(0,$w);
+			} else {
+				$Line += [string]($BlankChar[0])  * ($w - $Line.length)
+			}
+			
+			$VirtualScreen += $line -replace "`t",$BlankChar;
+		}
+		
+		[Console]::SetCursorPosition( $NewXPos, $NewYPos );
+		write-host ($VirtualScreen -Join "`n")
+		
+		if($PassThru){
+			write-output $PipeObj
+		}
+	}
+}
 
 
 # Meta functions

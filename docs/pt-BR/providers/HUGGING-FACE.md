@@ -230,10 +230,8 @@ Este comando retorna um objeto que contém diversas informações sobre o space 
 Como é um space gradio, você pode conectá-lo com os demais cmdlets (os cmdlets GradioSession conseguem entender quando um objeto retornado por Get-HuggingFaceSpace é passado para eles!)
 
 ```
+# Conectar no space (e, automatic, cria uma gradio session)
 $diff = Get-HuggingFaceSpace rrg92/diffusers-labs
-
-# cria uma nova gradiosession para a app gradio que existe neste space!
-$diff | Connect-HuggingFaceSpaceGradio
 
 #Default
 Set-GradioSession -Default $diff
