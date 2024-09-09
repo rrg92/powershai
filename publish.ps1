@@ -4,9 +4,16 @@
 [CmdletBinding()]
 param(
 	$ApiKey = $Env:PSGALERY_KEY
+	[switch]$CompileDoc
 )
 
 $ErrorActionPreference = "Stop";
+
+
+if($CompileDoc){
+	$DocsScript = Join-Path $PsScriptRoot docs.ps1
+	& $DocsScript -Publish
+}
 
 $ModuleRoot = Join-Path "$PsScriptRoot" powershai
 
