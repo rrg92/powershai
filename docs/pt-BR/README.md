@@ -48,6 +48,23 @@ Get-Help about_NomeProvider
 Get-Help about_huggingface
 ```
 
+## Obtendo Ajuda  
+
+Apesar do esforço para documentar o PowershAI ao máximo, muito provavelmente não iremos conseguir a tempo criar toda a documentação necessária para esclarecer as dúdivas, ou mesmo falar de todos os comandos disponíveis.  Por isso, é importante que você saiba fazer um básico disso sozinho. 
+
+Você pode listar todos os comandos disponíveis quando o comando `Get-Command -mo powershai`.  
+Este comando vai retornar todos os cmdlets, alias e funções exportadas do módulo powerhsai.  
+Ele é o ponto de partida mais fácil para descobrir quais comandos. Muitos comandos são auto-explicativos, apenas olhando o nome.  
+
+E, para cada comando, você pode obter mais detalhes usando `Get-Help -Full NomeComando`.
+Caso ainda o comando não tenha uma documentação completa, ou alguma dúvida que você precisa esteja faltando, você pode abrir uma issue no git solicitando mais complemento.  
+
+Por fim, você pode explorar o código-fonte do PowershAI, procurando por comentários deixados ao longo do código, que podem explicar alguma funcionamento ou arquitetura, de forma mais técnica.  
+
+Nós iremos atualizando a documentação a medida que novas versões são lançadas.
+Encourajamos você a contribuir para o PowershAI, submetendo Pull Requsts ou issues com melhorias na documentação caso encontre algo que possa ser melhor explicado, ou que ainda não foi explicado.  
+
+
 ## Estrutura de comandos  
 
 O PowershAI exporta diversos comandos que podem ser usados.  
@@ -78,6 +95,29 @@ Os Chats são o principal ponto de partida e permitem que você converse com os 
 Veja o documento [chats](CHATS.about.md) para mais informações.
 
 
+## Salvando configurações  
+
+O PowershAI permite ajustar uma série de configurações, como parâmetros de chats, tokens de autenticação, etc.  
+Sempre que você altera uma configuração, esta configuração é salva apenas na memória da sua sessão do Powershell.  
+Se você fechar, e abrir novamente, todas as configurações feitas serão perdidas.  
+
+Para que você não precise ficar gerando tokens toda vez, por exemplo, o Powershai fornece 2 comandos para exportar e importar configurações.  
+O comando `Export-PowershaiSettings`  exporta as configurações para um arquivo no diretório profile do usuário logado.  
+Devido ao fato de que os dados exportados podem ser sensíveis, você precisa informar uma senha, que será usada para gerar um chave de criptografia.  
+Os dados exportados são criptografados usando AES-256.  
+Você pode importar usando `Import-PowershaiSettings`. Você terá que fornecer a senha que usou para exportar.  
+
+Note que esta senha não é armazenada em local nenhum, então, você é o responsável por memorizá-la ou guardar em um cofre de sua escolha.
+
+## Custos  
+
+É importante lembrar que alguns providers podem cobrar pelos serviços usados.  
+O PowershAI não faz nenhum gerenciamento de custo.  Ele pode injetar dados em prompts, parâmetros, etc.  
+Você deve fazer o acompanhamento usando as ferramentas que o site do provider fornece para tal.  
+
+Futuras versões podem incluir comandos ou parâmetros que ajudem a controlar melhor, mas, por enquanto, o usuário deve monitorar.  
+
+
 # EXEMPLOS <!--! @#Ex -->
 
 ## Uso básico 
@@ -95,6 +135,28 @@ Set-OpenaiToken
 ia "Olá, estou falando do Powershaui com você!"
 ```
 
+## Exportando configurações 
+
+
+```powershell 
+# defina algum token, por exemplo 
+Set-OpenaiToken 
+
+# Após o coando acima rodar, basta exportar!
+Export-PowershaiSettings
+
+# Você terá que fornecer a senha!
+```
+
+## Importando configurações 
+
+
+```powershell 
+import-module powershai 
+
+# Importe as configuraçoes 
+Import-PowershaiSettings # O comando irá pedir a senha usada na exportacao
+```
 
 # Informaçoes Importantes <!--! @#Note -->
 

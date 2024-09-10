@@ -8,12 +8,16 @@ Esta é a documentação oficial do provider OpenAI do PowershAI.
 
 O provider OpenAI fornecer todos os comandos para se comunicar com os serviços da OpenAI.  
 Os cmdltets desse provider possui o formato Verbo-OpenaiNomes.  
+O provider implementa as chamadas HTTP conforme documentando em https://platform.openai.com/docs/api-reference
+
+**Obs**: Nem todas as features da API estão implementadas ainda
 
 
 ## Configurações iniciais 
 
 Usar o provider da OpenAI envolve basicamente ativá-lo e configurar o token.  
 Você precisa gerar uma API Token no site da OpenAI. Ou seja, você vai precisar criar uma conta e inserir créditos.  
+Verifique mais em https://platform.openai.com/api-keys 
 
 Uma vez que você possui essas informações, pode executar o seguinte códig para ativar o provider:
 
