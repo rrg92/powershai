@@ -116,5 +116,98 @@ Este comando dita como o contexto serão formatados. Por exemplo, você pode for
 Veja o help deste comando para mais informaões de como configurar o contexto.   
 
 
+###  Tools
+
+Uma das grandes funcionalidades implementadas é o suporte a Function Calling (ou Tool Calling).  
+Este recurso, disponível em vários LLMs, permite que a IA decida invocar funções para trazer dados adicionais na resposta.  
+Basicamente, você descreve uma ou mais funções e seus parâmetros, e o modelo pode decidir invocá-las.  
+
+**IMPORTANTE: Você só vai conseguir usar esse recurso em providers que expõe function calling usando a mesma especificação da OpenAI**
+
+Para mais detalhes, veja a documentação oficial da OpenAI sobre Function Calling: [Function Calling](https://platform.openai.com/docs/guides/function-calling).
+
+O modelo apenas decide quais funçoes invocar, quando invocar e seus prâmetros. A execução dessa invocação é feita pelo client, no nosso caso, o PowershAI.  
+Os modelos esperam a definição das funções descrevendo o que elas fazem, seu parâmetros, retornos, etc.  Originalmente isso é feito usando algo como OpenAPI Spec para descrever as funções.  
+Porém, o Powershell possui um poderoso sistema de Help ussando comentários, que permite descrever funções e seus parâmetros, além dos tipos dados.  
+
+O PowershAI integra com esse sistema de help, traduzidno ele para um OpenAPI specification.  O usuário pode escrever suas funções normalmente, usando comentários para documentá-la e isso é enviado ao modelo.  
+
+Para demonstrar esse recurso, vamos a um simples tutorial: crie um arquivo chamado `MinhasFuncoes.ps1` com o seguinte conteúdo
+
+```powershell
+# Arquivo MinhasFuncoes.ps1, salve em algum diretorio de sua preferência!
+
+<#
+    .DESCRIPTION
+    Lista a hora atual
+#>
+function HoraAtual {
+    return Get-Date
+}
+
+<#
+    .DESCRIPTION
+    Obtém um número aleatório!
+#>
+function NumeroAleatorio {
+    param(
+        # Número mínimo
+        $Min = $null,
+        
+        # Número máximo
+        $Max = $null
+    )
+    return Get-Random -Min $Min -Max $Max
+}
+```
+**Note o uso dos comentários para descrever funções e parâmetros**.  
+Esta é uma sintaxe suportada pelo PowerShell, conhecida como [Comment Based Help](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4).
+
+Agora, vamos adicionar esse arquivo ao PowershAI:
+
+```powershell
+import-module powershai 
+
+Set-AiProvider openai 
+Set-OpenaiToken #confiogure o token se ainda não configurou.
+
+
+# Adicione o script como tools!
+# Supondo que o script fo salvo em C:\tempo\MinhasFuncoes.ps1
+Add-AiTool C:\tempo\MinhasFuncoes.ps1
+
+# Confirme que s tools foram adicionadas 
+Get-AiTool
+```
+
+Experimente pedir ao modelo qual a data atual ou peça para ele gerar um número aleatório! Você verá que ele executará suas funções! Isso abre possibilidades infinitas, e sua criatividade é o limite!
+
+```powershell
+ia "Quantas horas?"
+```
+
+No comando acima, o modelo vai invocar a função. Na tela você verá a função sendo chamada!  
+Você pode adicionar qualquer comando ou script powershell como uma tool.  
+Utilize o comando `Get-Help -Full Add-AiTol` para mais detalhes de como usar essa poderosa funcioinalidade.
+
+O PowershAI automaticamente cuida de executar os comandos e enviar a resposta de volta ao modelo.  
+Se o modelo decidir executar várias funções em paralelo, ou insitir em executar novas funções, o PowershAI irá gerenciar isso automaticamente.  
+Note que, para evitar um loop inifinto de execuções, o PowershAI força um limite com o máximo de execuções.  
+O parâmetro que controla essas interações com o modelo é o `MaxInteractions`.  
+
+
+
+#### CONSIDERAÇÕES IMPORTANTES SOBRE O USO DE TOOLS
+
+O recurso de Function Calling é poderoso por permitir a execução de código, mas também é perigoso, MUITO PERIGOSO.  
+Portanto, tenha extrema cautela com o que você implementa e executa.
+Lembre-se de que o PowershAI executará conforme o modelo pedir. 
+
+Algumas dicas de segurança:
+
+- Evite rodar o script com um usuário Administrador.
+- Evite implementar código que exclua ou modifique dados importantes.
+- Teste as funções antes.
+- Não inclua módulos ou scripts de terceiros que você não conheça ou não confie.  
 
 

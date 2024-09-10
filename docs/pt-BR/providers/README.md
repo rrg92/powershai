@@ -44,6 +44,8 @@ A primeira é utilizando o comando `Get-AiProviders`.
 Se você está vendo essa documentação via Get-Help, você pode usar o comando Get-Help about_Powershell_`NomeProvider`, para obter mais detalhes.  
 Se está vendo pelo repositório Git, você pode consultar diretamente acessando o subdiretório com o nome do provider.
 
+Também, a lista de providers suportados e/ou que estão sendo implementandos pode ser conferida na issue #3.
+
 
 # EXEMPLOS <!--! @#Ex -->
 

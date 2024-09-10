@@ -92,7 +92,55 @@ O tópico `about_Powershai_NomeProvider` é o ponto de partida e deve sempre con
 ## Chats  
 
 Os Chats são o principal ponto de partida e permitem que você converse com os vários LLM disponibilizados pelos providers.  
-Veja o documento [chats](CHATS.about.md) para mais informações.
+Veja o documento [chats](CHATS.about.md) para mais detalhes. A seguir, uma introdução rápida aos chats.
+
+### Conversando com o modelo
+
+Uma vez que a configuração inicial do provider está feita, você pode iniciar a conversa!  
+A maneira mais fácil de iniciar a conversa é usando o comando `Send-PowershaiChat` ou o alias `ia`:
+
+```powershell
+ia "Olá, você conhece PowerShell?"
+```
+
+Este comando vai enviar a mensagem pro modelo do provider que foi configurado e a resposta será exibida em seguida.  
+Note que o tempo de resposta depende da capacidade do modelo e da rede.  
+
+Você pode usar o pipeline para jogar o resultado de outros comandos diretamente como contexto da ia:
+
+```powershell
+1..100 | Get-Random -count 10 | ia "Me fale curiosidades sobre esses números"
+```  
+O comando acima vai gerar uma sequencia de 1 a 100 e jogar cada número no pipeline do PowerShell.  
+Então, o comando Get-Random vai filtrar somente 10 desses números, aleatoriamente.  
+E por fim, essa sequencia será jogada (toda de uma vez) para a ia e será enviada com a mensagem que colocou no parâmetro.  
+
+Você pode usar o parâmetro `-ForEach` para que a ia processe cada input por vez, por exemplo:
+
+```powershell
+1..100 | Get-Random -count 10 | ia -ForEach "Me fale curiosidades sobre esses números"
+```  
+
+A diferença deste comando acima, é que a IA será chamada 10x, um para cada número.  
+No exemplo anterior, ela será chamada apenas 1x, com todos os 10 números.  
+A vantagem de usar esse método é reduzir o contexto, mas pode demorar mais tempo, pois mais requisições serão feitas.  
+Testes conforme suas necessidades!
+
+### Modo objeto  
+
+Por padrão, o comando `ia` não retorna nada. Mas você pode alterar esse comportamento usando o parâmetro `-Object`.  
+Quando este parâmetro é ativado, ele pede ao LLM que gere o resultado em JSON e escreve o retorno de volta no pipeline.  
+ISso significa, que você pode fazer algo assim:
+
+```powershell
+ia -Obj "5 numeros aleatorios, com seu valor escrito por extenso"
+
+#ou usando o alias, io/powershellgallery/dt/powershai
+
+io "5 numeros aleatorios, com seu valor escrito por extenso"
+```  
+
+**IMPORTANTE: Note que nem todo provider pode suportar este modo, pois o modelo precisa ser capaz de suportar JSON! Caso receba erros, confirme se o mesmo comando funciona com um modelo da OpenAI. VocÇe pode abrir uma issue também**
 
 
 ## Salvando configurações  
@@ -116,6 +164,18 @@ O PowershAI não faz nenhum gerenciamento de custo.  Ele pode injetar dados em p
 Você deve fazer o acompanhamento usando as ferramentas que o site do provider fornece para tal.  
 
 Futuras versões podem incluir comandos ou parâmetros que ajudem a controlar melhor, mas, por enquanto, o usuário deve monitorar.  
+
+
+
+### Export e Import  de Configurações e Tokens
+
+Para facilitar o reuso dos dados (tokens, default models, histórico de chats, etc.) o PowershAI permite que você exporte a sessão.  
+Para isso, use o comando `Export-PowershaiSettings`. Você vai precisar fornecer uma senha, que será usada para criar um chave e criptografar esse arquivo.  
+Somente com essa senha, você consegue importá-lo novamente. Para importar, use o comando `Import-PowershaiSettings`.  
+Por padrão, os Chats não exportados. Para exportá-los, você pode adicionar o parâmetro -Chats: `Export-PowershaiSettings -Chats`.  
+Note que isso pode deixar o arquivo maior, além de aumentar o tempo de export/import.  A vantagem é que você consegue continuar a conversa entre diferentes sessões.  
+Essa funcionalidade foi criada originalmente com o intuito de evitar ter que ficar gerando Api Key toda vez que precisasse usar o PowershAI. Com ela, você gera 1 vez suas api keys em cada provider, e exporta a medida que atualiza. Como está protegido por senha, você pode deixar salvo tranquilamente em um arquivo no seu computador.  
+Use a ajuda no comando para obter mais informacoes de como usá-lo.
 
 
 # EXEMPLOS <!--! @#Ex -->
