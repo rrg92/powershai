@@ -480,25 +480,47 @@ function Set-AiProvider {
 	
 	
 	$POWERSHAI_SETTINGS.provider = $provider;
-	$POWERSHAI_SETTINGS.funcbase = $provider+"_";
 }
 
 
 
 # Invoca uma funcao do provider atual!
 function PowerShaiProviderFunc {
-	param($FuncName, $FuncParams, [switch]$Ignore)
+	param(
+		$FuncName
+		,$FuncParams
+		,[switch]$Ignore
+		,[switch]$CheckExists
+		,$ProviderName = $null
+	)
 	
-	$FuncPrefix = $POWERSHAI_SETTINGS.funcbase;
-	$FullFuncName = $FuncPrefix + $FuncName;
+	if($ProviderName){
+		$provider = $PROVIDERS[$ProviderName];
+	} else {
+		$provider = Get-AiCurrentProvider
+	}
+	
+	
+	$FuncPrefix 	= $provider.name+"_";
+	$FullFuncName 	= $FuncPrefix + $FuncName;
 	
 	if(!$FuncParams){
 		$FuncParams = @{}
 	}
 	
 	if(Get-Command $FullFuncName -EA SilentlyContinue){
+		
+		if($CheckExists){
+			return $true;
+		}
+		
 		& $FullFuncName @FuncParams
 	} else {
+		
+		if($CheckExists){
+			return $false;
+		}
+		
 		if(!$Ignore){
 			throw "POWERSHAI_PROVIDERFUNC_NOTFOUND: FuncName = $FuncName, FuncPrefix = $FuncPrefix, FullName = $FullFuncName. This erros can be a bug with powershai. Ask help in github or search!"
 		}
@@ -554,7 +576,12 @@ function Get-AiProviders {
 	
 	@($PROVIDERS.keys) | %{
 		$Provider = $PROVIDERS[$_];
-		$ProviderInfo = [PSCustomObject](@{name = $_} + $Provider.info)
+		
+
+		
+		$ProviderInfo = [PSCustomObject](@{name = $_} + $Provider.info )
+		
+		$ProviderInfo | Add-Member Noteproperty Chat (PowerShaiProviderFunc "Chat" -Provider $Provider.name -CheckExists)
 		
 		$ProviderInfo
 	}
