@@ -832,7 +832,13 @@ function Invoke-Http {
 			
 			if($SseCallBack){
 				$Params = [PsCustomObject]@{ line = $HttpResult.text }
-				& $SseCallBack $Params 
+				
+				#This prevent continue inside script affect outerloop!
+				$WrapContinue = $true;
+				while($WrapContinue){
+					$WrapContinue = $false;
+					& $SseCallBack $Params 
+				}
 			}
 			
 			if($HttpResult.completed){

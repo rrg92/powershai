@@ -222,7 +222,7 @@ function google_Chat {
 			if($line -like 'data: {*'){
 				$RawJson = $line.replace("data: ","");
 			} else {
-				continue;
+				return;
 			}
 			
 			$AnswerJson = $RawJson | ConvertFrom-Json;

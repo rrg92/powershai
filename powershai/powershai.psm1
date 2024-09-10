@@ -774,7 +774,8 @@ function Invoke-AiChatTools {
 		,# máx output!
 			$MaxTokens			= 500	
 		,# No total, permitir no max 5 iteracoes!
-			$MaxRequests  		= 5		
+			$MaxInteractions  		= 10	
+			
 		,# Quantidade maximo de erros consecutivos que sua funcao pode gerar antes que ele encerre.
 			$MaxSeqErrors 		= 2	
 
@@ -907,9 +908,8 @@ function Invoke-AiChatTools {
 		$AiInteraction.message = $Message;
 		
 		# Se chegamos no limite, então naos vamos enviar mais nada!
-		if($ReqsCount -gt $MaxRequests){
+		if($ReqsCount -gt $MaxInteractions){
 			$AiInteraction.stopReason = "MaxReached";
-			write-warning "MaxRequests reached! ($ReqsCount)";
 			break;
 		}
 		
@@ -1225,494 +1225,6 @@ function Import-PowershaiSettings {
 # POWESHAI CHAT 
 # Implementacao do Chat Client do POWERSHAI
 
-<#
-	Comando ChaTest.
-	Com este comando você pode conversar direto do prompt com o modelo!.
-	Ele também é um belo teste de todos os outros comandos e funcionalidades disponíveis aqui!
-	
-	Note que isso pode consumir bastante dos seus tokens!
-	
-	Syntaxe:
-		Converse com
-	
-	DEPRECIADO. SErá substuido em beve polos *-PowershaiChat
-#>
-function Invoke-PowershaiChat {
-	[CmdletBinding()]
-	param(
-		$Functions 		= $Null
-		,$MaxTokens 	= 200
-		,$MaxRequests	= 10
-		,$SystemMessages = @()
-		
-		,#Desliga o stream 
-			[switch]$NoStream
-		
-		,#Specify a hash table where you want store all results 
-			$ChatMetadata 	= @{}
-	)
-	
-	$ErrorActionPreference = "Stop";
-	
-	function WriteModelAnswer($interaction, $evt){
-		$WriteParams = @{
-			NoNewLine = $false
-			ForegroundColor = "Cyan"
-		}
-		
-		$Stream = $interaction.stream;
-		$str = "";
-		$EventName = $evt.event;
-		
-		function FormatPrompt {
-			$str = PowerShaiProviderFunc "FormatPrompt" -Ignore -FuncParams @{
-				model = $model
-			}
-			
-			write-host "Prompt format: $str"
-			if($str -eq $null){
-				$str = "🤖 $($model):";
-			}
-			
-			return $str;
-		}
-		
-		
-		if($Stream){
-			$PartNum 	= $Stream.num;
-			$text 		= $Stream.answer.choices[0].delta.content;
-			
-			$WriteParams.NoNewLine = $true;
-			
-			if($PartNum -eq 1){
-				$str = FormatPrompt
-			}
-
-			if($text){
-				$Str += $text
-			}
-			
-			if($EventName -eq "answer"){
-				$str = "`n`n";
-			}
-		} else {
-			#So entrará nesse quando o stream estiver desligado!
-			$ans 	= $interaction.rawAnswer;
-			$text 	= $ans.choices[0].message.content;
-			$model 	= $ans.model;
-			$prempt = FormatPrompt;
-			$str 	= "`$($prempt): $text`n`n" 
-		}
-		
-		if($str){
-			write-host @WriteParams $Str;
-		}
-	}
-
-	$ChatHistory = @()
-	$ChatStats = @{
-		TotalChats 	= 0
-		
-		TotalCost 	= 0
-		TotalInput 	= 0
-		TotalOutput = 0
-		
-		TotalTokensI = 0
-		TotalTokensO = 0
-	}
-	
-	$ChatMetadata.history 	= $ChatHistory;
-	$ChatMetadata.stats 	= $ChatStats
-	
-	$VerboseEnabled = $False;
-	$MustStream = $true;
-	
-	if($NoStream){
-		$MustStream = $False;
-	}
-	
-	write-host "Carregando lista de modelos..."
-	$SupportedModels = Get-AiModels
-	
-	write-host "Montando estrutura de functions..."
-	$Funcs = OpenAuxFunc2Tool $Functions;
-	
-	try {
-		$CurrentUser = Get-LocalUser -SID ([System.Security.Principal.WindowsIdentity]::GetCurrent().User)
-		$FullName = $CurrentUser.FullName;
-		$UserAllNames = $FullName.split(" ");
-		$UserFirstName = $UserAllNames[0];
-	} catch {
-		write-verbose "Cannot get logged username: $_"
-	}
-	
-
-	
-	write-host "Iniciando..."
-	# $Ret = Invoke-AiChatTools -temperature 1 -prompt @(
-	# 	"Gere uma saudação inicial para o usuário que está conversando com você a partir do módulo powershell chamado PowerShai"
-	# )  -on @{
-	# 	stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
-	# 	answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
-	# }  -Stream:$MustStream
-	
-	
-	$model = $null
-	$UseJson = $false;
-	$ShowFullSend = $false;
-	$ShowTokenStats = $false;
-	$MaxContextSize = 8192 # Vou considerar isso como o número de caracter por uma questão simples...
-						   # futuramente, o correto é trabalhar com tokens!
-	
-	$ChatUserParams = @{
-		model 		= $model
-		MaxRequest 	= $MaxRequests
-		MaxTokens 	= $MaxTokens
-		Json 		= $false
-		RawParams	= @{
-			options = @{
-				stop = "|fim|"
-			}
-		}
-	}
-	
-	function ParsePrompt($prompt) {
-		$parts 		= $prompt -split ' ',2
-		$cmdName	= $parts[0];
-		$remain		= $parts[1];
-		
-		$result = @{
-			action = $null
-			prompt = $null;
-		}
-		
-		write-verbose "InputPrompt: $cmdName"
-		
-		switch($cmdName){
-			"/reload" {
-				write-host "Reloading function list...";
-				$Funcs = OpenAuxFunc2Tool $Functions;
-				Set-Variable -Scope 1 -Name Funcs -Value $Funcs
-			}
-			
-			"/retool" {
-				write-host "Redefinindo a lista de tools: $remain";
-				$Funcs = OpenAuxFunc2Tool $remain;
-				Set-Variable -Scope 1 -Name Funcs -Value $Funcs
-			}
-			
-			"/maxcontext" {
-				Set-Variable -Scope 1 -Name MaxContextSize -Value ([int]$remain)
-			}
-			
-			"/models" {write-host $($SupportedModels|out-string)}
-			{'.cls','/clear','/cls','.c' -contains $_} {clear-host}
-			
-			# sets 
-			"/von"  {Set-Variable -Scope 1 -Name VerboseEnabled -Value $true;}
-			"/voff" {Set-Variable -Scope 1 -Name VerboseEnabled -Value $false;}
-			"/json" {Set-Variable -Scope 1 -Name UseJson -Value $true }
-			"/jsoff" {Set-Variable -Scope 1 -Name UseJson -Value $false }
-			"/fullon" {Set-Variable -Scope 1 -Name ShowFullSend -Value $true }
-			"/fulloff" {Set-Variable -Scope 1 -Name ShowFullSend -Value $false }
-			"/tokon" {Set-Variable -Scope 1 -Name ShowTokenStats  -Value $true }
-			"/tokoff" {Set-Variable -Scope 1 -Name ShowTokenStats  -Value $false }
-			"/p" { 
-				#Split!
-				$paramPair = $remain -split ' ',2
-				$paramName = $paramPair[0]
-				$paramValStr = $paramPair[1];
-				
-				if(!$paramValStr){
-					write-host $($ChatUserParams|out-string);
-					return;
-				}
-				
-				if(!$ChatUserParams.contains($paramName)){
-					write-warning "No parameter existing with name: $paramName"
-					return;
-				}
-
-				$ParamVal = $ChatUserParams[$paramName];
-				
-				if($ParamVal -eq $null){
-					write-warning "Value is null. Setting as str value!";
-					$NewVal = $paramValStr
-					return;
-				} else {
-					$NewVal = $ParamVal.getType()::Parse($paramValStr);
-				}
-				
-				$ChatUserParams[$paramName] = $NewVal;
-				write-host "Changed PARAM $paramName from $ParamVal to $NewVal" 
-			}
-			
-			"/reqs" { 
-				$OldVal = $MaxRequests;
-				Set-Variable -Scope 1 -Name MaxRequests -Value [int]$remain;
-				write-host "Changed Maxtokens from $OldVal to $MaxRequests"
-			}
-			
-			"/ps" {
-				function prompt(){ "PowershAI>> " }
-				write-warning "Entering in nested prompt";
-				$host.EnterNestedPrompt();
-			}
-			
-			"/model" {
-				write-host "Changing model...";
-				$newModel 		= $remain;
-				$chosenModel 	= $null;
-				
-				#find all candidates!
-				while($true){
-					$ElegibleModels = @( $SupportedModels | ? { $_.id -like $newModel } );
-					
-					if($ElegibleModels.length -eq 1){
-						$model = $ElegibleModels[0].id;
-						break;
-					}
-					
-					write-warning "Refine your search (search:$newModel)";
-					write-host $($ElegibleModels|Sort-Object id|out-string)
-					$newModel = read-host "Filter model"
-				}
-				
-				$ChatUserParams['model'] = $model
-				write-host "	Changed model to: $model"
-			}
-			
-			default {
-				$result.action = "prompt";
-				$result.prompt = $prompt;
-			}
-		}
-		
-		return $result;
-	}
-	
-	$ChatContext = @{
-		messages = @()
-		size = 0
-	}
-	function AddContext($msg) {
-
-		while($ChatContext.size -ge $MaxContextSize -and $ChatContext.messages){
-			$removed,$LeftMessages = $ChatContext.messages;
-			
-			$ChatContext.messages = $LeftMessages;
-			
-			$RemovedCount = $removed.length;
-			if($removed.content){
-				$RemovedCount = $removed.content.length;
-			}
-			
-			write-verbose "Removing Length: $removed $RemovedCount"
-			$ChatContext.size -= [int]$RemovedCount;
-		}
-		
-		$ChatContext.messages += @($msg);
-
-		if($msg.content){
-			$ChatContext.size += $msg.content.length;
-		} else {
-			$ChatContext.size += $msg.length;
-		}
-	}
-	
-	$LoopNum = 0;
-	$InternalMessages = @();
-	
-	try {
-		write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
-		$LoopNum++;
-		
-		if($LoopNum -eq 1){
-			$Prompt = @()
-			
-			$InternalMessages += @(
-				"Você é um agente que está conversando com o usuário partir do PowershAI, um módulo powershell para interagir com IA"
-			)
-
-			if($UserFirstName){
-				$InternalMessages += "O nome do usuário é: "+$UserFirstName;
-			}
-			
-			$Prompt = "Conversa iniciada: Gere uma mensagem inicial:"
-			$Prompt = $Prompt -Join "`n";
-		} else {
-			$InternalMessages = @();
-			
-			if($UserFirstName){
-				$PromptLabel = $UserFirstName
-			} else {
-				$PromptLabel = "Você"
-			}
-			
-			write-host -NoNewLine "$PromptLabel>>> "
-			$prompt = read-host
-		}
-		
-		$Msg = @(
-			@($SystemMessages|%{ [string]"s: $_"})
-			@($InternalMessages|%{ [string]"s: $_"})
-			[string]"u: $prompt"
-		)
-		
-		
-		$Msg | %{ AddContext $_ };
-		
-		if($ShowFullSend){
-			write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
-		}
-	
-
-		$ChatParams = $ChatUserParams + @{
-			prompt 		= $ChatContext.messages
-			Functions 	= $Funcs 
-			Stream		= $MustStream
-			on 			= @{
-						
-						send = {
-							if($VerboseEnabled){
-								write-host -ForegroundColor DarkYellow "-- waiting model... --";
-							}
-						}
-						
-						stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
-						answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
-
-						
-						func = {
-							param($interaction)
-							
-							$ans = $interaction.rawAnswer;
-							$model = $ans.model;
-							$funcName = $interaction.toolResults[-1].name
-							
-							write-host -ForegroundColor Blue "$funcName{..." -NoNewLine
-						}
-				
-						exec = {
-							param($interaction)
-							
-							write-host -ForegroundColor Blue "}"
-							write-host ""
-						}
-				}
-		}
-		
-		if($VerboseEnabled){
-			$ChatParams.Verbose = $true;
-		}
-		
-		
-		
-		$Start = (Get-Date);
-		$Ret 	= Invoke-AiChatTools @ChatParams;
-		$End = Get-Date;
-		$Total = $End-$Start;
-		
-		foreach($interaction in $Ret.interactions){ 
-		
-			if($interaction.stream){
-				$Msg = $interaction.rawAnswer.message
-			} else {
-				$Msg = $interaction.rawAnswer.choices[0].message;
-			}
-		
-			
-
-			AddContext $Msg
-			
-			$toolsResults = $interaction.toolResults;
-			if($toolsResults){
-				$toolsResults | %{ AddContext $_.resp }
-			}
-			
-			
-			
-		}
-		
-		
-		#Store the historu of chats!
-		$ChatMetadata.history += @{
-								Ret = $Ret
-								Elapsed = $Total
-							}
-		$ChatHistory = $ChatMetadata.history;
-		
-		$AllAnswers 	= @($Ret.interactions | %{$_.rawAnswer});
-		$AnswersCost	= $Ret.costs
-		
-		
-		# current chat
-		$AnswerCount 	= $AllAnswers.count;
-		$TotalCost 		= $AnswersCost.total
-		$InputCost 		= $AnswersCost.input
-		$OutputCost 	= $AnswersCost.output
-		$TotalTokens 	= $AnswersCost.tokensTotal
-		$InputTokens 	= $AnswersCost.tokensInput
-		$OutputTokens 	= $AnswersCost.tokensOutput
-		
-		# all chats
-		$ChatStats.TotalChats += $ChatHistory.count;
-		$TotalChats = $ChatStats.TotalChats
-		
-		## COSTS (total, input,output)
-		$ChatStats.TotalCost += $TotalCost 
-		$ChatStats.TotalInput += $InputCost
-		$ChatStats.TotalOutput += $OutputCost
-		
-		## TOKENS QTY (total, input, output)
-		$ChatStats.TotalTokens += $TotalTokens 
-		$ChatStats.TotalTokensI += $InputTokens
-		$ChatStats.TotalTokensO += $OutputTokens
-		
-		
-		$AnswerLog = @(
-			"Answer: $AnswerCount"
-			"Cost: $TotalCost (i:$InputCost/o:$OutputCost)"
-			"Tokens: $TotalTokens (i:$InputTokens/o:$OutputTokens)"
-			"time: $($Total.totalMilliseconds) ms"
-		) -Join " "
-		
-		$HistoryLog = @(
-			"AllChats: $($ChatStats.TotalChats)"
-			
-			@(
-				"Cost: $($ChatStats.TotalCost)"
-				"(i:$($ChatStats.TotalInput)"
-				"/"
-				"o:$($ChatStats.TotalOutput))"
-			) -Join ""
-			
-			@(
-				"Tokens: $($ChatStats.TotalTokens)"
-				"(i:$($ChatStats.TotalTokensI)"
-				"/"
-				"o:$($ChatStats.TotalTokensO))"
-			) -Join ""
-			
-		) -Join " "
-		
-		if($ShowTokenStats){
-			write-host "** $AnswerLog"
-			write-host "** $HistoryLog"
-		}
-	} catch {
-		write-host ($_|out-string)
-		write-host "==== ERROR STACKTRACE ==="
-		write-host "StackTrace: " $_.ScriptStackTrace;
-	}
-	
-	
-	return $ChatHistory;
-}
-
-Set-Alias -Name Chatest -Value Invoke-PowershaiChat
-Set-Alias -Name PowerShait -Value Invoke-PowershaiChat
-
 
 function NewChatContext {
 	return @{
@@ -1724,26 +1236,42 @@ function NewChatContext {
 <#
 	.DESCRIPTION
 		Cria um ojbeto padrao contendo todos o spossveis parametros que podem ser usados no chat!
-		O usuário pode usar um get-help New-PowershaiParameters para obter a doc dos parametros.  
+		O usuário pode usar um get-help New-PowershaiParameters para obter a doc dos parametros.  	
 #>
 function New-PowershaiParameters {
 	[CmdLetBinding()]
 	param(
 		#Quando true, usa o modo stream, isto é, as mensagens são mostradas a medida que o modelo as produz
-		$stream = $true 
-		
-		,#Sem funcao. Será removido emnbeve 
-			$VerboseEnabled = $false
+			$stream = $true
 			
 		,# Habilia o modo JSON. Nesse modo, o modelo é forçado a retornar uma resposta com JSON.  
 		 # Quandoa ativado, as mensagens geradas via stream não sãoe xibidas a medida que são produzidas, e somente o resultado final é retornado.  
-			$UseJson
+			[bool]$Json = $false
+			
+		,# Nome do modelo a ser usado  
+		 # Se null, usa o modelo definido com Set-AiDefaultModel
+			[string]$model = $null
+			
+		,# Maximo de tokens a ser retornado pelo modelo  
+		   [int]$MaxTokens = 2048
 		
 		,#Printa o prompt inteiro que está sendo enviado ao LLM 
-			$ShowFullSend = $False 
+			[bool]$ShowFullSend = $False 
 			
 		,#Ao final de cada mensagem, exibe as estatísticas de consumo, em tokens, retornadas pela API 
 			$ShowTokenStats  = $False 
+			
+		,#Maximo de interacoes a serem feitas de um só vez 
+		 #Cada vez uma mensagem é enviada, o modelo executa 1 iteração (envia a mensagem e recebe uma resposta).  
+		 #Se o modelo pedir um function calling, a restpoa gerada será enviada novamente ao modelo. Isso conta como outra interacao.  
+		 #Esse parâmetro controla o máximo de interacoes que podem existir em cada chamada.
+		 #Isso ajuda a prevenir loops infinitos inesperados. 
+			$MaxInteractions = 50
+			
+		,#MAximo de erros em sequencia gerado por Tool Calling.  
+		 #Ao usar tool calling, esse parametro limita quantos tools sem sequencia que resultaram em erro podem ser chamados.  
+		 #O erro consideraod é a exception disparada pelo script ou comando configuirado. 
+			$MaxSeqErrors = 5
 			
 		,#Tamanho máximo do contexto, em caracteres 
 		 #No futuro, será em tokens 
@@ -1764,6 +1292,11 @@ function New-PowershaiParameters {
 			
 		,#System Message que é garantida ser enviada sempre, independente do histórico e clenaup do chat!
 			$SystemMessageFixed = $null
+			
+		,#Parãmetros a serem passados diretamente para a API que invoca o modelo.  
+		 #O provider deve implementar o suporte a esse.  
+		 #Para usá-lo você deve saber os detalhes de implementação do provider e como a API dele funciona!
+			$RawParams = @{}
 	)
 	
     # Get the command name
@@ -1872,15 +1405,7 @@ function New-PowershaiChat {
 		write-verbose "Cannot get logged username: $_"
 	}
 	
-	$ApiParams = @{					
-		#Parametros que vão para a api...
-		model 		= $model
-		MaxRequest 	= $MaxRequests
-		MaxTokens 	= $MaxTokens
-		Json 		= ([bool]$Json)
-		RawParams	= @{}
-		MaxSeqErrors = 5
-	}
+	$ApiParams = @{					}
 	
 	$ChatParams = New-PowershaiParameters -stream (!([bool]$NoStream))
 	
@@ -1903,11 +1428,8 @@ function New-PowershaiChat {
 		#Historico completo de todas as mensagens enviadas, com os objetos
 		history 		= @()
 		
-		#Parametros especifos do provider 
-		ApiParams 		= $ApiParams
-		
 		#Parametros configuraveis do chat
-		params 			= $ApiParams + $ChatParams 
+		params 			= $ChatParams 
 		
 		#Contexto dos chats. é onde fica as mensagens que deve ser enviadas
 		context  = (NewChatContext)
@@ -1936,6 +1458,8 @@ function New-PowershaiChat {
 			raw = @{}
 		}
 	}
+	
+	SetType $ChatSlot "Chat";
 
 	$Chats[$ChatId] = $ChatSlot;
 	
@@ -1990,7 +1514,7 @@ function Remove-PowershaiChat {
 function Get-PowershaiChat {
 	[CmdletBinding()]
 	param(
-		[string]$ChatId # . active chat
+		$ChatId # . active chat
 		,[switch]$SetActive
 		,[switch]$NoError
 	)
@@ -2000,8 +1524,12 @@ function Get-PowershaiChat {
 			throw "POWERSHAI_GET_CHAT: Must inform -ChatId"
 		}
 		
+		if(IsType $ChatId "Chat"){
+			return $ChatId;
+		}
+		
 		if($ChatId -eq '*'){
-			@($POWERSHAI_SETTINGS.chats) | Sort-Object CreateDate
+			@($POWERSHAI_SETTINGS.chats.values) | Sort-Object CreateDate
 			return;
 		}
 		
@@ -2072,7 +1600,7 @@ function Update-PowershaiChatParameter {
 			[switch]$Force
 	)
 	
-	$AllParameters = Get-PowershaiChatParameter
+	$AllParameters = Get-PowershaiChatParameter -ChatId $ChatId
 	
 	$Param = $AllParameters | ? { $_.name -eq $parameter }
 	
@@ -2099,9 +1627,13 @@ function Get-PowershaiChatParameter {
 	#Lista tudo para garantir mesmo os chats criados previamente possam exibir novas opcoes que aparecem!
 	$AllParams = @($Chat.params.keys) + @($ParamBaseHelp | %{$_.name}) | sort -Unique
 	
+	# Parametros da funcao!
+	$AiChatParams = ((Get-Command Invoke-AiChatTools).Parameters).Keys;
+	
 	foreach($ParamName in $AllParams){
 		$ParamHelp = $ParamBaseHelp | ? {$_.name -eq $ParamName}
 		
+		$IsDirectParam = $ParamName -in $AiChatParams;
 		
 		if($ParamHelp){
 			$help = @($ParamHelp.description | %{$_.text}) -Join "`n"
@@ -2113,6 +1645,9 @@ function Get-PowershaiChatParameter {
 		$ParameterInfo | Add-Member Noteproperty name $ParamName
 		$ParameterInfo | Add-Member Noteproperty value $Chat.params[$ParamName]
 		$ParameterInfo | Add-Member Noteproperty description $help
+		
+		#Direct informa se o parâmetro é um parâmetro direto da função Invoke-AiChatTools, que é a função base invocada Powershai Chats.
+		$ParameterInfo | Add-Member Noteproperty direct $IsDirectParam
 		
 		$ParamsHelp += $ParameterInfo
 	}
@@ -2323,8 +1858,8 @@ function Send-PowershaiChat {
 			[switch]$Temporary 
 			
 		,# Desliga o function call para esta execução somente!
-			[Alias('NoCalls')]
-			[switch]$DisableFunctions
+			[Alias('NoCalls','NoTools','nt')]
+			[switch]$DisableTools
 			
 		,# Alterar a funcao de formatacao  para esta execucao apenas!
 			$FormatterFunc = $null
@@ -2440,15 +1975,23 @@ function Send-PowershaiChat {
 			$ChatStats 			= $Chat.stats;
 			$ChatMetadata 		= $Chat.metadata;
 			$UserFirstName		= $Chat.UserInfo.AllNames[0];
-			$ChatUserParams		= $Chat.params;
-			$ApiParamsKeys		= @($Chat.ApiParams.keys);
+			$AllParams			= Get-PowershaiChatParameter  -ChatId $ActiveChat.id
 			$ChatContext 		= $Chat.context;
 			
 			write-verbose "Iniciando..."
 			
+			$ChatUserParams = @{}
+			$DirectParams = @{}
+			$AllParams | %{
+				if($_.direct){
+					verbose "Adding direct param $($_.name)";
+					$DirectParams[$_.name] = $_.value;
+				}
+				
+				$ChatUserParams[$_.name] = $_.value;
+			}
+			
 			$VerboseEnabled = $ChatUserParams.VerboseEnabled;
-			$model 			= $ChatUserParams.model;
-			$UseJson 		= $ChatUserParams.UseJson
 			$ShowFullSend 	= $ChatUserParams.ShowFullSend
 			$ShowTokenStats = $ChatUserParams.ShowTokenStats
 			# Vou considerar isso como o número de caracter por uma questão simples...
@@ -2488,7 +2031,7 @@ function Send-PowershaiChat {
 			$Chat.num++
 			$InternalMessages = @();
 			try {
-				write-verbose "Verbose habilitado..." -Verbose:$VerboseEnabled;
+				verbose "Verbose habilitado..." 
 				
 				$Chat.LastPrompt = $prompt
 				
@@ -2528,14 +2071,7 @@ function Send-PowershaiChat {
 					$Msg | %{ AddContext $_ };
 					$FullPrompt = $ChatContext.messages;
 				}
-				
-
-				$ApiParams = @{};
-				$ApiParamsKeys | %{
-					$ApiParams[$_] = $ChatUserParams[$_]
-				}
 						
-
 				if($NoContext){
 					$FullPrompt = $Msg
 				}
@@ -2547,7 +2083,7 @@ function Send-PowershaiChat {
 						Tools 		= $null
 					}
 					
-					write-verbose "Updating ParsedTools cached...";
+					verbose "Updating ParsedTools cached...";
 					$Chat.Tools.compiled = Get-AiUserToolbox
 				}
 				
@@ -2561,11 +2097,13 @@ function Send-PowershaiChat {
 					$FullPrompt = @("s: " + $Chat.params.SystemMessageFixed) + @($FullPrompt)
 				}
 				
+				#obtem os parametros que são 
 
-				$ChatParams = $ApiParams + @{
-					prompt 		= $FullPrompt
-					Tools 		= $ToolList
-					Stream		= $Chat.params.stream
+				$ChatParams = $DirectParams +  @{
+					prompt 			= $FullPrompt
+					Tools 			= $ToolList
+					
+					
 					on 			= @{
 								
 								send = {
@@ -2633,8 +2171,8 @@ function Send-PowershaiChat {
 					$ChatParams.Verbose = $true;
 				}
 				
-				if($DisableFunctions){
-					$ChatParams.Remove('Functions');
+				if($DisableTools){
+					$ChatParams.Remove('Tools');
 				}
 				
 				write-verbose "Params: $($ChatParams|out-string)"
@@ -3004,8 +2542,10 @@ function Add-AiTool {
 	$Chat = Get-PowershaiChat $ChatId
 	$Tools = $Chat.tools.raw;
 	
+	$scope = "chat"
 	if($Global){
 		$Tools = $POWERSHAI_SETTINGS.UserTools
+		$scope = "global"
 	}
 	
 	
@@ -3013,7 +2553,15 @@ function Add-AiTool {
 		$ToolIndex = $CommandName;
 		$ToolType = "command"
 		
-		if($script){
+		#Se é uma uri vlaida
+		$uri = [uri]$CommandName
+		$IsScript = [bool]$Script;
+		
+		if($uri.IsAbsoluteUri){
+			$IsScript = $true;
+		}
+		
+		if($IsScript){
 			[string]$AbsPath = Resolve-Path $CommandName -EA SilentlyContinue
 			
 			if(!$AbsPath){
@@ -3025,14 +2573,17 @@ function Add-AiTool {
 			$ToolType = "file"
 		}
 		
-		$ToolInfo = @{
+		$ToolInfo = [PsCustomObject]@{
 			name 			= $CommandName
 			UserDescription = $description
 			type 			= $ToolType 
 			formatter 		= $formatter
 			enabled 		= $true
 			chats 			= @()
+			scope 			= $scope
 		}
+		
+		SetType $ToolInfo AiToolInfo;
 		
 		$Tools[$ToolIndex] = $ToolInfo;
 	}
@@ -3050,8 +2601,18 @@ function Add-AiTool {
 #>
 function Get-AiTools {
 	param(
-		[switch]$Enabled
+		# obter especifico pelo nome ou o proprio objeto!
+		 # Se *, lista tudo!
+			$tool = "*"
+			
+		,[switch]$Enabled
 		,$ChatId = "."
+
+		,#user global store 
+			[switch]$global 
+		
+		,#Trata -tool como um script 
+			[switch]$script 
 	)
 	
 	$Chat = Get-PowershaiChat $ChatId
@@ -3068,21 +2629,45 @@ function Get-AiTools {
 				continue
 			}
 			
-			$Result = [PsCustomObject]@{};
-			$Result | Add-Member Noteproperty type $ToolInfo.type;
-			$Result | Add-Member Noteproperty name $ToolInfo.name;
-			$Result | Add-Member Noteproperty enabled $ToolInfo.enabled;
-			$Result | Add-Member Noteproperty formatter $ToolInfo.formatter;
-			$Result | Add-Member Noteproperty scope $scope
-
 			
-			$Result
+			$ToolInfo
 		}
 	}
 
+	if(!$tool){
+		throw "POWERSHAI_GETTOOLS_EMPTY: Must inform -tool";
+	}
 	
-	ListTools $Chat.Tools.raw "chat"
-	ListTools $POWERSHAI_SETTINGS.UserTools "global"
+	if($tool -eq "*"){
+		ListTools $Chat.Tools.raw "chat"
+		ListTools $POWERSHAI_SETTINGS.UserTools "global"
+	} else {
+		if(IsType $tool AiToolInfo){
+			return $tool;
+		} else {
+			$ToolsStore = $Chat.Tools.raw
+			if($Global){
+				$ToolsStore = $POWERSHAI_SETTINGS.UserTools
+			}
+			
+			[string]$ToolIndex = $tool;
+			if($script){
+				[string]$AbsPath = Resolve-Path $tool
+				$ToolIndex = "Path:" + $AbsPath
+			} 
+			
+			$ToolInfo = $ToolsStore[$ToolIndex];
+			
+			if(!$ToolInfo){
+				throw "POWERSHAI_GETTOOLS_NOTFOUND: Tool not found, name $tool. Global=$([bool]$Global), Script=$([bool]$Script)";
+			}
+			
+			return $ToolInfo;
+		}
+	}
+	
+	
+
 }
 
 <#
@@ -3099,36 +2684,47 @@ function Remove-AiTool {
 		,[switch]$global
 	)
 	
-	$Chat = Get-PowershaiChat $ChatId
-	$Tools = $Chat.Tools.Raw;
+	begin {
+		$Chat = Get-PowershaiChat $ChatId
+		$ToolStore = $Chat.Tools.Raw;
+		$IsPath = [bool]$Script;
+		$IsGlobal = [bool]$global;
+	}
 	
-	if($tool -is [string]){
-		$name = $tool
-	} else {
-		$name = $tool.name 
+	process {
 		
-		if($tool.type -eq "file"){
-			$IsPath = $True
+		
+		if(IsType $tool AiToolInfo){
+			$IsPath = $tool.type -eq "file"
+			$IsGlobal = $tool.scope -eq "global"
+			$name = $tool.name
 		}
-	}
+		else {
+			$name = [string]$tool
+		}
+			
+		if($IsGlobal){
+			verbose "Using global tools store"
+			$ToolStore = $POWERSHAI_SETTINGS.UserTools
+		}
 		
-	if($global){
-		$Tools = $POWERSHAI_SETTINGS.UserTools
+		$ToolIndex = $name;
+		if($IsPath){
+			[string]$AbsPath = Resolve-Path $name -EA SilentlyContinue
+			$ToolIndex = "Path:" + $AbsPath;
+		}
+		verbose "Tool Index: $ToolIndex";
+		
+		
+		if($ToolStore.contains($ToolIndex)){
+			verbose "Removing tool";
+			$ToolStore.Remove($ToolIndex);
+		}
+		
+		verbose "Reseting cache";
+		#Atualiza o cache das tools!
+		Reset-PowershaiChatToolsCache -ChatId $ChatId
 	}
-	
-	$ToolIndex = $name;
-	if($script){
-		[string]$AbsPath = Resolve-Path $CommandName -EA SilentlyContinue
-		$ToolIndex = "Path:" + $AbsPath;
-	}
-	
-	
-	if($Tools.contains($ToolIndex)){
-		$Tools.Remove($ToolIndex);
-	}
-	
-	#Atualiza o cache das tools!
-	Reset-PowershaiChatToolsCache -ChatId $ChatId
 }
 
 <#
@@ -3159,35 +2755,10 @@ function Set-AiTool {
 	
 	begin {
 		$Chat = Get-PowershaiChat $ChatId
-		$Tools = $Chat.Tools.Raw;
-		if($global){
-			$Tools = $POWERSHAI_SETTINGS.UserTools
-		}
 	}
 	
 	process {	
-		[bool]$IsPath = $Script
-	
-		if($tool -is [string]){
-			$name = $tool
-		} else {
-			$name = $tool.name 
-			
-			if($tool.type -eq "file"){
-				$IsPath = $True
-			}
-		}
-		
-		if($IsPath){
-			$name = "path:" + (Resolve-Path $name -EA SilentlyContinue)
-		}
-		
-		write-verbose "Processing tool $name"
-		
-		
-
-		
-		$Tool = $Tools[$name];
+		$Tool = Get-AiTools -ChatId $ChatId -tool $tool -global:$global -script:$script 
 		
 		if($Tool){
 			$OldState = $Tool.enabled
