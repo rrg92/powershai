@@ -1,10 +1,10 @@
 ﻿# Powershai
 
-# SHORT DESCRIPTION
+# RESUMO <!--! @#Short --> 
 
 PowershAI (Powershell + AI) é um modulo que adiciona acesso a IA através do Powershell
 
-# LONG DESCRIPTION
+# DETALHES  <!--! @#Long --> 
 
 O PowershAI é um módulo que adiciona recursos de IA a sua sessão do Powershell.  
 O objetivo é facilitar e encapsular chamadas e tratamentos complexos paras as APIs dos principais serviços de IA existentes.  
@@ -71,7 +71,14 @@ Essa documentação também pode ser acessada através do comando `Get-Help` do 
 A documentação de providers é sempre disponibilizada via help `about_Powershai_NomeProvider_Topico`.  
 O tópico `about_Powershai_NomeProvider` é o ponto de partida e deve sempre conter as informações inicais para os primeiros usos, bem como as explicações para o correto uso dos demais tópicos.  
 
-# EXAMPLES
+
+## Chats  
+
+Os Chats são o principal ponto de partida e permitem que você converse com os vários LLM disponibilizados pelos providers.  
+Veja o documento [chats](CHATS.about.md) para mais informações.
+
+
+# EXEMPLOS <!--! @#Ex -->
 
 ## Uso básico 
 
@@ -89,13 +96,13 @@ ia "Olá, estou falando do Powershaui com você!"
 ```
 
 
-# NOTE
+# Informaçoes Importantes <!--! @#Note -->
 
 O PowershAI possui uma gama de comandos disponóveis.  
 Cada provider fornece uma série de comandos com uma padrão de nomenclatura.  
 Você sempre deve ler a documentação do provider para obter mais detalhes de como usá-lo.  
 
-# TROUBLESHOOTING NOTE
+# Solução de problemas <!--! @#Troub -->
 
 Apesar de possuir bastante código e ter já bastante funcionalidade, o PowershAI é um projeto novo, que está sendo desenvolvido.  
 Alguns bugs podem ser encontrados e, nesta fase, é importante que você sempre ajude reportando, através de issues, no repositório oficial em https://github.com/rrg92/powershai  
@@ -109,14 +116,12 @@ $e = $error[0];
 $e.ErrorRecord.ScriptStackTrace # Isso ajua a encontrar a linha exada onde a exception ocorreu!
 ```
 
-# SEE ALSO
+# Veja também <!--! @#Also -->
 
 - Vídeo sobre Como usar o Provider do Hugging Face: https://www.youtube.com/watch?v=DOWb8MTS5iU
 - Veja a doc de cada provider para mais detalhes sobre como usar os seus cmdlets
 
-# KEYWORDS
+# Tags <!--! @#Kw -->
 
 - Inteligência Artificial
 - IA
-
-

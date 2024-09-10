@@ -1,10 +1,10 @@
 ﻿# Providers  
 
-# SHORT DESCRIPTION
+# RESUMO <!--! @#Short --> 
 
 Providers são scripts dentro do PowershAI que contém a lógica para se comunicar e trata a respostas das APIs dos serviços de IA.
 
-# LONG DESCRIPTION
+# DETALHES  <!--! @#Long --> 
 
 Um dos pilares do PowershAI são os providers.  
 Os providers implementam os comandos que acessam as APIs específicas.  
@@ -45,7 +45,7 @@ Se você está vendo essa documentação via Get-Help, você pode usar o comando
 Se está vendo pelo repositório Git, você pode consultar diretamente acessando o subdiretório com o nome do provider.
 
 
-# EXAMPLES
+# EXEMPLOS <!--! @#Ex -->
 
 ## Listando os providers 
 

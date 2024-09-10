@@ -98,6 +98,14 @@ Documentação dos Providers
     explicações para o correto uso dos demais tópicos.
 
 
+Chats
+    Os Chats são o principal ponto de partida e permitem que você converse com
+    os vários LLM disponibilizados pelos providers.
+
+    Veja o documento
+    chats
+    para mais informações.
+
 EXAMPLES
 Uso básico
     Usar o PowershAI é muito simples. O exemplo abaixo mostra como você pode

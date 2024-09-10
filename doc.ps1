@@ -59,6 +59,40 @@
 			Raiz/cmdlets				- nao deve conter nenhum about topic!
 			Raiz/providers 				- about_Powershai_Providers
 			Raiaz/providers/<provider> 	- about_Powershai_<provider>
+			
+			
+		Os arquivos MD podem conter expressões especiais, que chamamos de DocExpressions.  
+		Essas expressões visam permitri alterar uma linha, ou bloco de linhas, enquanto permite manter a exibição do markdown limpa!  
+		Quando for compilado em um help do Powershell, essas expressões serão alteradas!
+		
+		Sintaxe:
+		
+			Inline (em qualquer linga de uma linha):
+				<!--! Expressao -->
+			
+			Multiline:
+				<!--!
+				Expressao
+				Expressao
+				!-->
+	
+		Expressao pode ser um dos deguintes:
+		
+			@Comando 
+				Executa um comando que geramlente opera na linha atual!
+				Comandos possiveis:
+					= - Substitui o conteudo da linha atual.
+								= TEXTO
+							  Aceita substituição
+				
+			String qualquer 
+				
+				Exibe a string, com parse de variávies.
+				Variáveis podem ser especificadas usando $Nome.
+				As variaveis disponiveis são:
+			
+			
+				
 #>
 param(
 	#Directory where compile 
@@ -100,14 +134,30 @@ function ParseRun($str,$vars){
 	$RunLines = @();
 	$ParsedLines = @();
 	
-	$InlineRun = {
+	$Replacer = {
 		param($m)
 		
 		[string]$Expr = $m.Groups['Expr'];
+		
+		if(!$Expr){
+			return;
+		}
+		
+		$Trimmed = $Expr.trim();
+		
+		if($Trimmed -match '^='){
+			return "<@f>$Trimmed</@f>"
+		}
+		
+		if($Trimmed -match '^@'){
+			return "<@f>$Trimmed</@f>"
+		}
+		
+		
 		return (ReplaceVars @($Expr) $Vars)
 	}
 	
-	return [regex]::Replace($str,'\<\!\-\-\!(?<Expr>.*?)\-\-\>',$InlineRun, "Singleline" ); 
+	return [regex]::Replace($str,'\<\!\-\-\!(?<Expr>.*?)\-\-\>',$Replacer, "Singleline" ); 
 	
 }
 
@@ -142,23 +192,75 @@ $LangDirs  = $SupportedLangs | %{
 }
 
 Function ParseFile($Source,$Target,$Vars){
+	
+
 	$NewContent = ParseRun (Get-Content $Source -Raw) -Vars $Vars
 	
 	$Lines = $NewContent -split "`r?`n"
 	
+	$HEADERS = @{
+		'Short' 	= "SHORT DESCRIPTION"
+		'Long' 		= "LONG DESCRIPTION"
+		'Ex' 		= "EXAMPLES"
+		'Note' 		= "NOTE"
+		'Troub' 	= "TROUBLESHOOTING NOTE"
+		'Also' 		= "SEE ALSO"
+		'Kw' 		= "KEYWORDS"
+	}
+	
 	$HeaderNum = 0;
 	$LineNum = 0;
 	$NewLines = @();
-	foreach($line in $Lines){
-		$LineNum++;
-		
-		if($Vars.AboutTopic){
-			if($LineNum -eq 2){
-				$NewLines += "## " + $Vars.AboutTopic
-			}	
-		}
+	try {
+		foreach($line in $Lines){
+			$LineNum++;
+			
+			#Parse functiomns!
+			if($Line -match '<@f>(.*?)</@f>'){
+				$Expr = $matches[1];
+						
+				if($Expr[0] -eq "="){
+					$NewLines += $Expr -replace '^=[\s\t]*','';
+				}
+				
+				if($Expr[0] -eq "@"){
+					switch -Regex ($Expr){
+						"^\@#(.+)" { 
+							$HeaderName = $matches[1];
+							
+							$HeaderValue = $HEADERS[$HeaderName];
+							
+							if(!$HeaderValue){
+								throw "INVALID_HEADER: $HeaderName";
+								continue;
+							}
+							
+						
+							$NewLines += "# $HeaderValue";
+						}				
+						
+						default {
+							throw "FunctionNotRecognized"
+						}
+					}
+				}
+				
+				continue;
+			}
+			
+			if($Vars.AboutTopic){
+				if($LineNum -eq 2){
+					$NewLines += "## " + $Vars.AboutTopic
+				}	
+			}
 
-		$NewLines += $line;
+			$NewLines += $line;
+		}
+	
+	} catch {
+		$msg = "Error:$_ | Expr=$Expr, Line:$LineNum,File:$Source";
+		$Ex = New-Object Exception($msg, $_.Exception)
+		throw $Ex;
 	}
 	
 	$NewLines | Set-Content -Path $Target -Encoding UTF8
