@@ -22,6 +22,9 @@ param(
 	,$TargetLang = $null
 	,[switch]$KeepProvider
 	,$Provider = "openai"
+	,[switch]$Force
+	,$MaxTokens = 8192
+	,$FileFilter
 )
 
 $ErrorActionPreference = "Stop";
@@ -78,6 +81,16 @@ if(!$KeepProvider){
 }
 
 
+write-host "Generating fixed translations..."
+$WaterResult = Get-AiChat -prompt @(
+	"s: Traduzir para $TargetLang. Rertornar somente o texto traduzido"	
+	"Traduzido automaticamente usando o PowershAI e IA"
+)
+
+
+$WatermarkText = $WaterResult.choices[0].message.content
+
+
 
 
 foreach($SrcFile in $SourceFiles){
@@ -85,15 +98,28 @@ foreach($SrcFile in $SourceFiles){
 	$SrcRelPath = $SrcFile.FullName.replace($SourcePath,'') -replace '^.',''
 	$FileId	= $SrcRelPath.replace('\','/');
 	
+	write-host "File: $SrcRelPath";
+	
+	if($FileFilter -and $FileId -NotLike $FileFilter -and $SrcRelPath -NotLike $FileFilter ){
+		write-host "	Eliminated by filter"
+		continue;
+	}
+	
 	$TargetFilePath = JoinPath $TargetPath $SrcRelPath;
 	$TargetFile = Get-Item $TargetFilePath -EA SilentlyContinue;
 	
-	write-host "File: $SrcRelPath";
+	
 	
 	write-host "	Calculating Hash..."
 	$SrcHash = Get-FileHash $SrcFile;
 	
 	$TranslationInfo = $TranslationMap.$FileId;
+	
+	if($Force){
+		write-host "	### Forcing!":
+		$TargetFile = $null
+		$TranslationInfo = $null;
+	}
 	
 	$TargetHash = $null
 	$FileBackup = $null
@@ -137,26 +163,35 @@ foreach($SrcFile in $SourceFiles){
 	write-host "	Translating file...";
 	$FileContent = Get-Content -Raw $SrcFile;
 	
+	write-host "	Length: $($FileContent.length)";
+	
 	# Divide o markdown em blocos, para evitar ultrassar o size do modelo!
-	$BlockSize 	= 6000;
+	$BlockSize 	= $MaxTokens - 1000;
 	$FullTranslation = "";
 	
 	$Control = @{
 		buffer 		= @()
 		TotalChars 	= 0
 		text 		= ""
+		blockNum	= 0
 	}
 	
 	Function Translate {
 		$BufferText 		= $Control.buffer -Join "`n";
 		$Control.buffer 	= @();
 		$Control.TotalChars = 0;
+		$Control.blockNum++
 		
-		write-host "	Buffer:" $BufferText.length;
+		write-host "	Num: $($Control.blockNum) Buffer:" $BufferText.length;
+		
+		$Initial = @()
+
 		
 		$system = @(
 			"Traduza o texto do usuário para a linguagem de código $($TargetLang). Retorne APENAS o texto traduzido."
 			"Manter o conteúdo original entre <!--! -->. Traduzir comentários de código, nomes de funções de exemplo. Não traduzir nomes de comandos do PowershAI."
+			"Não altere ou complemente partes, foque apenas na tradução do texto."
+			$Initial
 		) -Join "`n"
 		
 		$prompt = @(
@@ -165,7 +200,14 @@ foreach($SrcFile in $SourceFiles){
 		)
 		
 		write-host "	Invoking AI..."
-		$result = Get-AiChat -prompt $prompt 
+		$result 	= Get-AiChat -prompt $prompt -MaxTokens $MaxTokens
+		$airesult 	= $result.choices[0]
+		$usage 		= $result.usage;
+		write-host "	Usage: Input = $($usage.prompt_tokens), Output = $($usage.completion_tokens)"
+		if($airesult.finish_reason -ne "stop"){
+			write-warning "	AIStopREason: $($airesult.finish_reason), this can produce incorrect results!"
+		}
+		
 		$translated = $result.choices[0].message.content;
 		write-host "	Translated: $($translated.length) chars"
 		$Control.text += $translated
@@ -179,6 +221,7 @@ foreach($SrcFile in $SourceFiles){
 			$EstTotal 	= $Control.TotalChars + $LineLen;
 			
 			if($EstTotal -ge $BlockSize){
+				
 				Translate
 			}
 			
@@ -202,7 +245,12 @@ foreach($SrcFile in $SourceFiles){
 	
 	try {
 		write-host "	Updating target content..."
-		$Translated | Set-Content -Encoding UTF8 -Path $TargetFilePath
+		@(
+			$Translated
+			''
+			''
+			'_'+$WatermarkText+'_'
+		) | Set-Content -Encoding UTF8 -Path $TargetFilePath
 	
 		# check if file is auto updated!
 		# aCalculate hash!
