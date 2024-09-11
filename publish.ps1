@@ -4,7 +4,7 @@
 [CmdletBinding()]
 param(
 	$ApiKey = $Env:PSGALERY_KEY
-	[switch]$CompileDoc
+	,[switch]$CompileDoc
 )
 
 $ErrorActionPreference = "Stop";
