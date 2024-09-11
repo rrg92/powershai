@@ -3,7 +3,7 @@
 O Hugging Face é o maior repositório de modelos de IA do mundo!  
 Lá, você tem acesso a uma gama incrível de modelos, datasets, demonstrações com o Gradio, e muito mais!  
 
-É o GitHub da Inteligência Artificial, comercial e open source!
+É o GitHub da Inteligência Artificial, comercial e open source! 
 
 O provider do Hugging Face do PowershAI conecta o seu powershell com uma gama incrível de serviços e modelos.  
 
@@ -50,7 +50,7 @@ Porém, você vai precisar de um token caso necessite acessar recursos privados:
 
 
 # Esturtura de comandos do provider Hugging Face  
-
+ 
 O provider do Hugging Face está organizado em 3 principais grupos de comandos: Gradio, Gradio Session e Hugging Face.  
 
 

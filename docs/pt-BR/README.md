@@ -28,7 +28,7 @@ Exemplos de providers famosos que já estão implementandos completa ou parcialm
 - Ollama
 - Maritalk (LLM brasileiro)
 
-Para começar a usar o PowershAI é bem simples:
+Para começar a usar o PowershAI é bem simples: 
 
 ```powershell 
 # Instale o modulo!

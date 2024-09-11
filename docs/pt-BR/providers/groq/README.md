@@ -1,4 +1,4 @@
-# Provider GROQ
+﻿# Provider GROQ
 
 Groq é um serviço que oferece diversos LLM que rodam em uma tecnologia chamada LPU, criada por eles.  
 A resposta é muito rápida!

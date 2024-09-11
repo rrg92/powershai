@@ -1,4 +1,4 @@
-# Chats 
+﻿# Chats 
 
 
 # Introdução <!--! @#Short --> 
@@ -15,7 +15,7 @@ Eles proveem um jeito padrão para estas funcionalidades:
 - Histórico de chats 
 - Contexto 
 - Pipeline (usar o resultaod de outros comandos)
-- Function callign (executar comandos a pedido do LLM)
+- Tool calling (executar comandos a pedido do LLM)
 
 Nem todos os providers implementar o suporte aos Chats.  
 Para saber se um provider possui o suporte ao chat, use o cmdlet Get-AiProviders, e consulte a propriedade "Chat". Se for $true, então o chat é suportado.  
@@ -111,9 +111,16 @@ O prompt do usuário é concatenado logo em seguida.
 Com isso, cria-se um efeito poderoso: Você pode facilmente integrar as saídas dos comandos com seus prompts, usando um simples pipes, que é uma operação comum no Powershell.  
 O LLM tende a considerar bem.  
 
-Você pode controlar como esse texto é enviando usando o comando `Set-PowershaiChatContextFormatter`.  
-Este comando dita como o contexto serão formatados. Por exemplo, você pode formatar como JSON ou criar um script customizado.  
-Veja o help deste comando para mais informaões de como configurar o contexto.   
+Apesar de possuir um valor padrão, você tem total controle de como esse objetos são enviados.  
+A primeria forma de controlar é como o obejto é convertido para texto.  Como o prompt é uma string, é necessário converter esse objeto para texto.  
+Por padrão, ele converte em uma representação padrão do Powershell, conforme o tipo (usando o comando `Out-String`).  
+Você pode alterar isso usando o comando `Set-PowershaiChatContextFormatter`. Você pode definir, por exemplo, JSON, tabela, e até um script customizado para ter total controle.  
+
+A outra forma de controlar como o contexto é enviado é usando o parâmetro do chat `ContextFormat`.  
+Esse parâmetro controla toda a mensagem que será injetada no prompt. Ele é um scriptblock.  
+Você deve reotrna um array de string, que equivale ao prompt enviado.  
+Esse script tem acesso a parâmetros como o objeto formatado que está passando no pipeline, os valores dos parâmetros do comando Send-PowershaiChat, etc.  
+O valor default do script é hard-coded, e você deve conferir direto no código para saber como ele envia (e para um exemplo de como implementar o seu próprio).  
 
 
 ###  Tools

@@ -2,7 +2,7 @@
 
 # RESUMO <!--! @#Short --> 
 
-Esta é a documentação oficial do provider OpenAI do PowershAI. 
+Esta é a documentação oficial do provider OpenAI da PowershAI.
 
 # DETALHES  <!--! @#Long --> 
 
