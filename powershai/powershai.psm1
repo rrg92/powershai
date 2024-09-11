@@ -111,6 +111,45 @@ function SetType($obj, $name){
 	}
 }
 
+# retorna a lista de parametros do caller!
+function GetMyParams(){
+
+	$cmd = Get-PSCallStack
+	$Caller = $cmd[1];
+	
+	$CmdParams = @($Caller.InvocationInfo.MyCommand.Parameters.values)
+	
+	$ParamList = @{};
+	
+	function GetCommonParams
+	{
+		[CmdletBinding()]
+		param()
+		$MyInvocation.MyCommand.Parameters.Keys
+	}
+	
+	$CommonParams = GetCommonParams
+	
+	foreach($Param in $CmdParams){
+		if($Caller.InvocationInfo.MyCommand.CmdletBinding){
+			if($Param.name -in $CommonParams){
+				continue;
+			}
+		}
+		
+		$ParamList[$Param.name] = Get-Variable -Name $Param.name -Scope 1 -ValueOnly -EA SilentlyContinue
+		
+	}
+	
+	
+	
+	return @{
+		bound 	= $ParamList
+		args 	= $Caller.InvocationInfo.UnboundArguments
+		caller 	= $Caller
+	}
+}
+
 <#
 	.DESCRIPTION  
 		FAciltia a criação de exceptions customizadas!
@@ -1297,6 +1336,16 @@ function New-PowershaiParameters {
 		 #O provider deve implementar o suporte a esse.  
 		 #Para usá-lo você deve saber os detalhes de implementação do provider e como a API dele funciona!
 			$RawParams = @{}
+			
+			
+		,# Controla o template usado ao injetar dados de contexto!
+		 # Este parâmetro é um scriptblock que deve retornar uma string com o contexto a ser injetado no prompt!
+		 # Os parâmetros do scriptblock são:
+		 #		FormattedObject 	- O objeto que representa o chat ativo, já formatado com o Formatter configurado
+		 #		CmdParams 			- Os parâmetros passados para Send-PowershaAIChat. É o mesmo objeto retorndo por GetMyParams
+		 #		Chat 				- O chat no qual os dados estão sendo enviados.
+		 # Se nulo, irá gerar um default. Verifique o cmdlet Send-PowershaiChat para detalhes
+			$ContextFormat = $null
 	)
 	
     # Get the command name
@@ -1770,14 +1819,26 @@ function ConvertTo-PowershaiContextTable {
 $POWERSHAI_FORMATTERS_SHORTCUTS['table'] = 'ConvertTo-PowershaiContextTable'
 
 
-
+<#
+	.DESCRIPTION 
+		Formato um objeto para ser injetado no contexto!  
+		Este cmdlet é usado pelo Send-PowershaiChat quando o contexto é ativado.  
+		Você pode invocá-lo diretamente caso queira manualmente injetar dados e/ou debugar o processo!
+#>
 function Format-PowershaiContext {
 	[CmdletBinding()]
 	param(
-		$obj
-		,$params
-		,$func 
-		,$ChatId = "."
+		#Objeto qualquer a ser injetado 
+			$obj
+			
+		,#Parâmetro a ser passado para a função formatter 
+			$params
+			
+		,#Função q ser nivocada. Se não especificado usa o defualt do chat.
+			$func 
+			
+		,#Chat em qual operar 
+			$ChatId = "."
 	)
 	
 	write-verbose "Getting ChatId..."
@@ -1816,13 +1877,34 @@ function Format-PowershaiContext {
 }
 
 <#
+	.SYNOPSIS 
+		Envia uma mensagem em um Chat do Powershai
+	
 	.DESCRIPTION 
-		Envia uma mensagem para o modelo do provider configurado e escreve a resposta na tela!
+		Este cmdlet permite que você envie uma nova mensagem para o LLM do provider atual.  
+		Por padrão, ele envia no chat ativo. Você pode sobrescrever o chat usando o parâmetro -Chat.  Se não houver um chat ativo, ele irá usar o default.  
+		
+		Diversos parâmetros do Chat afetam como este comando. Veja o comando Get-PowershaiChatParameter para mais info sobre os parâmetros do chat.  
+		Além dos parâmetros do chat, os próprios parâmetros do comando podem sobrescrever comportamento.  Para mais detalhes, consule a documentação de cada parâmetro deste cmdlet usando get-help.  
+		
+		Para simplicidade, e manter a liha de comando limmpa, permitindo o usuário focar mais no prompt e nos dados, alguns alias são dosponibilizados.  
+		Estes alias podem ativar certos parâmetros.
+		São eles:
+			ia
+				Abreviação de "Inteligência Artifical" em português. Este é um alias simples e não muda nenum parâmetro. Ele ajuda a reduzir bastante a linha de comando.
+			ai
+				Abreviação de "Artificial Inteligence", em inglês. Este também e um alias simples e muda nenhum parâmetro. Ajuda a reduzir bastante a linha de comando.
+			
+			iat,ait
+				O mesmo que Send-PowershaAIChat -Temporary
+				
+			io,ao
+				O mesmo que Send-PowershaAIChat -Object
 #>
 function Send-PowershaiChat {
-	[CmdletBinding()]
+	[CmdletBinding(PositionalBinding=$false)]
 	param(
-		[parameter(mandatory=$false, position=1)]
+		[parameter(mandatory=$false, position=0, ValueFromRemainingArguments)]
 		# o prompt a ser enviado ao modelo 
 			$prompt
 		
@@ -1866,14 +1948,40 @@ function Send-PowershaiChat {
 			
 		,# Parametros da funcao de formatacao
 			$FormatterParams = $null
+			
+		,# Retorna as mensagens de volta no pipeline, sem escrever direto na tela!
+		 # Esta opção assume que o usuário irá ser o responsável por dar o correto destino da mensagem!
+		 # O objeto passado ao pipeline terá as seguintes propriedades:
+		 #		text 			- O texto (ou trecho) do texto retornado pelo modelo 
+		 #		formatted		- O texto formatado, incluindo o prompt, como se fosse escrito direto na tela (sem as cores)
+		 #		event			- O evento. Indica o evento que originou. São os mesmos eventos documentaados em Invoke-AiChatTools
+		 #		interaction 	- O objeto interaction gerado por Invoke-AiChatTools
+			[switch]$PassThru
 	)
 	
 	
 	begin {
 		$ErrorActionPreference = "Stop";
 		
-		$MyInvok = $MyInvocation;
-		$CallName = $MyInvok.InvocationName;
+		$prompt = @($prompt) -Join " "
+		
+		$MyInvok 		= $MyInvocation;
+		$CallName 		= $MyInvok.InvocationName;
+		$MyRealName 	= $MyInvocation.MyCommand.Name;
+		$CurrentName 	= $CallName;
+		$MyParameters 	= GetMyParams
+		
+		# resolve até chegar no command!
+		$LoopProtection = 50;
+		while($CurrentName -ne $MyRealName -and $LoopProtection--){
+			$CallName = $CurrentName;
+			$CurrentName = (Get-Alias $CurrentName).Definition
+		}
+		
+		if($LoopProtection -lt 0){
+			write-warning "Cannot determined alias. This can be a bug!";
+		}
+		
 		
 		if($CallName -eq "io"){
 			write-verbose "Invoked vias io alias. Setting Object to true!";
@@ -1898,6 +2006,44 @@ function Send-PowershaiChat {
 		$AllContext = @()
 		$IsPipeline = $PSCmdlet.MyInvocation.ExpectingInput   
 		
+		$MainCmdlet = $PsCmdLet;
+		
+		$ChatMyParams 		= Get-PowershaiChatParameter  -ChatId $ActiveChat.id
+		$CurrentChatParams 	= @{
+			all = @{}
+			direct = @{}
+		};
+		
+		$ChatMyParams | %{
+			if($_.direct){
+				verbose "Adding direct param $($_.name)";
+				$CurrentChatParams.direct[$_.name] = $_.value;
+			}
+			
+			$CurrentChatParams.all[$_.name] = $_.value;
+		}
+		
+		$ContextFormat = $CurrentChatParams.all.ContextFormat;
+		
+		if(!$ContextFormat){
+			$ContextFormat = {
+				param($Params)
+				
+				$ContextObject 	= $Params.FormattedObject;
+				$UserPrompt 	= $Params.CmdParams.bound.prompt;
+				
+				@(
+					"Responda a mensagem com base nas informacoes de contexto que estao na tag <contexto></contexto>"
+					"<contexto>"
+					$ContextObject
+					"</contexto>"
+					"Mensagem:"
+					$UserPrompt	
+				)
+			}
+		}
+		
+		
 		function ProcessPrompt {
 			param($prompt)
 			
@@ -1921,6 +2067,7 @@ function Send-PowershaiChat {
 				
 				
 				function FormatPrompt {
+					
 					$str = PowerShaiProviderFunc "FormatPrompt" -Ignore -FuncParams @{
 						model = $model
 					}
@@ -1958,10 +2105,24 @@ function Send-PowershaiChat {
 					$prempt = FormatPrompt;
 					$str 	= "`$($prempt)$text`n`n" 
 				}
+
+				if($PassThru){
+					$MessageOutput = @{
+						event 		= $EventName
+						text 		= $text
+						formatted 	= $str
+						interaction = $interaction
+					}
+					
+					$MainCmdlet.WriteObject($MessageOutput);
+					return;
+				}
 				
 				if($str){
 					write-host @WriteParams $Str;
 				}
+				
+				
 			}
 
 			#Get active chat!
@@ -1975,21 +2136,12 @@ function Send-PowershaiChat {
 			$ChatStats 			= $Chat.stats;
 			$ChatMetadata 		= $Chat.metadata;
 			$UserFirstName		= $Chat.UserInfo.AllNames[0];
-			$AllParams			= Get-PowershaiChatParameter  -ChatId $ActiveChat.id
 			$ChatContext 		= $Chat.context;
 			
 			write-verbose "Iniciando..."
 			
-			$ChatUserParams = @{}
-			$DirectParams = @{}
-			$AllParams | %{
-				if($_.direct){
-					verbose "Adding direct param $($_.name)";
-					$DirectParams[$_.name] = $_.value;
-				}
-				
-				$ChatUserParams[$_.name] = $_.value;
-			}
+			$ChatUserParams = $CurrentChatParams.all
+			$DirectParams 	= $CurrentChatParams.Direct;
 			
 			$VerboseEnabled = $ChatUserParams.VerboseEnabled;
 			$ShowFullSend 	= $ChatUserParams.ShowFullSend
@@ -2124,6 +2276,11 @@ function Send-PowershaiChat {
 									$funcName = $interaction.toolResults[-1].name
 									
 									
+									if($PassThru){
+										$MainCmdlet.WriteObject(@{event="func";interaction=$interaction});
+										return;
+									}
+									
 									write-host -ForegroundColor Blue "$funcName{" -NoNewLine
 									
 									if($Chat.params.ShowArgs){
@@ -2142,6 +2299,11 @@ function Send-PowershaiChat {
 									
 									$LastResult = $funcName = $interaction.toolResults[-1].resp.content;
 									
+									if($PassThru){
+										$MainCmdlet.WriteObject(@{event="funcresult";interaction=$interaction});
+										return;
+									}
+									
 									if($Chat.params.PrintToolsResults){
 										write-host "Result:"
 										write-host $LastResult
@@ -2151,6 +2313,11 @@ function Send-PowershaiChat {
 						
 								exec = {
 									param($interaction)
+									
+									if($PassThru){
+										$MainCmdlet.WriteObject(@{event="exec";interaction=$interaction});
+										return;
+									}
 									
 									write-host -ForegroundColor Blue "}"
 									write-host ""
@@ -2208,9 +2375,9 @@ function Send-PowershaiChat {
 				$Chat.history += $HistoryEntry
 						
 				if($Object){
-					write-verbose "Object mode! Parsing json..."
+					verbose "Object mode! Parsing json..."
 					$JsonContent = @($Ret.answer)[0].choices[0].message.content
-					write-verbose "Converting json to object: $JsonContent";
+					verbose "Converting json to object: $JsonContent";
 					$JsonObject = $JsonContent | ConvertFrom-Json;
 					$ResultObj = $JsonObject;
 					
@@ -2295,22 +2462,24 @@ function Send-PowershaiChat {
 		function ProcessContext {
 			param($context)
 			
-			IF($PrintContext){
+			if($PrintContext){
 				write-host -ForegroundColor Blue Contexto:
 				write-host -ForegroundColor Blue $Context;
 			}
 			
-			write-verbose "Adding to context: $($Context|out-string)"
-			$FinalPrompt = @(
-				"Responda a mensagem com base nas informacoes de contexto que estao na tag <contexto></contexto>"
-				"<contexto>"
-				$context
-				"</contexto>"
-				"Mensagem:"
-				$prompt
-			)
 			
-			ProcessPrompt $FinalPrompt
+			
+			$ContextScriptParams = @{
+				FormattedObject = $Context
+				CmdParams 		= $MyParameters
+				Chat 			= $ActiveChat
+			}
+			
+			
+			$ContextPrompt = & $ContextFormat $ContextScriptParams
+			
+			write-verbose "Adding to context: $($Context|out-string)"
+			ProcessPrompt $ContextPrompt
 		}
 	
 
@@ -2903,10 +3072,15 @@ function Get-AiUserToolbox {
 
 
 Set-Alias -Name PowerShai -Value Start-PowershaiChat
+
 Set-Alias -Name ia -Value Send-PowershaiChat
 Set-Alias -Name iat -Value Send-PowershaiChat
 Set-Alias -Name io -Value Send-PowershaiChat
-Set-Alias -Name iaf -Value Update-PowershaiChatFunctions
+
+Set-Alias -Name ai 	-Value ia
+Set-Alias -Name ait -Value iat
+Set-Alias -Name ao 	-Value io
+
 
 <#
 function prompt {
