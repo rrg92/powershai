@@ -1,26 +1,6 @@
 {
-    "providers/ollama/README.md":  {
-                                       "SrcHash":  "F413EF1C4BFB9E7E63E6F50CDF4DDB851D3F57E4D146CFFC873D82DA8C2A4FD4",
-                                       "TargetHash":  "BBAB0110C723C0C4D7B936EB124ADAF6F7EB12DD417647FDCE7153E1EFE73FD8"
-                                   },
-    "CHATS.about.md":  {
-                           "SrcHash":  "2630A3C1D96C4BB98D2168452F4145AFCCE88D2734D30045A98DD27267DE6CB9",
-                           "TargetHash":  "A36B4BE4921CFAE70DABCB9EC7D78441F17C885BCCB4BFF8E0EC5885A9A16334"
-                       },
     "providers/huggingface/README.md":  {
                                             "SrcHash":  "2C58332EBD5C7C26A85C90EAD1177199F42AD1F4B3812C90B00E67B57B2D1A74",
-                                            "TargetHash":  "E95B08C8F0609BA8A1D1F80611DB260B4DF66B81CCF0DEEAC23B72D64554F138"
-                                        },
-    "providers/maritalk/README.md":  {
-                                         "SrcHash":  "6E10FE375DA3A983D3A2F20F0A48B5C9E533D29CAC7905A1EF96C7F414C63030",
-                                         "TargetHash":  "E2A4C1DC1DE1985060CB87D283C0F2F5D6B1E714846DA3E1F52824BAF7EE044B"
-                                     },
-    "providers/groq/README.md":  {
-                                     "SrcHash":  "24BF3F0474B3E00B8EDB6AE6C7CEA2C25C6A5917469218A48526A533DA300673",
-                                     "TargetHash":  "5005C17716314E522440D13DDFB690D801EA21CB005DA48D1A08A27E23EC93BA"
-                                 },
-    "providers/openai/README.md":  {
-                                       "SrcHash":  "A7A339DFAB9E18E54C9CD15B9D7BA3092BE66D52169F04546BB56AEE252DDC66",
-                                       "TargetHash":  "546F72431C43A5B80AB45496E6C4184DF026E035A54426B94BC48FB43F3840FE"
-                                   }
+                                            "TargetHash":  "9872A5981DFEA75D21B5F0162712CEC20F4C891CE45FD3C01086DCCA818BD31B"
+                                        }
 }

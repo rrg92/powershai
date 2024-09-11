@@ -1,8 +1,11 @@
-﻿<!--! # Provider OLLAMA  -->
+﻿# Provider OLLAMA  
 
-<!--! # Initial configurations  -->
+# Initial Configurations 
 
-<!--! * Use Set-OllamaUrl URL  -->
-<!--! Use to optionally pass an alternative URL. -->
+* Use Set-OllamaUrl URL  
+Use to optionally pass an alternative URL.
 
-<!--! * Configure a default model with `Set-AiDefaultMode Name` -->
+* Set a default model with `Set-AiDefaultMode Name`
+
+
+_Automatically translated using PowershAI and AI._

@@ -1,8 +1,11 @@
 ﻿# Fournisseur OLLAMA  
 
-# Configurations initiales 
+# Configurations initiales  
 
 * Utilisez Set-OllamaUrl URL  
-Utilisez pour Facultativement, vous pouvez passer une URL alternative.
+Utilisez pour optionnellement passer une URL alternative.  
 
 * Configurez un modèle par défaut avec `Set-AiDefaultMode Nom`
+
+
+_Traduit automatiquement en utilisant PowershAI et IA._
