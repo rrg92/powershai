@@ -73,13 +73,14 @@ if(Test-Path $TranslationMapFile){
 # List all source files!
 $SourceFiles = gci -rec (JoinPath $sourcePath *.md)
 
-$NewMap = @{};
+
 
 if(!$KeepProvider){
 	write-host "Enforcing provider $Provider";
 	Set-AiProvider $provider;
 }
 
+$CurrentProvider = Get-AiCurrentProvider
 
 write-host "Generating fixed translations..."
 $WaterResult = Get-AiChat -prompt @(
@@ -90,7 +91,12 @@ $WaterResult = Get-AiChat -prompt @(
 
 $WatermarkText = $WaterResult.choices[0].message.content
 
+$NewMap = @{}
+$TranslationMap.psobject.properties | %{
+	$NewMap[$_.name] = $_.Value;
+}
 
+$TranslationMap = $NewMap;
 
 
 foreach($SrcFile in $SourceFiles){
@@ -113,7 +119,7 @@ foreach($SrcFile in $SourceFiles){
 	write-host "	Calculating Hash..."
 	$SrcHash = Get-FileHash $SrcFile;
 	
-	$TranslationInfo = $TranslationMap.$FileId;
+	$TranslationInfo = $TranslationMap[$FileId];
 	
 	if($Force){
 		write-host "	### Forcing!":
@@ -141,17 +147,13 @@ foreach($SrcFile in $SourceFiles){
 		$AiHash = $TranslationInfo.TargetHash;
 		
 		if($AiHash -ne $TargetHash.Hash){
-			write-host "	FileChanged. Will not be updated...";
+			$TranslationMap.remove($FileId);
+			write-host "	FileChanged. Will not be updated more...";
 			continue;
 		}
 		
 		# Neste ponto, assume que o arquivo pode ser atualizavel!s
 	}
-	
-	#Atualiza o map!
-	#Mesmo que nao haja atualizcoes nessa iteracao, garantimos que os dados serão escrito na proxima vez em que o arquivo de map for atualziado!
-	#Se ele nunca for atualizado, então, não tem problema, significa que o valor antigo não foi sobrescrito!
-	$NewMap[$FileId] = $TranslationInfo;
 	
 	# Checa se mudou!
 	if($TranslationInfo.SrcHash -eq $SrcHash.Hash){
@@ -174,6 +176,9 @@ foreach($SrcFile in $SourceFiles){
 		TotalChars 	= 0
 		text 		= ""
 		blockNum	= 0
+		InputTokens = 0
+		OutputTokens = 0
+		LastModel = $null
 	}
 	
 	Function Translate {
@@ -211,6 +216,9 @@ foreach($SrcFile in $SourceFiles){
 		$translated = $result.choices[0].message.content;
 		write-host "	Translated: $($translated.length) chars"
 		$Control.text += $translated
+		$Control.InputTokens 	+= $usage.prompt_tokens
+		$Control.OutputTokens 	+= $usage.completion_tokens
+		$Control.LastModel 		= $result.model;
 	}
 	
 	if($FileContent.length -gt $BlockSize){
@@ -221,8 +229,7 @@ foreach($SrcFile in $SourceFiles){
 			$EstTotal 	= $Control.TotalChars + $LineLen;
 			
 			if($EstTotal -ge $BlockSize){
-				
-				Translate
+				$null = Translate
 			}
 			
 			$Control.buffer += $line;
@@ -234,7 +241,10 @@ foreach($SrcFile in $SourceFiles){
 	
 	Translate
 	
-	$Translated = $Control.text
+	$Translated 	= $Control.text
+	$InputTokens 	= $Control.InputTokens
+	$OutputTokens 	= $Control.OutputTokens
+	$Model 			= $Control.LastModel
 	write-host "	Translated Length: $($Translated.length)";
 	
 	write-host "	Creating target directories..."
@@ -258,12 +268,16 @@ foreach($SrcFile in $SourceFiles){
 		
 		write-host "	Creating new map..."
 		$NewMap[$FileId] = @{
-			SrcHash 	= $SrcHash.Hash
-			TargetHash	= $TargetNewHash.Hash;
+			SrcHash 		= $SrcHash.Hash
+			TargetHash		= $TargetNewHash.Hash
+			Provider 		= $CurrentProvider.name 
+			Model 			= $Model 	
+			InputTokens 	= $InputTokens 
+			OutputTokens	= $OutputTokens
 		}
 		
 		write-host "	Updating $TranslationMapFile";
-		$TranslationMapJson = $NewMap | ConvertTo-Json	
+		$TranslationMapJson = $TranslationMap | ConvertTo-Json	
 		Set-Content -Path $TranslationMapFile -Value $TranslationMapJson
 	} catch {
 		# Restore file backup!
