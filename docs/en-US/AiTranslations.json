@@ -1,6 +1,438 @@
 {
+    "cmdlets/Wait-HuggingFaceSpace.md":  {
+                                             "SrcHash":  "D3979A88CD26CDF994063BF49844F51AB979B061E08D5C2A46C1F00891597985",
+                                             "TargetHash":  "FDC3572EE0B6E74E3C48E9F90CE1106297949B9B3A7C289423325047EE8F7AED"
+                                         },
+    "cmdlets/Set-PowershaiChatTool.md":  {
+                                             "SrcHash":  "6A61014754BEA3D3952220466FA136B75A7A28DAE5E3B67182E4AB81B55186B4",
+                                             "TargetHash":  "516F7988771428B465F7587759199150B5F7192F669AE941B1F55BDE59D0FF8E"
+                                         },
+    "providers/groq/README.md":  {
+                                     "SrcHash":  "24BF3F0474B3E00B8EDB6AE6C7CEA2C25C6A5917469218A48526A533DA300673",
+                                     "Provider":  "openai",
+                                     "InputTokens":  214,
+                                     "TargetHash":  "07E8685113340FB6A0C8010D7763B88AB94B4BC705C325865BA22BC43E11F50A",
+                                     "Model":  "gpt-4o-mini-2024-07-18",
+                                     "OutputTokens":  86
+                                 },
+    "cmdlets/Get-GoogleModels.md":  {
+                                        "SrcHash":  "FBEBA2551707A4973405AA669FEB141C0152B07D90D20C4542DFFFF91F2C1FB3",
+                                        "TargetHash":  "E2A4225D4D1A270E17F8FE856745D5A40F54C615F00FA3A47054A669D6C4DB42"
+                                    },
+    "cmdlets/Reset-PowershaiCurrentChat.md":  {
+                                                  "SrcHash":  "535CC8BCD06FBBAC470B3542A617A8C0CA6833D2696831CB41FE645F8029A1D4",
+                                                  "TargetHash":  "8B9FC808A2380BEA38AFE38E335064FCBC24FA7B6E9722AA7DBB0554357A5FF1"
+                                              },
+    "cmdlets/Get-MaritalkChat.md":  {
+                                        "SrcHash":  "45F55FE267823922274B17E0F28167630FC630B985206F587DD031547951037C",
+                                        "TargetHash":  "04FAC9E2916D29D65C93CD211823299032D0F04CB5412596EDCD5C2FDBA9B1AF"
+                                    },
+    "cmdlets/Get-AiProviders.md":  {
+                                       "SrcHash":  "03B7162609E0C32A458A1956B075796DF742711B52EF2FCD9A27C8DC5691E8B4",
+                                       "TargetHash":  "2E58785B8C6FFC91731532894CE7571763F11B71A7EF1B961D016CCD59C3D6A6"
+                                   },
+    "cmdlets/Format-PowershaiContext.md":  {
+                                               "SrcHash":  "594114CC962657CFD1DD1AD2AA36A1F74F2F001EA9317D95DEF60619E8944DBC",
+                                               "TargetHash":  "C629E99081F1981B8EA3AB156B6E2DA6FB6087E79BF42BCAE8D35790567D66C1"
+                                           },
+    "cmdlets/Get-PowershaiHelp.md":  {
+                                         "SrcHash":  "E6896B5709C87426EAE328EBDC50E614E7CC7F10846346D7185797CECF8738A3",
+                                         "TargetHash":  "6D29C50BB90B6A614972375595C1522C33BD7A18F156C84E9A1E283A9971B028"
+                                     },
+    "cmdlets/Get-AiCurrentProvider.md":  {
+                                             "SrcHash":  "EF7BD44928E1530E1A3A8BE036D29898F3CEBE76698B5D6364B8EE57EC6E1DC8",
+                                             "TargetHash":  "FC5AD6A6788902479E50904426E9158F5F25C1ED1E7E2BF3257CBB5930A79DCD"
+                                         },
+    "cmdlets/Invoke-GradioDynamicApi.md":  {
+                                               "SrcHash":  "CFB777A2415D481D690ABC48B0D44144DA39874320AD4AA792FA95A0339E93AD",
+                                               "TargetHash":  "1DA2F1E79F9ACE06FD5036C7E421D113A3E7B10A1D0BCCABA5838DBDD67C3259"
+                                           },
+    "cmdlets/Clear-PowershaiChat.md":  {
+                                           "SrcHash":  "091DB200E1858B7F3F10F79D7A30065964681C17F7C413D835433F45ADB5C3CD",
+                                           "TargetHash":  "D58E65B324B3A15BA68068E9E7C6556099A15B72111B924CEF2F6810D9F6FEF3"
+                                       },
+    "cmdlets/Remove-GradioSessionApi.md":  {
+                                               "SrcHash":  "5C6532E49163DB550D1D1746707B9FC934A7849CB7EF6BA6F7921E55399D80CF",
+                                               "TargetHash":  "5EC1B47F2D4AE8CD3CEF25676CE7E10BD11C381D4A1965DCE5996C69DE3834E0"
+                                           },
+    "cmdlets/Set-PowershaiChatParameter.md":  {
+                                                  "SrcHash":  "B72984565B7593CC6FCBC2C5CD66D7B99D82B1E1F7CDBB9C6321EC917C14E02C",
+                                                  "TargetHash":  "FC5551A7BB4671B2F3C1C4964BB9DC971B7365BDBB74171FCB38934F87FC3EB6"
+                                              },
+    "providers/HUGGING-FACE.md":  {
+                                      "SrcHash":  "BD8D181B88F5038F561DD824BD059DDECC7A0DA375FF7D77EF6CF56A50712C31",
+                                      "Provider":  "openai",
+                                      "InputTokens":  156,
+                                      "TargetHash":  "BCA6223B5FBD6ED13D6A959C97BA7134086B8AC04FEE58514FAA5EBF15C2A61E",
+                                      "Model":  "gpt-4o-mini-2024-07-18",
+                                      "OutputTokens":  28
+                                  },
+    "cmdlets/Remove-GradioSession.md":  {
+                                            "SrcHash":  "8E6C672598C2DB7942D2BA829ABF7B6825D513B2CE2160E802751F400FBF110E",
+                                            "TargetHash":  "36524923F484E87980564AA17924AB162881431B600D24CC0B8E99D38FBDA865"
+                                        },
+    "cmdlets/Set-GradioSession.md":  {
+                                         "SrcHash":  "6700A197E4DE3D577C65B9CDB480814F37710382E45D88930F813A0C18D9D3EA",
+                                         "TargetHash":  "89B3FE6448F57841306A058A44CCA32DA391488834118DE32A6B3E1D98BF72DF"
+                                     },
+    "cmdlets/Set-MaritalkToken.md":  {
+                                         "SrcHash":  "F0B9988097F7A3B1AEF1AE5D34282B391413D32BA91CDAE09975311695D76A25",
+                                         "TargetHash":  "42DA29F1B5AEF0745CD586EA0B3D19D7BF9E1E99C909B84B83D4CAAEDA729CE7"
+                                     },
+    "cmdlets/Set-HuggingFaceToken.md":  {
+                                            "SrcHash":  "177A3B87D02AC840468AB7FFAC8BF5CCB101B7CF9F0A43A48876FD12C5712C9D",
+                                            "TargetHash":  "BB14FB9AA64583F50192CD2E5772097753E85E38B881CFEB46B2161485E389F6"
+                                        },
+    "cmdlets/ConvertTo-PowershaiContextList.md":  {
+                                                      "SrcHash":  "2FE2D6F15E09B764456B17E5368C28DBDF6C6F80CE734CCDE8EC910AA511255B",
+                                                      "TargetHash":  "2AC64D124EF17102D3F855E8DED5148BC7E25AF461B001D9957DB7CCB77A5EF5"
+                                                  },
+    "cmdlets/ConvertTo-OpenaiMessage.md":  {
+                                               "SrcHash":  "7D80B0B492A7705328B42555BB24600F3E8BAD662E5792FDC8748207055866E9",
+                                               "TargetHash":  "3EE318E3871BBA744598CDB30E7A41F05EB60ABC26DE503CCCC59806BC5B0114"
+                                           },
+    "cmdlets/Get-OllamaTags.md":  {
+                                      "SrcHash":  "5109BF6D93A20FCD81392E49F4F31AAC57B57F83FCEC3D748FE94E18DAE4130E",
+                                      "TargetHash":  "0E11BDC53360049174EC7F07EE4D75D1571824C0979D287D0CDBDDDA9775AFD5"
+                                  },
     "providers/huggingface/README.md":  {
                                             "SrcHash":  "2C58332EBD5C7C26A85C90EAD1177199F42AD1F4B3812C90B00E67B57B2D1A74",
-                                            "TargetHash":  "9872A5981DFEA75D21B5F0162712CEC20F4C891CE45FD3C01086DCCA818BD31B"
-                                        }
+                                            "Provider":  "openai",
+                                            "InputTokens":  2925,
+                                            "TargetHash":  "C6B33B693DFFA7DB97B90E7ABB7E22ECC47DFC4BDDD708FA663E6605ED00B610",
+                                            "Model":  "gpt-4o-mini-2024-07-18",
+                                            "OutputTokens":  2497
+                                        },
+    "cmdlets/Set-OpenaiBaseUrl.md":  {
+                                         "SrcHash":  "177B945E9948D82A59ACAA5B0C62CFA6B2041B0A193E7FF184B15A27F75E2392",
+                                         "TargetHash":  "4FD4FA05BB3D82F94FDB97754B12F03E4F9EEBF4C23C9268E85589BFEF8B7C10"
+                                     },
+    "cmdlets/Set-PowershaiActiveChat.md":  {
+                                               "SrcHash":  "701B9723847541D816E1D48942B883AF3A40C46E8371D70995BE76FDBBE675EF",
+                                               "TargetHash":  "6410C7F07DBCAC397A3251DF71E5B22FFDD9BB90D17A85747B2489B6D56D4E3D"
+                                           },
+    "cmdlets/New-GradioSessionApiProxyFunction.md":  {
+                                                         "SrcHash":  "4A689B36683FE814F14E67CAF3066E7E472C62E5BB680F488FAF2EC73F7E3C9F",
+                                                         "TargetHash":  "BA7E65C2BFB2AC76F9DCD43CFC4DAABE3B6D2420D284EEB4A9BEE84C131C8C20"
+                                                     },
+    "cmdlets/Invoke-PowershaiCommand.md":  {
+                                               "SrcHash":  "C05A5745CA54DB285EC065D6AA0B3EEA62857E42B22C384BB687A1A47F097EE7",
+                                               "TargetHash":  "7459FAB47A8D0A2DDE42973931EF8A0A2C7871F5994350CA8E1CCC4310A9562F"
+                                           },
+    "cmdlets/Get-OpenaiToolFromCommand.md":  {
+                                                 "SrcHash":  "10C8276A59A744F907DE8548F73C76BB9D2AA88C761A88929534D55A0AA0D430",
+                                                 "TargetHash":  "8317C2C9293EE1DF611665E92C5163B5079815D8542A3885FACE52E730C853D2"
+                                             },
+    "cmdlets/Import-PowershaiSettings.md":  {
+                                                "SrcHash":  "7C0724A728C429D413EBD0A1F35919191CDF1D359992A1B28026726D0D6505D8",
+                                                "TargetHash":  "1CBFBE7C84FA37779A21664114A0D36E43FAD9E0A41A854AADFFD1CD5071495B"
+                                            },
+    "cmdlets/ConvertTo-PowershaiContextJson.md":  {
+                                                      "SrcHash":  "45FE8A89168D1562BE94E54EAEE02972289F7B3FCBB935B0058E14A8039ABD93",
+                                                      "TargetHash":  "6CEE7420CAA609DA5723E45409DE5E33ABB0998DB92D98CEE5928D1744646743"
+                                                  },
+    "cmdlets/Get-ClaudeMessages.md":  {
+                                          "SrcHash":  "4C1943A79983578B76FBB119EC387C6AC45CF8DD915757FCB316DBA8D356C632",
+                                          "TargetHash":  "6AC64F4BDC2E09B6DECEF30DF999FFEE3B7F33A0B208166048853DB943CE275C"
+                                      },
+    "cmdlets/Update-GradioApiResult.md":  {
+                                              "SrcHash":  "AA897368B2998F6A9E89161BF5B27D86E8C45C037FCC79FF6DEED9BF6C4DF99B",
+                                              "TargetHash":  "1BA0ABCB7E63465977D6655E80E0AB7CE48C8112B1F35D60224A2008B862812D"
+                                          },
+    "cmdlets/Start-HttpRequest.md":  {
+                                         "SrcHash":  "86923ECE3FE9C2A2238CC675C192B0622255200E02C714CCCCF8663EFD63A7FF",
+                                         "TargetHash":  "616D5CAF976BE621DD439A6CE75EFEDFB4937C0FFDBCB8BA7BD59AAAA8D5EDC4"
+                                     },
+    "cmdlets/ConvertTo-PowershaiContextTable.md":  {
+                                                       "SrcHash":  "4121F3688F0638ED930B683BAB1CEFAC3BAEDE3E1B0BC40098A54C4A53AE2678",
+                                                       "TargetHash":  "5E266F8463995597D597A166E67FE2DF9F995191DF263E08F4FDAA73C38F610A"
+                                                   },
+    "cmdlets/Get-GradioSessionApiProxyFunction.md":  {
+                                                         "SrcHash":  "D65350351AF3419CD585805DF3F186FA1B99545C105330A945FCFB6E9610EF7F",
+                                                         "TargetHash":  "140E50FB3AD9174609C638B770B1CF3713B1674270AD81838951D16BE5EBAADB"
+                                                     },
+    "cmdlets/Convert-GradioParamPowershell.md":  {
+                                                     "SrcHash":  "7946FF297E48E93C29D3109FD974737A45F83C61A8589736B2232C47B580711B",
+                                                     "TargetHash":  "BBD47295B7C34D84E6BCD8DA5A568D94935B578B4AC56516C5C87418569C2083"
+                                                 },
+    "cmdlets/Get-GradioInfo.md":  {
+                                      "SrcHash":  "3548CE4E080196F37D02FE7227642D01A51B723A07F08EF94C8ACACF7B9B6791",
+                                      "TargetHash":  "AB70154FDCDE086A0D2A0BD9280223E032CD3BCED7AE83D6E357F1C1F23C9FD2"
+                                  },
+    "cmdlets/Get-OpenaiModels.md":  {
+                                        "SrcHash":  "9B5A46DBEBFCC6297A25C53491FD41B5E276EE4AD9C45DFE057CD7F2E900A97E",
+                                        "TargetHash":  "5D97C53B8234E2BD1B5D4A975C4A6D4751502E40E081F153BFD8AFD665A2CB67"
+                                    },
+    "cmdlets/Set-OpenaiToken.md":  {
+                                       "SrcHash":  "F845F025CEE746719A01FC190B5578064563A53D7807511698D2AD9F93B39074",
+                                       "TargetHash":  "E549429C686DDF4EF68876314E7803D62D78A95286E0E4F4323606AF446C4D4D"
+                                   },
+    "cmdlets/Invoke-Http.md":  {
+                                   "SrcHash":  "83E5609D25CDC1AC0CEDBB534940566859DA109E21C13202ED114C2DC736F805",
+                                   "TargetHash":  "6A357B68AFF59F2B78B9A5F08374FF34CFAD97AD7A7B1CA2FFC93A7F65D11A38"
+                               },
+    "cmdlets/Set-OllamaUrl.md":  {
+                                     "SrcHash":  "19DA8DD8C53C3186B010C7607EEFDB37B599E97EEBC8437DA4CAF27D6100ABF5",
+                                     "TargetHash":  "BD9BED213BC1EE96AFFDA8BC37B78A1111EDFF5A5764888C0FA112422F068233"
+                                 },
+    "cmdlets/Invoke-AESEncryption.md":  {
+                                            "SrcHash":  "618557D509166C293EF01AE4E1EFBEAEB5849CC9AE3F5BE5B72AB57E46874B88",
+                                            "TargetHash":  "F34252694ECF4F3C7618516BF5B2A4AD5CD56CBA922DA6FB2D3750D9F1B9AECF"
+                                        },
+    "cmdlets/Get-HuggingFaceSpace.md":  {
+                                            "SrcHash":  "956497154524ED48DC5FD46FA6E2939EEA0CDA2263D82AD93873BC35455A306C",
+                                            "TargetHash":  "8D5D39BEDD4A5E691D1F02BCCD9E07A681B24B2829FD776F718A22CB084F5691"
+                                        },
+    "cmdlets/Invoke-MaritalkApi.md":  {
+                                          "SrcHash":  "86E85DF7CAF7F88D4A54A3D0E0E1F570F5A138C44E4EFC0991BA8B6A01E1928C",
+                                          "TargetHash":  "8D24150C5467433486B4B1B602AC0F344C91B14F1079B08E07F6548E04785F13"
+                                      },
+    "cmdlets/New-PowershaiChat.md":  {
+                                         "SrcHash":  "3A34DEFAC395933C9BC4BCC84F2D30173A93AA793C90B9C3F8E741247C2B4FEC",
+                                         "TargetHash":  "38F9F615EFF381DC3EEC7ACF3023E1B9F7D25C5C6096323A7DF5232BE50757E9"
+                                     },
+    "cmdlets/Remove-GradioSessionApiProxyFunction.md":  {
+                                                            "SrcHash":  "B06CE5424CBBC9EEEE8FA2B2B1687C699FFADD2053B11983D6CBBF5F4EDED846",
+                                                            "TargetHash":  "4306B6351A4A2AFF452345AF3093897541FE0A94B418203C547B7DB9AA2D907D"
+                                                        },
+    "cmdlets/Get-OpenaiToolFromScript.md":  {
+                                                "SrcHash":  "C9913B68470E8E418FBD9ED15B1D2F6B6919C53976CB2A584D311F6F5F1061D7",
+                                                "TargetHash":  "3B5E26029CE7000A039A0050A14DF0A240B5CD23622791623E068E99B4A72EEF"
+                                            },
+    "cmdlets/Set-GoogleApiKey.md":  {
+                                        "SrcHash":  "2AEF374EFC9DF343C17C6D82CBC3DE6396D26217D84730671BDF439D22E973E7",
+                                        "TargetHash":  "27775FEE1CD84E0A9AB161CF25E1E7DD119BE30AD7C9450650A3FA7B8BC7E27D"
+                                    },
+    "providers/openai/README.md":  {
+                                       "SrcHash":  "A7A339DFAB9E18E54C9CD15B9D7BA3092BE66D52169F04546BB56AEE252DDC66",
+                                       "Provider":  "openai",
+                                       "InputTokens":  740,
+                                       "TargetHash":  "3EEC3EB1C2E416EA218F45A62B60AE3CB41D19D43E01B6020815263E80CD9578",
+                                       "Model":  "gpt-4o-mini-2024-07-18",
+                                       "OutputTokens":  463
+                                   },
+    "cmdlets/Start-HuggingFaceSpace.md":  {
+                                              "SrcHash":  "3F786369B5C7CB2A16466AB0E44864CC57B2EAB3A0059BEEEE90042B46B745B3",
+                                              "TargetHash":  "869A6CEA82515EC5BA790B66431701D5273470B965ADBB238D293121331F4772"
+                                          },
+    "cmdlets/Invoke-HttpOld.md":  {
+                                      "SrcHash":  "839114C7150A339DCFF01FEC69114D63035BF16502523379BDA511A15AB65597",
+                                      "TargetHash":  "471DCA61A828A4EB297DEE3B9DA2BF690D47378DB6CC9A844127F196AA4531B7"
+                                  },
+    "providers/maritalk/README.md":  {
+                                         "SrcHash":  "6E10FE375DA3A983D3A2F20F0A48B5C9E533D29CAC7905A1EF96C7F414C63030",
+                                         "Provider":  "openai",
+                                         "InputTokens":  294,
+                                         "TargetHash":  "A3C4710370C8EBFB3BBA4FC9C08E5FB7DAEF1CD333042811533EC3168AB5CC8D",
+                                         "Model":  "gpt-4o-mini-2024-07-18",
+                                         "OutputTokens":  135
+                                     },
+    "cmdlets/Invoke-GradioHttp.md":  {
+                                         "SrcHash":  "21C288C929B7F568F44D7D1A031B3076B2B6479A03FF60FB8C7DD952F3B36815",
+                                         "TargetHash":  "D592EDA6EC9E1B0624F56BDC0E7782660DEA3A8E123279C062F2898C4E6481DA"
+                                     },
+    "cmdlets/Get-HuggingFaceModel.md":  {
+                                            "SrcHash":  "E1820214DC029E50CB6891E2E48EF868DB441EC8002D5A466F57688079A0453D",
+                                            "TargetHash":  "3D1CC06EB9402390B55526F854419AF22F35C7EE3103E0D7AED111B00DF8F273"
+                                        },
+    "cmdlets/Get-AiModels.md":  {
+                                    "SrcHash":  "92C2B8813EBD100B0539654661950690DF0375D739BA00813047441323AA0457",
+                                    "TargetHash":  "2D4D21BE7131CB07CA7AA1F63D37C4BC66E078E65039E0CB7581421FA260E270"
+                                },
+    "cmdlets/Send-GradioSessionFiles.md":  {
+                                               "SrcHash":  "4F0A50ED20012D703383C1C441A7435F5D5F87D7161C1927774BDAE50675CB57",
+                                               "TargetHash":  "9834B2F4E12ABDD9E5E188C01276E70802588CEE369F2A864D171CBE65D8CB4B"
+                                           },
+    "cmdlets/Invoke-GoogleGenerateContent.md":  {
+                                                    "SrcHash":  "63B6CC3C9B36B27810344DB0E43965A2A807FFE552C91554D138FD701A1BFB2F",
+                                                    "TargetHash":  "47DAE6D169EB6C2FFFB99ED0EC165BB0930F742A568ADAD7522A5FF0ADEBC1DF"
+                                                },
+    "cmdlets/Remove-PowershaiChat.md":  {
+                                            "SrcHash":  "425F5A8DF68C2FA928E93CC3431109E44CFC302BD9933864471D86598BC4B424",
+                                            "TargetHash":  "AD15C0A0D3E90AE847316762917B18F316DF24378324A78D162B41B4B1E52140"
+                                        },
+    "cmdlets/Send-PowershaiChat.md":  {
+                                          "SrcHash":  "84DDC236E2F358722B9D96E79137B8ECE31330E7EC595E9DFCACFDE683A0F963",
+                                          "TargetHash":  "7872207C8880462BC0B4C1A56B3A9DEA4B6510A0B031A786C615F1972BE90C12"
+                                      },
+    "cmdlets/Close-HttpRequest.md":  {
+                                         "SrcHash":  "CCB68C39EAB34D31E0B1AEE2E344E4CD9869F002F41950531C2C60A8951B3AE1",
+                                         "TargetHash":  "61F683F2F7D91FB3C022073467843260984DC3AD828ABD6E3CA66E28D251F95D"
+                                     },
+    "providers/ollama/README.md":  {
+                                       "SrcHash":  "F413EF1C4BFB9E7E63E6F50CDF4DDB851D3F57E4D146CFFC873D82DA8C2A4FD4",
+                                       "Provider":  "openai",
+                                       "InputTokens":  173,
+                                       "TargetHash":  "3A208EE6E205D4AC7943939E3B0EDCD2C7573F25A518E6DF23DB228E4037BF79",
+                                       "Model":  "gpt-4o-mini-2024-07-18",
+                                       "OutputTokens":  41
+                                   },
+    "cmdlets/Connect-HuggingFaceSpaceGradio.md":  {
+                                                      "SrcHash":  "3FF3C50EE021200782442AFA3317DE09CA4AE8DD18DAAF10E32EE5905500C88C",
+                                                      "TargetHash":  "FFCCC921B21B4AF9C21F172BA8550AB190E2EEFB8C6173F985A0B542CA69666C"
+                                                  },
+    "cmdlets/Get-OpenAiTextCompletion.md":  {
+                                                "SrcHash":  "9007B598CBC6498F52CD40CFAC9F030351EC5C1687DEB76C315F03382F4E9435",
+                                                "TargetHash":  "93CAED5F0F7690A9AC2749B069EE70AC40F34EA691D84019206A3C7549584455"
+                                            },
+    "cmdlets/Reset-OpenaiBaseUrl.md":  {
+                                           "SrcHash":  "C2150F7CC5B603BC16F4B772A3F7805DD0C922F76673A6FBF3C3D2D18C5C14CF",
+                                           "TargetHash":  "40B8A13D2C5916DC8C263B3AB9035FDFA1F92E870D502D366ED33E6CA5E124C6"
+                                       },
+    "cmdlets/Get-PowershaiChatParameter.md":  {
+                                                  "SrcHash":  "E404FD5CE578CD2BC21B0097DFCACD5AA21796AA40650F6B9167ECB2146AA064",
+                                                  "TargetHash":  "A963A58A3CCAF927D1518F25DFA52047F9B15471A9EB9D8D3AA4F34AF08EA3D8"
+                                              },
+    "cmdlets/Get-OpenAiAnswerCost.md":  {
+                                            "SrcHash":  "9EE73A7E1DA71D753C85B1182AD02172EB8A7C0645330A20B0E6E06362F01739",
+                                            "TargetHash":  "E3380695CA59AC509F43614310BF0F7765052924EA97B335BBB6FCD0C25AEB95"
+                                        },
+    "cmdlets/Get-AiNearProvider.md":  {
+                                          "SrcHash":  "CD3C0C31E278B9422078088922D7D1038BE8C99B2AF091480886A8FD5EB40F33",
+                                          "TargetHash":  "AF6739DDECFAD5D1661EB9BF591CD7B4AF5895EAE9646A751FC802BA90DAC0E6"
+                                      },
+    "cmdlets/Get-HttpResponse.md":  {
+                                        "SrcHash":  "E06DD82E13ADD38F1F9EF816C2155A03BA9BE3B79E617D61312493F312DDECB4",
+                                        "TargetHash":  "812895F4C8778BC5E0442851F29CF076CE2CEBF884862EFA119FA86E0D8C7DEC"
+                                    },
+    "cmdlets/Get-GradioSessionApi.md":  {
+                                            "SrcHash":  "978FAA7988AE6DCA2F282125F87818672EA8CD6B659BA5D6207AA0B9602A761E",
+                                            "TargetHash":  "882524903E9BF4C77871DD64CE1C7055FB74B694D7A1462BBE777B3841941747"
+                                        },
+    "cmdlets/Get-GradioSession.md":  {
+                                         "SrcHash":  "96CB5A3A4A12DEE1B2C15F33707CA996732F76889C7FAFC4ACA6B62B9DD5535E",
+                                         "TargetHash":  "AFCB0ACAFD478C6F30CEE582ECB5E631A86D10342CE89165BD3A49D79286D87A"
+                                     },
+    "cmdlets/Send-GradioApi.md":  {
+                                      "SrcHash":  "9BB5EFCEA3BA1AF4FFC7FF780567D0BE32212432870552DE9D73294282436025",
+                                      "TargetHash":  "B82B831ABEA0F72DE07E1BC54A56716BDEFB4886E08D2BEBF57BC3CCC618FB3D"
+                                  },
+    "cmdlets/Send-GradioFile.md":  {
+                                       "SrcHash":  "AA352FF47B9735C7029105DE18B789480DBC130561EADB078E7D852C3885E1D3",
+                                       "TargetHash":  "6056AB5843D12DFF001526D5C3A744518EA68F5EDD904CA33A47332647272231"
+                                   },
+    "cmdlets/ConvertTo-PowershaiContextOutString.md":  {
+                                                           "SrcHash":  "86DBB1CC0C786B51DBE74D81D1D5783FEC4E4EA21CE66DFFA536D312A54E8C54",
+                                                           "TargetHash":  "805C36F942AC12288E9CE39245CA7EE2A4C9CE9F07E055B11BDEC9146F0E644E"
+                                                       },
+    "cmdlets/Invoke-HuggingFaceHub.md":  {
+                                             "SrcHash":  "7BEEBFFE508F3989DE697D3B0A5F4E9A0D04CD842B8CD608AFB4FAEBC49E9DF6",
+                                             "TargetHash":  "6D648494E84F9EAF034BFE3394D285A4AD14ECB8FFC4046A4ED5E3598FE430D7"
+                                         },
+    "cmdlets/Set-AiDefaultModel.md":  {
+                                          "SrcHash":  "74BD867C5C554F3357F09A2D8C8F9C37A9D4B5C9995D402F33ECF1C521662673",
+                                          "TargetHash":  "9494DC32411EDB276D2E03053443B3D9B8C34C29E06EE85BEF8EE99DC28904AC"
+                                      },
+    "providers/README.md":  {
+                                "SrcHash":  "A34C9F88F035C1C4B62EA5168CEC7AB9E866F1EFFE961615310140955AD81F26",
+                                "Provider":  "openai",
+                                "InputTokens":  789,
+                                "TargetHash":  "71A3C0E9034F6E50AEDD2E989BBEF380D7230D5962BBC6F27670BBDCC77F7C9F",
+                                "Model":  "gpt-4o-mini-2024-07-18",
+                                "OutputTokens":  608
+                            },
+    "cmdlets/ConvertTo-GoogleContentMessage.md":  {
+                                                      "SrcHash":  "10630457730DF7A0C994C22D03F4304986925BAAA9DC4FF4E4E59F036D1B2CD0",
+                                                      "TargetHash":  "4E879CC65EBE8699A2F5B41DD0EFA9E462068889E36381C6E881A53E154B7046"
+                                                  },
+    "cmdlets/New-PowershaiParameters.md":  {
+                                               "SrcHash":  "98429F94997A74B4949E2D5655388EEF2B78C3D131BAC74C02025B412569B4C0",
+                                               "TargetHash":  "54B1B071033EB63E1915DE90F262025DAAD9EE5FB0F4776EF22230F7CD7B8DAD"
+                                           },
+    "cmdlets/Invoke-PowerhsaiConsoleDraw.md":  {
+                                                   "SrcHash":  "47F0D8C88BD92FFC0A91AC58E793BE47A9BD4C18FA7E1756A18E281DB5F366F2",
+                                                   "TargetHash":  "6701A0D36B786D5D6B0B7369372EE5C19C62325DA1FF17CACBCB2C23B524250F"
+                                               },
+    "cmdlets/Reset-PowershaiChatToolsCache.md":  {
+                                                     "SrcHash":  "046D5A88EB7AE3DDCB3F3BC0FC404722F612E39DCAFAE4CB87529E7C6C66E865",
+                                                     "TargetHash":  "3B1E06F6B57A1F4F719D95C80E5E61D0B8775092D2375E55E63F25A73F024B64"
+                                                 },
+    "cmdlets/Get-PowershaiChatTool.md":  {
+                                             "SrcHash":  "E2E6B762712B0BA1AA44D65828718C3909BF8B8E020B31608A39DDDF74756B96",
+                                             "TargetHash":  "96C823A2D0519208C241A725489DA714509BB78497D04BAE913EC949E879A7C3"
+                                         },
+    "cmdlets/Remove-PowershaiChatTool.md":  {
+                                                "SrcHash":  "EB00D67EF0D898C123FE5537A17BA0BC38D59D3469D512BEB429CCD4DECE5420",
+                                                "TargetHash":  "081A5F63460E9E4135E727DA99D3128E143CC350664DDC19E8DEB23616C8326B"
+                                            },
+    "cmdlets/Get-OpenaiChat.md":  {
+                                      "SrcHash":  "8ECC6622A917FBEC4FEF06C3D0506E88087505E10E45C5D99273924E066CA168",
+                                      "TargetHash":  "C3618E02B5143F218325C1B2B1028989C37D35503D1A38A1FBC1BAD08B404A74"
+                                  },
+    "cmdlets/New-PowershaiError.md":  {
+                                          "SrcHash":  "4A14E3C99A9EBAFB0629DB189F3D284ED6D3109F1DC715F69BCC5A746E11657C",
+                                          "TargetHash":  "C71C07816FA8838B286373DBD923F5CB03139D6613C3245AA8D89CFDEF6A7FC2"
+                                      },
+    "cmdlets/New-GradioSession.md":  {
+                                         "SrcHash":  "F8DC8EE5D8016C7221C71A78A3E5591EF9D32C4468BF6A1A571BC8670E3918C2",
+                                         "TargetHash":  "F61FA8D87F770CD982CBF00B200C4BB06170B845CB0A0B9EC07B48C19F96E073"
+                                     },
+    "cmdlets/Get-PowershaiDefaultParams.md":  {
+                                                  "SrcHash":  "71CACE83B34F90F87A2B120E2B3895F30A321884FAD78CACCF51A23C5D915169",
+                                                  "TargetHash":  "2D55690F469146555E229B62EDE5323FB87EC91A84ED12E8A707936D6A49B176"
+                                              },
+    "cmdlets/Invoke-AiChatTools.md":  {
+                                          "SrcHash":  "4336B934B1782142EE60ABE0C8976FB3FFE98B21EB3D248FF33A606734E01987",
+                                          "TargetHash":  "8FEBF9CBED1BF2A86327E9BAA7F78C4AE0C292130597A9336EA3FFC08FBCECFB"
+                                      },
+    "cmdlets/Get-AiChat.md":  {
+                                  "SrcHash":  "077B3797AC75161D7E8FAF65932ECCD2AF795DDBB11E43CD57321F3E30DD5881",
+                                  "TargetHash":  "D9A0C424F29B58C78D5497DCD32F673523FF62BB848D23A9DEF0CBEDA1EEA611"
+                              },
+    "cmdlets/Set-ClaudeToken.md":  {
+                                       "SrcHash":  "6F15DDBB6E22B1CC5DF44C7E897A979948DC9D8402F63122127377E6F40A8059",
+                                       "TargetHash":  "7F9A11426E353ABE89ADD139BF16721A0A807D71CD56F2F053BF5DD497DAACEF"
+                                   },
+    "cmdlets/Get-PowershaiContextFormatters.md":  {
+                                                      "SrcHash":  "1501AFA241BBAD6284DBF3AA3A98806AF1C82DF057044BB599637841AA7C48CF",
+                                                      "TargetHash":  "911C69AB22BA9C60029F8A236BDB83083E153796E37F883F46412950C2CED70C"
+                                                  },
+    "cmdlets/Set-AiProvider.md":  {
+                                      "SrcHash":  "F86B9BFCBDCE5C52E777F9538A2650155B6F0F85A6A8E0F3A3C781F949158CDF",
+                                      "TargetHash":  "9F817C3918F35B99C95D771061B790AADD7314783D044E28AE38A08160540AA4"
+                                  },
+    "cmdlets/Add-PowershaiChatTool.md":  {
+                                             "SrcHash":  "FF6A84A80BEE87567A0B78660D3AA473410944DDE92CE5333442BE3AF7A92EC6",
+                                             "TargetHash":  "250C130230812956FD5E0F0C448E9F05D6CB3CF8926507089E55C1CBD7633ACC"
+                                         },
+    "cmdlets/Update-GradioSessionApiResult.md":  {
+                                                     "SrcHash":  "313ACFF0C219134E6B0C376DB2B6DE38CFD1993F6A5269E5C4C43C5CB0C4EB18",
+                                                     "TargetHash":  "7E184BDCEC028C894941B6418FA92D96A6FD563F8BE18860703C27B78AE5B45A"
+                                                 },
+    "cmdlets/Invoke-GradioSessionApi.md":  {
+                                               "SrcHash":  "D5CBA6E6277E5365DAB9989BD818095DD334D2CF543EA475C8993CF1A456CE9D",
+                                               "TargetHash":  "AA91CA0E056B45A7CFBB51A176F25853D140BFD460E968AC68C829939F5225D0"
+                                           },
+    "cmdlets/Invoke-HuggingFaceInferenceApi.md":  {
+                                                      "SrcHash":  "93A961F7CFB4E4A630D277A5EAD2B69C142ECA1BE61BDE09E66C913B838CB5DB",
+                                                      "TargetHash":  "12EAA7F4C491989B1C953ECBEC06D5E110D5F69D3B7AC786A4ED45EF82836937"
+                                                  },
+    "cmdlets/Get-HuggingFaceWhoami.md":  {
+                                             "SrcHash":  "B1A4AF4F6262056A71E81A93662B52C62B869C807DC213AD31410082B11DA488",
+                                             "TargetHash":  "01D3FC3D89474BC2FC50D619FBFEBC14EA22DE8BC4A47BF23B1F9D6844364ED1"
+                                         },
+    "cmdlets/Invoke-MaritalkInference.md":  {
+                                                "SrcHash":  "BA0FDD7CB2D8988EA7B8DB8E88317B353C661E831BB8464C4FBD8566100CF527",
+                                                "TargetHash":  "31F12B4ED19A6318370C21CC835C9814F13EB62FD9712B6251BEC28505AD0C0C"
+                                            },
+    "cmdlets/Export-PowershaiSettings.md":  {
+                                                "SrcHash":  "F82547CD9440A7B05D72CB2B5750F21D040F96135B68D8C1FA40A08AD17F552C",
+                                                "TargetHash":  "634BE8F85D8781FFA0B18345E5CE5F69792A7781CC38271183338D8CA50DB8B3"
+                                            },
+    "cmdlets/Get-PowershaiChat.md":  {
+                                         "SrcHash":  "C1BF4E6E5F6239B8C2B8B3C18975B15CB45936B6EC4F28D6B8B5F12F36FB2AED",
+                                         "TargetHash":  "6708EE4A2E7870E6430146DB285D0C33C1C044CEEA74A62685DB898B5EDD7242"
+                                     },
+    "cmdlets/Get-OpenaiEmbeddings.md":  {
+                                            "SrcHash":  "E4AC6B92D5D84AE91C900138664661AC74E614334D5DDEE5C888BBFAA6C0878D",
+                                            "TargetHash":  "23DF3C8E1CA62E5FE4584F6ECC3C648F46B43CA4D42D76179DF158A708F23F84"
+                                        },
+    "cmdlets/Get-MaritalkModels.md":  {
+                                          "SrcHash":  "C670B86F7A03F8156FE3B8CCD0E8D72C44E61B80C26A6A9C346D815C73B28AD2",
+                                          "TargetHash":  "261FC044F99BBDE238AC47D52127EC68051CB9993990C485EA4061013AD4730E"
+                                      },
+    "cmdlets/Set-PowershaiChatContextFormatter.md":  {
+                                                         "SrcHash":  "17728512B29933B709204A133D626312D7C86493E4E54EE696FBD591AB045C36",
+                                                         "TargetHash":  "80B3E59C1EAF2FC198C4DF0005B1FBE2AAC9E05A09CD23C81BF4A2DE3AA6EEDC"
+                                                     }
 }
