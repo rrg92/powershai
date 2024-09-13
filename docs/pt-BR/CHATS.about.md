@@ -203,6 +203,68 @@ Note que, para evitar um loop inifinto de execuções, o PowershAI força um lim
 O parâmetro que controla essas interações com o modelo é o `MaxInteractions`.  
 
 
+### Invoke-AiChatTools e Get-AiChat 
+
+Estes dois cmdlets são a base da feature de chats do Powershai.  
+`Get-AiChat` é o comando que permite se comunicar com o LLM da maneira mais primitiva possível, quase próximo a chamada HTTP.  
+Ele é, basicamente, um wrapper padronizado para a API que permitem gerar texto.  
+você informa os parãmetros, que são padronizados e ele devolve uma resposta, que também é padronizada,
+Independente do provider, a resposta deve seguir a mesma regra!
+
+Já o cmdlet `Invoke-AiChatTools` é um pouco mais elaborado e um pouco mais alto nível.  
+Ele permite especifciar funções Powershell como Tools.  Essas funções são convertidas para um formato que o LLM entenda.  
+Ele usa o sistema de help do Powershell para obter todos os metadados possíveis para enviar ao modelo.  
+Ele envia os dados ao modelo usando o comando `Get-Aichat`. Ao obter a resposta, ele valida se há tool calling, e se houver, ele executa as funções equivalentes e devolve a resposta.  
+Ele fica fazendo esse ciclo até que o modelo finalize a resposta ou que o máximo de interações seja atingindo.  
+Uma interação é uma chamada de API ao modelo. Ao invocar o Invoke-AiChatTools com funções, podem ser necessários várias chamadas para devolver as respostas ao modelo.  
+
+O seguinte diagrama explica esse fluxo:
+
+```
+	sequenceDiagram
+		Invoke-AiChatTools->>modelo:prompt (INTERAÇÃO 1)
+		modelo->>Invoke-AiChatTools:(response, 3 function call)
+		Invoke-AiChatTools-->Invoke-AiChatTools:Call Tool 1
+		Invoke-AiChatTools-->Invoke-AiChatTools:Call Tool 2
+		Invoke-AiChatTools-->Invoke-AiChatTools:Call Tool 3
+		Invoke-AiChatTools->>modelo:Resultado tool call + prompts anteriores prompt (INTERAÇÃO 2)
+		modelo->>Invoke-AiChatTools:resposta final
+```
+
+
+#### Como os comandos são transformados e invocados
+
+O comando `Invoke-AiChatTools` espera no parâmetro -Functions uma lista de comandos powershell mapeados para schemas OpenAPI.  
+Ele espera um objeto que chamammos de OpenaiTool, contendo as seguintes props: (o nome OpenAiTool é devido ao fato de que usamos o mesmo formato de tool caling da OpenAI)
+
+- tools  
+Esta propriedade contém o schema de function calling que será enviando para o LLM (nos parâmetros que esperam esse informação)  
+
+- map  
+Este é um método que retorna o comando powershell (function,alias,cmdlet,exe, etc.) a ser executado.  
+Este método deve retornar um objeto com a proprodade chamada "func", que deve ser o nome de uma função, comando executável ou scriptblock.  
+Ele irá receber no primeiro argumento o nome da tool, e no segundo o próprio obejto OpenAiTool (como se fosse o this).
+
+Além dessas propriedades, qualquer outra é livre para ser adicionada ao objeto OpenaiTool. Isso permite que o script map tenha acesso a qualquer dado externo que precisar.  
+
+Quando o LLM devolve o pedido de function calling, o nome da função a ser invocada é passada para o método `map`, e ele deve retornar qual comando deve executar. 
+Isso abre diversas possibilidades, permitindo que, em runtime, possa ser determinado o comando a ser executado a partir de um nome.  
+Graças a esse mecanismo o usuário tem total controle e flexbilidade sobre como irá responder ao tool calling do LLM.  
+
+Então, o comando será invocando e os parâmetros e valores enviados pelo modelo serão passados como Bounded Arguments.  
+Ou seja, o comando ou script deve ser capaz de conseguir receber os parâmetros (ou identificá-los dinamicamente) a partir do seu nome.
+
+
+Tudo isso é feito em um loop que vai iterar, sequencialmente, em cada Tool Calling retornado pelo LLM.  
+Não há qualquer garantia da ordem em que as tools serão executadas, portanto, nunca deve-se presumir ordem, a não ser que o LLM envie uma tool em sequência.  
+Isso significa que, em implementaões futuras, diversas tool calligns podem ser executadas ao mesmo tempo, em paralelo (Em Jobs, por exemplo).  
+
+Internamente, o PowershAI cria um script map padrão para os comandos adicionaods usando `Add-AiTool`.  
+
+Para um exemplo de como implementar funcoes que retornem esse format, veja no provider openai.ps1, os comandos que comecam com Get-OpenaiTool*
+
+Note que essa feature de Tool Calling funciona apenas com modelos que suportam o Tool Calling seguindo as mesmas especificações da OpenAI (tanto de entrada como de retorno).  
+
 
 #### CONSIDERAÇÕES IMPORTANTES SOBRE O USO DE TOOLS
 
@@ -217,4 +279,10 @@ Algumas dicas de segurança:
 - Teste as funções antes.
 - Não inclua módulos ou scripts de terceiros que você não conheça ou não confie.  
 
+A implementação atual executa a função na mesma sessão, e com as mesmas credenciais, do usuário logado.  
+Isso significa que, por exemplo, se o modelo (intecional ou erroneamente) pedir para executar um comando perigoso, seus dados, ou até seu computador, pode ser danificado ou comprometido.  
+
+Por isso, vale este aviso: Tenha o máximo de cautela e somente adiciona tools com scripts em que você possua total confiança.  
+
+Há um planejamento para adicionar futuros mecanismos para ajudar a aumenta a segurança, como isolar em outros runspaces, abrir um processo separado, com menos privilégios e permitir que o usuário tenha opções de configurar isso.
 

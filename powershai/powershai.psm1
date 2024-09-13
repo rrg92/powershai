@@ -89,21 +89,26 @@ if(!$Global:POWERSHAI_SETTINGS.UserTools){
 
 
  
+###
+###  Aux/helper/misc functions!
+###		
+###	As funções a seguir são de caráter auxiliar, isto é, usadas apenas internamente para facilitar algo no PowershAI.
+### A maioria são de uso apenas interno pelo módulo!
+###
+###
 
-#Converts a hashtable to a URLENCODED format to be send over HTTP requests.
+# Simple verbose logging function
 Function verbose {
 	$ParentName = (Get-Variable MyInvocation -Scope 1).Value.MyCommand.Name;
 	write-verbose ( $ParentName +':'+ ($Args -Join ' '))
 }
 
-function Get-PowershaiDefaultParams {
-	return $PSDefaultParameterValues
-}
-
+# Aux function to set check custom types
 function IsType($obj, $name){
 	return $($Obj.psobject.TypeNames -contains "PowershaiType:$name");
 }
 
+# Aux function to set custom types
 function SetType($obj, $name){
 	
 	if(-not(IsType $obj $name)){
@@ -112,6 +117,7 @@ function SetType($obj, $name){
 }
 
 # retorna a lista de parametros do caller!
+# Return caller function param list
 function GetMyParams(){
 
 	$cmd = Get-PSCallStack
@@ -151,8 +157,74 @@ function GetMyParams(){
 }
 
 <#
+	Obtém uma string codificada com um encoding específico. 
+	Internamente, o Powershell (.NET) armazena tudo como unicode utf16 (https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-encoding-introduction)
+	Mas, podemos usar as classes de Text.Encoding para obter strings formadas por oturas sequências.  
+	Isso é útil para enviar via protocolos (como HTTP), etc.  
+	Se você tentar printar o resultado dessa função, pode não ser legível, devido a sequência de bytes diferentes.  
+	Esta função é um auxiliar usada para testes somentes
+#>
+function GetPowershaiAuxEncodedString {
+	param(
+		$SourceStr
+		,$TargetEncoding = "UTF-8"
+		,#Se especifciado retorna apenas os bytes 
+			[switch]$Bytes
+	)
+	
+	#Aqui obtemos os bytes no encoding desejado.  
+	#Internamente, o Powershell armazena os caraceres como UTF-16. As classes Text.Encoding convertem de UTF-16 para a sequencia de bytes no encoding desejado.  
+	#FOr exemplo, innternamente, a string "á" é armazenada como um array contendo apenas 1 elemento: [char]225 (225 é o codepoint do á no Unicode).
+	#Quando  usamos UTF8.Getbytes("á"), estamos pedindo que o powershel retorne o UTF-8 equiuvalente de "á", que é um array cim 2 posicoes: 195,196 (é assim que o "á" é representando no UTF-8)
+	[byte[]]$TargetEncBytes = [Text.Encoding]::GetEncoding($TargetEncoding).GetBytes($SourceStr)
+	
+	if($Bytes){
+		return $TargetEncBytes
+	}
+	
+	#Uma vez que temos um array de bytes, podemos construir um tipo string de volta. 
+	#Assi,podemos concatenar essa string em lugares que aceitam string, como concatenção.
+	#Aqui, usamos uma "gambi": O encoding iso-8859-1 não faz nenhuma conversão de bytes. Por isso, podemos usar ele para ober a string a partir do byte.  
+	#Assim, considerando o exemplo, anterior, será retornada uma string, formada peçla sequencia 195,196. Ao printar ela, vai parecer uma string completamente difernete (pos o Powershell exibe em outra codificação).
+	return [Text.Encoding]::GetEncoding("iso-8859-1").GetString($TargetEncBytes)
+}
+
+#
+# funcoes usadas para auxiliar alguma operacao ou encasuplar logica complexa!
+function JoinPath {
+	$Args -Join [IO.Path]::DirectorySeparatorChar
+}
+
+
+<#
+	.SYNOPSIS
+		Obtém uma referência para variável que define os default parameters 
+		
+	.DESCRIPTION  
+		No Powershell, módulos tem seu próprio escopo de variáveis.  
+		Portanto, ao tentar definir essa variável fora do escopo correto, não afetará os comandos dos módulos.  
+		Este comando permite que o usuário tenha acesso a variável que controla o default parameter dos comandos do módulo.  
+		Na maior parte, isso vai ser usado para debug, mas, eventualmente, um usuário pode querer definir parâmetros default.
+		
+	.EXAMPLE
+		O exemplo abaixo mostra como definir a variável de ebug default do comanod Invoke-Http.
+		$HttpDebug = @{}
+		$ModDefaults = Get-PowershaiDefaultParams
+		$ModDefaults['Invoke-Http:DebugVarName'] = 'HttpDebug';
+		Note que o parãmetro -DebugVarName é um parâmetro existente no comando Invoke-Http.	
+#>
+function Get-PowershaiDefaultParams {
+	return $PSDefaultParameterValues
+}
+
+
+<#
+	.SYNOPSIS
+		Cria um nova Exception cusotmizada para o PowershaAI
+		
 	.DESCRIPTION  
 		FAciltia a criação de exceptions customizadas!
+		É usada internamente pelos providers para criar exceptions com propriedades e tipos que podem ser restados posteriormente.
 #>
 function New-PowershaiError {
 	param(
@@ -183,53 +255,7 @@ function New-PowershaiError {
 }
 
 	
-<#
-	.DESCRIPTION 
-		Obtém uma string codificada com um encoding específico.  
-		Internamente, o Powershell (.NET) armazena tudo como unicode utf16 (https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-encoding-introduction)
-		Mas, podemos usar as classes de Text.Encoding para obter strings formadas por oturas sequências.  
-		Isso é útil para enviar via protocolos (como HTTP), etc.  
-		Se você tentar printar o resultado dessa função, pode não ser legível, devido a sequência de bytes diferentes.  
-#>
-function Get-EncodedString {
-	param(
-		$SourceStr
-		,$TargetEncoding = "UTF-8"
-		,#Se especifciado retorna apenas os bytes 
-			[switch]$Bytes
-	)
-	
-	#Aqui obtemos os bytes no encoding desejado.  
-	#Internamente, o Powershell armazena os caraceres como UTF-16. As classes Text.Encoding convertem de UTF-16 para a sequencia de bytes no encoding desejado.  
-	#FOr exemplo, innternamente, a string "á" é armazenada como um array contendo apenas 1 elemento: [char]225 (225 é o codepoint do á no Unicode).
-	#Quando  usamos UTF8.Getbytes("á"), estamos pedindo que o powershel retorne o UTF-8 equiuvalente de "á", que é um array cim 2 posicoes: 195,196 (é assim que o "á" é representando no UTF-8)
-	[byte[]]$TargetEncBytes = [Text.Encoding]::GetEncoding($TargetEncoding).GetBytes($SourceStr)
-	
-	if($Bytes){
-		return $TargetEncBytes
-	}
-	
-	#Uma vez que temos um array de bytes, podemos construir um tipo string de volta. 
-	#Assi,podemos concatenar essa string em lugares que aceitam string, como concatenção.
-	#Aqui, usamos uma "gambi": O encoding iso-8859-1 não faz nenhuma conversão de bytes. Por isso, podemos usar ele para ober a string a partir do byte.  
-	#Assim, considerando o exemplo, anterior, será retornada uma string, formada peçla sequencia 195,196. Ao printar ela, vai parecer uma string completamente difernete (pos o Powershell exibe em outra codificação).
-	return [Text.Encoding]::GetEncoding("iso-8859-1").GetString($TargetEncBytes)
-}
-
-
-
-
-
-
-
-
-# Aux/helper functions!
-# funcoes usadas para auxiliar alguma operacao ou encasuplar logica complexa!
-function JoinPath {
-	$Args -Join [IO.Path]::DirectorySeparatorChar
-}
-
-#Carrega a http lib!
+# LOW LEVEL HTTP Functions
 . (JoinPath $PSSCriptRoot "lib" "http.ps1")
 
 
@@ -364,11 +390,24 @@ function PowershaiHash {
 # misc functions...
 
 <#
+	.SYNOPSIS
+		Cria um quadro virtual de texto, e escreve caracteres dentro dos limites desse quadro
+	
 	.DESCRIPTION 
 		Cria um quadro de desenho no console, que é atualizado em somente uma região específica!
 		Você pode enviar várias linhas de texto e afuncao cuidará de manter o desenho no mesmo quadro, dando a impressão que apenas uma região está sendo atualizada.
 		Para o efeito desejado, esta funcao deve ser invocada repetidamente, sem outros writes entre as invocacoes!
-		Só funciona com o modo interativo.
+		
+		Esta função só deve ser usada no modo interativo do powershell, rodando em uma janela de console.
+		Ela é útil para usar em situações em que você quer ver o progresso de um resultado em string exatamente na mesma área, podendo comparar melhor variações.
+		É apenas uma função auxiliar.
+		
+	.EXAMPLE
+		O seguinte exemplo escreve 3 string de texto a cada 2 segundos.
+		Você vai perceber que as strings serão escritas exatamente na mesm alinha, substuindo a anterior!
+	
+		"ISso",@("é","um teste"),"de escrita","com`nvarias`nlinhas!!" | Invoke-PowerhsaiConsoleDraw -w 60x10 {  $_; start-sleep -s 1 };
+		
 #>
 function Invoke-PowerhsaiConsoleDraw {
 	[CmdletBinding()]
@@ -450,11 +489,24 @@ function Invoke-PowerhsaiConsoleDraw {
 }
 
 
-# Meta functions
-# Esssas funcoes devem ser usadas para obter informacoes!
+<#
+	.SYNOPSIS
+		Obtém o provider ativo 
+		
+	.DESCRIPTION 
+		Retorna o objeto que representa o provider ativo.  
+		Os providers são implementados como objetos e ficam armazenados na memória da sessão, em uma variável global.  
+		Esta função retorna o provider ativo, que foi definido com o comando Set-AiProvider.
+		
+		O objeto retorando é uma hashtable contendo todos os campos do provider.  
+		Este comando é comumente usado pelos providers para obter o nome do provider ativo.  
+		
+		O parâmetro -ContextProvider retorna o provider atual onde o script está rodando.  
+		Se estiver rodando em um script de um provider, ele vai retornar aquele provider, ao invés do provider definido com Set-AiProvider.
+#>
 function Get-AiCurrentProvider {
 	param(
-		#Se habilitado, usa o provider de contexto, isto é, se o códigoe stá rodando em um arquivo no diretorio de um provider, assume este provider.
+		#Se habilitado, usa o provider de contexto, isto é, se o código está rodando em um arquivo no diretorio de um provider, assume este provider.
 		#Caso contrario, obtem o provider habilitado atualmente.
 		[switch]$ContextProvider
 	)
@@ -474,6 +526,22 @@ function Get-AiCurrentProvider {
 }
 
 
+<#
+	.SYNOPSIS
+		Obtém o provider mais recente do script atual
+		
+	.DESCRIPTION 
+		Este cmdlet é comumente uado pelos providers de forma indireta através de Get-AiCurrentProvider.  
+		Ele olha na callstack do powershell e identifica se o caller (a função que executou) faz parte de um script de um provider.  
+		Se for, ele retorna esse provider.
+		
+		Se a chamada foi feia em múltiplos providers, o mais recente é retornaod. Por exemplo, imagine esse cenário:
+		
+			Usuario -> Get-aiChat -> ProviderX_Function -> ProviderY_Function -> Get-AiNearProvider
+			
+		Neste caso, note que existem 2 calls de providers envolvidas.  
+		Neste caso, a funcao Get-AiNearProvider retornará o provider y, pois ele é o mais recente da call stack.  
+#>
 function Get-AiNearProvider {
 	$CallStack = Get-PSCallStack
 	
@@ -491,10 +559,23 @@ function Get-AiNearProvider {
 	return $PROVIDERS[$ProviderName];
 }
 
-# Muda o provider!
+<#
+	.SYNOPSIS
+		Altera o provider atual
+		
+	.DESCRIPTION 
+		Providers são scripts que implementam o acesso à suas respectivas APIs.  
+		Cada provider tem sua forma de invocar APIs, formato dos dados, schema da resposta, etc.  
+		
+		Ao mudar o provider, você afeta certos comandos que operam no provider atual, como `Get-AiChat`, `Get-AiModels`, ou os Chats, como Send-PowershaAIChat.
+		Para saber mais detalhes sobre os providers consule o tópico about_Powershai_Providers
+#>
 function Set-AiProvider {
 	[CmdletBinding()]
-	param($provider, $url)
+	param(
+		#nome do provider 
+		$provider
+	)
 	
 	$ProviderSettings = $PROVIDERS[$provider];
 	
@@ -502,28 +583,19 @@ function Set-AiProvider {
 		throw "POWERSHAI_PROVIDER_INVALID: $provider";
 	}
 	
-	switch($provider){
-		"ollama" {
-			if($url){
-				$ProviderSettings.DefaultUrl 	= "$url/v1"
-				$ProviderSettings.ApiUrl 		= "$url/api"	
-			}
-		}
-
-		default {
-			if($url){
-				$ProviderSettings.DefaultUrl 	= "$url/v1"
-			}
-		}
-	}
-	
-	
 	$POWERSHAI_SETTINGS.provider = $provider;
 }
 
-
-
-# Invoca uma funcao do provider atual!
+<#
+	Invoca funções em um provider!
+	O PowershAI espera que certas funções sejam implementandas pelos providers.  
+	
+	Por exemplo, a função Chat é usada quando invocamos o Get-AiChat.  
+	Estas funções devem ser implementadas para prover a funcionalidade de maneira padrão.  
+	Essas funções são implementadas usando o nome do provider, por exemplo: openai_Chat.  
+	
+	O Powershai usa esta função para invocar as funcoes implementadas pelo powershai. Ela atua como um wrapper e facilitado e trata cenários comuns a todas essas invocações.
+#>
 function PowerShaiProviderFunc {
 	param(
 		$FuncName
@@ -567,7 +639,16 @@ function PowerShaiProviderFunc {
 	
 }
 
-# function 
+<#
+	Obtém configuracoes especifcias de um provider especifico, a partir de uma key.
+	ProviderData é como se fosse um pequeno banco de dados de configurações no formato de dicionario.  
+	Os providers armazenam configurações do usuário ali.  
+	
+	Todo provider tem 2 slots de configuração: User e Default. 
+	O default é o slot com as confniguirações com valores default definido pelo proprio provider.  
+	O USer é o slot com a sconfigurações que foram definidas pelo usuário. 
+	Ao ser recuperada, o powershai tenta primeiro trazer a versão no slot User. Se não encontra, otbém do default. 
+#>
 function GetProviderData {
 	param($name, $Key)
 	
@@ -584,6 +665,7 @@ function GetProviderData {
 	return $DefaultSetting
 }
 
+# altera configurações de um provider, dado a key e o valor.
 function SetProviderData {
 	param($name, $Key, $value)
 	
@@ -591,6 +673,7 @@ function SetProviderData {
 	$UserDefined[$key] = $value;
 }
 
+# Obtém configurações do providerr atual, a partir de um akey
 function GetCurrentProviderData {
 	param($key,[switch]$ContextProvider)
 	
@@ -598,6 +681,7 @@ function GetCurrentProviderData {
 	GetProviderData -name $Provider.name -key $key
 }
 
+# Atualiza configurações do provider atual
 function SetCurrentProviderData {
 	param(
 		$key,
@@ -609,7 +693,14 @@ function SetCurrentProviderData {
 	SetProviderData -name $provider.name -key $key -value $value;
 }
 
-# obtem a lista de providers !
+<#
+	.SYNOPSIS
+		Retorna os providers disponíveis
+	
+	.DESCRIPTION
+		Este comando lista os providers implementando sno powershai.  
+		PAra saber mais sobre providers consulte o tópico about_Powershai_Providers
+#>
 function Get-AiProviders {
 	param()
 	
@@ -634,11 +725,14 @@ $POWERSHAI_MODEL_CACHE = @{
 }
 
 <#
+	.SYNOPSIS
+		lista os modelos disponíveis no provider atual
+	
 	.DESCRIPTION
-		Lista os modelos disponíveis no provider atual.  
-		A única informação garantida de retorno em qualquer provider é o "id", ue é o id do modelo.  
-		As demais proproiedades são exclusivas de cada provider.
-		O id é o valor referenciado nos demais cmdlets desse módulo.
+		Este comando lista todos os LLM que podem ser usados com o provider atual para uso no PowershaiChat.  
+		Esta função depende que o provider implemente a função GetModels.
+		
+		O objeto retornado varia conforme o provider, mas, todo provider deve retorna um array de objetos, cada deve conter, pelo menos, a propridade id, que deve ser uma string usada para identificar o modelo em outros comandos que dependam de um modelo.
 #>
 function Get-AiModels {
 	[CmdletBinding()]
@@ -650,34 +744,29 @@ function Get-AiModels {
 	
 	return $ModelList
 }
-
-
-function GetModelsId {
+<#
+	.SYNOPSIS
+		Configurar o LLM default do provider atual
 	
-	$CurrentProvider = Get-AiCurrentProvider
-	
-	
-	if(!$POWERSHAI_MODEL_CACHE.ModelList){
-		$null = Get-AiModels
-	}
-	
-	if($CurrentProvider.name -ne $POWERSHAI_MODEL_CACHE.Provider){
-		$null = Get-AiModels
-	}
-
-	$POWERSHAI_MODEL_CACHE.ModelList
-}
-
-
-# Configura o default model!
+	.DESCRIPTION
+		Usuários podem configurar o LLM default, que será usado quando um LLM for necessário.  
+		Comandos como Send-PowershaAIChat, Get-AiChat, esperam um modelo, e se não for informado, ele usa o que foi definido com esse comando.  
+#>
 function Set-AiDefaultModel {
 	[CmdletBinding()]
-	param($model, [switch]$Force)
+	param(
+		#Id do modelo, conforme retornado por Get-AiModels
+		#Você pode usar tab para completar a linha de comando.
+			$model
+			
+		,#Força definir o modelo, mesmo que não seja retornaod por Get-AiModels 
+			[switch]$Force
+	)
 	
 	$ElegibleModels = @(Get-AiModels | ? { $_.name -like $model+"*" })
 	$ExactModel 	= $ElegibleModels | ?{ $_.name -eq $model }
 	
-	write-verbose "ElegibleModels: $($ElegibleModels|out-string)"
+	verbose "ElegibleModels: $($ElegibleModels|out-string)"
 	
 	if(!$ElegibleModels){
 		if($Force){
@@ -703,100 +792,128 @@ function Set-AiDefaultModel {
 }
 
 
+# Lista os ids de models para o arg completion!
+function GetModelsId {
+	
+	$CurrentProvider = Get-AiCurrentProvider
+	
+	
+	if(!$POWERSHAI_MODEL_CACHE.ModelList){
+		$null = Get-AiModels
+	}
+	
+	if($CurrentProvider.name -ne $POWERSHAI_MODEL_CACHE.Provider){
+		$null = Get-AiModels
+	}
+
+	$POWERSHAI_MODEL_CACHE.ModelList
+}
+
+
 RegArgCompletion Set-AiDefaultModel model {
 	param($cmd,$param,$word,$ast,$fake)
 	
 	GetModelsId | ? {$_ -like "$word*"} | %{$_}
 }
 
-# Funcao generica de chat. Segue a especificacao da OpenAI
+<#
+	.SYNOPSIS
+		Envia mensagens para um LLM e retorna a resposta 
+		
+	.DESCRIPTION 
+		Esta é a forma mais básica de Chat promovida pelo PowershAI.  
+		Com esta função, você pode enviar uma mensagem para um LLM do provider atual.  
+		
+		Esta função é mais baixo nível, de maneria padronizada, de acesso a um LLM que o powershai disponibiliza.  
+		Ela não gerencia histórico ou contexto. Ela é útil para invocar promps simples, que não requerem várias interações como em um Chat. 
+		Apesar de suportar o Functon Calling, ela não executa qualquer código, e apenas devolve a resposta do modelo.
+		
+		
+		
+		** INFORMACOES PARA PROVIDERS
+			O provider deve implementar a função Chat para que esta funcionalidad esteja disponíveil. 
+			A função chat deve retornar um objeto com a resposta com a mesma especificação da OpenAI, função Chat Completion.
+			Os links a seguir servem de base:
+				https://platform.openai.com/docs/guides/chat-completions
+				https://platform.openai.com/docs/api-reference/chat/object (retorno sem streaming)
+			O provider deve implementar os parâmetros dessa função. 
+			Veja a documentação de cada parãmetro para detalhes e como mapear para um provider;
+			
+			Quando o modelo não suportar um dos parâmetros informados (isto pé, não houver funcionalidade equivalente,ou que possa ser implementanda de maneira equivalente) um erro deverá ser retornado.
+#>
 function Get-AiChat {
 	[CmdletBinding()]
 	param(
-         $prompt
-        ,$temperature   = 0.6
-        ,$model         = $null
-        ,$MaxTokens     = 200
-		,$ResponseFormat = $null
+         #O prompt a ser enviado. Deve ser no formato descrito pela função ConvertTo-OpenaiMessage
+			$prompt
+        
+		,#Temperatuta do modelo 
+			$temperature   = 0.6
+			
+        ,#Nome do modelo. Se não especificado, usa o default do provider.
+			$model         = $null
+			
+        ,#Máximo de tokens a ser retornado 
+			$MaxTokens     = 1024
+			
+		,#Formato da resposta 
+		 #Os formatos aceitáveis, e comportamento, devem seguir o mesmo da OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
+		 #Atalhos:
+		 #	"json", equivale a {"type": "json_object"}
+			$ResponseFormat = $null
 		
-		,#Sobrescrever a lista de funcoes!
-		 #Por padrão, este cmdlet irá checar adicionar estas funcoes a lista:
-		 #		InternalFunctions 	- Lista de funcoes internas
-		 #		UserFunctions		- Lista de funcoes adiconadas usandos os cmdslet *-AiTool
-		 #Ao usar este parametro, voce sobrescreve esse comportamento
+		,#Lista de tools que devem ser invocadas!
+		 #Você pode usar o comandos como Get-OpenaiTool*, para transformar funcões powershell facilmente no formato esperado!
+		 #Se o modelo invocar a função, a resposta, tanto em stream, quanto normal, deve também seguir o modelo de tool caling da OpenAI.
+		 #Este parâmetro deve seguir o mesmo esquema do Function Calling da OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
 			$Functions 	= @()	
 			
-		#Add raw params directly to api!
-		#overwite previous
-		,$RawParams	= @{}
+
+		,#Especifique parâmetros diretos da API do provider.
+		 #Isso irá sobrescrever os valores que foram calculados e gerados com base nos outros parâmetros.
+			$RawParams	= @{}
 		
-		,$StreamCallback = $null
+		,#Habilita o modelo Stream 
+		 #Você deve especificar um ScriptBlock que será invocado para cada texto gerado pelo LLM.
+		 #O script deve receber um parâmetro que representa cada trecho, no mesmo formato de streaming retornado
+		 #	Este parâmetro é um objeto que conterá a propridade choices, que é nom mesmo esquema retornado pelo streaming da OpenAI:
+		 #		https://platform.openai.com/docs/api-reference/chat/streaming		 
+			$StreamCallback = $null
 	)
 	
 	$Provider = Get-AiCurrentProvider
 	$FuncParams = $PsBoundParameters;
+	
+	if($ResponseFormat -eq "json"){
+		$ResponseFormat = @{type = "json_object"}
+	}
 
 	if(!$model){
 		$FuncParams['model'] = GetCurrentProviderData DefaultModel
 	}
 	
-
-
-	
 	PowerShaiProviderFunc "Chat" -FuncParams $FuncParams;
 }
 
 <#
+	.SYNOPSIS
+		Envia mensagem para um LLM, com suporte a Tool Calling, e executa as tools solicitadas pelo modelo como comandos powershell.
+		
 	.DESCRIPTION
 		Esta é uma função auxiliar para ajudar a fazer o processamento de tools mais fácil com powershell.
 		Ele lida com o processamento das "Tools", executando quando o modelo solicita!
-		Apenas converse normalmente, defina as funções e deixe que este comando faça o resto!
-		Não se preocupe em processar a resposta do modelo, se tem que executar a função, etc.
-		O comando abaixo já faz tudo isso pra você. 
 		
+		Você deve passar as tools em um formato específico, documentando no tópico about_Powershai_Chats
+		Esse formato mapeia corretamente funções e comandos powershell pra o esquema aceitável pela OpenAI (OpenAPI Schema).  
+		
+		Este comando encapsula toda a lógica que identifica quando o modelo quer invocar a função, a execução dessas funções,e o envio dessa resposta de volta ao modelo.  
+		Ele fica nesse loop até que o modelo pare de decidir invocar mais funções, ou que o limite de interações (sim, aqui chamamos de interações mesmo, e não iterações) com o modelo tenha finalizado.
+		
+		O conceito de interação é simples: Cada vez que a função envia um prompt para o modelo, conta como uma integração.  
+		Abaixo está um fluxo típico que pode acontecer:
+			
 
-		COMO AS TOOLS SÃO INVOCADAS  
-
-			Este comando irá usar as tools enviadas no parâmetro -Functions para invocá-las e executá-las diretamente nesta sessão do Powershell.
-			Ele espera um objeto que chamammos de OpenaiTool, contendo as seguintes props:
-			
-			@{
-				# é o objeto com o schema, documentado da OpenAI, a ser passado ao modelo (parametro tools da API)
-				# O nome das funcoes enviados segue um padrão, documentado abaixo.
-				tools = @{} 
-				
-				#Este é um scriptblock que deve retonar um comando a ser executado 
-				# se nao informaod, usa o proprio nome de comando como executável!
-				map = {
-					param(
-						$Name # Nome da tool 
-						$OpenaiTool #Este proprio objeto Openaitool
-					)
-					
-					return @{
-						# comando a ser executado!
-						# Deve ser um comando invocavel pelo powershell como scrip block, nome de funcao, funao em arquivo, script, etc.
-						func = function|scriptblock|funcao
-					}
-				}
-			}
-			
-			Além dessas propriedades, qualquer outra é livre para ser retornado, que pode ser usada pelo script de map!
-			
-			Quando o modelo solicita a execucao de uma (ou mais) funcoes, este cmdlet irá determinar qual a OpenaiTool onde este comando foi definido.
-			Ele faz isso olhando o "tools" que é apssado e filtrando pelo nome retronado pelo modelo.  
-			
-			Então, ele executa o script "map" dessa tool passando o nome da tool invocada e o proprio obejto OpenaiTool onde foi definido.  
-			E o script então segue sua logica para devolver uma funcao executável.  
-			Cada cmdlet de cada provider deve implementar sua propria logica para execucao dessa funcao!
-			
-			Os argumentos dessas funcoes são enviados pelo modelo, conforme o schema que foi montando e enviado em tools.  
-			Note que, este recurso só funciona com providers que suportem modelos que suportem o Tool Calling com exatamente o mesmo params e retorno da OpenAI.  
-				
-				
-					
-
-		Para um exemplo de como implementar funcoes que retornem esse format, veja no provider openai.ps1, os comandos que comecam com Get-OpenaiTool*
+		Você pode obter mais detalhes do funcionamento consultando o tópico about_Powershai_Chats
 #>
 function Invoke-AiChatTools {
 	[CmdletBinding()]
@@ -1136,24 +1253,56 @@ function Invoke-AiChatTools {
 	}
 }
 
-
-
-
-
-
-
-# security FUNCTIONS
-
-
 <#
 	.SYNOPSIS 
-		Export current settings protected by user password
+		Exporta as configurações da sessão atual para um arquivo, criptografado por uma senha
+		
+	.DESCRIPTION
+		Este cmdlet é útil para salvar configurações, como os Tokens, de maneira segura.  
+		Ele solicia uma senha e usa ela para criar um hash e criptografar os dados de configuração da sessão em AES256.  
+		
+		As configurações exportadas são todas aquelas definidas na variável $POWERSHAI_SETTINGS.  
+		Essa variável é uma hashtable contendo todos os dados configurados pelos providers, o que inclui os tokens.  
+		
+		Por padrão, os chats não são exportados devido a quantidade de dados envolvidos, o que pode deixar o arquivo muito grande!
+		
+		O arquivo exportado é salvo em um diretório criado automaticamente, por padrão, na home do usuário ($HOME).  
+		Os objetos são exportados via Serialization, que é o mesmo método usado por Export-CliXml.  
+		
+		Os dados são exportados em um formato próprio que pode ser importado apenas com Import-PowershaiSettings e informando a mesma senha.  
+		
+		Uma vez que o PowershAI não faz um export automático, é recomendo invocar esse comando comando sempre que houver alteração de configuração, como a inclusão de novos tokens.  
+		
+		O diretório de export pode ser qualquer caminho válido, incluindo cloud drives como OneDrive,Dropbox, etc.  
+	
+		Este comando foi criado com o intuito de ser interativo, isto é, precisa da entrada do usuário em teclado.
+		
+	.EXAMPLE 
+		Export-PowershaiSettings 
+		
+		Exporta com as configurações padrões!
+		
+	.EXAMPLE 
+		Export-PowershaiSettings -Chat  
+	
+		Exporta incluindo os chats!
+
+	.EXAMPLE
+		PS> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
+		PS> Export-PowershaiSettings
+		
+			Exporta para um diretório no OneDrive.
 #>
 function Export-PowershaiSettings {
 	[CmdletBinding()]
 	param(
-		$ExportDir = $Env:POWERSHAI_EXPORT_DIR
-		,[switch]$Chats
+		#Diretório de export 
+		#Por Padrão, é um diretorio chamado .powershai no profile do usuário, mas pode especificar a variável de ambiente POWERSHAI_EXPORT_DIR para alterar.
+			$ExportDir = $Env:POWERSHAI_EXPORT_DIR
+		
+		,#Se especificado, inclui os chats no export 
+		 #Todos os chats serão exportados
+			[switch]$Chats
 	)
 	
 	$Password = Get-Credential "ExportPassword";
@@ -1204,7 +1353,35 @@ function Export-PowershaiSettings {
 
 <#
 	.SYNOPSIS 
-		Import current settings
+		Importa uma configuração exportada com Export-PowershaiSettings
+		
+	.DESCRIPTION
+		Este cmdlet é o pair do Export-PowershaiSettings, e como o nome indica, ele importa os dados que foram exportados.  
+		Você deve garantir que a mesma senha e o mesmo arquivo são passados.  
+		
+		IMPORTANTE: Este comando sobscreverá todos os dados configurados na sessão. Só execute ele se tiver certeza absoluta que nenhum dado configurado previamente pode ser perdido.
+		Por exemplo, alguma API Token nova gerada recentemente.
+		
+		Se você estivesse especifciado um caminho de export diferente do padrão, usando a variável POWERSHAI_EXPORT_DIR, deve usa ro mesmo aqui.
+		
+		O processo de import valida alguns headers para garantir que o dado foi descriptografado corretamente.  
+		Se a senha informanda estiver incorreta, os hashs não vão ser iguais, e ele irá disparar o erro de senha incorreta.
+		
+		Se, por outro lado, um erro de formado invalido de arquivo for exibido, significa que houve alguma corrupção no proesso de import ou é um bug deste comando.  
+		Neste caso, você pode abrir uma issue no github relatando o problema.
+		
+		
+		
+	.EXAMPLE 
+		Import-PowershaiSettings
+		
+		Importa as configurações do diretório padrão.
+	
+	.EXAMPLE
+		PS> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
+		PS> Import-PowershaiSettings
+		
+			Importa as configurações que foram exportadas para um diretório alternativo (one drive).
 #>
 function Import-PowershaiSettings {
 	[CmdletBinding()]
@@ -1261,10 +1438,15 @@ function Import-PowershaiSettings {
 	write-host "Session settings imported";
 }
 
-# POWESHAI CHAT 
-# Implementacao do Chat Client do POWERSHAI
+###
+### POWERHSAI CHATS
+###		
+###	Funcoes relacionadas ao Powershai Chat
+###
+###
 
 
+# Cria um objeto que representa um ChatContext
 function NewChatContext {
 	return @{
 		messages = @()
@@ -1273,6 +1455,10 @@ function NewChatContext {
 }
 
 <#
+	.SYNOPSIS 
+		Cria um novo objeto que representa os parâmetros de um PowershaiChat 
+		
+		
 	.DESCRIPTION
 		Cria um ojbeto padrao contendo todos o spossveis parametros que podem ser usados no chat!
 		O usuário pode usar um get-help New-PowershaiParameters para obter a doc dos parametros.  	
@@ -1408,22 +1594,27 @@ function New-PowershaiParameters {
 		O tamanho do contexto local (aqui na sua sessao do Powershai, e nao do LLM), é controlado por um parametro (use Get-PowershaiChatParameter para ver a lista de parametros)
 		
 		Note que, devido a essa maneira do Powershai funcionar, dependendo da quantidade de informacoes enviadas e retornadas, mais as configuracoes dos parametros, voce pode fazer seu Powershell consumir bastante memória. Voce pode limpar o contexto e historico manualmente do seu chat usando Reset-PowershaiCurrentChat
+		
+		Veja mais detalhes sobre no tópico about_Powershai_Chats,
 #>
 function New-PowershaiChat {
 	[CmdletBinding()]
 	param(
-		$ChatId
-		,$model  		= $null
-		,$MaxRequests 	= 10
-		,$MaxTokens 	= 1024
-		,[switch]$Json
-		
-		,#Desliga o stream 
-			[switch]$NoStream
+		#Id do chat. Se não especifico, irá gerar um padrão 
+		#ALguns padrões de id são reservados para uso interno. Se você us´-alos poderá causar instabilidades no PowershAI.
+		#Os seguintes valores são reservados:
+		# default 
+		# _pwshai_*
+			$ChatId
 			
-		,[switch]$IfNotExists
+		,#Cria somente se não existe um chat com o mesmo nome 
+			[switch]$IfNotExists
+			
 		,#Forçar recriar o chat se ele já estiver criado!
 			[switch]$Recreate
+			
+		,#Cria o chat e inclui essas tools!
+			$Tools = @()
 	)
 	
 	if(!$ChatId){
@@ -1443,6 +1634,8 @@ function New-PowershaiChat {
 		if(!$Recreate){
 			throw "POWERSHAI_START_CHAT: Chat $ChatId already exists";
 		}
+		
+		verbose "Recreate Enabled";
 	}
 	
 	try {
@@ -1456,7 +1649,7 @@ function New-PowershaiChat {
 	
 	$ApiParams = @{					}
 	
-	$ChatParams = New-PowershaiParameters -stream (!([bool]$NoStream))
+	$ChatParams = New-PowershaiParameters
 	
 	$ChatSlot = [PsCustomObject]@{
 		#Id unico e interno do chat!
@@ -1510,26 +1703,16 @@ function New-PowershaiChat {
 	
 	SetType $ChatSlot "Chat";
 
+	verbose "Updating slot of chatid: $ChatId";
 	$Chats[$ChatId] = $ChatSlot;
 	
 	$null = Get-PowershaiChat -SetActive $ChatId
-	return $ChatSlot;
-}
-
-function Invoke-PowershaiChatStart {
-	$InternalMessages = @(
-		"Você é um agente que está conversando com o usuário partir do PowershAI, um módulo powershell para interagir com IA"
-		"O chat está sendo iniciado agora"
-	)
-
-	if($UserFirstName){
-		$InternalMessages += "O nome do usuário é: "+$UserFirstName;
+	
+	if($Tools){
+		 Add-AiTool -names $Tools -ChatId $ChatId
 	}
-	$Prompt = @(
-		"Gere uma saudação inicial para o usuário"
-	)
-	$Prompt = $Prompt -Join "`n";
-	Send-PowershaiChat -Prompt $Prompt -SystemMessages $InternalMessages;
+	
+	return $ChatSlot;
 }
 
 <#
@@ -1559,13 +1742,30 @@ function Remove-PowershaiChat {
 	return $TargetChat;
 }
 
-# Get a chatid!
+<#
+	.SYNOPSIS 
+		Retorna um ou mais Chats criados com New-PowershaAIChat
+		
+	.DESCRIPTION
+		Este comando permite retornar o objeto que representa um Powershai Chat.  
+		Este objeto é o objeto referenciando internamente pelos comandos que operam no Powershai Chat.  
+		Apesar de certos parâmetros você poder alterar diretamente, não é recomendável que faça esta ação.  
+		Prefira sempre usar a saída desse comando como entrada para os outros que comandos PowershaiChat.
+#>
 function Get-PowershaiChat {
 	[CmdletBinding()]
 	param(
-		$ChatId # . active chat
-		,[switch]$SetActive
-		,[switch]$NoError
+		#Id do chat
+		#Nomes especiais:
+		#	. - Indica o proprio chat 
+		# 	* - Indica todos os chats 
+			$ChatId 
+		
+		,#Define o chat como ativo, quando o id especifciado não é um nome especial.
+			[switch]$SetActive
+			
+		,#Ignora erros zde validação 
+			[switch]$NoError
 	)
 	
 	try {
@@ -1623,20 +1823,36 @@ function Get-PowershaiChat {
 	
 }
 
+<#
+	.SYNOPSIS 
+		Altera o chat ativo
+		
+	.DESCRIPTION
+		O chat ativo é o chat padrão nos quais os comandos do Powershai Chat são enviados.  
+		Se existem somente 1 chat, ele é considerado ativo, por padrão.
+#>
 function Set-PowershaiActiveChat {
 	[CmdletBinding()]
-	param($ChatId)
+	param(
+		$ChatId
+	)
+	
+	if(IsType $ChatId "Chat"){
+		$ChatId = $ChatId.id;
+	}
 	
 	Get-PowershaiChat -SetActive $ChatId;
 }
 
 <#
-	.DESCRIPTION 
+	.SYNOPSIS
 		Atualiza o valor de um parâmetro do chat do Powershai Chat.  
-		Se o parâmetro não existe, o cmdlet retorna um erro, a menos que -Force é usado!
-		-Force deve ser usado normalmente em casos de testes internos ou em raras si
+		
+	.DESCRIPTION 
+		Atualiza o valor de um parâmetro de um Powershai Chat.  
+		Se o parâmetro não existe, um erro é retornado.
 #>
-function Update-PowershaiChatParameter {
+function Set-PowershaiChatParameter {
 	param(
 		#Nome do parâmetro 
 			$parameter
@@ -1657,20 +1873,42 @@ function Update-PowershaiChatParameter {
 		throw "POWERSHAI_CHAT_SETPARAM: Parameter $Parameter not found";
 	}
 	
+	
 	$Chat = Get-PowershaiChat $ChatId;
 	$CurrentValue = $Chat.params[$parameter];
 	
 	$Chat.params[$parameter] = $value;
-	write-host "Changed $parameter from $CurrentValue to $value";
+	
+	return [PsCustomObject]@{ Parameter = $parameter; OldValue = $CurrentValue; Newvalue = $Chat.params[$parameter] }
 }
 
-
+<#
+	.SYNOPSIS
+		Retorna a lista de parâmetros disoponíveis em um chat
+		
+	.DESCRIPTION 
+		Este comando retorna um objeto contendo a lista de propriedades.  
+		O objeto é, na verdade, um array, onde cada elemento representa uma propriedade.  
+		
+		Esse array retornado possui algumas modificações para faciltiar o acesso aos parametros. 
+		Você pode acessar os parâmetros usando o objeto retornado diretamente, sem a necessidade de fitrar sobre a lista de parâmetros.
+		Isso é útil quando se desejar acessar um parâmetro específico da lista.  
+		
+	.EXAMPLE 	
+		> $MyParams = Get-PowershaiChatParameter
+		> $MyParams.MaxTokens # Acessa o parâmetro max TOKENS
+		> $MyParams | %{ write-host Parametro $_.name tem o valor $_.value } # itera sobre os parametros!
+		
+#>
 function Get-PowershaiChatParameter {
 	param($ChatId = ".")
 	
 	$Chat = Get-PowershaiChat $ChatId;
 	
-	$ParamsHelp = @()
+	[Collections.ArrayList]$ParamsHelp = @()
+	
+	SetType $ParamsHelp "ChatParameterList"
+	
 	$ParamBaseHelp = @(get-help New-PowershaiParameters).parameters.parameter
 	
 	#Lista tudo para garantir mesmo os chats criados previamente possam exibir novas opcoes que aparecem!
@@ -1698,34 +1936,39 @@ function Get-PowershaiChatParameter {
 		#Direct informa se o parâmetro é um parâmetro direto da função Invoke-AiChatTools, que é a função base invocada Powershai Chats.
 		$ParameterInfo | Add-Member Noteproperty direct $IsDirectParam
 		
-		$ParamsHelp += $ParameterInfo
+		$null = $ParamsHelp.add($ParameterInfo)
+		Add-Member -InputObject $ParamsHelp -force Noteproperty $ParameterInfo.name $ParameterInfo.value;
 	}
 	
-	return $ParamsHelp;
+	
+	write-output -NoEnumerate $ParamsHelp;
 }
 
-
-function Set-PowershaiChatParameter {
-	param($parameter, $value, $ChatId = ".")
-	
-	if($parameter -eq $null){
-		Get-PowershaiChatParameter $ChatId
-		return;
-	} 
-	
-	Update-PowershaiChatParameter $parameter $value $chatId
-}
 
 $PARAM_LIST = @();
 
-RegArgCompletion Set-PowershaiChatParameter,Update-PowershaiChatParameter parameter {
+RegArgCompletion Set-PowershaiChatParameter parameter {
 	param($cmd,$param,$word,$ast,$fake)
 	 
 	Get-PowershaiChatParameter -ChatId . | ? {$_.name -like "$word*"} | %{$_.Name};
 }
 
 
-
+<#
+	.SYNOPSIS
+		Permite invocar a maioria das funções de uma maneira compacta
+		
+	.DESCRIPTION 
+		Este é um simples utilizario que permite invocar diversas funcoes de uma forma mais reduzia na linha de comando.  
+		Note que nem todos os comandos podem ser suportados ainda.
+		
+		É melhor usado com o alia pshai.
+		
+	.EXAMPLE 	
+		> pshai tools # lista as tools
+		> pshai params MaxTokens 2048 #atualiza um parâmetro
+		
+#>
 function Invoke-PowershaiCommand {
 	[CmdletBinding()]
 	param(
@@ -1755,7 +1998,7 @@ function Invoke-PowershaiCommand {
 
 Set-Alias pshai Invoke-PowershaiCommand
 
-
+$POWERSHAI_FORMATTERS_SHORTCUTS = @{}
 <#
 	.SYNOPSIS
 		Define qual será a funcao usada para formatar os objetos passados pro parâmetro Send-PowershaiChat -Context
@@ -1766,9 +2009,14 @@ Set-Alias pshai Invoke-PowershaiCommand
 		Essa conversão é chamada de "Context Formatter" aqui no Powershai.  
 		O Context Formatter é uma funcao que irá pegar cada objeto passado e convertê-lo para uma string para ser injetada no prompt.
 		A função usada deve receber como primeiro parametro o objeto a ser convertido.  
+		
 		Os demais parametros ficam a criterio. Os valor deles pode ser especicicados usando o parametro -Params dessa funcao!
+		
+		O powershai disponibiliza context formatters nativos.  
+		Utilize Get-Command ConvertTo-PowershaiContext* ou Get-PowershaiContextFormatters para obter a lista!
+		
+		Uma vez que os context formatters nativos são apenas funções powershell, você pode usar o Get-Help Nome, para obter mais detalhes.  
 #>
-$POWERSHAI_FORMATTERS_SHORTCUTS = @{}
 function Set-PowershaiChatContextFormatter {
 	param(
 		$ChatId = "."
@@ -1784,12 +2032,24 @@ function Set-PowershaiChatContextFormatter {
 	$Chat.params.ContextFormatterParams =  $Params
 }
 
+<#
+	.SYNOPSIS
+		Lista todos os Context Formatters compactos disponíveis
+	
+	.DESCRIPTION
+		Certos Context Formatters disponibilizados pelo PowershAI podem ter um nome compacto (ou alias, se preferir), para facilitar sua definição.  
+		Este cmdlet retorna todos esses momes que podem ser usados ao uisar Set-PowershaiChatContextFormatter
+#>
 function  Get-PowershaiContextFormatters {
 	param()
 	
 	@($POWERSHAI_FORMATTERS_SHORTCUTS.keys) |  %{ [PsCustomObject]@{name = $_; func = $POWERSHAI_FORMATTERS_SHORTCUTS[$_]} }
 }
 
+<#
+	.SYNOPSIS
+		Converte o contexto para JSON usando ConverTo-Json
+#>
 function ConvertTo-PowershaiContextJson {
 	param($context)
 	
@@ -1797,22 +2057,47 @@ function ConvertTo-PowershaiContextJson {
 }
 $POWERSHAI_FORMATTERS_SHORTCUTS['json'] = 'ConvertTo-PowershaiContextJson'
 
+<#
+	.SYNOPSIS
+		Converte o contexto para JSON usando ConverTo-Json
+#>
 function ConvertTo-PowershaiContextOutString {
-	param($context)
+	param(
+		#Objeto a ser injetado no contexto 
+		$context
+	)
 	
 	$context | out-string @params
 }
 $POWERSHAI_FORMATTERS_SHORTCUTS['str'] = 'ConvertTo-PowershaiContextOutString'
 
+<#
+	.SYNOPSIS
+		Converte o objeto para um formato lista usando Format-List.
+#>
 function ConvertTo-PowershaiContextList  {
-	param($context, $FlParams = @{})
+	param(
+		#Objeto que será injetado no contexto
+			$context
+		
+		,#Parâmetros do comando Format-List 
+			$FlParams = @{}
+	)
 	
 	$context | Format-List @FlParams | out-string
 }
 $POWERSHAI_FORMATTERS_SHORTCUTS['list'] = 'ConvertTo-PowershaiContextList'
 
+<#
+	.SYNOPSIS
+		Converte o objeto para um formato Table usando Format-Table
+#>
 function ConvertTo-PowershaiContextTable {
-	param($context, $FlParams = @{})
+	param(
+		#Objeto que será injetado no contexto
+			$context
+			,$FlParams = @{}
+	)
 	
 	$context | Format-Table -AutoSize @FlParams | out-string
 }
@@ -1820,10 +2105,18 @@ $POWERSHAI_FORMATTERS_SHORTCUTS['table'] = 'ConvertTo-PowershaiContextTable'
 
 
 <#
+	.SYNOPSIS
+		Formato um objeto para ser injetado no contexto de uma mensagem envianda em um Powershai Chat
+	
 	.DESCRIPTION 
-		Formato um objeto para ser injetado no contexto!  
-		Este cmdlet é usado pelo Send-PowershaiChat quando o contexto é ativado.  
-		Você pode invocá-lo diretamente caso queira manualmente injetar dados e/ou debugar o processo!
+		Dado que LLM processam apenas strings, os objetos passados no contexto precisam ser convertidos para um formato em string, antes de serem injetados no prompt.
+		E, como existem várias reprsentações de um objeto em string, o Powershai permite que o usuário tenha total controle sobre isso.  
+		
+		Sempre que um objeto precisar ser injado no prompt, quando invocado com Send-PowershaAIChat, via ppipeline ou parâmetro Contexto, este cmdlet será invocado.
+		Este cmdlet é responsavel por transformar este objeto em string, independente do objeto, seja array, hashtable, customizado, etc.  
+		
+		Ele faz isso invocando a função de formatter configurada usando Set-PowershaiChatContextFormatter
+		NO geral, você não precisa invocar essa funções diretamente, mas pode querer invocar quando quiser fazer algum teste!
 #>
 function Format-PowershaiContext {
 	[CmdletBinding()]
@@ -1834,7 +2127,7 @@ function Format-PowershaiContext {
 		,#Parâmetro a ser passado para a função formatter 
 			$params
 			
-		,#Função q ser nivocada. Se não especificado usa o defualt do chat.
+		,#Sobrescrever a função ser invocada. Se não especificado usa o defualt do chat.
 			$func 
 			
 		,#Chat em qual operar 
@@ -1873,42 +2166,44 @@ function Format-PowershaiContext {
 	
 	write-verbose "Invoking formatter..."
 	& $func $obj @params
-
 }
 
-<#
-	.SYNOPSIS 
-		Envia uma mensagem em um Chat do Powershai
-	
-	.DESCRIPTION 
-		Este cmdlet permite que você envie uma nova mensagem para o LLM do provider atual.  
-		Por padrão, ele envia no chat ativo. Você pode sobrescrever o chat usando o parâmetro -Chat.  Se não houver um chat ativo, ele irá usar o default.  
-		
-		Diversos parâmetros do Chat afetam como este comando. Veja o comando Get-PowershaiChatParameter para mais info sobre os parâmetros do chat.  
-		Além dos parâmetros do chat, os próprios parâmetros do comando podem sobrescrever comportamento.  Para mais detalhes, consule a documentação de cada parâmetro deste cmdlet usando get-help.  
-		
-		Para simplicidade, e manter a liha de comando limmpa, permitindo o usuário focar mais no prompt e nos dados, alguns alias são dosponibilizados.  
-		Estes alias podem ativar certos parâmetros.
-		São eles:
-			ia
-				Abreviação de "Inteligência Artifical" em português. Este é um alias simples e não muda nenum parâmetro. Ele ajuda a reduzir bastante a linha de comando.
-			ai
-				Abreviação de "Artificial Inteligence", em inglês. Este também e um alias simples e muda nenhum parâmetro. Ajuda a reduzir bastante a linha de comando.
-			
-			iat,ait
-				O mesmo que Send-PowershaAIChat -Temporary
-				
-			io,ao
-				O mesmo que Send-PowershaAIChat -Object
-#>
+
 function Send-PowershaiChat {
+	<#
+		.SYNOPSIS 
+			Envia uma mensagem em um Chat do Powershai
+		
+		.DESCRIPTION 
+			Este cmdlet permite que você envie uma nova mensagem para o LLM do provider atual.  
+			Por padrão, ele envia no chat ativo. Você pode sobrescrever o chat usando o parâmetro -Chat.  Se não houver um chat ativo, ele irá usar o default.  
+			
+			Diversos parâmetros do Chat afetam como este comando. Veja o comando Get-PowershaiChatParameter para mais info sobre os parâmetros do chat.  
+			Além dos parâmetros do chat, os próprios parâmetros do comando podem sobrescrever comportamento.  Para mais detalhes, consule a documentação de cada parâmetro deste cmdlet usando get-help.  
+			
+			Para simplicidade, e manter a liNha de comando limmpa, permitindo o usuário focar mais no prompt e nos dados, alguns alias são disponibilizados.  
+			Estes alias podem ativar certos parâmetros.
+			São eles:
+				ia|ai
+					Abreviação de "Inteligência Artifical" em português. Este é um alias simples e não muda nenum parâmetro. Ele ajuda a reduzir bastante a linha de comando.
+				
+				iat|ait
+					O mesmo que Send-PowershaAIChat -Temporary
+					
+				io|ao
+					O mesmo que Send-PowershaAIChat -Object
+			
+			O usuário pode criar seus próprios alias. Por exemplo:
+				Set-Alias ki ia # DEfine o alias para o alemao!
+				Set-Alias kit iat # DEfine o alias kit para iat, fazendo o comportamento ser igual ao iat (chat temporaria) quando usado o kit!
+	#>
 	[CmdletBinding(PositionalBinding=$false)]
 	param(
 		[parameter(mandatory=$false, position=0, ValueFromRemainingArguments)]
 		# o prompt a ser enviado ao modelo 
 			$prompt
 		
-		,#System messages 
+		,#System message para ser incluída 
 			$SystemMessages = @()
 		
 		,#O contexto 
@@ -1918,11 +2213,12 @@ function Send-PowershaiChat {
 			$context = $null
 			
 		,#Força o cmdlet executar para cada objeto do pipeline
-		 #Por padrão, ele acumula todos os objetos em uma string só e envia de um só vez pro LLM.
+		 #Por padrão, ele acumula todos os objetos em um array, converte o array para string só e envia de um só vez pro LLM.
 			[switch]$ForEach
 			
 		,#Habilia o modo json 
 		 #nesse modo os resultados retornados sempre será um JSON.
+		 #O modelo atual deve suportar!
 			[switch]$Json
 			
 		,#Modo Object!
@@ -1932,21 +2228,28 @@ function Send-PowershaiChat {
 			[switch]$Object
 			
 		,# Mostra os dados de contexto enviados ao LLM antes da resposta!
+		 # É útil para debugar o que está senod injetado de dados no prompt.
 			[switch]$PrintContext
 			
-		,#Desliga o historico anterior, mas colcoa a resposta atual no historico!
-			[switch]$NoContext 
-		,#DEsliga o historico e nao inclui o atual no historico!
+		,#Não enviar as conversas anteriores (o histórico de contexto), mas incluir o prompt e a resposta no contexto histórico.
+			[switch]$Forget
+			
+		,#Ignorar a resposta do LLM, e não incluir o prompt no contexto histórico
+			[switch]$Snub
+			
+		,#Não envia o histórico e nem inclui a resposta e prompt.  
+		 #É o mesmo que passar -Forget e -Snub juntos.
 			[switch]$Temporary 
 			
 		,# Desliga o function call para esta execução somente!
 			[Alias('NoCalls','NoTools','nt')]
 			[switch]$DisableTools
 			
-		,# Alterar a funcao de formatacao  para esta execucao apenas!
+		,# Alterar o contexto formatter pra este
+		 # Veha mais sobre em Format-PowershaiContext
 			$FormatterFunc = $null
 			
-		,# Parametros da funcao de formatacao
+		,# Parametros do contexto formatter alterado.
 			$FormatterParams = $null
 			
 		,# Retorna as mensagens de volta no pipeline, sem escrever direto na tela!
@@ -1993,6 +2296,12 @@ function Send-PowershaiChat {
 			$Temporary = $true;
 		}
 		
+		if($Temporary){
+			write-warning "Temporary Chat enabled";
+			$Snub 	= $true;
+			$Forget = $true;
+		}
+		
 		$ActiveChat = Get-PowershaiChat "." -NoError
 		
 		if(!$ActiveChat){
@@ -2008,7 +2317,7 @@ function Send-PowershaiChat {
 		
 		$MainCmdlet = $PsCmdLet;
 		
-		$ChatMyParams 		= Get-PowershaiChatParameter  -ChatId $ActiveChat.id
+		$ChatMyParams 		= Get-PowershaiChatParameter  -ChatId $ActiveChat.id 
 		$CurrentChatParams 	= @{
 			all = @{}
 			direct = @{}
@@ -2152,7 +2461,7 @@ function Send-PowershaiChat {
 			
 			function AddContext($msg) {
 
-				if($Temporary){
+				if($Snub){
 					return;
 				}
 					
@@ -2216,17 +2525,17 @@ function Send-PowershaiChat {
 					write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
 				}
 				
-				if($Temporary){
-					write-warning "Temporary Chat enabled";
-					$FullPrompt = $Msg;
-				} else {
+	
+				if(!$Snub){
 					$Msg | %{ AddContext $_ };
 					$FullPrompt = $ChatContext.messages;
 				}
-						
-				if($NoContext){
+				
+				if($Forget){
 					$FullPrompt = $Msg
 				}
+				
+
 				
 				#Generate functions!
 				if($Chat.Tools.compiled -eq $null){
@@ -2236,7 +2545,7 @@ function Send-PowershaiChat {
 					}
 					
 					verbose "Updating ParsedTools cached...";
-					$Chat.Tools.compiled = Get-AiUserToolbox
+					$Chat.Tools.compiled = CompileChatTools
 				}
 				
 				
@@ -2529,84 +2838,29 @@ function Send-PowershaiChat {
 
 }
 
-function Enter-PowershaiChat {
-	param(
-		$ChatId = "."
-		,[switch]$StartMessage
-	)
-	
-	$Chat = Get-PowershaiChat $ChatId -SetActive
-	$UserFirstName = $Chat.UserInfo.AllNames[0];
-	
-	if($UserFirstName){
-		$PromptLabel = $UserFirstName
-	} else {
-		$PromptLabel = "Você"
-	}
-	
-	if($StartMessage){
-		Invoke-PowershaiChatStart
-	}
-		
-	while($true){
-		$InternalMessages = @();
-		write-host -NoNewLine "$PromptLabel>>> "
-		$prompt = read-host
-		
-		try {
-			Send-PowershaiChat -prompt $prompt
-			
-			if($Chat.LastPrompt.action -eq "ExplicitExit"){
-				break;
-			}
-		} catch {
-			$ErrorActionPreference = "Continue";
-			write-error -ErrorRecord $_
-			$ErrorActionPreference = "Stop";
-		}
-	}
-}
+# Send-PowershaaiChat é esperado ser o comando mais utilizado talvez.
+# Reduzir o seu nome pode deixar mais confortável para o usuário.
+# Os seguintes alias são os alias primários, em que o Send-PowershaiChat pode alterar seu comportamento se um deles for utilizado.
+Set-Alias -Name ia -Value Send-PowershaiChat
+Set-Alias -Name iat -Value Send-PowershaiChat
+Set-Alias -Name io -Value Send-PowershaiChat
 
-function Start-PowershaiChat {
-	[CmdletBinding()]
-	param(
-		$ChatId = "default"
-		,$Functions = $null
-	)
-	
-	if(!$NoCreate){
-		$NewChat = New-PowershaiChat -ChatId $ChatId -IfNotExists
-	}
-	
-	if($Functions){
-		Update-PowershaiChatFunctions -ChatId $NewChat.id -File $Functions;
-	}
-	
-	
-	Enter-PowershaiChat -StartMessage
-}
+# Estes são alias secundários, que são criados apenas para melhor interface com usuários de outros idiomas.
+# Definimos uma alias para o alias primario, pois isso manterá o comportamento do Send-PowershaiChat, que pode alterar conforme o alias primário.
+# 	Ele contém toda a lógica necessáro para detecta esse cenário!
+Set-Alias -Name ai 	-Value ia
+Set-Alias -Name ait -Value iat
+Set-Alias -Name ao 	-Value io
 
-function Update-PowershaiChatFunctions {
-	[CmdletBinding()]
-	param($File, $ChatId = ".")
-	
-	$Chat = Get-PowershaiChat $ChatId
-	
-	if($File){
-		$FunctionSrc = $File;
-	} else {
-		$FunctionSrc = $Chat.src
-	}
-	
-	write-verbose "Loading functions from $FunctionSrc"
-	$Chat.Functions.src 	= $FunctionSrc;
-	$Chat.Functions.Tools 	= Get-OpenaiToolFromScript $FunctionSrc;
-}
+
 
 function Clear-PowershaiChat {
 	<#
 		.SYNOPSIS
 			Apaga elementos de um chat!
+		.DESCRIPTION
+			Apaga elementos específico de um chat.  
+			Útil apra liberar recursos, ou tirar o vício do llm devido ao histórico.
 	#>
 	param(
 		
@@ -2635,6 +2889,10 @@ function Clear-PowershaiChat {
 }
 
 function Reset-PowershaiCurrentChat {
+	<#
+		.SYNOPSIS
+			Apaga o histórico e o contexto do chat atual.
+	#>
 	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'High')]
 	param($ChatId = ".")
 	
@@ -2645,30 +2903,29 @@ function Reset-PowershaiCurrentChat {
     }
 }
 
-
-
-<#
-	.SYNOPSIS
-		Limpa o cache de de tools
-	
-	.DESCRIPTION
-		O PowershAI mantém um cache com as tools "compiladas".
-		Quando o PowershAI envia a lsita de tools pro LLM, ele precisa enviar junto a descrição da tools, lista de paraemtros, descrição, etc.  
-		Montar essa lista pode consumir um tempo signifciativo, uma vez que ele vai varrer a lista de tools, funcoes, e pra cada um, varrer o help (e o help de cada parametro).
-		
-		Ao dicionar um cmdlet como Add-AiTool, ele não compila naquele momento.
-		Ele deixa para fazer isso quando ele precisa invocar o LLM, na funcao Send-PowershaiChat.  
-		Se o cache não existe, então ele compila ali na hora, o que pode fazer com que esse primeiro envio ao LLM, demora alguns millisegundos ou segundos a mais que o normal.  
-		
-		Esse impacto é proprocional ao numero de funcoes e parâmetros enviados.  
-		
-		Sempre que você usa o Add-AiTool ou Add-AiScriptTool, ele invalida o cache, fazendo com que na proxima execução, ele seja gerado.  
-		ISso permite adicionar muitas funcoes de uma só vez, sem que seja compilado cada vez que você adicona.
-		
-		Porém, se você altera sua função, o cache não é recalcuado.  
-		Então, você deve usar esse cmdlet para que a proxima execução contenha os dados atualizados das suas tools após alteracoes de código ou de script.
-#>
 function Reset-PowershaiChatToolsCache {
+	<#
+		.SYNOPSIS
+			Limpa o cache de AI Tools.
+		
+		.DESCRIPTION
+			O PowershAI mantém um cache com as tools "compiladas".
+			Quando o PowershAI envia a lista de tools pro LLM, ele precisa enviar junto a descrição da tools, lista de paraemtros, descrição, etc.  
+			Montar essa lista pode consumir um tempo signifciativo, uma vez que ele vai varrer a lista de tools, funcoes, e pra cada um, varrer o help (e o help de cada parametro).
+			
+			Ao adicionar um cmdlet como Add-AiTool, ele não compila naquele momento.
+			Ele deixa para fazer isso quando ele precisa invocar o LLM, na funcao Send-PowershaiChat.  
+			Se o cache não existe, então ele compila ali na hora, o que pode fazer com que esse primeiro envio ao LLM, demora alguns millisegundos ou segundos a mais que o normal.  
+			
+			Esse impacto é proprocional ao numero de funcoes e parâmetros enviados.  
+			
+			Sempre que você usa o Add-AiTool ou Add-AiScriptTool, ele invalida o cache, fazendo com que na proxima execução, ele seja gerado.  
+			ISso permite adicionar muitas funcoes de uma só vez, sem que seja compilado cada vez que você adicona.
+			
+			Porém, se você alterar sua função, o cache não é recalcuado.  
+			Então, você deve usar esse cmdlet para que a proxima execução contenha os dados atualizados das suas tools após alteracoes de código ou de script.
+	#>
+	[CmdletBinding()]
 	param($ChatId = ".")
 	
 	$Chat = Get-PowershaiChat $ChatId
@@ -2680,32 +2937,56 @@ function Reset-PowershaiChatToolsCache {
 	}
 }
 
-<#
-	.SYNOPSIS
-		Adiciona um ou mais cmdlets, ou scripts, para a lista de comandos que podem ser invocados pela IA, via tool caling!
-	
-	.DESCRIPTION
-		Adiciona funcoes na sessao atual para a lista de Tool caling permitidos!
-		Quando um comando é adicionado, ele é enviado ao modelo atual como uma opcao para Tool Calling.
-		O help dsponivel da função será usado para descrevê-la, iuncluindo os parâmetros.
-		Com isso, você pode, em runtime, adicionar novas habilidades na IA que poderão ser invocadas pelo LLM e executadas pelo PowershAI.  
+#
+####
+#### CHAT TOOLS
+####
+#
+#
+
+
+function  Add-PowershaiChatTool {
+	<#
+		.SYNOPSIS
+			Adiciona funcoes, scripts, executáveis como uma tool invocável pelo LLM no chat atual (ou default para todos).
 		
-		AO adicionar scritps, todas as funcoes dentro do script são adicionadas de uma só vez.
-		
-		MUITO IMPORTANTE: 
-		NUNCA ADICIONEI COMANDOS QUE VOCÊ NÃO CONHEÇA OU QUE POSSAM COMPROMETER SEU COMPUTADOR.  
-		O POWERSHELL VAI EXECUTÁ-LO A PEDIDO DO LLM E COM OS PARÂMETROS QUE O LLM INVOCAR, E COM AS CREDENCIAIS DO USUÁRIO ATUAL.  
-		SE VOCÊ ESTIVER LOGADO COM UMA CONTA PRIVILEGIADA, COMO O ADMINISTRADOR, NOTE QUE VOCÊ PODERÁ EXECUTAR QUALQUER AÇÃO A PEDIDO DE UM SERVER REMOTO (O LLM).
-#>
-function Add-AiTool {
+		.DESCRIPTION
+			Adiciona funcoes na sessao atual para a lista de Tool caling permitidos!
+			Quando um comando é adicionado, ele é enviado ao modelo atual como uma opcao para Tool Calling.
+			O help dsponivel da função será usado para descrevê-la, iuncluindo os parâmetros.
+			Com isso, você pode, em runtime, adicionar novas habilidades na IA que poderão ser invocadas pelo LLM e executadas pelo PowershAI.  
+			
+			AO adicionar scritps, todas as funcoes dentro do script são adicionadas de uma só vez.
+			
+			Para mais informações sobre tools consule o topico about_Powershai_Chats
+			
+			MUITO IMPORTANTE: 
+			NUNCA ADICIONEI COMANDOS QUE VOCÊ NÃO CONHEÇA OU QUE POSSAM COMPROMETER SEU COMPUTADOR.  
+			O POWERSHELL VAI EXECUTÁ-LO A PEDIDO DO LLM E COM OS PARÂMETROS QUE O LLM INVOCAR, E COM AS CREDENCIAIS DO USUÁRIO ATUAL.  
+			SE VOCÊ ESTIVER LOGADO COM UMA CONTA PRIVILEGIADA, COMO O ADMINISTRADOR, NOTE QUE VOCÊ PODERÁ EXECUTAR QUALQUER AÇÃO A PEDIDO DE UM SERVER REMOTO (O LLM).
+	#>
+	[CmdletBinding()]
 	param(
-		$names
-		,$parameters
-		,$description
-		,$formatter
-		,[switch]$script
-		,$ChatId = "."
-		,[switch]$Global
+		#Nome do comando, caminho do script ou executável
+		#Pode ser um array de string com estes elementos misturados.
+		#Quando nome que termina com .ps1 é passado, é tratado como um script (isto é, será carregado as funcoes do script)
+		#Caso queria tratar com um comando (executar o script), informe o parâmetor -Command, para forçar ser tratado como um comando!
+			$names
+			
+		,#Descrição para esse tool a ser passada ao LLM.  
+		 #O comando vai usar o help e enviar, também o conteúdo descrito
+		 #Se este parâmetro for adicionado, ele é enviado junto com o help.
+			$description
+		
+		,#Força tratar como command. Útil quando você quer que um script seja executado como comando.
+		 #ùtil somente quando você passa um nome ambíguo de arquivo, que coincide como nome de algum comando!
+			[switch]$ForceCommand
+			
+		,#Chat em qual criar a tool 
+			$ChatId = "."
+			
+		,#Cria a tool globalmente, isto é, será disponível em todos os chats 
+			[switch]$Global
 	)
 	
 	$Chat = Get-PowershaiChat $ChatId
@@ -2724,12 +3005,13 @@ function Add-AiTool {
 		
 		#Se é uma uri vlaida
 		$uri = [uri]$CommandName
-		$IsScript = [bool]$Script;
+		$IsScript = $false;
 		
-		if($uri.IsAbsoluteUri){
+		if($CommandName -like "*.ps1" -and !$ForceCommand){
 			$IsScript = $true;
 		}
 		
+		$CommandInfo = $null;
 		if($IsScript){
 			[string]$AbsPath = Resolve-Path $CommandName -EA SilentlyContinue
 			
@@ -2741,12 +3023,16 @@ function Add-AiTool {
 			$CommandName = $AbsPath;
 			$ToolType = "file"
 		}
+		else {
+			$CommandInfo = Get-Command $CommandName;
+		}
 		
 		$ToolInfo = [PsCustomObject]@{
 			name 			= $CommandName
+			ComamndInfo 	= $CommandInfo
 			UserDescription = $description
 			type 			= $ToolType 
-			formatter 		= $formatter
+			formatter 		= $null #deprecated!
 			enabled 		= $true
 			chats 			= @()
 			scope 			= $scope
@@ -2760,31 +3046,36 @@ function Add-AiTool {
 	#Atualiza o cache das tools!
 	Reset-PowershaiChatToolsCache -ChatId $ChatId
 }
+Set-Alias Add-AiTool Add-PowershaiChatTool
 
-<#
-	.SYNOPSIS
-		Lista todas as Tools disponíveis e seu tipo
-	
-	.DESCRIPTION
-		Obtém a lista de tools
-#>
-function Get-AiTools {
+
+function Get-PowershaiChatTool {
+	<#
+		.SYNOPSIS
+			Obtéma a list de tools atuais.
+	#>
+	[CmdletBinding()]
 	param(
 		# obter especifico pelo nome ou o proprio objeto!
-		 # Se *, lista tudo!
+		# Se terminar como um .ps1, trata como script, a menos que ForceCommand seja usado!
 			$tool = "*"
 			
-		,[switch]$Enabled
-		,$ChatId = "."
+		,#listar somente as tools habilitadas 
+			[switch]$Enabled
+			
+		,#Chat de origem 
+			$ChatId = "."
 
-		,#user global store 
+		,#Quando obtendo uma tool específica, procurar na lista de tools globais.
 			[switch]$global 
 		
-		,#Trata -tool como um script 
-			[switch]$script 
+		,#Trata tool como um command!
+			[switch]$ForceCommand
 	)
 	
 	$Chat = Get-PowershaiChat $ChatId
+	
+	$IsScript = $false;
 
 	function ListTools {
 		param($src, $scope)
@@ -2811,6 +3102,11 @@ function Get-AiTools {
 		ListTools $Chat.Tools.raw "chat"
 		ListTools $POWERSHAI_SETTINGS.UserTools "global"
 	} else {
+		
+		if($Tool -like "*.ps1" -and !$ForceCommand){
+			$IsScript = $true;
+		}
+		
 		if(IsType $tool AiToolInfo){
 			return $tool;
 		} else {
@@ -2820,7 +3116,7 @@ function Get-AiTools {
 			}
 			
 			[string]$ToolIndex = $tool;
-			if($script){
+			if($IsScript){
 				[string]$AbsPath = Resolve-Path $tool
 				$ToolIndex = "Path:" + $AbsPath
 			} 
@@ -2828,40 +3124,48 @@ function Get-AiTools {
 			$ToolInfo = $ToolsStore[$ToolIndex];
 			
 			if(!$ToolInfo){
-				throw "POWERSHAI_GETTOOLS_NOTFOUND: Tool not found, name $tool. Global=$([bool]$Global), Script=$([bool]$Script)";
+				throw "POWERSHAI_GETTOOLS_NOTFOUND: Tool not found, name $tool. Global=$([bool]$Global), Script=$([bool]$IsScript)";
 			}
 			
 			return $ToolInfo;
 		}
 	}
-	
-	
-
 }
+Set-Alias Get-AiTools Get-PowershaiChatTool
 
-<#
-	.SYNOPSIS
-		Remove uma tool definitivamente
-#>
-function Remove-AiTool {
+
+function Remove-PowershaiChatTool {
+	<#
+		.SYNOPSIS
+			Remove uma tool definitivamente!
+	#>
 	[CmdletBinding()]
 	param(
+		#Nome do comando, script, funcoes que foi previamente adicioonado como tool.
+		#Se for um arquivo .ps1, trata como um script, a menos que -Force command é usado.
+		#Você pode usar o resultado de Get-PowershaiChatTool via pipe para este comando, que ele irá reconhecer
+		#Ao enviar o objeto retornado, todos os demais parâmetros são ignorados.
 		[parameter(ValueFromPipeline=$true)]
-		$tool
-		,[switch]$script
-		,$ChatId = "."
-		,[switch]$global
+			$tool
+			
+		,#Força tratar tool como um comando, quando é uma string 
+			[switch]$ForceCommand 
+			
+		,#Chat de onde remover 
+			$ChatId = "."
+			
+		,#Remover da lista global, se a tool foi adicionada previamente como global 
+			[switch]$global
 	)
 	
 	begin {
 		$Chat = Get-PowershaiChat $ChatId
 		$ToolStore = $Chat.Tools.Raw;
-		$IsPath = [bool]$Script;
-		$IsGlobal = [bool]$global;
+		$IsGlobal = [bool]$global;		
 	}
 	
 	process {
-		
+		$IsPath = $False;
 		
 		if(IsType $tool AiToolInfo){
 			$IsPath = $tool.type -eq "file"
@@ -2870,6 +3174,9 @@ function Remove-AiTool {
 		}
 		else {
 			$name = [string]$tool
+			if($name -like "*.ps1" -and !$ForceCommand){
+				$IsPath = $true;
+			}
 		}
 			
 		if($IsGlobal){
@@ -2895,31 +3202,36 @@ function Remove-AiTool {
 		Reset-PowershaiChatToolsCache -ChatId $ChatId
 	}
 }
+Set-Alias Remove-AiTool Remove-PowershaiChatTool
 
-<#
-	.SYNOPSIS
-		Desabilita um tool (mas não remove). Tool desabiltiada não é enviada ao LLM.
-#>
-function Set-AiTool {
+
+function Set-PowershaiChatTool {
+	<#
+		.SYNOPSIS
+			Desabilita um tool (mas não remove). Tool desabiltiada não é enviada ao LLM.
+	#>
 	[CmdletBinding()]
 	param(
-		#The name of tool or object 
+		#Nome da tool (mesmo de Add-PowershaiChatTool) ou via pipe o resultado de Get-PowershaiChatTool
 			[parameter(ValueFromPipeline=$true)]
 			$tool 
 		
-		,#habilita
+		,#habilita a tool.
 			[Parameter(ParameterSetName="Enable")]
 			[switch]$Enable
 			
-		,#desabilita
+		,#desabilita a tool.
 			[Parameter(ParameterSetName="Disable")]
 			[switch]$Disable
 		
-		,#Se informado, resolve o name como um path 
-			[switch]$Script
+		,#Se informado, e tool é um nome, força o mesmo a ser tratado como script!
+			[switch]$ForceCommand
 			
-		,$ChatId = "."
-		,[switch]$Global
+		,#Chat em qual a tool está 
+			$ChatId = "."
+			
+		,#Procura a tool na lista global de Tools	
+			[switch]$Global
 	)
 	
 	begin {
@@ -2927,7 +3239,7 @@ function Set-AiTool {
 	}
 	
 	process {	
-		$Tool = Get-AiTools -ChatId $ChatId -tool $tool -global:$global -script:$script 
+		$Tool = Get-AiTools -ChatId $ChatId -tool $tool -global:$global -ForceCommand:$ForceCommand
 		
 		if($Tool){
 			$OldState = $Tool.enabled
@@ -2940,7 +3252,7 @@ function Set-AiTool {
 				$Tool.enabled = $false
 			}
 			
-			write-verbose "	Setting from $OldState to $($Tool.enabled)"
+			verbose "	Setting from $OldState to $($Tool.enabled)"
 		}
 		
 	}
@@ -2950,7 +3262,7 @@ function Set-AiTool {
 	}
 	
 }
-
+Set-Alias Set-AiTool Set-PowershaiChatTool
 
 RegArgCompletion Set-AiTool,Remove-AiTool tool {
 	param($cmd,$param,$word,$ast,$fake)
@@ -2968,13 +3280,36 @@ RegArgCompletion Set-AiTool,Remove-AiTool tool {
 
 
 <#
-	.DESCRIPTION  
-		Obtém todas as tools cadastradas pelo usuário com Set-AiTool e compila em um único objeto para ser enviado ao LLM usando Invoke-AiChatTools.  
+	.SYNOPSIS 
+		Converte todas as tools adicionadas no formato esperado pela função Invoke-AiChatTools.
 		
+	.DESCRIPTION  
+		Obtém todas as tools cadastradas pelo usuário com New-PowershaiChatTool e compila em um único objeto para ser enviado ao LLM usando Invoke-AiChatTools.  
+		Este processo pode ser bem lento, dependendo da quantidade de tools adicionadas.
+		
+		O cmdlet vai pecorrer todas as tools, obter o help dos comando e dos parâmetros, e converter isso em um formato que possa ser enviado em Invoke-AiChatTools
+		Como o PowershAI define que o mecanismo de tools deve seguir o padrão da OpenAI, a função Get-OpenaiTool* do provider OpenAI é usada.  
+		Estas funcões contém a lógica necessária para gerar o schema da tool calling seguindo as especificações da OpenAI.  
+		
+		Este comando, itera em cada tool disponível para o chat atual e cria o que é necessário para ser enviado com Invoke-AiChatTools. 
+		Invoke-AiChatTools contém toda a lógica para lidar com o envio, execução e resposta do LLM.  
+		
+		Basicamente, existem 2 tipos de tools que o Powershai Suporte: Script ou Comando.  
+		Comando é qualquer código executável pelo powershell: funções, .exe, cmdlets nativos, etc.
+		
+		Scripts são simples arquivos .ps1 que definem as funções que podem ser usadas como tools.
+		É como se fosse um grupo de comandos.
+		
+		Este comando invoca tudo o que é necessário para converter essas tools no formato padrão esperado Invoke-AiChatTools.  
+		Invoke-AiChatTools não sabe nada sobre chats, tools globais. Ela é uma função genérica que não depende do mecanismo de Chats criado pelo Powershai.  
+		
+		Por isso, é necessário que esta função faça toda essa "tradução" das facilidades do Powershai Chat para o esperado pelo Invoke-AiChatTools.
 #>
-function Get-AiUserToolbox {
+function CompilePowershaiChatTools {
 	[CmdletBinding()]
 	param(
+		#Chat do qual serão obtidos as tools 
+		#Além do chat, as tools globais serão inclusas
 		$ChatId = "."
 	)
 	
@@ -3064,53 +3399,118 @@ function Get-AiUserToolbox {
 	
 	return $Compiled.ToolList
 }
+Set-Alias CompileChatTools CompilePowershaiChatTools
 
 
 
-
-
-
-
-Set-Alias -Name PowerShai -Value Start-PowershaiChat
-
-Set-Alias -Name ia -Value Send-PowershaiChat
-Set-Alias -Name iat -Value Send-PowershaiChat
-Set-Alias -Name io -Value Send-PowershaiChat
-
-Set-Alias -Name ai 	-Value ia
-Set-Alias -Name ait -Value iat
-Set-Alias -Name ao 	-Value io
-
-
-<#
-function prompt {
-	$ExistingPrompt = [scriptblock]::create($POWERSHAI_SETTINGS.OriginalPrompt);
+function Get-PowershaiHelp {
+	<#
+		.SYNOPSIS
+			Usa o provider atual para ajudar a obter ajuda sobre o powershai!
+			
+		.DESCRIPTION
+			Este cmdlet utiliza os próprios comandos do PowershAI para ajudar o usuário a obter ajuda sobre ele mesmo.  
+			Basicamente, partindo da pergunta do usuário, ele monta um prompt com algumas informacoes comuns e helps basicos.  
+			Então, isso é enviando ao LLM em um chat.
+			
+			Devido ao grande volume de dados enviandos, é recomendando usar esse comando somente com providers e modeos que aceitam mais de 128k e que sejam baratos.  
+			Por enquanto, este comando é experimental e funciona penas com estes modelos:
+				- Openai gpt-4*
+				
+			Internamente, ele irá criar um Powershai Chat chamado "_pwshai_help", onde manterá todo o histórico!
+	#>
+	[CmdletBinding()]
+	param(
+		#Descreva o texto de ajuda!
+		$helptext
+		
+		,#Se quiser help de um comando específico, informe o comando aqui 
+		 #Não precisa ser somente um comando do PowershaiChat.
+			$command
+			
+		,#Recria o chat!
+			[switch]$Recreate
+	)
+	
+	write-warning "This command is in preview! Take caution!"
+	
+	$CurrentProvider = Get-AiCurrentProvider
+	$CurrentProviderName = $CurrentProvider.name;
+	[object[]]$SupportedProviders = @("openai")
+	if($CurrentProviderName -notin $SupportedProviders){
+		throw "POWERSHAI_AIHELP_PROVIDER_NOTSUPPORTED: $CurrentProviderName | Allowed = $SupportedProviders"
+	}
+	
+	$CurrentChat = Get-PowershaiChat .
+	
+	
+	
+	$HelpTools = JoinPath $PsScriptRoot "lib" PowershaiHelp.tools.ps1
+	
+	
 	
 	try {
-		$Chat = Get-PowershaiChat ".";
-		$Id = $Chat.id;
-	} catch {
+		# Create internal chat!
+		$IfNotExists = !$Recreate
+		$HelpChat 	= New-PowershaiChat -ChatId "_pwshai_help" -IfNotExists:$IfNotExists -Tool $HelpTools -Recreate:$Recreate;
+		$null 		= Set-PowershaiActiveChat $HelpChat;
+	
+		$null = Set-PowershaiChatParameter MaxContextSize 20000
+		$null = Set-PowershaiChatParameter MaxInteractions 50
+		$null = Set-PowershaiChatParameter MaxTokens 8192
 		
+		if(!$HelpChat.HelpCache){
+			$HelpChat | Add-Member -Force Noteproperty HelpCache @{}
+		}
+		
+		$HelpCache = $HelpChat.HelpCache;
+		
+		if(!$HelpCache.SystemPrompt){
+			
+			$Synopsis = @{
+				Name = "Descricao"
+				Expression = {
+					if($_.CommandType -eq "alias"){
+						return "Alias para" + $_.Definition;
+					}
+					
+					return (Get-help $_).Synopsis.trim()
+				}
+			}
+			
+			$CommandHelp = Get-Command -mo powershai | select name,$Synopsis
+			
+			$Culture = Get-UICulture;
+			$HelpCache.SystemPrompt = @(
+					"Você é um assistente que deve ajudar o usuário a responder dúvidas sobre um módulo Powershell chamado Powershai"
+					"O Powershai é um módulo que possui vários comandos para trazer ao mundo de IA!"
+					"Abaixo está a lista de comandos do powershai, separado por vírgula:"
+					@(Get-Command -mo powershai | select CommandType,name | out-string)
+					""
+					"Abaixo está a lista de help topics disponiveis no powershai:"
+					@(get-help about_Powershai*|out-string)
+					"Com base na questão responda sobre as perguntas com o máximo de detalhes e clareza possível"
+					"Formate a resposta apenas com textos simples, sem qualquer formatçaão visual, pois o texto será exinido em um prompt de comando"
+					"Resonda no idioma da pergunta do usuário. Caso não seja possível identificar, responda nesse: $($Culture.DisplayName)"
+				)
+		}
+		
+		
+		
+		ia $helptext -SystemMessages $HelpCache.SystemPrompt
+	} finally {
+		$null = Set-PowershaiActiveChat $CurrentChat;
 	}
 	
-	if($Id){
-		$Id = "💬 $Id"
-	} else {
-		$Id = ""
-	}
 	
 	
 	
-	$NewPrompt = (& $ExistingPrompt);
 	
-	if($Id){
-		$NewPrompt = "$Id $NewPrompt"
-	}
-	
-	return $NewPrompt
 }
-#>
-
+set-alias aihelp Get-PowershaiHelp
+set-alias aid Get-PowershaiHelp
+set-alias ajudai Get-PowershaiHelp
+set-alias iajuda Get-PowershaiHelp
 
 
 # Carrega os providers!
@@ -3148,5 +3548,5 @@ if(!$POWERSHAI_SETTINGS.provider){
 	Set-AiProvider openai
 }
 
-Export-ModuleMember -Function * -Alias * -Cmdlet *
+Export-ModuleMember -Alias * -Cmdlet *-* -Function *-*
 
