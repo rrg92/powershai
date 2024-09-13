@@ -191,6 +191,8 @@ $LangDirs  = $SupportedLangs | %{
 	New-Item -ItemType Directory -Path $DirPath
 }
 
+$Utf8Bom = New-Object System.Text.UTF8Encoding $true
+
 Function ParseFile($Source,$Target,$Vars){
 	
 
@@ -263,13 +265,16 @@ Function ParseFile($Source,$Target,$Vars){
 		throw $Ex;
 	}
 	
-	$NewLines | Set-Content -Path $Target -Encoding UTF8
+	[System.IO.File]::WriteAllLines($Target,$NewLines,$Utf8Bom)
+	#$NewLines, | Set-Content -Path $Target -Encoding 
 }
 
 
 
-write-host "Loading file list";
-$AllMarkDowns = gci -rec (JoinPath $DocsDir *.md);
+write-host "Loading file list: $DocsDir";
+$SrcLangDirs = $SupportedLangs | %{JoinPath $DocsDir $_ *.md}
+write-host "	Dirs: $SrcLangDirs"
+$AllMarkDowns = gci -rec $SrcLangDirs;
 foreach($MdFile in $AllMarkDowns){
 	
 	$Vars = @{}
@@ -298,14 +303,9 @@ foreach($MdFile in $AllMarkDowns){
 	$LangDir = JoinPath $TempDir $Lang;
 	
 	# Is cmdlet help file!
-	if($FileName -match '([\w-]+)\.cmdlet\.md$'){
+	if($FileName -match '([\w-]+)\.cmdlet\.md$' -or $FileName -match 'cmdlets/([\w-]+).md'){
 		$CmdLetName = $matches[1];
-		
-		if($CmdLetName -NotLike '*-*'){
-			write-host "	NotSupported: Must be in format Verb-Noun.cmdlet.md"
-			continue;
-		}
-		
+
 		$NewFileName = $matches[1] + '.md';
 		
 		$Vars.FileName = $MdFile.name;
@@ -318,12 +318,6 @@ foreach($MdFile in $AllMarkDowns){
 		continue;
 	}
 
-	if($FileName -match '^providers/(.*?)/(.*)'){
-		$ProviderName = $matches[1];
-		$Topic += "_" + $ProviderName;
-		$FileName = $matches[2];
-	}
-	
 	if($FileName -match '((.*?)/)?(.*?)\.md'){
 		if($matches[1]){
 			$Topic += "_" + $Matches[2].replace("/","_")
@@ -331,8 +325,8 @@ foreach($MdFile in $AllMarkDowns){
 		
 		$BaseName = $matches[3];
 		
-		if($BaseName -like '*.about'){
-			$Topic += "_" + ($BaseName -replace 'about$','')
+		if($BaseName -like '*.about' -or $BaseName -eq "README"){
+			$Topic += "_" + ($BaseName -replace '\.about$','')
 		} elseif($BaseName -ne 'README') {
 			write-host "	MdFileNotSupported: leftname=$fileName"
 			continue;
@@ -356,18 +350,39 @@ write-host "== Start compilation... =="
 
 write-host "	Out: $OutDir";
 
+$Progress = @()
+
 foreach($Lang in $LangDirs){
-	write-host "Compiling:" $Lang.FullName;
+	$LangName = $Lang.name
+	write-host "Compiling:" $LangName
+
 	
-	$OutPath = JoinPath $OutDir $Lang.name;
-	
-	write-host "	Generating help files to $OutPath";
-	$null = New-ExternalHelp -Path $Lang.FullName -OutputPath $OutPath;
-	
-	
-	$ModuleLangDir = JoinPath "$PsScriptRoot" "powershai" $Lang.name
-	write-host "	Copying back to docs: $ModuleLangDir"
-	gci $OutPath | copy-item -Recurse -Destination $ModuleLangDir;
+	try {
+		$OutPath = JoinPath $OutDir $LangName;
+		$ErrorFile = JoinPath $OutDir "$LangName-Errors.json";
+		
+		write-host "	Generating help files to $OutPath";
+		#$FileList = gci -rec (JoinPath $Lang.FullName *.md)
+		$null = New-ExternalHelp -force -Path  $Lang.FullName-OutputPath $OutPath -Encoding $Utf8Bom -ErrorLogFile $ErrorFile -EA Continue;
+		
+		
+		
+		$ModuleLangDir = JoinPath "$PsScriptRoot" "powershai" $LangName
+		
+		if(Test-Path $ModuleLangDir){
+			write-host "	Cleaning target dir: $ModuleLangDir";
+			gci (JoinPath $ModuleLangDir *) | remove-item -force -recurse;
+		}
+		
+		write-host "	Copying back to docs: $ModuleLangDir"
+		gci $OutPath | copy-item -Recurse -Destination $ModuleLangDir;
+	} catch {
+		write-warning "LANG ERROR: $LangName, Summary = $_";
+		$ErrorActionPreference = "Continue";
+		write-error -Exception $_.Exception
+		write-host $_.ScriptStackTrace
+		$ErrorActionPreference = "Stop";
+	}
 }
 
 

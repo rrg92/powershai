@@ -324,8 +324,8 @@ function claude_Chat {
 	#	
 	#}
 	
-	if($ResponseFormat -eq "json_object"){
-		throw "POWERSHAI_CLAUDE_JSON_NOTSUPPORTED: Json mode not supported yet!"
+	if($ResponseFormat){
+		throw "POWERSHAI_CLAUDE_FORMAT_NOTSUPPORTED: ResponseFormat not suppoted yet!"
 	}
 
 	

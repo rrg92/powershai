@@ -308,7 +308,7 @@ function Get-MaritalkChat {
 	}
 	
 	if($ResponseFormat){
-		$Body.response_format = @{type = $ResponseFormat}
+		$Body.response_format = $ResponseFormat
 	}
 	
 	#if($Functions){
@@ -369,7 +369,7 @@ function maritalk_Chat {
 	
 	
 	$ResultText = $result.answer;
-	if($ResponseFormat -eq "json_object"){
+	if($ResponseFormat.type -eq "json_object"){
 		if($ResultText -match '(?s)```json(.*?)```'){
 			$ResultText = $matches[1];
 		} else {

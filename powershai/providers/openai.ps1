@@ -378,7 +378,7 @@ function Get-OpenaiChat {
 	}
 	
 	if($ResponseFormat){
-		$Body.response_format = @{type = $ResponseFormat}
+		$Body.response_format = $ResponseFormat
 	}
 	
 	if($Functions){
@@ -668,6 +668,7 @@ function Get-OpenaiToolFromCommand {
 	
 	foreach($function in $functions){
 	
+	
 		$Command = Get-Command -EA SilentlyContinue $function;
 		
 	
@@ -947,12 +948,12 @@ function NewAiInteraction {
 
 
 
-# Obtéms os embegginds de um texto
-function OpenaiEmbeddings {
+# Invoca a api para ober os mebddings
+function Get-OpenaiEmbeddings {
 	param($inputText,$model)
 	
 	if(!$model){
-		$model = 'text-embedding-ada-002'
+		$model = 'text-embedding-3-small'
 	}
 	
 	$body = @{
@@ -966,24 +967,30 @@ function OpenaiEmbeddings {
 <#
 	Gera o embedding de um texto!
 #>
-function Invoke-OpenaiEmbedding {
+function Get-OpenaiEmbeddings {
 	[CmdletBinding()]
 	param(
+		[Parameter(ValueFromPipeline)]
 		$text
 		,$model
 	)
 	
-    $ans = OpenaiEmbeddings  -input $text -model $model
-	$costs = Get-OpenAiAnswerCost $ans
+	process {
 	
-	[object[]]$AllEmbeddings = @($null) * $ans.data.length;
-	
-	$ans.data | %{ $AllEmbeddings[$_.index] = $_.embedding }
-	
-	return @{
-		rawAnswer 	= $ans
-		costs 		= $costs
-		embeddings 	= $AllEmbeddings
+		$ans = Invoke-OpenaiEmbeddings  -input $text -model $model
+		$costs = Get-OpenAiAnswerCost $ans
+		
+		[object[]]$AllEmbeddings = @($null) * $ans.data.length;
+		
+		$ans.data | %{ $AllEmbeddings[$_.index] = $_.embedding }
+		
+		return [PsCustomObject]@{
+			rawAnswer 	= $ans
+			costs 		= $costs
+			embeddings 	= $AllEmbeddings
+			text 	 	= $text
+		}
+		
 	}
 }
 
