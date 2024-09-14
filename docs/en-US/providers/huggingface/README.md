@@ -243,4 +243,6 @@ Invoke-GradioApiGenerateimage -Prompt "a car flying"
 **IMPORTANT: Remember that access to certain spaces may require authentication; in these cases, you should use Set-HuggingFaceToken and specify an access token.**
 
 
+<!--PowershaiAiDocBlockStart-->
 _Automatically translated using PowershAI and AI._
+<!--PowershaiAiDocBlockEnd-->

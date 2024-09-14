@@ -55,4 +55,6 @@ And, due to the fact that other providers tend to follow OpenAI, this provider i
 Creating a new provider that uses the same specifications as OpenAI is very simple, just defining a few configuration variables!
 
 
+<!--PowershaiAiDocBlockStart-->
 _Automatically translated using PowershAI and AI._
+<!--PowershaiAiDocBlockEnd-->

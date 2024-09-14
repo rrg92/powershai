@@ -12,4 +12,6 @@ Their API is compatible with OpenAI, so the steps are quite similar.
 * Use Set-OpenaiToken to configure the token!
 
 
+<!--PowershaiAiDocBlockStart-->
 _Automatically translated using PowershAI and AI._
+<!--PowershaiAiDocBlockEnd-->

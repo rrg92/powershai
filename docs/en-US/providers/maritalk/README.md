@@ -14,4 +14,6 @@ Therefore, the commands that work best are `Get-AiChat` and `ia`.
 * Use Set-MaritalkToken to configure the token! (obtain it at https://plataforma.maritaca.ai/chaves-de-api)
 
 
+<!--PowershaiAiDocBlockStart-->
 _Automatically translated using PowershAI and AI._
+<!--PowershaiAiDocBlockEnd-->
