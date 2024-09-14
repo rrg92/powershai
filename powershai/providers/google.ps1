@@ -189,6 +189,7 @@ function google_Chat {
 		,$Functions 	= @()	
 		,$RawParams	= @{}
 		,$StreamCallback = $null
+		,[switch]$IncludeRawResp
 	)
 	
 	$Params = @{
@@ -303,10 +304,10 @@ function google_Chat {
 	}
 
 	#Nao-stream!
-	return @{
+	$ResultObj = @{
 		choices = @(
 			@{
-				finish_reason 	= $resp.finishReason
+				finish_reason 	= $resp.candidates[0].finishReason.ToLower()
 				index 			= $resp.candidates[0].index
 				logprobs 		= $null
 				message 		= @{
@@ -327,6 +328,12 @@ function google_Chat {
 		id 		= $null
 		system_fingerprint = $null
 	}
+	
+	if($IncludeRawResp){
+		$ResultObj.RawResp = $Resp
+	}
+	
+	return $ResultObj;
 }
 
 <#
