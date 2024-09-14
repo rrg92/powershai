@@ -97,6 +97,9 @@
 param(
 	#Directory where compile 
 	$WorkDir
+	
+	,#Filter files using regex. DebugOnly.
+		$FilterRegex = $null
 )
 
 $ErrorActionPreference = "Stop";
@@ -214,8 +217,47 @@ Function ParseFile($Source,$Target,$Vars){
 	$LineNum = 0;
 	$NewLines = @();
 	try {
+		$BufferDefaults = @{
+			active 		= $false;
+			buffer 		= @()
+			onStop 		= $null
+			stop 		= $null
+			inclusive 	= $true;
+		}
+		$LineBuffer = [PsCustomObject]$BufferDefaults
+		
 		foreach($line in $Lines){
 			$LineNum++;
+			
+			if($LineBuffer.active){
+				$MustStop = & $LineBuffer.stop
+				
+				if(!$MustStop){
+					$LineBuffer.buffer += $line;
+					continue;
+				}
+				
+				if($LineBuffer.inclusive){
+					$LineBuffer.buffer += $line
+				}
+				
+				& $LineBuffer.onStop;
+				$LineBuffer = [PsCustomObject]$BufferDefaults
+				
+				if($LineBuffer.inclusive){
+					continue;
+				}
+			}
+			
+			# eat aidoc generated content...
+			if($line -eq "<!--PowershaiAiDocBlockStart-->"){
+				write-host "	Removing AiDoc block..."
+				$LineBuffer.active 	= $true;
+				$LineBuffer.stop 	= { $line -eq '<!--PowershaiAiDocBlockEnd-->' }
+				$LineBuffer.onStop 	= { write-host "	Removed: $($LineBuffer.buffer.length) lines" };
+				continue;
+			}
+
 			
 			#Parse functiomns!
 			if($Line -match '<@f>(.*?)</@f>'){
@@ -224,7 +266,7 @@ Function ParseFile($Source,$Target,$Vars){
 				if($Expr[0] -eq "="){
 					$NewLines += $Expr -replace '^=[\s\t]*','';
 				}
-				
+						
 				if($Expr[0] -eq "@"){
 					switch -Regex ($Expr){
 						"^\@#(.+)" { 
@@ -281,11 +323,17 @@ foreach($MdFile in $AllMarkDowns){
 	
 	$RelName 	= $MdFile.FullName.replace($DocsDir,"") -replace '^.',''
 	$SRelPath 	= $RelName.replace([IO.Path]::DirectorySeparatorChar, '/');
-
-	$Vars.RelPath = $SRelPath
-
-	write-host "File:" $SRelPath;
 	
+	if($FilterRegex -and -not($SRelPath -match $FilterRegex)){
+		write-verbose "File $SRelPath Filtered out by FilterRegex";
+		continue;
+	}
+	
+	write-host "File:" $SRelPath;
+	$Vars.RelPath = $SRelPath
+	
+
+
 	$Topic = "about_Powershai";
 	$FileName = $SRelPath;
 	$Lang = $null

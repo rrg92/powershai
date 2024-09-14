@@ -113,6 +113,7 @@
 			  - This will prevent the files from being automatically translated again. The community will need to keep them synchronized.
   
 #>
+[CmdletBinding(SupportsShouldProcess,ConfirmImpact = 'High')]
 param(
 	 #Name of language. One of subdir docs/<name> 
 		$SourceLang = $null
@@ -131,9 +132,13 @@ param(
 		
 	,#Max tokens returned. Target model must support 
 		$MaxTokens = 8192
+	
+	,#Filter files
+		$FileFilter = $null
+	
+	,#Atualiza o conteudo dos arquios de desitno usando esse script e reclculando o hash!
+		[switch]$TargetRehash
 		
-	,#Like expression to filter relative path of file (Relative ro project root).
-		$FileFilter
 )
 
 $ErrorActionPreference = "Stop";
@@ -211,6 +216,14 @@ $DebugData = @{
 	SrcLang 		= $SrcLang
 	TargetLang 		= $TargetLang
 }
+$Global:AIDOC_LASTRUN = $DebugData;
+
+function SaveTranslationMap {
+	$TranslationMapJson = $TranslationMap | ConvertTo-Json	
+	Set-Content -Path $TranslationMapFile -Value $TranslationMapJson
+}
+
+
 
 foreach($SrcFile in $SourceFiles){
 	
@@ -228,13 +241,15 @@ foreach($SrcFile in $SourceFiles){
 	$SrcFileInfo.RelPath = $SrcRelPath
 	$SrcFileInfo.Fileid = $FileId;
 	
-	write-host "File: $SrcRelPath";
-	
+
 	if($FileFilter -and $FileId -NotLike $FileFilter -and $SrcRelPath -NotLike $FileFilter ){
-		write-host "	Eliminated by filter"
+		write-verbose "$SrcRelPath filteredout!"
 		$SrcFileInfo.status = "filtered";
 		continue;
 	}
+	
+	write-host "File: $SrcRelPath";
+	
 	
 	$TargetFilePath = JoinPath $TargetPath $SrcRelPath;
 	$TargetFile = Get-Item $TargetFilePath -EA SilentlyContinue;
@@ -264,6 +279,7 @@ foreach($SrcFile in $SourceFiles){
 
 		$SrcFileInfo.TargetHash = $TargetHash;
 		
+		
 		# Checa se o arquivo foi geraod automaticamente!
 		if(!$TranslationInfo){
 			$SrcFileInfo.status = "NotinMap";
@@ -276,12 +292,28 @@ foreach($SrcFile in $SourceFiles){
 		
 		if($AiHash -ne $TargetHash.Hash){
 			$SrcFileInfo.status = "TargetChanged";
-			$TranslationMap.remove($FileId);
-			write-host "	FileChanged. Will not be updated more...";
+
+			if($TargetRehash){
+				if($PSCmdlet.ShouldProcess($TargetFile.FullName,"Rehash $AiHash->$($TargetHash.Hash)")){
+					$SrcFileInfo.status = "TargetRehashed";
+					$TranslationInfo.TargetHash = $TargetHash.Hash;
+					SaveTranslationMap;
+					continue;
+				}
+			} else {
+				write-host "	FileChanged. Will not be updated more...";
+				$TranslationMap.remove($FileId);
+			}
+			
 			continue;
 		}
 		
 		# Neste ponto, assume que o arquivo pode ser atualizavel!s
+	}
+	
+	if($TargetRehash){
+		write-host "	TargetReash mode. Nothing to do more..."
+		continue;
 	}
 	
 	write-host "	Calculating Hash..."
@@ -345,7 +377,7 @@ foreach($SrcFile in $SourceFiles){
 		$usage 		= $result.usage;
 		write-host "	Usage: Input = $($usage.prompt_tokens), Output = $($usage.completion_tokens)"
 		if($airesult.finish_reason -ne "stop"){
-			write-warning "	AIStopREason: $($airesult.finish_reason), this can produce incorrect results!"
+			throw "STOP_REASON: $($airesult.finish_reason)"
 		}
 		
 		$translated = $result.choices[0].message.content;
@@ -357,24 +389,32 @@ foreach($SrcFile in $SourceFiles){
 		$Control.answers 		+= $result;
 	}
 	
-	if($FileContent.length -gt $BlockSize){
-		$FileLines = $FileContent -split "`r?`n"
-		foreach($line in $FileLines){
-			$LineLen 	= $Line.length;
-			$EstTotal 	= $Control.TotalChars + $LineLen;
-			
-			if($EstTotal -ge $BlockSize){
-				$null = Translate
+	try {
+		if($FileContent.length -gt $BlockSize){
+			$FileLines = $FileContent -split "`r?`n"
+			foreach($line in $FileLines){
+				$LineLen 	= $Line.length;
+				$EstTotal 	= $Control.TotalChars + $LineLen;
+				
+				if($EstTotal -ge $BlockSize){
+					$null = Translate
+				}
+				
+				$Control.buffer += $line;
+				$Control.TotalChars += $LineLen;
 			}
-			
-			$Control.buffer += $line;
-			$Control.TotalChars += $LineLen;
+		} else {
+			$Control.buffer = $FileContent;
 		}
-	} else {
-		$Control.buffer = $FileContent;
+		
+		Translate
+	} catch {
+		write-host "	FAILED: $_";
+		$SrcFileInfo.status 		= "error:translation";
+		$SrcFileInfo.translation 	= $Control
+		$SrcFileInfo.error 			= $_
+		continue;
 	}
-	
-	Translate
 	
 	$Translated 	= $Control.text
 	$InputTokens 	= $Control.InputTokens
@@ -395,7 +435,9 @@ foreach($SrcFile in $SourceFiles){
 			$Translated
 			''
 			''
+			'<!--PowershaiAiDocBlockStart-->'
 			'_'+$WatermarkText+'_'
+			'<!--PowershaiAiDocBlockEnd-->'
 		) | Set-Content -Encoding UTF8 -Path $TargetFilePath
 	
 		# check if file is auto updated!
@@ -418,16 +460,11 @@ foreach($SrcFile in $SourceFiles){
 		$SrcFileInfo.NewMap = $NewMap;
 		
 		$SrcFileInfo.status = "MapUpdate"
-		write-host "	Updating $TranslationMapFile";
-		$TranslationMapJson = $TranslationMap | ConvertTo-Json	
-		Set-Content -Path $TranslationMapFile -Value $TranslationMapJson
-		$SrcFileInfo.status = "translated";
+		write-host "	Saving $TranslationMapFile";
+		SaveTranslationMap
+		$SrcFileInfo.status = "translated";	
 	} catch {
 		$SrcFileInfo.error = $_;
-		
-		if($SrcFileInfo.status -eq "translating"){
-			$SrcFileInfo.translation = $Control
-		}
 		
 		# Restore file backup!
 		if($FileBackup){
@@ -444,7 +481,7 @@ foreach($SrcFile in $SourceFiles){
 		
 }
 
-$Global:AIDOC_LASTRUN = $DebugData;
+
 
 
 
