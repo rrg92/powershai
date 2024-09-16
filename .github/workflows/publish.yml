@@ -17,4 +17,4 @@ jobs:
         shell: pwsh
         env:
           PSGALERY_KEY: ${{ secrets.PSGALERY_KEY }}
-        run: ./publish.ps1 -CompileDoc
+        run: ./util/publish.ps1 -CompileDoc
