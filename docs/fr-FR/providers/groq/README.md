@@ -1,15 +1,19 @@
 ﻿# Fournisseur GROQ
 
-Groq est un service qui propose divers LLM fonctionnant sur une technologie appelée LPU, créée par eux.  
+Groq est un service qui propose divers LLM qui s'exécutent sur une technologie appelée LPU, qu'ils ont créée.  
 La réponse est très rapide !
 En savoir plus sur https://groq.com/  
 
 Leur API est compatible avec OpenAI, donc les étapes sont assez similaires.
 
-# Configurations initiales 
+# Configuration initiale 
 
 * Utilisez Set-AiProvider groq
-* Utilisez Set-OpenaiToken pour configurer le token !
+* Utilisez Set-OpenaiToken pour configurer le jeton ! 
 
 
-_Traduit automatiquement en utilisant PowershAI et IA._
+
+<!--PowershaiAiDocBlockStart-->
+_Traduit automatiquement à l'aide de PowershAI et IA. 
+_
+<!--PowershaiAiDocBlockEnd-->
