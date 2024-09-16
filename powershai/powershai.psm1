@@ -2266,6 +2266,10 @@ function Send-PowershaiChat {
 		 #		event			- O evento. Indica o evento que originou. São os mesmos eventos documentaados em Invoke-AiChatTools
 		 #		interaction 	- O objeto interaction gerado por Invoke-AiChatTools
 			[switch]$PassThru
+		
+		,#Retorna um array de linhas 
+		 #Se o modo stream estiver ativado, retornará uma linha por vez!
+			[switch]$Lines
 	)
 	
 	
@@ -2364,7 +2368,20 @@ function Send-PowershaiChat {
 			
 			$prompt = @($prompt) -join "`n";
 			
-			function WriteModelAnswer($interaction, $evt){
+			$WriteData = @{
+				BufferedText 	= ""
+				LinesBuffer		= @()
+			}
+			function WriteModelAnswer {
+				param(
+					$interaction
+					,$evt
+				)
+				
+				if($interaction -eq "FlushLine" -and $WriteData.BufferedText){
+					$MainCmdlet.WriteObject($WriteData.BufferedText)
+					return;
+				}
 				
 				if($Object){
 					write-verbose "ObjectMode enabled. No writes...";
@@ -2430,6 +2447,22 @@ function Send-PowershaiChat {
 					}
 					
 					$MainCmdlet.WriteObject($MessageOutput);
+					return;
+				}
+				
+				if($Lines){
+					$WriteData.BufferedText += $text;
+					
+					$Lines 		= $WriteData.BufferedText -split '\r?\n'
+					$LastLine 	= $Lines.count - 1;
+					
+					if($LastLine -gt 0){
+						$LastDelivery = $LastLine - 1
+						$DeliveryLines = $Lines[0..$LastDelivery];
+						$DeliveryLines | %{ $MainCmdlet.WriteObject($_) }
+						$WriteData.BufferedText = $Lines[-1];
+					}
+					
 					return;
 				}
 				
@@ -2663,6 +2696,10 @@ function Send-PowershaiChat {
 				$Ret 	= Invoke-AiChatTools @ChatParams;
 				$End = Get-Date;
 				$Total = $End-$Start;
+				
+				if($lines){
+					WriteModelAnswer "FlushLine";
+				}
 
 				foreach($interaction in $Ret.interactions){ 
 				
