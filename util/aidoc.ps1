@@ -195,6 +195,8 @@ $WaterResult = Get-AiChat -prompt @(
 )
 $WatermarkText = $WaterResult.choices[0].message.content
 
+$WatermarkText = @($WatermarkText) -Join ""
+
 $NewMap = @{}
 $TranslationMap.psobject.properties | %{
 	$NewMap[$_.name] = $_.Value;

@@ -108,11 +108,15 @@ param(
 	
 	,#Filter files using regex. DebugOnly.
 		$FilterRegex = $null
+		
+	,$MaxAboutWidth = 80
 )
 
 $ErrorActionPreference = "Stop";
 . (Join-Path "$PsScriptRoot" UtilLib.ps1)
 CheckPowershaiRoot
+
+import-module -force platyPS;
 
 
 
@@ -417,7 +421,7 @@ foreach($Lang in $LangDirs){
 		
 		write-host "	Generating help files to $OutPath";
 		#$FileList = gci -rec (JoinPath $Lang.FullName *.md)
-		$null = New-ExternalHelp -force -Path  $Lang.FullName-OutputPath $OutPath -Encoding $Utf8Bom -ErrorLogFile $ErrorFile -EA Continue;
+		$null = New-ExternalHelp -force -Path  $Lang.FullName-OutputPath $OutPath -Encoding $Utf8Bom -ErrorLogFile $ErrorFile -EA Continue -MaxAboutWidth $MaxAboutWidth;
 		
 		
 		
