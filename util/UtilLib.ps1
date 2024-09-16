@@ -1,3 +1,10 @@
+# Simple verbose logging function
+Function verbose {
+	$ParentName = (Get-Variable MyInvocation -Scope 1).Value.MyCommand.Name;
+	write-verbose ( $ParentName +':'+ ($Args -Join ' '))
+}
+
+
 function JoinPath {
 	[CmdletBinding()]
 	param(

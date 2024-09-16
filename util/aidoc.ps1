@@ -449,7 +449,7 @@ foreach($SrcFile in $SourceFiles){
 	$SrcFileInfo.status = "Updating"
 	
 	try {
-		write-host "Fixing localized links"
+		verbose "Fixing localized links"
 		$Translated = $Translated.replace("/docs/"+$SourceLang,"/docs/"+$TargetLang)
 		
 		write-host "	Updating target content..."

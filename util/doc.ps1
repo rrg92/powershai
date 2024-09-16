@@ -94,6 +94,7 @@
 			
 				
 #>
+[CmdletBinding()]
 param(
 	#Directory where compile 
 	$WorkDir
@@ -181,20 +182,20 @@ if($SupportedLangs -eq "*"){
 	$SupportedLangs = Get-ChildItem $DocsDir | ? {$_.PsIsContainer} | %{$_.name}
 }
 
-write-host "Langs: $SupportedLangs";
+write-host "Chosen langs: $SupportedLangs";
 
 $LangDirs  = $SupportedLangs | %{  
 	$LangName = $_;
 	
 	$SrcLangExists = Test-Path (JoinPath $DocsDir $LangName)
 	
-	if(!$LangName){
+	if(!$SrcLangExists){
 		throw "LANG_NOTFOUND: $LangName";
 	}
 
 	$DirPath = JoinPath $TempDir $LangName;
 	
-	write-host "	Creating $DirPath";
+	write-host "	Creating temp lang dir: $DirPath";
 	New-Item -ItemType Directory -Path $DirPath
 }
 
@@ -204,12 +205,7 @@ if(!$LangDirs){
 	return;
 }
 
-
-$Utf8Bom = New-Object System.Text.UTF8Encoding $true
-
 Function ParseFile($Source,$Target,$Vars){
-	
-
 	$NewContent = ParseRun (Get-Content $Source -Raw) -Vars $Vars
 	
 	$Lines = $NewContent -split "`r?`n"
@@ -253,11 +249,12 @@ Function ParseFile($Source,$Target,$Vars){
 			}
 			
 			# eat aidoc generated content...
+			
 			if($line -eq "<!--PowershaiAiDocBlockStart-->"){
-				write-host "	Removing AiDoc block..."
+				verbose "	Removing AiDoc block..."
 				$LineBuffer.active 	= $true;
 				$LineBuffer.stop 	= { $line -eq '<!--PowershaiAiDocBlockEnd-->' }
-				$LineBuffer.onStop 	= { write-host "	Removed: $($LineBuffer.buffer.length) lines" };
+				$LineBuffer.onStop 	= { verbose "	Removed: $($LineBuffer.buffer.length) lines" };
 				continue;
 			}
 
@@ -320,111 +317,159 @@ Function ParseFile($Source,$Target,$Vars){
 	#$NewLines, | Set-Content -Path $Target -Encoding 
 }
 
+$Stats = @{
+	langs = @{}
+}
 
+$GLOBAL:POWERSHAI_DOCSTATS = $Stats;
 
-write-host "Loading file list: $DocsDir";
-$SrcLangDirs = $SupportedLangs | %{JoinPath $DocsDir $_ *.md}
-write-host "	Dirs: $SrcLangDirs"
-$AllMarkDowns = gci -rec $SrcLangDirs;
-foreach($MdFile in $AllMarkDowns){
+[string]$OutDir = New-Item -ItemType Directory (JoinPath $TempDir "_out")
+write-host "OutputDir: $OutDir";
+
+$Utf8Bom = New-Object System.Text.UTF8Encoding $true
+
+foreach($TempLangDir in $LangDirs){
+	$LangName = $TempLangDir.name
 	
-	$Vars = @{}
+	write-host ">> LANG: $LangName <<"
 	
-	$RelName 	= $MdFile.FullName.replace($DocsDir,"") -replace '^.',''
-	$SRelPath 	= $RelName.replace([IO.Path]::DirectorySeparatorChar, '/');
+	$SrcLangDir = JoinPath docs $TempLangDir.Name *.md
 	
-	if($FilterRegex -and -not($SRelPath -match $FilterRegex)){
-		write-verbose "File $SRelPath Filtered out by FilterRegex";
-		continue;
+	write-host "	Loading contents: $SrcLangDir"
+	$AllMarkDowns = gci -rec $SrcLangDir;
+	
+	$DocResults =@{
+		files = @()
 	}
 	
-	write-host "File:" $SRelPath;
-	$Vars.RelPath = $SRelPath
+	$Stats.langs[$LangName] = $DocResults
 	
-
-
-	$Topic = "about_Powershai";
-	$FileName = $SRelPath;
-	$Lang = $null
-	
-	if($FileName -match '^(.+?)/(.*)'){
-		$Lang 		= $matches[1];
-		$FileName 	= $matches[2];
-	}
-	
-	if($Lang -notin $SupportedLangs){
-		write-host "LangNotsupported: $FileName";
-		continue;
-	}
-	
-	$LangDir = JoinPath $TempDir $Lang;
-	
-	# Is cmdlet help file!
-	if($FileName -match '([\w-]+)\.cmdlet\.md$' -or $FileName -match 'cmdlets/([\w-]+).md'){
-		$CmdLetName = $matches[1];
-
-		$NewFileName = $matches[1] + '.md';
+	write-host "	FoundFiles: $($AllMarkDowns.count)! Analyzing..."
+	foreach($MdFile in $AllMarkDowns){
 		
-		$Vars.FileName = $MdFile.name;
-		$Vars.CmdLetName = $CmdLetName;
+		$Vars = @{}
 		
-		
-		write-host "	IsCmdlet doc! name: NewFile: $NewFileName";
-		$TargetFile = (JoinPath $LangDir $NewFileName);
-		ParseFile -Source $MdFile -Target $TargetFile  -Vars $Vars
-		continue;
-	}
-
-	if($FileName -match '((.*?)/)?([^/]+)\.md'){
-		if($matches[1]){
-			$Topic += "_" + $Matches[2].replace("/","_")
+		$FileResult = [PsCustomObject]@{
+			SrcFile = $MdFile
+			Status 	= "started"	
+			error 	= $null
+			Vars 	= $Vars
+			lang 	= $null
+			LeftName = $null
 		}
 		
-		$BaseName = $matches[3];
+		$DocResults.files += $FileResult;
 		
-		if($BaseName -like '*.about'){
-			$Topic += "_" + ($BaseName -replace '\.about$','')
-		} 
-		if($BaseName -ne 'README') {
-			write-host "	MdFileNotSupported: leftname=$fileName, BaseName = $BaseName"
+		try {
+		
+			$RelName 	= $MdFile.FullName.replace($DocsDir,"") -replace '^.',''
+			$SRelPath 	= $RelName.replace([IO.Path]::DirectorySeparatorChar, '/');
+			
+			if($FilterRegex -and -not($SRelPath -match $FilterRegex)){
+				$FileResult.Status = "filtered";
+				write-verbose "File $SRelPath Filtered out by FilterRegex";
+				continue;
+			}
+			
+			verbose "File:" $SRelPath;
+			$Vars.RelPath = $SRelPath
+			$FileResult.Status = "validating";
+
+
+			$Topic = "about_Powershai";
+			$FileName = $SRelPath;
+			$Lang = $null
+			
+			if($FileName -match '^(.+?)/(.*)'){
+				$Lang 		= $matches[1];
+				$FileName 	= $matches[2];
+			}
+			
+			$FileResult.lang = $Lang;
+			
+			if($Lang -notin $SupportedLangs){
+				$FileResult.status = "LangNotSupported";
+				verbose "LangNotsupported: $FileName";
+				continue;
+			}
+			
+			$LangDir = JoinPath $TempDir $Lang;
+			
+			# Is cmdlet help file!
+			if($FileName -match '([\w-]+)\.cmdlet\.md$' -or $FileName -match 'cmdlets/([\w-]+).md'){
+				$CmdLetName = $matches[1];
+
+				$NewFileName = $matches[1] + '.md';
+				
+				$Vars.FileName = $MdFile.name;
+				$Vars.CmdLetName = $CmdLetName;
+				
+				
+				verbose "	IsCmdlet doc! name: NewFile: $NewFileName";
+				$TargetFile = (JoinPath $LangDir $NewFileName);
+				ParseFile -Source $MdFile -Target $TargetFile  -Vars $Vars
+				$FileResult.status = "parsed"
+				continue;
+			}
+
+			if($FileName -match '((.*?)/)?([^/]+?)\.md'){
+				if($matches[1]){
+					$Topic += "_" + $Matches[2].replace("/","_")
+				}
+				
+				$BaseName = $matches[3];
+				
+				if($BaseName -like '*.about'){
+					$Topic += "_" + ($BaseName -replace '\.about$','')
+				} 
+				elseif($BaseName -ne 'README') {
+					$FileResult.status = "MdFileNotSupported:UnknownNameFormat"
+					$FileResult.LeftName = $FileName
+					verbose "	MdFileNotSupported: leftname=$fileName, BaseName = $BaseName"
+					continue;
+				}
+			}
+			elseif($FileName -ne 'README.md'){
+				$FileResult.status = "MdFileNotSupported:UnknownPathFormat"
+				verbose "	File not supported: $($SRelPath), name = $FileName"
+				continue;
+			}
+			
+			$Vars.AboutTopic = $Topic;
+			
+			verbose 	"	Lang: $Lang, Topic:$Topic, file:$SRelPath"
+			$NewFileName = $Topic+".md";
+			$FileResult.status = "parsing"
+			ParseFile -Source $MdFile -Target (JoinPath $LangDir $NewFileName) -Vars $Vars
+			$FileResult.status = "parsed"
+		} catch {
+			write-warning "FileFailed: $MdFile | Error = $_";
+			$FileResult.status = "Error"
+			$FileResult.error = $_;
 			continue;
 		}
 	}
-	elseif($FileName -ne 'README.md'){
-		write-host "	File not supported: $($SRelPath), name = $FileName"
-		continue;
-	}
 	
-	$Vars.AboutTopic = $Topic;
 	
-	write-host 	"	Lang: $Lang, Topic:$Topic, file:$SRelPath"
-	$NewFileName = $Topic+".md";
-	ParseFile -Source $MdFile -Target (JoinPath $LangDir $NewFileName) -Vars $Vars
-}
+	write-host "=== $LangName STATS ==="
+	write-host $($DocResults.files | Group Status -NoElement | ft -AutoSize | out-string)
 
-write-host "== Start compilation... =="
 
-[string]$OutDir = New-Item -ItemType Directory (JoinPath $TempDir "_out")
+	write-host "=== FILE STATS ==="
+	write-host $($DocResults.files | Group Status -NoElement | ft -AutoSize | out-string)
 
-write-host "	Out: $OutDir";
-
-$Progress = @()
-
-foreach($Lang in $LangDirs){
-	$LangName = $Lang.name
-	write-host "Compiling:" $LangName
-
-	
+	write-host "== Start compilation... =="
 	try {
+		$Progress = @()
+		write-host "	TempLangDir: $TempLangDir"
+
 		$OutPath = JoinPath $OutDir $LangName;
 		$ErrorFile = JoinPath $OutDir "$LangName-Errors.json";
 		
 		write-host "	Generating help files to $OutPath";
 		#$FileList = gci -rec (JoinPath $Lang.FullName *.md)
-		$null = New-ExternalHelp -force -Path  $Lang.FullName-OutputPath $OutPath -Encoding $Utf8Bom -ErrorLogFile $ErrorFile -EA Continue -MaxAboutWidth $MaxAboutWidth;
-		
-		
-		
+		$null = New-ExternalHelp -force -Path $TempLangDir.FullName -OutputPath $OutPath -Encoding $Utf8Bom -ErrorLogFile $ErrorFile -EA Continue -MaxAboutWidth $MaxAboutWidth;
+
 		$ModuleLangDir = JoinPath powershai $LangName
 		
 		if(Test-Path $ModuleLangDir){
@@ -443,7 +488,15 @@ foreach($Lang in $LangDirs){
 		write-host $_.ScriptStackTrace
 		$ErrorActionPreference = "Stop";
 	}
+	
+
+
+	
 }
+
+
+
+
 
 
 

@@ -27,7 +27,7 @@ $null = New-Item -Force -ItemType Directory -Path $PlatyDir
 if($CompileDoc){
 	write-host "DocCompileWorkDir: $PlatyDir";
 	$DocsScript = Join-Path $PsScriptRoot doc.ps1
-	& $DocsScript $PlatyDir
+	& $DocsScript $PlatyDir -SupportedLangs * -MaxAboutWidth 150
 }
 
 $ModuleRoot = Join-Path "$PsScriptRoot" powershai
