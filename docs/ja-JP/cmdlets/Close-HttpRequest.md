@@ -7,9 +7,7 @@ powershai: true
 # Close-HttpRequest
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Close-HttpRequest [[-HttpRequest] <Object>] [-Force] [<CommonParameters>]
-
+Start-HttpRequest で開かれた Http を閉じます。
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -19,20 +17,6 @@ Close-HttpRequest [[-HttpRequest] <Object>] [-Force] [<CommonParameters>]
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -Force
-
-```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
-```
-
 ### -HttpRequest
 
 ```yml
@@ -41,15 +25,29 @@ Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 0
+Position: 1
 Default Value: 
 Accept pipeline input: true (ByValue)
-Accept wildcard characters: 
+Accept wildcard characters: false
+```
+
+### -Force
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_PowershAI e IA を使用して自動翻訳されました。_
 <!--PowershaiAiDocBlockEnd-->

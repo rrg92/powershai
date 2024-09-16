@@ -7,24 +7,24 @@ powershai: true
 # New-PowershaiParameters
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Crée un nouvel objet représentant les paramètres d'un PowershaiChat
+Crée un nouvel objet qui représente les paramètres d'un PowershaiChat
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Crée un objet par défaut contenant tous les paramètres possibles qui peuvent être utilisés dans le chat !
+Crée un objet standard contenant tous les paramètres possibles qui peuvent être utilisés dans le chat !
 L'utilisateur peut utiliser un get-help New-PowershaiParameters pour obtenir la doc des paramètres.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
 New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] <Boolean>] [[-ShowTokenStats] <Object>] 
-[[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] 
-[[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>] [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
+[[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] 
+<Object>] [[-PrintToolsResults] <Object>] [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -stream
-Lorsque true, utilise le mode stream, c'est-à-dire que les messages sont affichés au fur et à mesure que le modèle les produit
+Quand true, utilise le mode stream, c'est-à-dire que les messages sont affichés au fur et à mesure que le modèle les produit
 
 ```yml
 Parameter Set: (All)
@@ -39,8 +39,8 @@ Accept wildcard characters: false
 ```
 
 ### -Json
-Active le mode JSON. En ce mode, le modèle est forcé à retourner une réponse avec JSON.  
-Lorsqu'activé, les messages générés via le stream ne sont pas affichés au fur et à mesure qu'ils sont produits, et seul le résultat final est retourné.
+Active le mode JSON. Dans ce mode, le modèle est forcé à renvoyer une réponse avec JSON.  
+Quand activé, les messages générés via stream ne sont pas affichés au fur et à mesure qu'ils sont produits, et seul le résultat final est renvoyé.
 
 ```yml
 Parameter Set: (All)
@@ -71,7 +71,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-Maximum de jetons à retourner par le modèle
+Maximum de jetons à renvoyer par le modèle
 
 ```yml
 Parameter Set: (All)
@@ -86,7 +86,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowFullSend
-Imprime l'invite entière qui est envoyée au LLM
+Affiche l'intégralité de l'invite qui est envoyée au LLM
 
 ```yml
 Parameter Set: (All)
@@ -101,7 +101,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowTokenStats
-À la fin de chaque message, affiche les statistiques de consommation, en jetons, retournées par l'API
+À la fin de chaque message, affiche les statistiques de consommation, en jetons, renvoyées par l'API
 
 ```yml
 Parameter Set: (All)
@@ -116,11 +116,11 @@ Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-Maximum d'interactions à effectuer d'un seul coup 
+Maximum d'interactions à effectuer en une seule fois 
 Chaque fois qu'un message est envoyé, le modèle exécute 1 itération (envoie le message et reçoit une réponse).  
-Si le modèle demande un function calling, la réponse générée est renvoyée au modèle. Cela compte comme une autre interaction.  
-Ce paramètre contrôle le nombre maximum d'interactions qui peuvent exister à chaque appel.
-Cela aide à prévenir les boucles infinies inattendues.
+Si le modèle demande un appel de fonction, la réponse générée est renvoyée au modèle. Cela compte comme une autre interaction.  
+Ce paramètre contrôle le maximum d'interactions qui peuvent exister à chaque appel.
+Cela permet de prévenir les boucles infinies inattendues.
 
 ```yml
 Parameter Set: (All)
@@ -136,7 +136,7 @@ Accept wildcard characters: false
 
 ### -MaxSeqErrors
 Maximum d'erreurs en séquence générées par Tool Calling.  
-Lorsqu'on utilise le tool calling, ce paramètre limite le nombre de tools sans séquence qui ont abouti à une erreur pouvant être appelées.  
+Lors de l'utilisation de tool calling, ce paramètre limite le nombre d'outils sans séquence qui ont entraîné une erreur et peuvent être appelés.  
 L'erreur considérée est l'exception déclenchée par le script ou la commande configurée.
 
 ```yml
@@ -154,7 +154,7 @@ Accept wildcard characters: false
 ### -MaxContextSize
 Taille maximale du contexte, en caractères 
 À l'avenir, ce sera en jetons 
-Contrôle le nombre de messages dans le contexte actuel du chat. Lorsque ce nombre est dépassé, Powershai efface automatiquement les messages les plus anciens.
+Contrôle la quantité de messages dans le contexte actuel du chat. Lorsque ce nombre est dépassé, Powershai nettoie automatiquement les messages les plus anciens.
 
 ```yml
 Parameter Set: (All)
@@ -169,7 +169,7 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormatterFunc
-Fonction utilisée pour le formatage des objets passés via le pipeline
+Fonction utilisée pour la mise en forme des objets passés via le pipeline
 
 ```yml
 Parameter Set: (All)
@@ -184,7 +184,7 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormatterParams
-Arguments à transmettre à ContextFormatterFunc
+Arguments à passer à ContextFormatterFunc
 
 ```yml
 Parameter Set: (All)
@@ -214,7 +214,7 @@ Accept wildcard characters: false
 ```
 
 ### -PrintToolsResults
-Affiche les résultats des tools lorsqu'elles sont exécutées par PowershAI en réponse au tool calling du modèle
+Affiche les résultats des outils lorsqu'ils sont exécutés par PowershAI en réponse à l'appel d'outil du modèle
 
 ```yml
 Parameter Set: (All)
@@ -229,7 +229,7 @@ Accept wildcard characters: false
 ```
 
 ### -SystemMessageFixed
-System Message qui est garantie d'être toujours envoyée, indépendamment de l'historique et du clenaup du chat !
+System Message qui est garantie d'être envoyée à chaque fois, indépendamment de l'historique et du nettoyage du chat !
 
 ```yml
 Parameter Set: (All)
@@ -245,8 +245,8 @@ Accept wildcard characters: false
 
 ### -RawParams
 Paramètres à passer directement à l'API qui appelle le modèle.  
-Le fournisseur doit implémenter la prise en charge de cela.  
-Pour l'utiliser, vous devez connaître les détails d'implémentation du fournisseur et le fonctionnement de son API !
+Le fournisseur doit implémenter la prise en charge de ceci.  
+Pour l'utiliser, vous devez connaître les détails d'implémentation du fournisseur et comment son API fonctionne !
 
 ```yml
 Parameter Set: (All)
@@ -261,13 +261,13 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormat
-Contrôle le modèle utilisé lors de l'injection de données de contexte !
-Ce paramètre est un scriptblock qui doit retourner une chaîne avec le contexte à injecter dans l'invite !
-Les paramètres du scriptblock sont :
-	FormattedObject 	- L'objet qui représente le chat actif, déjà formaté avec le Formatter configuré
-	CmdParams 			- Les paramètres passés à Send-PowershaAIChat. C'est le même objet que celui retourné par GetMyParams
+Contrôle le modèle utilisé lors de l'injection des données de contexte !
+Ce paramètre est un scriptblock qui doit renvoyer une chaîne de caractères avec le contexte à injecter dans l'invite !
+Les paramètres du scriptblock sont :
+	FormattedObject 	- L'objet qui représente le chat actif, déjà formaté avec le formatteur configuré
+	CmdParams 			- Les paramètres passés à Send-PowershaAIChat. C'est le même objet que celui renvoyé par GetMyParams
 	Chat 				- Le chat dans lequel les données sont envoyées.
-Si nul, il générera un par défaut. Consultez le cmdlet Send-PowershaAIChat pour plus de détails
+Si nul, il générera un défaut. Vérifiez le cmdlet Send-PowershaAIChat pour plus de détails
 
 ```yml
 Parameter Set: (All)
@@ -285,6 +285,6 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
+_Traduit automatiquement à l'aide de PowershAI et de l'IA. 
 _
 <!--PowershaiAiDocBlockEnd-->

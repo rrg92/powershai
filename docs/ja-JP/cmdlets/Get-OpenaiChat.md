@@ -14,8 +14,8 @@ Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] 
-[[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
+Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
+<Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -150,5 +150,5 @@ Accept wildcard characters:
 
 
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_PowershAI e IA を使用して自動翻訳されました。_
 <!--PowershaiAiDocBlockEnd-->

@@ -10,17 +10,17 @@ powershai: true
 Sends a message in a Powershai Chat
 
 ## DESCRIPTION <!--!= @#Desc !-->
-This cmdlet allows you to send a new message to the current provider's LLM.  
-By default, it sends to the active chat. You can override the chat using the -Chat parameter.  If there is no active chat, it will use the default one.  
+This cmdlet lets you send a new message to the LLM of the current provider.  
+By default, it sends to the active chat. You can override the chat using the -Chat parameter.  If there is no active chat, it will use the default.  
 
-Several Chat parameters affect how this command works. See the Get-PowershaiChatParameter command for more information on chat parameters.  
-In addition to chat parameters, the command's own parameters can override behavior.  For more details, consult the documentation for each parameter of this cmdlet using get-help.  
+Several Chat parameters affect how this command works. See the Get-PowershaiChatParameter command for more info about chat parameters.  
+In addition to chat parameters, command parameters themselves can override behavior.  For more details, consult the documentation for each parameter of this cmdlet using get-help.  
 
-For simplicity, and to keep the command line clean, allowing the user to focus more on the prompt and data, some aliases are available.  
+For simplicity, and to keep the command line clean, allowing the user to focus more on the prompt and data, some aliases are provided.  
 These aliases can activate certain parameters.
 They are:
 	ia|ai
-		Abbreviation of "Artificial Intelligence" in English. This is a simple alias and does not change any parameter. It helps to reduce the command line considerably.
+		Abbreviation for "Artificial Intelligence" in English. This is a simple alias and does not change any parameter. It helps to reduce the command line a lot.
 	
 	iat|ait
 		Same as Send-PowershaAIChat -Temporary
@@ -29,14 +29,14 @@ They are:
 		Same as Send-PowershaAIChat -Object
 
 The user can create their own aliases. For example:
-	Set-Alias ki ia # DEfine o alias para o alemao!
-	Set-Alias kit iat # DEfine o alias kit para iat, fazendo o comportamento ser igual ao iat (chat temporaria) quando usado o kit!
+	Set-Alias ki ia # DEfine the alias for german!
+	Set-Alias kit iat # DEfine the kit alias for iat, making the behavior the same as iat (temporary chat) when using kit!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
 Send-PowershaiChat [[-prompt] <Object>] [-SystemMessages <Object>] [-context <Object>] [-ForEach] [-Json] [-Object] [-PrintContext] [-Forget] [-Snub] [-Temporary] 
-[-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [<CommonParameters>]
+[-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [-Lines] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -72,9 +72,9 @@ Accept wildcard characters: false
 ```
 
 ### -context
-The context
-This parameter is preferred to be used by the pipeline.
-It will cause the command to put the data in <contexto></contexto> tags and inject it into the prompt.
+The context 
+This parameter is preferably used by the pipeline.
+It will cause the command to put the data in <context></context> tags and inject it along with the prompt.
 
 ```yml
 Parameter Set: (All)
@@ -90,7 +90,7 @@ Accept wildcard characters: false
 
 ### -ForEach
 Forces the cmdlet to execute for each object in the pipeline
-By default, it accumulates all objects into an array, converts the array to string only and sends it to the LLM at once.
+By default, it accumulates all objects in an array, converts the array to string only and sends it all at once to the LLM.
 
 ```yml
 Parameter Set: (All)
@@ -105,8 +105,8 @@ Accept wildcard characters: false
 ```
 
 ### -Json
-Enables json mode
-in this mode the results returned will always be a JSON.
+Enable json mode
+in this mode the returned results will always be a JSON.
 The current model must support!
 
 ```yml
@@ -156,7 +156,7 @@ Accept wildcard characters: false
 ```
 
 ### -Forget
-Do not send previous conversations (context history), but include the prompt and response in the historical context.
+Do not send the previous conversations (the context history), but include the prompt and the response in the historical context.
 
 ```yml
 Parameter Set: (All)
@@ -171,7 +171,7 @@ Accept wildcard characters: false
 ```
 
 ### -Snub
-Ignore the LLM's response, and do not include the prompt in the historical context
+Ignore the LLM response, and do not include the prompt in the historical context
 
 ```yml
 Parameter Set: (All)
@@ -186,7 +186,7 @@ Accept wildcard characters: false
 ```
 
 ### -Temporary
-Do not send the history, nor include the response and prompt.  
+Do not send the history or include the response and prompt.  
 It is the same as passing -Forget and -Snub together.
 
 ```yml
@@ -202,7 +202,7 @@ Accept wildcard characters: false
 ```
 
 ### -DisableTools
-Turns off function call for this execution only!
+Disables function call for this execution only!
 
 ```yml
 Parameter Set: (All)
@@ -217,8 +217,8 @@ Accept wildcard characters: false
 ```
 
 ### -FormatterFunc
-Change the context formatter to this
-See more about it in Format-PowershaiContext
+Change the context formatter for this
+See more about in Format-PowershaiContext
 
 ```yml
 Parameter Set: (All)
@@ -233,7 +233,7 @@ Accept wildcard characters: false
 ```
 
 ### -FormatterParams
-Parameters of the changed context formatter.
+Parameters of the altered context formatter.
 
 ```yml
 Parameter Set: (All)
@@ -248,13 +248,29 @@ Accept wildcard characters: false
 ```
 
 ### -PassThru
-Returns messages back into the pipeline, without writing directly to the screen!
-This option assumes that the user will be responsible for giving the correct message destination!
+Returns the messages back to the pipeline, without writing directly to the screen!
+This option assumes that the user will be responsible for giving the correct destination of the message!
 The object passed to the pipeline will have the following properties:
-	text 			- The text (or excerpt) of the text returned by the model 
+	text 			- The text (or portion) of the text returned by the model 
 	formatted		- The formatted text, including the prompt, as if it were written directly to the screen (without the colors)
-	event			- The event. Indicates the event that originated it. They are the same events documented in Invoke-AiChatTools
+	event			- The event. Indicates the event that originated. They are the same events documented in Invoke-AiChatTools
 	interaction 	- The interaction object generated by Invoke-AiChatTools
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Lines
+Returns an array of lines
+If stream mode is enabled, it will return one line at a time!
 
 ```yml
 Parameter Set: (All)
@@ -272,5 +288,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Translated automatically using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

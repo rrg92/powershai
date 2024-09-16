@@ -686,6 +686,10 @@ function Get-HttpResponse {
 
 
 function Close-HttpRequest {
+	<#
+		.SYNOPSIS 
+			Close Http opended with Start-HttpRequest
+	#>
 	[CmdLetBinding()]
 	param(
 		[Parameter(ValueFromPipeline=$true)]

@@ -10,13 +10,12 @@ powershai: true
 
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Gradio への HTTP 呼び出しを実行し、認証など、共通ヘッダーを既に追加しています。
+Gradio への HTTP 呼び出しを実行し、認証など、共通ヘッダーをすでに追加します。
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] 
-[<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -109,5 +108,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_PowershAI e IA を使用して自動翻訳されました。_
 <!--PowershaiAiDocBlockEnd-->

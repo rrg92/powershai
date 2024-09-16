@@ -10,21 +10,21 @@ powershai: true
 PowershaiChat のパラメーターを表す新しいオブジェクトを作成します。
 
 ## DESCRIPTION <!--!= @#Desc !-->
-チャットで使用できるすべてのパラメーターを含む、標準のオブジェクトを作成します!
-ユーザーは get-help New-PowershaiParameters を使用してパラメーターのドキュメントを取得できます。
+チャットで使用できるすべての可能なパラメーターを含む、デフォルトのオブジェクトを作成します。
+ユーザーは、get-help New-PowershaiParameters を使用してパラメーターのドキュメントを取得できます。
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
 New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] <Boolean>] [[-ShowTokenStats] <Object>] 
-[[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] 
-[[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>] [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
+[[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] 
+<Object>] [[-PrintToolsResults] <Object>] [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -stream
-True の場合、ストリームモードを使用します。つまり、メッセージはモデルが生成するにつれて表示されます。
+true の場合、ストリーミングモードを使用します。つまり、メッセージはモデルが生成するにつれて表示されます
 
 ```yml
 Parameter Set: (All)
@@ -40,7 +40,7 @@ Accept wildcard characters: false
 
 ### -Json
 JSON モードを有効にします。このモードでは、モデルは JSON を含む応答を返すように強制されます。
-有効にすると、ストリームで生成されたメッセージは生成時に表示されず、最終的な結果のみが返されます。
+有効にすると、ストリーム経由で生成されたメッセージは生成時に表示されず、最終的な結果のみが返されます。
 
 ```yml
 Parameter Set: (All)
@@ -56,7 +56,7 @@ Accept wildcard characters: false
 
 ### -model
 使用するモデルの名前
-null の場合、Set-AiDefaultModel で定義されたモデルを使用します。
+null の場合、Set-AiDefaultModel で定義されたモデルを使用します
 
 ```yml
 Parameter Set: (All)
@@ -71,7 +71,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-モデルが返すことができるトークンの最大数
+モデルが返すトークンの最大数
 
 ```yml
 Parameter Set: (All)
@@ -86,7 +86,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowFullSend
-LLM に送信されている完全なプロンプトを出力します。
+LLM に送信されているプロンプト全体を出力します
 
 ```yml
 Parameter Set: (All)
@@ -101,7 +101,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowTokenStats
-各メッセージの最後に、API から返された消費統計情報をトークンで表示します。
+各メッセージの最後に、API から返された消費統計（トークン単位）を表示します
 
 ```yml
 Parameter Set: (All)
@@ -116,11 +116,11 @@ Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-一度に行うことができる相互作用の最大数
-メッセージが送信されるたびに、モデルは 1 回の反復を実行します (メッセージを送信して応答を受け取ります)。
-モデルが関数呼び出しを要求する場合、生成された応答はモデルに再送信されます。これは別の相互作用としてカウントされます。
-このパラメーターは、各呼び出しで存在できる相互作用の最大数を制御します。
-これにより、予期しない無限ループを回避するのに役立ちます。
+一度に行うことができる対話の最大数
+メッセージが送信されるたびに、モデルは 1 つの反復を実行します（メッセージを送信して応答を受信します）。
+モデルが関数呼び出しを要求した場合、生成された応答はモデルに再送信されます。これは別の反復としてカウントされます。
+このパラメーターは、各呼び出しで発生する可能性のある反復の最大数を制御します。
+これは、予期しない無限ループを防ぐのに役立ちます。
 
 ```yml
 Parameter Set: (All)
@@ -135,9 +135,9 @@ Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
-Tool Calling によって生成される連続エラーの最大数
-Tool Calling を使用する場合、このパラメーターは、エラーが発生した連続ツールを何回呼び出せるかを制限します。
-考慮されるエラーは、設定されたスクリプトまたはコマンドによって発生した例外です。
+Tool Calling で生成されたシーケンスエラーの最大数。
+Tool Calling を使用する場合、このパラメーターは、エラーが発生したシーケンスのない Tool を呼び出すことができる回数に制限します。
+エラーとして考慮されるのは、構成されたスクリプトまたはコマンドによって発生した例外です。
 
 ```yml
 Parameter Set: (All)
@@ -152,9 +152,9 @@ Accept wildcard characters: false
 ```
 
 ### -MaxContextSize
-コンテキストの最大サイズ (文字数)
-将来はトークンで表されます。
-現在のチャットのコンテキスト内のメッセージ数を制御します。この数値を超えると、Powershai は古いメッセージを自動的にクリアします。
+コンテキストの最大サイズ（文字単位）
+将来はトークン単位になります
+現在のチャットのコンテキスト内のメッセージの数を制御します。この数が超えると、Powershai は自動的に古いメッセージを消去します。
 
 ```yml
 Parameter Set: (All)
@@ -169,7 +169,7 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormatterFunc
-パイプラインを通じて渡されるオブジェクトの書式設定に使用される関数
+パイプライン経由で渡されるオブジェクトのフォーマットに使用される関数
 
 ```yml
 Parameter Set: (All)
@@ -199,7 +199,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowArgs
-True の場合、Tool Calling がアクティブになって関数が実行されるときに、関数の引数を出力します。
+true の場合、Tool Calling がアクティブになって何らかの関数を実行するときに、関数の引数を出力します
 
 ```yml
 Parameter Set: (All)
@@ -214,7 +214,7 @@ Accept wildcard characters: false
 ```
 
 ### -PrintToolsResults
-PowershAI が Tool Calling に応じてツールを実行したときに、ツールの結果を出力します。
+PowershAI がモデルのツール呼び出しに応答して実行したときに、ツールの結果を出力します
 
 ```yml
 Parameter Set: (All)
@@ -229,7 +229,7 @@ Accept wildcard characters: false
 ```
 
 ### -SystemMessageFixed
-履歴やチャットのクリーンアップに関係なく、常に送信されることが保証される System Message!
+履歴とチャットのクリーンアップに関係なく、常に送信されることが保証されている System Message です。
 
 ```yml
 Parameter Set: (All)
@@ -245,8 +245,8 @@ Accept wildcard characters: false
 
 ### -RawParams
 モデルを呼び出す API に直接渡されるパラメーター。
-プロバイダーは、これに対するサポートを実装する必要があります。
-これを使用するには、プロバイダーの実装の詳細と API の動作を理解する必要があります。
+プロバイダーはこれに対するサポートを実装する必要があります。
+これを使用するには、プロバイダーの実装の詳細と API の動作方法を理解している必要があります。
 
 ```yml
 Parameter Set: (All)
@@ -261,13 +261,13 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormat
-コンテキストデータを挿入するときに使用されるテンプレートを制御します。
-このパラメーターは、コンテキストを含む文字列を返すスクリプトブロックです。
+コンテキストデータを注入するときに使用するテンプレートを制御します。
+このパラメーターは、コンテキストを含める文字列を返すスクリプトブロックです。
 スクリプトブロックのパラメーターは次のとおりです。
-	FormattedObject 	- フォーマッターでフォーマットされた、アクティブなチャットを表すオブジェクト。
-	CmdParams 			- Send-PowershaAIChat に渡されたパラメーター。GetMyParams によって返されたのと同じオブジェクトです。
+	FormattedObject 	- フォーマッターでフォーマットされたアクティブなチャットを表すオブジェクト。
+	CmdParams 			- Send-PowershaAIChat に渡されるパラメーター。GetMyParams によって返されるオブジェクトと同じです。
 	Chat 				- データが送信されているチャット。
-null の場合、デフォルトが生成されます。詳細については、cmdlet Send-PowershaAIChat を参照してください。
+null の場合、デフォルトが生成されます。詳細については、Send-PowershaiChat コマンドレットを参照してください。
 
 ```yml
 Parameter Set: (All)
@@ -285,5 +285,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_PowershAI e IA を使用して自動翻訳されました。_
 <!--PowershaiAiDocBlockEnd-->

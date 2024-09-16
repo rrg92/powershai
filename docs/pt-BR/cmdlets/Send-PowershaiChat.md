@@ -36,7 +36,7 @@ O usuário pode criar seus próprios alias. Por exemplo:
 
 ```
 Send-PowershaiChat [[-prompt] <Object>] [-SystemMessages <Object>] [-context <Object>] [-ForEach] [-Json] [-Object] [-PrintContext] [-Forget] [-Snub] [-Temporary] 
-[-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [<CommonParameters>]
+[-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [-Lines] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -255,6 +255,22 @@ O objeto passado ao pipeline terá as seguintes propriedades:
 	formatted		- O texto formatado, incluindo o prompt, como se fosse escrito direto na tela (sem as cores)
 	event			- O evento. Indica o evento que originou. São os mesmos eventos documentaados em Invoke-AiChatTools
 	interaction 	- O objeto interaction gerado por Invoke-AiChatTools
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Lines
+Retorna um array de linhas 
+Se o modo stream estiver ativado, retornará uma linha por vez!
 
 ```yml
 Parameter Set: (All)

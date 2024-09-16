@@ -8,13 +8,13 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Gets a chat response from OpenAI.
+Get OpenAI Chat response
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] 
-[[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
+Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
+<Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -149,5 +149,5 @@ Accept wildcard characters:
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Translated automatically using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->
