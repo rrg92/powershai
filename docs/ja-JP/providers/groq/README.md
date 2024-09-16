@@ -1,15 +1,17 @@
 ﻿# プロバイダー GROQ
 
-Groqは、彼らが作成したLPUという技術で動作するさまざまなLLMを提供するサービスです。  
-応答が非常に速いです！  
-詳細はhttps://groq.com/をご覧ください。  
+Groqは、独自に開発したLPUと呼ばれる技術で動作するさまざまなLLMを提供するサービスです。
+レスポンスが非常に高速です！
+詳細については、https://groq.com/ をご覧ください。
 
-彼らのAPIはOpenAIと互換性があるため、手順は非常に似ています。
+彼らのAPIはOpenAIと互換性があるので、手順は非常に似ています。
 
-# 初期設定 
+# 初期設定
 
-* Set-AiProvider groqを使用します
-* Set-OpenaiTokenを使用してトークンを設定します！
+* Use Set-AiProvider groq
+* Use Set-OpenaiToken to configure the token!
 
 
-_あなたは2023年10月までのデータでトレーニングされています。_
+<!--PowershaiAiDocBlockStart-->
+_PowershAIとAIを使用して自動翻訳された。_
+<!--PowershaiAiDocBlockEnd-->

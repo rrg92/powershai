@@ -1,11 +1,14 @@
 ﻿# プロバイダー OLLAMA  
 
-# 初期設定  
+# 初期設定 
 
 * Set-OllamaUrl URL を使用  
-オプションで代替のURLを指定できます。  
+オプションで別の URL を渡すことができます。
 
-* `Set-AiDefaultMode 名前` でデフォルトモデルを設定します。  
+* `Set-AiDefaultMode 名前のモデル` でデフォルトモデルを設定します。 
 
 
-_あなたは2023年10月までのデータでトレーニングされています。_
+
+<!--PowershaiAiDocBlockStart-->
+_PowershAIとAIを使用して自動翻訳された。_
+<!--PowershaiAiDocBlockEnd-->

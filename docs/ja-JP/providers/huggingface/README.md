@@ -1,68 +1,68 @@
-﻿# プロバイダー Hugging Face
+﻿# Hugging Face プロバイダー
 
-Hugging Faceは、世界最大のAIモデルリポジトリです！  
-そこでは、驚くほどのモデル、データセット、Gradioを使用したデモなどにアクセスできます！  
+Hugging Face は世界最大の AI モデルリポジトリです！  
+そこには、驚くほどの数のモデル、データセット、Gradio を使ったデモなどが用意されています！  
 
-それは、商業用およびオープンソースの人工知能のGitHubです！ 
+AI の GitHub とも言うべき場所です。商用でもオープンソースでも利用できます！
 
-PowershAIのHugging Faceプロバイダーは、あなたのPowerShellを驚くべきサービスとモデルの範囲に接続します。  
+PowershAI の Hugging Face プロバイダーは、Powershell を驚くほど多くのサービスやモデルに接続します。  
 
-## Gradioについて
+## Gradio
 
-Gradioは、AIモデルのデモを作成するためのフレームワークです。少ないPythonコードで、テキスト、ファイルなどのさまざまな入力を受け入れるインターフェースを立ち上げることができます。  
-さらに、キュー、アップロードなどの多くの問題を管理します。また、インターフェースとともに、UIを介して公開された機能にプログラミング言語を介してアクセスできるAPIを提供することもできます。  
-PowershAIはこれを活用し、GradioのAPIをより簡単に公開し、ターミナルから機能を呼び出し、ほぼ同じ体験を得ることができます！
+Gradio は、AI モデルのデモを作成するためのフレームワークです。Python で少行のコードを書くだけで、テキスト、ファイルなど、さまざまな入力を受け付けるインターフェースを作成できます。  
+さらに、キュー、アップロードなどの多くの問題を管理します。  そして、インターフェースに加えて、UI を介して公開されている機能をプログラミング言語からもアクセスできるように、API を提供することもできます。  
+PowershAI はこの機能を活用し、Gradio の API をより簡単に利用できるようにしています。端末から機能を呼び出せば、ほぼ同じエクスペリエンスを実現できます！
 
 
 ## Hugging Face Hub  
 
-Hugging Face Hubは、https://huggingface.coでアクセスできるプラットフォームです。  
-これは、基本的に世界中の他の人々や企業が作成したAIモデルのソースコードであるモデル（models）に整理されています。  
-「Spaces」もあり、ここではPythonで書かれたアプリケーションを公開するためのコードをアップロードできます（たとえば、Gradioを使用）。  
+Hugging Face Hub は、https://huggingface.co でアクセスできるプラットフォームです。  
+このプラットフォームはモデルで構成されており、モデルとは、世界中の個人や企業が作成した AI モデルのソースコードのことです。  
+また、"Spaces" もあり、ここでは Python (Gradio などを使用) または Docker を使用して作成したアプリケーションを公開するためのコードをアップロードできます。  
 
-Hugging Faceについての詳細は、[このIa Talkingのブログ投稿](https://iatalk.ing/hugging-face/)をご覧ください。  
-また、Hugging Face Hubについては[公式ドキュメント](https://huggingface.co/docs/hub/en/index)をご覧ください。
+Hugging Face についてもっと知りたい方は、[Ia Talking のブログ記事](https://iatalk.ing/hugging-face/) をご覧ください。
+また、Hugging Face Hub については、[公式ドキュメント](https://huggingface.co/docs/hub/en/index) をご覧ください。
 
-PowershAIを使用すると、モデルをリストし、さまざまなスペースのAPIと対話し、ターミナルからさまざまなAIアプリを実行できます。  
+PowershaAI を使用すると、モデルを一覧表示したり、さまざまな Spaces の API と対話したり、端末からさまざまな AI アプリケーションを実行したりできます。  
 
 
-# 基本的な使用法
+# 基本的な使い方
 
-PowershAIのHugging Faceプロバイダーには、対話用の多くのcmdletがあります。  
-次のコマンドに整理されています：
+PowershAI の Hugging Face プロバイダーには、多くの cmdlet が用意されており、対話に利用できます。  
+これらのコマンドは、以下のように分類されます。
 
-* Hugging Faceと対話するコマンドは、名前に`HuggingFace`または`Hf`が含まれています。例：`Get-HuggingFaceSpace`（エイリアス`Get-HfSpace`）。  
-* Gradioと対話するコマンドは、Hugging FaceのSpaceであろうとなかろうと、名前に`Gradio`または`GradioSession`が含まれています：`Send-GradioApi`、`Update-GradioSessionApiResult`
-* 完全なリストを取得するには、このコマンドを使用できます：`get-command -mo powershai -Noun Hf*,HuggingFace*,Gradio*`
+* Hugging Face と対話するコマンドには、`HuggingFace` または `Hf` が名前に入ります。例: `Get-HuggingFaceSpace` (エイリアス `Get-HfSpace`)。  
+* Gradio と対話するコマンドには、Hugging Face の Space であるかどうかにかかわらず、`Gradio` または `GradioSession` が名前に入ります: `Send-GradioApi`, `Update-GradioSessionApiResult`
+* すべての cmdlets を取得するには、`get-command -mo powershai -Noun Hf*,HuggingFace*,Gradio*` コマンドを使用してください。
 
-Hugging Faceの公開リソースにアクセスするために認証する必要はありません。  
-認証なしで利用できる無料のモデルとスペースが無限にあります。  
-たとえば、次のコマンドは、Meta（著者：meta-llama）の最もダウンロードされたトップ5のモデルをリストします：
+Hugging Face のパブリックリソースにアクセスするのに認証は必要ありません。  
+認証なしで無料で利用できるモデルや Spaces が無数にあります。  
+例えば、次のコマンドは、Meta (作者: meta-llama) からダウンロードされたトップ 5 のモデルを一覧表示します。
 
 ```powershell
 import-module powershai
 Invoke-HuggingFaceHub "models" -limit 5 -author meta-llama -sort downloads -direction -1 
 ```
 
-cmdlet `Invoke-HuggingFaceHub`は、HubのAPIエンドポイントを呼び出す役割を果たします。パラメーターは、https://huggingface.co/docs/hub/en/apiに文書化されているものと同じです。  
-ただし、プライベートリソースにアクセスする必要がある場合は、トークンが必要です：`Set-HuggingFaceToken`（または`Set-HfToken`）は、すべてのリクエストで使用されるデフォルトトークンを挿入するためのcmdletです。  
+cmdlet `Invoke-HuggingFaceHub` は、Hub の API のエンドポイントを呼び出す役割を果たします。  パラメータは、https://huggingface.co/docs/hub/en/api に記載されているものと同じです。
+ただし、プライベートリソースにアクセスする必要がある場合は、トークンが必要です。`Set-HuggingFaceToken` (または `Set-HfToken`) は、すべての要求で使用するデフォルトのトークンを設定するための cmdlet です。  
 
 
 
-# Hugging Faceプロバイダーのコマンド構造  
+# Hugging Face プロバイダーのコマンド構造  
  
-Hugging Faceプロバイダーは、3つの主要なコマンドグループに整理されています：Gradio、Gradio Session、Hugging Face。  
+Hugging Face プロバイダーは、主に 3 つのグループのコマンドで構成されています。Gradio、Gradio Session、Hugging Face です。  
 
 
-## Gradio*コマンド
+## Gradio*` コマンド
 
-「gradio」グループのcmdletは、動詞-Gradio名の構造を持っています。これらのコマンドは、GradioのAPIへのアクセスを実装します。  
-これらのコマンドは基本的にAPIのラッパーです。これらの構築は、次のドキュメントに基づいています：https://www.gradio.app/guides/querying-gradio-apps-with-curl  およびGradioのソースコードを観察することによって（例：[Routes](https://github.com/gradio-app/gradio/blob/main/gradio/routes.py)）  
-これらのコマンドは、ホストされている場所に関係なく、任意のGradioアプリで使用できます：ローカルマシン、Hugging Faceのスペース、クラウド上のサーバー...  
-アプリケーションの主要なURLだけが必要です。  
+"gradio" グループの cmdlet は、Verbo-GradioName の構造になっています。  これらのコマンドは、Gradio の API へのアクセスを実装しています。  
+これらのコマンドは、基本的に API のラッパーです。これらのコマンドの構築は、このドキュメント: https://www.gradio.app/guides/querying-gradio-apps-with-curl をベースにしており、Gradio のソースコード (例: [Routes](https://github.com/gradio-app/gradio/blob/main/gradio/routes.py) ) も参考にしています。
+これらのコマンドは、ローカルマシン、Hugging Face の Space、クラウド上のサーバーなど、Gradio アプリケーションがどこでホストされているかに関係なく、どの Gradio アプリケーションでも使用できます。
+アプリケーションのメイン URL が分かっていれば、使用できます。  
 
 
-次のGradioアプリを考えてみましょう：
+次の Gradio アプリケーションを考えてみましょう。
 
 ```python 
 # file, simple-app.py
@@ -72,7 +72,7 @@ import time
 def Op1(Duration):
     yield f"Dur:{Duration}"
     
-    print("ループ中...");
+    print("Looping...");
     start = time.perf_counter()
     while True:
         now = time.perf_counter();
@@ -85,12 +85,12 @@ def Op1(Duration):
         yield elapsed;
         time.sleep(1);
     
-    yield f"完了"
+    yield f"Finished"
     
     
 with gr.Blocks() as demo:
-    DurationSeconds = gr.Text(label="持続時間（秒）", value=5);
-    txtResults = gr.Text(label="結果");
+    DurationSeconds = gr.Text(label="Duration, in, seconds", value=5);
+    txtResults = gr.Text(label="Resultado");
     btnOp1 = gr.Button(value="Op1");
     btnOp1.click( Op1, [DurationSeconds], [txtResults] );
     
@@ -98,77 +98,78 @@ if __name__ == "__main__":
     demo.launch(show_api=True)
 ```
 
-基本的に、このアプリは2つのテキストフィールドを表示します。1つはユーザーがテキストを入力し、もう1つは出力を表示するために使用されます。  
-ボタンは、クリックされるとOp1関数をトリガーします。この関数は、指定された秒数の間ループを実行します。  
-毎秒、経過時間を返します。  
+このアプリケーションは、基本的に 2 つのテキストフィールドを表示します。1 つはユーザーがテキストを入力するもので、もう 1 つは出力を表示するものです。  
+ボタンをクリックすると、Op1 関数が実行されます。この関数は、パラメータで指定された秒数の間、ループ処理を行います。  
+1 秒ごとに、経過時間を返します。  
 
-このアプリがhttp://127.0.0.1:7860でアクセス可能であると仮定します。  
-このプロバイダーを使用して、このアプリに接続するのは簡単です：
+アプリケーションを起動すると、http://127.0.0.1:7860 でアクセスできるようになっているとします。
+このプロバイダーを使用すると、このアプリケーションに簡単に接続できます。
 
 ```powershell
-# powershaiをインストールしていない場合はインストールしてください！
+# powershai をインストールします (まだインストールしていない場合)。
 Install-Module powershai 
 
 # インポート
 import-module powershai 
 
-# APIのエンドポイントを確認します！
+# API のエンドポイントを確認します。
 Get-GradioInfo http://127.0.0.1:7860
 ```
 
-cmdlet `Get-GradioInfo`は最もシンプルです。これは、すべてのGradioアプリが持つエンドポイント/infoを読み取るだけです。  
-このエンドポイントは、利用可能なAPIエンドポイントなどの貴重な情報を返します：
+cmdlet `Get-GradioInfo` は最も単純なコマンドです。すべての Gradio アプリケーションが持つ /info エンドポイントを読み取ります。  
+このエンドポイントからは、API で利用可能なエンドポイントなどの貴重な情報が返されます。
 
 ```powershell
-# APIのエンドポイントを確認します！
+# API のエンドポイントを確認します。
 $AppInfo = Get-GradioInfo http://127.0.0.1:7860
 
-# エンドポイントのパラメーターをリストします
+# エンドポイントのパラメータを一覧表示します
 $AppInfo.named_endpoints.'/op1'.parameters
 ```
 
-APIを呼び出すには、cmdlet `Send-GradioApi`を使用できます。  
+API を呼び出すには、`Send-GradioApi` cmdlet を使用します。  
 
 ```powershell
 $Event = Send-GradioApi -AppUrl 'http://127.0.0.1:7860' -ApiName Op1 -Params @(1)
 ```
 
-URL、スラッシュなしのエンドポイント名、およびパラメーターのリストを含む配列を渡す必要があることに注意してください。  
-このリクエストの結果は、APIの結果を照会するために使用できるイベントです。  
-結果を取得するには、`Update-GradioApiResult`を使用する必要があります。  
+URL、スラッシュを含まないエンドポイント名、パラメータの配列を指定する必要があることに注意してください。
+この要求の結果はイベントであり、このイベントを使用して API の結果を確認できます。
+結果を取得するには、`Update-GradioApiResult` を使用します。
 
 ```powershell
 $Event | Update-GradioApiResult
 ```
 
-cmdlet `Update-GradioApiResult`は、APIによって生成されたイベントをパイプラインに書き込みます。  
-サーバーによって生成された各イベントに対してオブジェクトが返されます。このオブジェクトの`data`プロパティには、返されたデータが含まれています（あれば）。  
+cmdlet `Update-GradioApiResult` は、API から生成されたイベントをパイプラインに書き込みます。  
+サーバーから生成されたイベントごとにオブジェクトが返されます。このオブジェクトの `data` プロパティには、返されたデータ (存在する場合) が含まれます。  
 
 
-さらに、アップロードを行うための`Send-GradioFile`コマンドがあります。これは、サーバー上のファイルを表すFileDataオブジェクトの配列を返します。  
+また、`Send-GradioFile` コマンドを使用すると、アップロードを実行できます。  このコマンドは、サーバー上のファイルを表現する `FileData` オブジェクトの配列を返します。  
 
-これらのcmdletは非常に原始的であることに注意してください：すべてを手動で行う必要があります。エンドポイントを取得し、APIを呼び出し、配列としてパラメーターを送信し、ファイルをアップロードします。  
-これらのコマンドはGradioの直接HTTP呼び出しを抽象化しますが、ユーザーに多くの負担をかけます。  
-そのため、ユーザーの生活をさらに簡単にするために、GradioSessionコマンドグループが作成されました！
+これらの cmdlet は非常に基本的なものであることに注意してください。すべてを手動で行う必要があります。エンドポイントを取得し、API を呼び出し、パラメータを配列として送信し、ファイルをアップロードします。  
+これらのコマンドは、Gradio の HTTP 呼び出しを抽象化していますが、ユーザーにはまだ多くの操作が必要です。  
+そのため、GradioSession コマンドグループが作成されました。このグループのコマンドを使用すると、さらに抽象化され、ユーザーの負担が軽減されます。
 
 
-## GradioSession* コマンド  
+## GradioSession*  コマンド
 
-GradioSessionグループのコマンドは、Gradioアプリへのアクセスをさらに抽象化するのに役立ちます。  
-これらを使用すると、Gradioアプリと対話する際にPowerShellに近づき、ネイティブ呼び出しから遠ざかります。  
+GradioSession グループのコマンドは、Gradio アプリケーションへのアクセスをさらに抽象化します。  
+これらのコマンドを使用すると、Powershell から Gradio アプリケーションを操作するのがより簡単になります。  ネイティブな呼び出しから離れて操作できます。  
 
-前のアプリの例を使って、いくつかの比較を行いましょう：
+前のアプリケーションの例を使用して、いくつかの比較を行います。
 
-```powershell# 新しいセッションを作成する 
+```powershell
+# 新しいセッションを作成します
 New-GradioSession http://127.0.0.1:7860
 ```
 
-コマンドレット `New-GradioSession` は、Gradioと新しいセッションを作成します。この新しいセッションには、SessionId、アップロードされたファイルのリスト、設定などのユニークな要素があります。  
-コマンドはこのセッションを表すオブジェクトを返し、作成されたすべてのセッションを取得するには `Get-GradioSession` を使用できます。  
-GradioSessionを、ブラウザで開いているGradioアプリのタブのように考えてください。  
+cmdlet `New-GradioSession` は、Gradio との新しいセッションを作成します。  この新しいセッションには、SessionId、アップロードされたファイルのリスト、設定など、一意の要素が含まれています。  
+このコマンドは、このセッションを表すオブジェクトを返します。作成されたセッションはすべて `Get-GradioSession` を使用して取得できます。  
+GradioSession は、ブラウザで開いているタブにたとえられます。タブには Gradio アプリケーションが開かれています。  
 
-GradioSessionのコマンドは、デフォルトではデフォルトセッションで操作します。セッションが1つだけ存在する場合、それはデフォルトセッションです。  
-複数のセッションが存在する場合、ユーザーは `Set-GradioSession` コマンドを使用してどのセッションをデフォルトにするかを選択する必要があります。
+GradioSession コマンドは、デフォルトでデフォルトセッションで動作します。セッションが 1 つしかない場合、そのセッションがデフォルトセッションになります。  
+セッションが複数ある場合は、`Set-GradioSession` コマンドを使用して、どのセッションをデフォルトにするかを指定する必要があります。
 
  ```powershell
 $app1 = New-GradioSession http://127.0.0.1:7860
@@ -177,71 +178,76 @@ $app2 = New-GradioSession http://127.0.0.1:7861
 Set-GradioSession -Default $app2
 ```
 
-最も強力なコマンドの1つは `New-GradioSessionApiProxyFunction`（またはエイリアスGradioApiFunction）です。  
-このコマンドは、セッションのGradioのAPIをPowerShellの関数に変換します。つまり、APIをPowerShellの関数のように呼び出すことができます。  
-前の例に戻りましょう。
+最も強力なコマンドの 1 つが `New-GradioSessionApiProxyFunction` (またはエイリアスの GradioApiFunction) です。  
+このコマンドは、セッションの Gradio の API を Powershell 関数に変換します。つまり、Gradio の API を Powershell 関数のように呼び出すことができます。  
+前の例に戻ってみましょう。
+
 
 ```powershell
-# まず、セッションを開きます！
+# まず、セッションを開きます。
 New-GradioSession http://127.0.0.1:7860
 
-# 次に、関数を作成します！
+# 次に、関数をいくつか作成します。
 New-GradioSessionApiProxyFunction
 ```
 
-上記のコードは、Invoke-GradioApiOp1というPowerShell関数を生成します。  
-この関数は、'/op1'エンドポイントと同じパラメータを持ち、詳細情報を得るにはget-helpを使用できます：  
+上記のコードは、Invoke-GradioApiOp1 という Powershell 関数を生成します。  
+この関数は、エンドポイント '/op1' と同じパラメータを持ちます。`get-help` を使用すると、詳細な情報が得られます。
 
 ```powershell
 get-help -full Invoke-GradioApiOp1
 ```
 
-実行するには、単に呼び出します：
+実行するには、次のように呼び出します。
 
 ```powershell
 Invoke-GradioApiOp1 -Duration 10 | %{ "ElapsedSeconds: $($_.data)" }
 ```
 
-アプリGradioで定義されたパラメータ `Duration` がPowerShellのパラメータになったことに注意してください。  
-裏では、Invoke-GradioApiOp1は `Update-GradioApiResult` を実行しており、つまり、返されるのは同じオブジェクトです！  
-しかし、GradioのAPIを呼び出して結果を受け取るのがどれほど簡単になったかを認識してください！
+Gradio アプリケーションで定義されている `Duration` パラメータが、Powershell パラメータになっていることに注意してください。  
+実際には、Invoke-GradioApiOp1 は `Update-GradioApiResult` を実行しており、返されるオブジェクトは同じです。
+しかし、Gradio の API を呼び出し、結果を受け取るのがいかに簡単になったかがお分かりいただけると思います。
 
-音楽、画像などのファイルを定義するアプリは、これらのファイルを自動的にアップロードする関数を生成します。  
-ユーザーはローカルパスを指定するだけで済みます。  
+音楽や画像などのファイルを定義するアプリケーションは、これらのファイルを自動的にアップロードする関数を生成します。  
+ユーザーは、ローカルパスを指定するだけです。  
 
-最終的に、変換でサポートされていないデータの種類が存在する場合があり、その場合は、問題を報告するか（PRを提出するか）して評価し、実装する必要があります！
+場合によっては、変換でサポートされていないデータ型が存在することがあります。そのようなデータ型が見つかった場合は、Issue を作成 (または PR を提出) して、評価と実装をお願いします。
 
 
 
-## HuggingFaceコマンド*（またはHf*）
+## HuggingFace* (または Hf*) コマンド
 
-このグループのコマンドは、Hugging FaceのAPIで操作するために作成されました。  
-基本的に、これらはHugging FaceのさまざまなエンドポイントへのHTTP呼び出しをカプセル化しています。  
+このグループのコマンドは、Hugging Face の API を操作するために作成されました。  
+基本的には、Hugging Face のさまざまなエンドポイントに対する HTTP 呼び出しをカプセル化しています。  
 
-例：
+例:
 
 ```
 Get-HuggingFaceSpace rrg92/diffusers-labs
 ```
 
-このコマンドは、ユーザーrrg92のspace diffusers-labsに関するさまざまな情報を含むオブジェクトを返します。  
-これはGradioのスペースであるため、他のcmdletと接続することができ（Get-HuggingFaceSpaceによって返されたオブジェクトがそれらに渡されると、GradioSessionのcmdletは理解できます！）
+このコマンドは、ユーザー rrg92 の space diffusers-labs に関するさまざまな情報を含むオブジェクトを返します。  
+これは Gradio space なので、他の cmdlet と接続できます (GradioSession cmdlet は、`Get-HuggingFaceSpace` から返されるオブジェクトが渡されると、それを認識します)。
 
 ```
-# スペースに接続する（自動的にGradioセッションを作成）
+# space に接続します (自動的に Gradio セッションが作成されます)。
 $diff = Get-HuggingFaceSpace rrg92/diffusers-labs
 
-#デフォルト
+# デフォルト
 Set-GradioSession -Default $diff
 
-# 関数を作成！
+# 関数をいくつか作成します。
 New-GradioSessionApiProxyFunction
 
-# 呼び出す！
+# 呼び出します。
 Invoke-GradioApiGenerateimage -Prompt "a car flying"
 ```
 
-**重要：特定のスペースへのアクセスは認証が必要な場合があるため、その場合はSet-HuggingFaceTokenを使用してアクセストークンを指定する必要があります。**
+**重要: 特定の space にアクセスするには、認証が必要な場合があります。その場合は、`Set-HuggingFaceToken` を使用してアクセストークンを指定する必要があります。**
 
 
-_あなたは2023年10月までのデータでトレーニングされています。_
+
+
+<!--PowershaiAiDocBlockStart-->
+_PowershAIとAIを使用して自動翻訳された。_
+<!--PowershaiAiDocBlockEnd-->
