@@ -8,8 +8,7 @@ param(
 	#Fitlrar comandos!
 	,$CommandFilter = $null
 	
-	,[switch]$UpdateMd
-	,[switch]$UpdateFiles
+	,[switch]$Update
 )
 
 $ErrorActionPreference = "Stop";
@@ -213,50 +212,10 @@ foreach($Cmd in $ModCommands){
 	
 	$OutputFile = JoinPath $OutputDir "$($Cmd.Name).md"
 	
-	write-host "Writing to $OutputFile";
-	WriteFileBom $OutputFile $PlatyMd;
+	if($Update){
+		write-host "Writing to $OutputFile";
+		WriteFileBom $OutputFile $PlatyMd;
+	}
 }
-
-
-
-#foreach($File in $CmdLetsMd){
-#	
-#	$FileLines = Get-Content $File;
-#	
-#	$FileInfo = @{
-#		file = $file
-#		lines = $FileLines
-#		modified = $null
-#	}
-#	
-#	$DebugInfo.files += $FileInfo;
-#	
-#	
-#	$Modified = New-Object Collections.ArrayList;
-#	$LineNum = 0;
-#	$CurrentSection = ""
-#	foreach($Line in $FileLines){
-#		$LineNum++;
-#		$NewLine = $line;
-#		
-#		if($Line -match $HeadersRegex){
-#			$MatchedKey = $matches.keys | ? { $_ -like "Code_*" };
-#			$CodeName 	= $MatchedKey.replace("Code_","");
-#			$NewLine 	= $line + " <!--!= @#$CodeName -->";
-#		}
-#		
-#		
-#		$null = $Modified.Add($NewLine);
-#	}
-#	
-#	$Modified = @($Modified)
-#	$FileInfo.modified = $modified
-#	
-#	if($UpdateFiles){
-#		write-host "Updating file $file";
-#		WriteFileBom $file $Modified;
-#	}
-#}
-
 
 write-warning "Check local FileData var to details"
