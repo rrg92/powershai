@@ -234,7 +234,11 @@ function ParseCommandHelp {
 		
 		# Now, lets find the set that contains exactly this param list.
 		# If two sets same same list, we will pickup one of them only. (besides dont see pratical appplication this, powershell still allow that situation).
-		$MySet = $ParamSets | ? { $_.SortedParams -eq $SortedParams -and !$_.selected } | select -first 1;
+		if($ParamSets.count -eq 1 -and $ParamSets[0].name -eq '__AllParameterSets'){
+			$MySet = $ParamSets[0]
+		} else {
+			$MySet = $ParamSets | ? { $_.SortedParams -eq $SortedParams -and !$_.selected } | select -first 1;
+		}
 		
 		# if dont found a set, this is a erro!
 		# We myst always found a set!
