@@ -145,7 +145,7 @@ function ParseRun($str,$vars){
 		return (ReplaceVars @($Expr) $Vars)
 	}
 	
-	return [regex]::Replace($str,'\<\!\-\-\!(?<Expr>.*?)\-\-\>',$Replacer, "Singleline" ); 
+	return [regex]::Replace($str,'<!--!(?<Expr>.*?)!?-->',$Replacer, "Singleline" ); 
 	
 }
 
@@ -260,31 +260,37 @@ Function ParseFile($Source,$Target,$Vars){
 			
 			#Parse functiomns!
 			if($Line -match '<@f>(.*?)</@f>'){
+				
 				$Expr = $matches[1];
+					
+				switch -Regex ($Expr){
+					"^(=\s*)?@#(.+)" { 
 						
-				if($Expr[0] -eq "="){
-					$NewLines += $Expr -replace '^=[\s\t]*','';
-				}
+						$HeaderName = $matches[2];
 						
-				if($Expr[0] -eq "@"){
-					switch -Regex ($Expr){
-						"^\@#(.+)" { 
-							$HeaderName = $matches[1];
-							
-							$HeaderValue = $HEADERS[$HeaderName];
-							
-							if(!$HeaderValue){
-								throw "INVALID_HEADER: $HeaderName";
-								continue;
-							}
-							
+						$HeaderValue = $HEADERS[$HeaderName];
 						
-							$NewLines += "# $HeaderValue";
-						}				
-						
-						default {
-							throw "FunctionNotRecognized"
+						if(!$HeaderValue){
+							throw "INVALID_HEADER: $HeaderName";
+							continue;
 						}
+						
+						$HeaderHashs = "##";
+						if($line -match '^(#+)'){
+							$HeaderHashs = $matches[1];
+						}
+					
+						$NewLines += $HeaderHashs+" $HeaderValue";
+						break;
+					}
+
+					"^=\s+([^@])" {
+						$NewLines += $matches[1];
+						break;
+					}
+					
+					default {
+						throw "FunctionNotRecognized"
 					}
 				}
 				
