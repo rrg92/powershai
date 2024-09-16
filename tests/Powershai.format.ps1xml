@@ -1,0 +1,36 @@
+﻿TesteONly
+https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/update-formatdata?view=powershell-7.4
+https://learn.microsoft.com/en-us/powershell/scripting/developer/format/defaultsettings-element-format?view=powershell-7.4
+
+
+<?xml version="1.0" encoding="utf-8" ?>
+<Configuration>
+	<ViewDefinitions>
+		<View>
+			<Name>ChatList</Name>
+			<ViewSelectedBy>
+				<TypeName>PowershaiType:Chat</TypeName>
+			</ViewSelectedBy>
+			<CustomControl>
+				<CustomEntries>
+				  <CustomEntry>
+					<CustomItem>
+						<Frame>
+						  <LeftIndent>0</LeftIndent>
+						  <RightIndent>0</RightIndent>
+						  <FirstLineIndent>0</FirstLineIndent>
+						  <CustomItem>
+								<ExpressionBinding>
+									<ScriptBlock>
+										return $null;
+									</ScriptBlock>
+								</ExpressionBinding>
+						  </CustomItem>
+						</Frame>
+					</CustomItem>
+				  </CustomEntry>
+				</CustomEntries>
+		  </CustomControl>
+		</View>
+	</ViewDefinitions>
+</Configuration>
