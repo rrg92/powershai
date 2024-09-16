@@ -8,7 +8,8 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Startet eine HTTP-Anforderung. <!--!= @#Start-HttpRequest Synopsis !-->
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
+
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -121,6 +122,5 @@ Accept wildcard characters:
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Automatisch übersetzt mit PowershAI und KI_
 <!--PowershaiAiDocBlockEnd-->
