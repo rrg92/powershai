@@ -115,23 +115,24 @@
 #>
 [CmdletBinding(SupportsShouldProcess,ConfirmImpact = 'High')]
 param(
-	 #Name of language. One of subdir docs/<name> 
-		$SourceLang = $null
-		
-	,#Target lang to translate. Valid are on of subdir docs/<name>
+	#Target lang to translate. Valid are on of subdir docs/<name>
 		$TargetLang = $null
+		
+	,#Name of language. One of subdir docs/<name> 
+		$SourceLang = 'pt-BR'
+		
 	
 	,#force keep current provider. By efault, script try changes to -Provider 
 		[switch]$KeepProvider
 		
 	,#provider to use 
-		$Provider = "openai"
+		$Provider = "google"
 		
 	,#Force recreate docs that dont have changed!
 		[switch]$Force
 		
 	,#Max tokens returned. Target model must support 
-		$MaxTokens = 8192
+		$MaxTokens = 32000
 	
 	,#Filter files
 		$FileFilter = $null
@@ -218,6 +219,12 @@ function SaveTranslationMap {
 }
 
 
+$StartReadme = Get-Item ./README.md;
+
+if($SourceLang -eq 'pt-BR'){
+	$SourceFiles += $StartReadme;
+}
+
 
 foreach($SrcFile in $SourceFiles){
 	
@@ -229,11 +236,21 @@ foreach($SrcFile in $SourceFiles){
 	$DebugData.files += $SrcFileInfo;
 	
 	
-	$SrcRelPath = $SrcFile.FullName.replace($SourcePath,'') -replace '^.',''
-	$FileId	= $SrcRelPath.replace('\','/');
+	if($SrcFile -eq $StartReadme){
+		$SrcRelPath 				= 'START-README.md'
+		$SrcFileInfo.IsStartReadme 	= $true;
+	} else {
+		$SrcRelPath = $SrcFile.FullName.replace($SourcePath,'')
+		
+	}
 	
-	$SrcFileInfo.RelPath = $SrcRelPath
-	$SrcFileInfo.Fileid = $FileId;
+	if($SrcRelPath[0] -in '\','/'){
+		$SrcRelPath = $SrcRelPath -replace '^.',''
+	}
+	
+	$FileId	 = $SrcRelPath.replace('\','/');
+	$SrcFileInfo.RelPath 	= $SrcRelPath
+	$SrcFileInfo.Fileid 	= $FileId;
 	
 
 	if($FileFilter -and $FileId -NotLike $FileFilter -and $SrcRelPath -NotLike $FileFilter ){
