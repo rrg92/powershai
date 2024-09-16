@@ -16,23 +16,23 @@
 * [עברית](/docs/he-IL/START-README.md)
 * [italiano](/docs/it-IT/START-README.md)
 
-PowershAI (PowerShell + AI) هو وحدة نمطية تُدمج خدمات الذكاء الاصطناعي مباشرةً في PowerShell.  
+PowershAI (PowerShell + AI) هو وحدة نمطية تقوم بدمج خدمات الذكاء الاصطناعي مباشرةً في PowerShell.  
 يمكنك استدعاء الأوامر في كل من البرامج النصية وسطر الأوامر.  
 
-تتوفر العديد من الأوامر التي تسمح لك بإجراء محادثات مع LLMs واستدعاء مساحات Hugging Face و Gradio ، إلخ.  
-يمكنك الدردشة مع GPT-4o-mini و Gemini Flash و Llama 3.1 ، إلخ ، باستخدام رموزك الخاصة من هذه الخدمة.  
-أيًّا كان، فأنت لا تدفع أي مبلغ لاستخدام PowershAI ، بالإضافة إلى التكاليف التي ستكون عليك دفعها عادةً عند استخدام هذه الخدمات.  
+هناك العديد من الأوامر التي تسمح لك بإجراء محادثات مع LLMs ، واستدعاء مساحات من Hugging Face و Gradio ، إلخ.  
+يمكنك الدردشة مع GPT-4o-mini و gemini flash و llama 3.1 ، إلخ ، باستخدام رموزك الخاصة من هذه الخدمة.  
+بمعنى آخر ، لا تدفع أي شيء لاستخدام PowershAI ، بالإضافة إلى التكاليف التي ستكون لديك عادةً عند استخدام هذه الخدمات.  
 
-هذه الوحدة النمطية مثالية لدمج أوامر PowerShell مع LLMs المفضلة لديك، واختبار المكالمات، وpocs ، إلخ.  
-إنها مثالية لأولئك الذين اعتادوا على استخدام PowerShell ويريدون دمج AI في برامجهم النصية بطريقة أبسط وأسهل!
+هذه الوحدة النمطية مثالية لدمج أوامر PowerShell مع LLMs المفضلة لديك ، واختبار المكالمات ، و PoCs ، إلخ.  
+إنه مثالي لأولئك الذين اعتادوا بالفعل على PowerShell ويريدون إحضار الذكاء الاصطناعي إلى نصوصهم بطريقة أبسط وأسهل!
 
-تُظهر الأمثلة التالية كيفية استخدام Powershai في حالات شائعة:
+تُظهر الأمثلة التالية كيفية استخدام Powershai في مواقف شائعة:
 
 ## تحليل سجلات Windows 
 ```powershell 
 import-module powershai 
 
-Set-OpenaiToken # configure a token for OpenAI (only need to do this once)
+Set-OpenaiToken # configure a token for OpenAI (only need to do this 1x)
 Set-AiProvider openai 
 
  Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Algum evento importante?"
@@ -42,7 +42,7 @@ Set-AiProvider openai
 ```powershell 
 import-module powershai 
 
-Set-GoogleApiKey # configure a token for Google Gemini (only need to do this once)
+Set-GoogleApiKey # configure a token for Google Gemini (only need to do this 1x)
 Set-AiProvider google
 
 Get-Service | ia "Faça um resumo de quais serviços não são nativos do Windows e podem representar um risco"
@@ -52,26 +52,26 @@ Get-Service | ia "Faça um resumo de quais serviços não são nativos do Window
 ```powershell 
 import-module powershai 
 
-Set-MaritalkToken # configure a token for Maritaca.AI (brazilian LLM)
+Set-MaritalkToken # configure a token for Maritaca.AI (Brazilian LLM)
 Set-AiProvider maritalk
 
 git log --oneline | ia "Faça um resumo desses commits feitos"
 ```
 
 
-الأمثلة المذكورة أعلاه هي مجرد عرض صغير لمدى سهولة البدء في استخدام AI في Powershell الخاص بك ودمجه مع أي أمر عمليًا!
-[اكتشف المزيد في الوثائق](docs/pt-BR)
+الأمثلة المذكورة أعلاه هي مجرد عرض صغير لمدى سهولة بدء استخدام الذكاء الاصطناعي في Powershell الخاص بك ودمجه مع أي أمر تقريبًا!
+[Explore more in the complete documentation](/docs/ar-SA)
 
 ## التثبيت
 
-توجد جميع الوظائف في دليل `powershai` ، وهو وحدة نمطية PowerShell.  
-أبسط خيار للتثبيت هو باستخدام الأمر `Install-Module`:
+كل وظائف موجودة في الدليل `powershai` ، وهي وحدة نمطية PowerShell.  
+أبسط طريقة للتثبيت هي استخدام الأمر `Install-Module`:
 
 ```powershell
 Install-Module -Name powershai -Scope CurrentUser
 ```
 
-بعد التثبيت، ما عليك سوى استيراده في جلستك:
+بعد التثبيت ، ما عليك سوى استيراده في جلستك:
 
 ```powershell
 import-module powershai
@@ -80,38 +80,38 @@ import-module powershai
 Get-Command -mo powershai
 ```
 
-يمكنك أيضًا نسخ هذا المشروع مباشرةً واستيراد دليل powershai:
+يمكنك أيضًا نسخ هذا المشروع مباشرةً واستيراد الدليل powershai:
 
 ```powershell
 cd CAMINHO
 
-# Clone
+# Clona
 git clone ...
 
-#Import from the specific path!
+#Importar a partir do caminho específico!
 Import-Module .\powershai
 ```
 
-## استكشاف واساهم
+## استكشاف ومساهمة
 
-لا يزال هناك الكثير مما يجب توثيقه وتطويره في PowershAI!  
-مع تقدمي في إدخال التحسينات، أترك تعليقات في الكود لمساعدة أولئك الذين يرغبون في معرفة كيفية القيام بذلك!  
-لا تتردد في استكشاف والمساهمة باقتراحات لتحسينات.
+لا يزال هناك الكثير لتوثيقه وتطويره في PowershAI!  
+مع إجراء التحسينات ، أترك تعليقات في الكود لمساعدة أولئك الذين يرغبون في معرفة كيف فعلت ذلك!  
+لا تتردد في استكشاف والمساهمة باقتراحات للتحسينات.
 
-## مشاريع أخرى باستخدام PowerShell
+## مشاريع أخرى مع PowerShell
 
-فيما يلي بعض المشاريع المثيرة للاهتمام الأخرى التي تُدمج PowerShell مع AI:
+فيما يلي بعض المشاريع الأخرى المثيرة للاهتمام التي تقوم بدمج PowerShell مع الذكاء الاصطناعي:
 
 - [PSAI](https://github.com/dfinke/PSAI)
 - [PSOpenAI](https://github.com/mkht/PSOpenAI)
 - [dbatools.ai](https://github.com/potatoqualitee/dbatools.ai)
 
-استكشف وتعلم واساهم!
+استكشف وتعلم وشارك!
 
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_أرجو توضيح طلبك. ما الذي تريدني أن أترجمه؟ 
+_ترجم بشكل آلي باستخدام PowershAI و AI 
 _
 <!--PowershaiAiDocBlockEnd-->

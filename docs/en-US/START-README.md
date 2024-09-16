@@ -16,55 +16,54 @@
 * [עברית](/docs/he-IL/START-README.md)
 * [italiano](/docs/it-IT/START-README.md)
 
-PowershAI (PowerShell + AI) is a module that integrates Artificial Intelligence services directly into PowerShell.  
-You can invoke the commands in both scripts and the command line.  
+PowershAI (PowerShell + AI) is a module that integrates Artificial Intelligence services directly into PowerShell.
+You can invoke commands both in scripts and on the command line.
 
-There are several commands that allow conversations with LLMs, invoke Hugging Face spaces, Gradio, etc.  
-You can chat with GPT-4o-mini, gemini flash, llama 3.1, etc, using your own tokens from these services.  
-That is, you don't pay anything to use PowershAI, besides the costs you would normally have when using these services.  
+There are several commands that allow conversations with LLMs, invoke spaces from Hugging Face, Gradio, etc.
+You can chat with GPT-4o-mini, gemini flash, llama 3.1, etc., using your own tokens from these services.
+That is, you don't pay anything to use PowershAI, in addition to the costs you would normally have when using these services.
 
-This module is ideal for integrating PowerShell commands with your favorite LLMs, testing calls, POCs, etc.  
-It's ideal for those who are already familiar with PowerShell and want to bring AI to their scripts in a simpler and easier way!
+This module is ideal for integrating powershell commands with your favorite LLMs, testing calls, POCs, etc.
+It is ideal for those who are already familiar with PowerShell and want to bring AI to their scripts in a simpler and easier way!
 
-The following examples show how you can use Powershai in common situations:
+The following examples show how you can use PowershAI in common situations:
 
-## Analyzing Windows logs 
-```powershell 
-import-module powershai 
+## Analyzing Windows Logs
+```powershell
+import-module powershai
 
-Set-OpenaiToken # configure a token for OpenAI (only need to do this once)
-Set-AiProvider openai 
+Set-OpenaiToken # sets a token for OpenAI (you only need to do this once)
+Set-AiProvider openai
 
- Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Is there any important event?"
+Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Is there any important event?"
 ```
 
-## Service Description 
-```powershell 
-import-module powershai 
+## Service Description
+```powershell
+import-module powershai
 
-Set-GoogleApiKey # configure a token for Google Gemini (only need to do this once)
+Set-GoogleApiKey # sets a token for Google Gemini (you only need to do this once)
 Set-AiProvider google
 
 Get-Service | ia "Summarize which services are not native to Windows and may pose a risk"
 ```
 
-## Explaining git commits 
-```powershell 
-import-module powershai 
+## Explaining git commits
+```powershell
+import-module powershai
 
-Set-MaritalkToken # configure a token for Maritaca.AI (Brazilian LLM)
+Set-MaritalkToken # sets a token for Maritaca.AI (Brazilian LLM)
 Set-AiProvider maritalk
 
 git log --oneline | ia "Summarize these commits made"
 ```
 
-
-The above examples are just a small demonstration of how easy it is to start using AI in your PowerShell and integrate with virtually any command!
-[Explore more in the documentation](docs/pt-BR)
+The examples above are just a small demonstration of how easy it is to start using AI in your Powershell and integrate with virtually any command!
+[Explore more in the full documentation](/docs/en-US)
 
 ## Installation
 
-All functionality is in the `powershai` directory, which is a PowerShell module.  
+All functionality is in the `powershai` directory, which is a PowerShell module.
 The simplest installation option is with the `Install-Module` command:
 
 ```powershell
@@ -76,7 +75,7 @@ After installing, just import it into your session:
 ```powershell
 import-module powershai
 
-# See the available commands
+# See available commands
 Get-Command -mo powershai
 ```
 
@@ -94,8 +93,8 @@ Import-Module .\powershai
 
 ## Explore and Contribute
 
-There is still much to document and evolve in PowershAI!  
-As I make improvements, I leave comments in the code to help those who want to learn how I did it!  
+There is still a lot to document and evolve in PowershAI!
+As I make improvements, I leave comments in the code to help those who want to learn how I did it!
 Feel free to explore and contribute with suggestions for improvements.
 
 ## Other Projects with PowerShell
@@ -112,6 +111,5 @@ Explore, learn and contribute!
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI. 
-_
+_Translated automatically using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

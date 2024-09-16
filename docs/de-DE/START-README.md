@@ -19,36 +19,36 @@
 PowershAI (PowerShell + AI) ist ein Modul, das KI-Dienste direkt in PowerShell integriert.  
 Sie können die Befehle sowohl in Skripten als auch in der Befehlszeile aufrufen.  
 
-Es gibt verschiedene Befehle, die Gespräche mit LLMs ermöglichen, Hugging Face-Spaces, Gradio usw. aufrufen.  
-Sie können mit GPT-4o-mini, gemini flash, llama 3.1 usw. sprechen, indem Sie Ihre eigenen Token dieser Dienste verwenden.  
-Das heißt, Sie zahlen nichts für die Verwendung von PowershAI, außer den Kosten, die Sie normalerweise für die Verwendung dieser Dienste anfallen würden.  
+Es gibt verschiedene Befehle, mit denen Sie mit LLMs konvertieren, Hugging Face Spaces, Gradio usw. aufrufen können.  
+Sie können mit GPT-4o-mini, gemini flash, llama 3.1 usw. mithilfe Ihrer eigenen Token dieser Dienste chatten.  
+Das heißt, Sie zahlen nichts für die Nutzung von PowershAI, außer den Kosten, die Sie normalerweise bei der Nutzung dieser Dienste haben.  
 
-Dieses Modul ist ideal, um PowerShell-Befehle in Ihre Lieblings-LLMs zu integrieren, Aufrufe, POCs usw. zu testen.  
+Dieses Modul ist ideal für die Integration von Powershell-Befehlen in Ihre bevorzugten LLMs, zum Testen von Aufrufen, PoCs usw.  
 Es ist ideal für alle, die mit PowerShell vertraut sind und KI auf einfachere und einfachere Weise in ihre Skripte einbringen möchten!
 
 Die folgenden Beispiele zeigen, wie Sie Powershai in gängigen Situationen verwenden können:
 
-## Analysieren von Windows-Protokollen 
+## Analyse von Windows-Protokollen 
 ```powershell 
 import-module powershai 
 
-Set-OpenaiToken # konfiguriert ein Token für OpenAI (muss nur 1x durchgeführt werden)
+Set-OpenaiToken # konfiguriert ein Token für OpenAI (nur 1x erforderlich)
 Set-AiProvider openai 
 
- Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Ist etwas Wichtiges passiert?"
+ Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Gibt es ein wichtiges Ereignis?"
 ```
 
 ## Beschreibung von Diensten 
 ```powershell 
 import-module powershai 
 
-Set-GoogleApiKey # konfiguriert ein Token für Google Gemini (muss nur 1x durchgeführt werden)
+Set-GoogleApiKey # konfiguriert ein Token für Google Gemini (nur 1x erforderlich)
 Set-AiProvider google
 
 Get-Service | ia "Fassen Sie zusammen, welche Dienste nicht nativ in Windows sind und ein Risiko darstellen könnten"
 ```
 
-## Erläuterung von Git-Commits 
+## Erklärung von Git-Commits 
 ```powershell 
 import-module powershai 
 
@@ -59,19 +59,19 @@ git log --oneline | ia "Fassen Sie diese Commits zusammen"
 ```
 
 
-Die obigen Beispiele sind nur ein kleiner Vorgeschmack darauf, wie einfach es ist, mit der Verwendung von KI in Ihrem Powershell zu beginnen und es in nahezu jeden Befehl zu integrieren!
-[Weitere Informationen finden Sie in der Dokumentation](docs/pt-BR)
+Die obigen Beispiele sind nur eine kleine Demonstration, wie einfach es ist, mit der Verwendung von KI in Ihrem Powershell zu beginnen und es in fast jeden Befehl zu integrieren!
+[Weitere Informationen finden Sie in der vollständigen Dokumentation](/docs/de-DE)
 
 ## Installation
 
 Die gesamte Funktionalität befindet sich im Verzeichnis `powershai`, das ein PowerShell-Modul ist.  
-Die einfachste Installationsoption ist der Befehl `Install-Module`:
+Die einfachste Installationsmöglichkeit ist der Befehl `Install-Module`:
 
 ```powershell
 Install-Module -Name powershai -Scope CurrentUser
 ```
 
-Nach der Installation müssen Sie es nur in Ihrer Sitzung importieren:
+Nach der Installation müssen Sie es nur noch in Ihre Sitzung importieren:
 
 ```powershell
 import-module powershai
@@ -88,25 +88,25 @@ cd PATH
 # Klonen
 git clone ...
 
-# Importieren Sie aus dem spezifischen Pfad!
+# Importieren Sie vom spezifischen Pfad!
 Import-Module .\powershai
 ```
 
-## Entdecken und beitragen
+## Erkunden und Mitwirken
 
-Es gibt noch viel zu dokumentieren und weiterzuentwickeln in PowershAI!  
+Es gibt noch viel zu dokumentieren und weiterzuentwickeln im PowershAI!  
 Während ich Verbesserungen vornehme, hinterlasse ich Kommentare im Code, um denen zu helfen, die lernen wollen, wie ich es gemacht habe!  
-Gerne können Sie das Projekt erkunden und Verbesserungsvorschläge einbringen.
+Zögern Sie nicht, zu erkunden und mit Verbesserungsvorschlägen beizutragen.
 
 ## Weitere Projekte mit PowerShell
 
-Hier sind einige andere interessante Projekte, die PowerShell in KI integrieren:
+Hier sind einige weitere interessante Projekte, die PowerShell mit KI integrieren:
 
 - [PSAI](https://github.com/dfinke/PSAI)
 - [PSOpenAI](https://github.com/mkht/PSOpenAI)
 - [dbatools.ai](https://github.com/potatoqualitee/dbatools.ai)
 
-Entdecken, lernen und beitragen!
+Erkunden, lernen und mitwirken!
 
 
 

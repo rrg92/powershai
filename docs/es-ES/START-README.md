@@ -19,20 +19,20 @@
 PowershAI (PowerShell + AI) es un módulo que integra servicios de Inteligencia Artificial directamente en PowerShell.  
 Puedes invocar los comandos tanto en scripts como en la línea de comandos.  
 
-Hay varios comandos que te permiten conversar con LLMs, invocar espacios de Hugging Face, Gradio, etc.  
-Puedes conversar con GPT-4o-mini, gemini flash, llama 3.1, etc, usando tus propios tokens de estos servicios.  
-Esto es, no pagas nada por usar PowershAI, más allá de los costos que ya tendrías normalmente al usar estos servicios.  
+Existen varios comandos que permiten conversaciones con LLMs, invocar spaces de Hugging Face, Gradio, etc.  
+Puedes conversar con el GPT-4o-mini, gemini flash, llama 3.1, etc, usando tus propios tokens de estos servicios.  
+Esto es, no pagas nada para usar PowershAI, además de los costes que ya tendrías normalmente al usar estos servicios.  
 
-Este módulo es ideal para integrar comandos powershell con tus LLMs favoritos, probar llamadas, pocs, etc.  
-¡Es ideal para quienes ya están acostumbrados a PowerShell y quieren llevar la IA a sus scripts de una manera más simple y fácil!
+Este módulo es ideal para integrar comandos powershell con tus LLM favoritos, probar llamadas, pocs, etc.  
+¡Es ideal para quien ya está acostumbrado con PowerShell y quiere traer la IA a sus scripts de una manera más simple y fácil!
 
-Los siguientes ejemplos muestran cómo puedes usar PowershAI en situaciones comunes:
+Los siguientes ejemplos muestran cómo puedes usar Powershai en situaciones comunes:
 
 ## Analizando logs del Windows 
 ```powershell 
 import-module powershai 
 
-Set-OpenaiToken # configura un token para OpenAI (solo necesitas hacerlo 1x)
+Set-OpenaiToken # configura un token para OpenAI (solo necesitas hacer esto 1x)
 Set-AiProvider openai 
 
  Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Algún evento importante?"
@@ -42,7 +42,7 @@ Set-AiProvider openai
 ```powershell 
 import-module powershai 
 
-Set-GoogleApiKey # configura un token para Google Gemini (solo necesitas hacerlo 1x)
+Set-GoogleApiKey # configura un token para Google Gemini (solo necesitas hacer esto 1x)
 Set-AiProvider google
 
 Get-Service | ia "Haz un resumen de qué servicios no son nativos de Windows y pueden representar un riesgo"
@@ -59,8 +59,8 @@ git log --oneline | ia "Haz un resumen de estos commits hechos"
 ```
 
 
-¡Los ejemplos anteriores son solo una pequeña demostración de lo fácil que es comenzar a usar IA en tu Powershell e integrar con prácticamente cualquier comando!
-[Explora más en la documentación](docs/pt-BR)
+Los ejemplos anteriores son solo una pequeña demostración de cómo es fácil empezar a usar IA en tu Powershell e integrar con prácticamente cualquier comando!
+[Explora más en la documentación completa](/docs/es-ES)
 
 ## Instalación
 
@@ -76,7 +76,7 @@ Después de instalar, solo tienes que importarlo en tu sesión:
 ```powershell
 import-module powershai
 
-# Ver los comandos disponibles
+# Ve los comandos disponibles
 Get-Command -mo powershai
 ```
 
@@ -85,7 +85,7 @@ También puedes clonar este proyecto directamente e importar el directorio power
 ```powershell
 cd CAMINHO
 
-# Clonar
+# Clona
 git clone ...
 
 # ¡Importar desde la ruta específica!
@@ -95,8 +95,8 @@ Import-Module .\powershai
 ## Explora y Contribuye
 
 ¡Todavía hay mucho que documentar y evolucionar en PowershAI!  
-A medida que hago mejoras, dejo comentarios en el código para ayudar a aquellos que quieran aprender cómo lo hice!  
-Siéntete libre de explorar y contribuir con sugerencias de mejoras.
+A medida que hago mejoras, dejo comentarios en el código para ayudar a aquellos que quieren aprender cómo lo hice!  
+No dudes en explorar y contribuir con sugerencias de mejoras.
 
 ## Otros Proyectos con PowerShell
 
@@ -112,6 +112,6 @@ Aquí hay algunos otros proyectos interesantes que integran PowerShell con IA:
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowerShell e IA. 
+_Traducido automáticamente usando PowerShell y AI. 
 _
 <!--PowershaiAiDocBlockEnd-->

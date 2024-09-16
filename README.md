@@ -60,7 +60,7 @@ git log --oneline | ia "Faça um resumo desses commits feitos"
 
 
 Os exemplos acima são apenas uma pequena demonstração de como é fácil começar a usar IA no seu Powershell e integrar com praticamente qualquer comando!
-[Explore mais na documentação](docs/pt-BR)
+[Explore mais na documentação completa](/docs/pt-BR)
 
 ## Instalação
 

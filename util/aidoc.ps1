@@ -157,6 +157,11 @@ if(!$TargetLang){
 	throw "Must specifuy -TargetLang"
 }
 
+if($TargetLang -eq $SourceLang){
+	write-warning "Target and Source = $TargetLang. Ignoring";
+	return;
+}
+
 $SourcePath = Resolve-Path (JoinPath docs $SourceLang)
 $TargetPath = Resolve-Path (JoinPath docs $TargetLang)
 
@@ -444,6 +449,9 @@ foreach($SrcFile in $SourceFiles){
 	$SrcFileInfo.status = "Updating"
 	
 	try {
+		write-host "Fixing localized links"
+		$Translated = $Translated.replace("/docs/"+$SourceLang,"/docs/"+$TargetLang)
+		
 		write-host "	Updating target content..."
 		@(
 			$Translated
