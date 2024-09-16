@@ -1,117 +1,95 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Format-PowershaiContext
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Formats an object to be injected into the context of a message sent in a Powershai Chat
 
-## SYNTAX
-
-```
-Format-PowershaiContext [[-obj] <Object>] [[-params] <Object>] [[-func] <Object>] [[-ChatId] <Object>]
- [<CommonParameters>]
-```
-
-## DESCRIPTION
-Given that LLMs process only strings, the objects passed in the context need to be converted to a string format before being injected into the prompt.
-And, since there are various string representations of an object, Powershai allows the user to have full control over this.
+## DESCRIPTION <!--!= @#Desc !-->
+Given that LLMs process only strings, objects passed in the context need to be converted to a string format, before being injected into the prompt.
+And, as there are several string representations of an object, Powershai allows the user to have complete control over this.  
 
 Whenever an object needs to be injected into the prompt, when invoked with Send-PowershaAIChat, via pipeline or Context parameter, this cmdlet will be invoked.
-This cmdlet is responsible for transforming this object into a string, regardless of the object, be it an array, hashtable, custom, etc.
+This cmdlet is responsible for transforming this object into a string, regardless of the object, be it array, hashtable, custom, etc.  
 
-It does this by invoking the configured formatter function using Set-PowershaiChatContextFormatter.
-In general, you do not need to invoke this function directly, but you may want to invoke it whenever you want to do some testing!
+It does this by invoking the formatter function configured using Set-PowershaiChatContextFormatter
+Overall, you don't need to invoke this function directly, but you may want to invoke it when you want to do some testing!
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Format-PowershaiContext [[-obj] <Object>] [[-params] <Object>] [[-func] <Object>] [[-ChatId] <Object>] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -obj
 Any object to be injected
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -params
 Parameter to be passed to the formatter function
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -func
-Override the function to be invoked.
-If not specified, uses the default of the chat.
+Override the function to be invoked. If not specified, use the chat's default.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ChatId
-Chat in which to operate
+Chat to operate on
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

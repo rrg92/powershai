@@ -1,47 +1,27 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Reset-OpenaiBaseUrl
 
-## SYNOPSIS
-{{ Preencha o resumo }}
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
+Reset the OpenAI base URL to default.
+
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Reset-OpenaiBaseUrl
+Reset-OpenaiBaseUrl [<CommonParameters>]
 ```
 
-## DESCRIPTION
-{{ Preencha a descrição }}
+## PARAMETERS <!--!= @#Params !-->
 
-## EXAMPLES
 
-### Example 1
-```powershell
-PS C:\> {{ Adicione o código de exemplo aqui }}
-```
-
-{{ Adicione a descrição do exemplo aqui }}
-
-## PARAMETERS
-
-## INPUTS
-
-### None
-
-## OUTPUTS
-
-### System.Object
-## NOTES
-
-## RELATED LINKS
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

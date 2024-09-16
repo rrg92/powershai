@@ -1,13 +1,15 @@
-﻿# Provider OLLAMA  
+﻿# OLLAMA Provider  
 
 # Initial configurations 
 
 * Use Set-OllamaUrl URL  
-Use to optionally pass an alternative URL.
+Use to Optionally you can pass an alternative URL.
 
-* Configure a default model with `Set-AiDefaultMode Name`
+* Set a default model with `Set-AiDefaultMode Name`
+
+
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

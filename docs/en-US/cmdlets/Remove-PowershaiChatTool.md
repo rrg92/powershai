@@ -1,111 +1,88 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Remove-PowershaiChatTool
 
-## SYNOPSIS
-Removes a tool permanently!
+## SYNOPSIS <!--!= @#Synop !-->
+Permanently removes a tool!
 
-## SYNTAX
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
 Remove-PowershaiChatTool [[-tool] <Object>] [-ForceCommand] [[-ChatId] <Object>] [-global] [<CommonParameters>]
 ```
 
-## DESCRIPTION
-{{ Fill in the Description }}
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
-```
-
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -tool
 Name of the command, script, functions that was previously added as a tool.
-If it is a .ps1 file, it is treated as a script unless -ForceCommand is used.
-You can use the output of Get-PowershaiChatTool via pipe to this command, and it will recognize
+If it is a .ps1 file, it is treated as a script, unless -Force command is used.
+You can use the output of Get-PowershaiChatTool via pipe for this command, which it will recognize
 When sending the returned object, all other parameters are ignored.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: true (ByValue)
+Accept wildcard characters: false
 ```
 
 ### -ForceCommand
-Forces treating the tool as a command when it is a string
+Force to treat tool as a command, when it is a string
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ChatId
-Chat from which to remove
+Chat to remove from
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -global
-Remove from the global list if the tool was previously added as global
+Remove from global list, if the tool was previously added as global
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

@@ -1,150 +1,133 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Invoke-PowerhsaiConsoleDraw
 
-## SYNOPSIS
-Creates a virtual text box and writes characters within the limits of that box
+## SYNOPSIS <!--!= @#Synop !-->
+Creates a virtual text frame, and writes characters inside the frame's boundaries.
 
-## SYNTAX
+## DESCRIPTION <!--!= @#Desc !-->
+Creates a drawing frame on the console, which is updated in only a specific region!
+You can send multiple lines of text and the function will take care of keeping the drawing in the same frame, giving the impression that only one region is being updated.
+For the desired effect, this function must be called repeatedly, without other writes between invocations!
+
+This function should only be used in PowerShell interactive mode, running in a console window.
+It's useful for situations where you want to see the progress of a string result in exactly the same area, allowing for better comparison of variations.
+It's just a helper function.
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>]
- [[-PipeObj] <Object>] [-PassThru] [<CommonParameters>]
+Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] [-PassThru] [<CommonParameters>]
 ```
 
-## DESCRIPTION
-Creates a drawing box in the console, which is updated in only a specific area!
-You can send several lines of text and the function will take care of maintaining the drawing in the same box, giving the impression that only one area is being updated.
-For the desired effect, this function must be invoked repeatedly, without other writes between the invocations!
-
-This function should only be used in interactive mode of PowerShell, running in a console window.
-It is useful to use in situations where you want to see the progress of a string result exactly in the same area, allowing for better comparison of variations.
-It is just a helper function.
-
-## EXAMPLES
+## EXAMPLES <!--!= @#Ex !-->
 
 ### EXAMPLE 1
-```
+```powershell
 The following example writes 3 strings of text every 2 seconds.
 ```
 
-You will notice that the strings will be written exactly on the same line, replacing the previous one!
 
-"ISso",@("É","a test"),"of writing","with`nmultiple`nlines!!" | Invoke-PowerhsaiConsoleDraw -w 60x10 {  $_; start-sleep -s 1 };
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -Text
-Text to be written.
-It can be an array.
-If it exceeds the limits of W and H, it will be truncated.
-If it is a script block, it invokes the code passing the pipeline object!
+Text to be written. Can be an array. If it exceeds the limits of W and H, it will be truncated
+If it's a script bloc, it invokes the code passing the pipeline object!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -w
-Max number of characters in each line
+Max characters per line
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: 10
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 10
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -h
-Max number of lines
+Max lines
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: 10
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 10
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -BlankChar
-Character used as empty space
+Character used as blank space
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -PipeObj
 Pipeline object
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 5
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: true (ByValue)
+Accept wildcard characters: false
 ```
 
 ### -PassThru
-Passes the object through
+Passes the object
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

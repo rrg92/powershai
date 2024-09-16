@@ -1,47 +1,29 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-AiProviders
 
-## SYNOPSIS
-Returns the available providers
+## SYNOPSIS <!--!= @#Synop !-->
+Returns available providers.
 
-## SYNTAX
+## DESCRIPTION <!--!= @#Desc !-->
+This command lists the providers implementing the powershai.  
+For more about providers see the about_Powershai_Providers topic.
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiProviders
+Get-AiProviders [<CommonParameters>]
 ```
 
-## DESCRIPTION
-This command lists the providers implementing sno powershai.
- 
-To learn more about providers, refer to the topic about_Powershai_Providers.
+## PARAMETERS <!--!= @#Params !-->
 
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
-```
-
-{{ Add example description here }}
-
-## PARAMETERS
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

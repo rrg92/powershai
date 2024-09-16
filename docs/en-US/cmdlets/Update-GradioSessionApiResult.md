@@ -1,126 +1,105 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Update-GradioSessionApiResult
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Updates the return of a call generated as Invoke-GradioSessionApi
 
-## SYNTAX
-
-```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>]
- [-History] [<CommonParameters>]
-```
-
-## DESCRIPTION
+## DESCRIPTION <!--!= @#Desc !-->
 This cmdlet follows the same principle as its equivalents in Send-GradioApi and Update-GradioApiResult.
 However, it only works for events generated in a specific session.
-It returns the event itself so it can be used with other cmdlets that depend on the updated event!
+Returns the event itself so it can be used with other cmdlets that require the updated event!
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-Event Id, returned by Invoke-GradioSessionApi or the object returned itself.
+Id of the event, returned by Invoke-GradioSessionApi or the object itself returned.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: true (ByValue)
+Accept wildcard characters: false
 ```
 
 ### -NoOutput
-Do not throw the result back to the output!
+Do not output the result to the output!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxHeartBeats
 Max consecutive heartbeats.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -session
 Session Id
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -History
-Adds the events to the event history of the GradioApiEvent object specified in -Id
+Adds the events to the history of events of the GradioApiEvent object informed in -Id
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

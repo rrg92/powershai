@@ -1,157 +1,125 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-HttpResponse
 
-## SYNOPSIS
-{{ Preencha o Resumo }}
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
+Gets the response for an HTTP request.
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>]
- [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] 
+[<CommonParameters>]
 ```
 
-## DESCRIPTION
-{{ Preencha a Descrição }}
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Adicione o código de exemplo aqui }}
-```
-
-{{ Adicione a descrição do exemplo aqui }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -ForceEnd
-{{ Preencha a Descrição do ForceEnd }}
 
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+```yml
+Parameter Set: (All)
+Type: switch
+Aliases: 
+Accepted Values: 
+Required: false
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -HttpRequest
-{{ Preencha a Descrição do HttpRequest }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 0
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: true (ByValue)
+Accept wildcard characters: 
 ```
 
 ### -ReadCount
-{{ Preencha a Descrição do ReadCount }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -ReadMode
-{{ Preencha a Descrição do ReadMode }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -StreamsOnly
-{{ Preencha a Descrição do StreamsOnly }}
 
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+```yml
+Parameter Set: (All)
+Type: switch
+Aliases: 
+Accepted Values: 
+Required: false
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -Timeout
-{{ Preencha a Descrição do Timeout }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -WaitSleep
-{{ Preencha a Descrição do WaitSleep }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-### System.Object
-
-## OUTPUTS
-
-### System.Object
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

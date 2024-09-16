@@ -1,119 +1,91 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Invoke-AESEncryption
 
-## SYNOPSIS
-{{ Fill in the Synopsis }}
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
+Invoke-AESEncryption -Mode <string> -Key <string> -Text <string> [<CommonParameters>]
 
-### CryptText
-```
-Invoke-AESEncryption -Mode <String> -Key <String> -Text <String> [<CommonParameters>]
-```
+Invoke-AESEncryption -Mode <string> -Key <string> -Path <string> [<CommonParameters>]
+
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ### CryptFile
 ```
-Invoke-AESEncryption -Mode <String> -Key <String> -Path <String> [<CommonParameters>]
+Invoke-AESEncryption -Mode {Encrypt | Decrypt} -Key <string> -Path <string> [<CommonParameters>]
 ```
 
-## DESCRIPTION
-{{ Fill in the Description }}
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### CryptText
+```
+Invoke-AESEncryption -Mode {Encrypt | Decrypt} -Key <string> -Text <string> [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -Key
-{{ Fill Key Description }}
 
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: True
+```yml
+Parameter Set: (All)
+Type: string
+Aliases: 
+Accepted Values: 
+Required: true
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -Mode
-{{ Fill Mode Description }}
 
-```yaml
-Type: String
-Parameter Sets: (All)
-Aliases:
-Accepted values: Encrypt, Decrypt
-
-Required: True
+```yml
+Parameter Set: (All)
+Type: string
+Aliases: 
+Accepted Values: 
+Required: true
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -Path
-{{ Fill Path Description }}
 
-```yaml
-Type: String
-Parameter Sets: CryptFile
-Aliases:
-
-Required: True
+```yml
+Parameter Set: CryptFile
+Type: string
+Aliases: 
+Accepted Values: 
+Required: true
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
 ### -Text
-{{ Fill Text Description }}
 
-```yaml
-Type: String
-Parameter Sets: CryptText
-Aliases:
-
-Required: True
+```yml
+Parameter Set: CryptText
+Type: string
+Aliases: 
+Accepted Values: 
+Required: true
 Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-### None
-
-## OUTPUTS
-
-### System.String
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

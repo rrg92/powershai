@@ -1,65 +1,41 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Set-PowershaiActiveChat
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Changes the active chat
 
-## SYNTAX
+## DESCRIPTION <!--!= @#Desc !-->
+The active chat is the default chat where Powershai Chat commands are sent.  
+If there is only 1 chat, it is considered active, by default.
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
 Set-PowershaiActiveChat [[-ChatId] <Object>] [<CommonParameters>]
 ```
 
-## DESCRIPTION
-The active chat is the default chat to which Powershai Chat commands are sent.
-
-If there is only 1 chat, it is considered active by default.
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
-```
-
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -ChatId
-{{ Fill ChatId Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
-
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

@@ -1,108 +1,89 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Set-PowershaiChatParameter
 
-## SYNOPSIS
-Updates the value of a parameter in the Powershai Chat.
+## SYNOPSIS <!--!= @#Synop !-->
+Updates the value of a Powershai Chat chat parameter.
 
-## SYNTAX
-
-```
-Set-PowershaiChatParameter [[-parameter] <Object>] [[-value] <Object>] [[-ChatId] <Object>] [-Force]
-```
-
-## DESCRIPTION
-Updates the value of a parameter in a Powershai Chat.
- 
+## DESCRIPTION <!--!= @#Desc !-->
+Updates the value of a parameter for a Powershai Chat.  
 If the parameter does not exist, an error is returned.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Set-PowershaiChatParameter [[-parameter] <Object>] [[-value] <Object>] [[-ChatId] <Object>] [-Force] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -parameter
-Name of the parameter
+Parameter name
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -value
-Value of the parameter
+Parameter value
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ChatId
-Chat that you want to update.
-By default, updates the active chat
+Chat to update. By default updates the active chat
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Force
 Force update, even if the parameter does not exist in the parameter list
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

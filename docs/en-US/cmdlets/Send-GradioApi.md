@@ -1,225 +1,186 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Send-GradioApi
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
 
-```
-Send-GradioApi [[-AppUrl] <Object>] [[-ApiName] <Object>] [[-Params] <Object>] [[-SessionHash] <Object>]
- [[-EventId] <Object>] [[-token] <Object>] [<CommonParameters>]
-```
+## DESCRIPTION <!--!= @#Desc !-->
+Sends data to a Gradio and returns an object representing the event!
+Pass this object to other cmdlets to get the results.
 
-## DESCRIPTION
-Sends data to a Gradio and returns an object that represents the event!
-Pass this object to the other cmdlets to obtain the results.
-
-HOW THE GRADIO API WORKS 
+HOW THE GRADIO API WORKS
 
 	Based on: https://www.gradio.app/guides/querying-gradio-apps-with-curl
 	
-	To better understand how to use this cmdlet, it is important to understand how the Gradio API works.
- 
-	When we invoke an API endpoint, it does not return the data immediately.
- 
-	This is due to the simple fact that processing is extensive, due to the nature (AI and Machine Learning).
- 
+	To better understand how to use this cmdlet, it is important to understand how the Gradio API works.  
+	When we invoke an API endpoint, it does not return the data immediately.  
+	This is due to the simple fact that processing is extensive, due to the nature (AI and Machine Learning).  
 	
-	Then, instead of returning the result, or waiting indefinitely, Gradio returns an "Event Id".
- 
-	With this event, we can periodically obtain the generated results.
- 
-	Gradio will generate event messages with the data that has been generated.
-We need to pass the generated EventId to obtain the new generated pieces.
+	So, instead of returning the result, or waiting indefinitely, Gradio returns an "Event Id".  
+	With this event, we can periodically get the generated results.  
+	Gradio will generate event messages with the data that was generated. We need to pass the generated EventId to get the new chunks generated.
 	These events are sent via Server Side Events (SSE), and can be one of these:
-		- heartbeat 
-		Every 15 seconds, Gradio will send this event to keep the connection alive.
- 
-		That’s why, when using the cmdlet Update-GradioApiResult, it may take a while to return.
+		- hearbeat 
+		Every 15 seconds, Gradio will send this event to keep the connection alive.  
+		This is why, when using the Update-GradioApiResult cmdlet, it may take a while to return.
 		
 		- complete 
-		It is the last message sent by Gradio when the data has been generated successfully!
+		It is the last message sent by Gradio when the data has been successfully generated!
 		
 		- error 
-		Sent when there was an error in processing.
- 
+		Sent when there was an error during processing.  
 		
 		- generating
-		It is generated when the API already has available data, but more may still come.
+		It is generated when the API already has data available, but more may still come.
 	
-	Here in PowershAI, we also separate this into 3 parts: 
-		- This cmdlet (Send-GradioApi) makes the initial request to Gradio and returns an object that represents the event (we call it a GradioApiEvent object)
-		- This resulting object, of type GradioApiEvent, contains everything necessary to query the event and it also stores the data and errors obtained.
-		- Finally, we have the cmdlet Update-GradioApiResult, where you must pass the generated event, and it will query the Gradio API and obtain the new data.
- 
-			Check the help of this cmdlet for more information on how to control this mechanism of obtaining the data.
+	Here in PowershAI, we have also separated this into 3 parts: 
+		- This cmdlet (Send-GradioApi) makes the initial request to Gradio and returns an object that represents the event (let's call it a GradioApiEvent object)
+		- This resulting object, of type GradioApiEvent, contains everything you need to query the event and it also stores the data and errors obtained.
+		- Finally, we have the Update-GradioApiResult cmdlet, where you must pass the generated event, and it will query the Gradio API and get the new data.  
+			Check the help for this cmdlet for more information on how to control this data fetching mechanism.
 			
 	
-	So, in a normal flow, you should do the following: 
+	So, in a normal workflow, you should do the following: 
 	
 		# Invoke the Gradio endpoint!
-		$MyEvent = Send-GradioApi ... 
+		$MyEvent = SEnd-GradioApi ... 
 	
-		# Obtain results until it has finished!
-		# Check the help of this cmdlet to learn more!
+		# Get results until they are finished!
+		# Check the help for this cmdlet to learn more!
 		$MyEvent | Update-GradioApiResult
 		
 GradioApiEvent Object
 
-	The GradioApiEvent object resulting from this cmdlet contains everything necessary for PowershAI to control the mechanism and obtain the data.
- 
-	It is important that you know its structure so you know how to collect the data generated by the API.
+	The resulting GradioApiEvent object from this cmdlet contains everything PowershAI needs to control the mechanism and get the data.  
+	It is important that you know its structure so that you know how to collect the data generated by the API.
 	Properties:
 	
 		- Status  
 		Indicates the status of the event. 
-		When this status is "complete", it means that the API has finished processing and all possible data has been generated.
- 
-		While it is different from this, you must invoke Update-GradioApiResult so that it checks the status and updates the information. 
+		When this status is "complete", it means that the API has finished processing and all possible data has already been generated.  
+		As long as it is different from this, you should invoke Update-GradioApiResult so that it checks the status and updates the information. 
 		
 		- QueryUrl  
-		Internal value that contains the exact endpoint for querying the results
+		Internal value containing the exact endpoint for the query of the results
 		
 		- data  
-		An array containing all the response data generated.
-Each time you invoke Update-GradioApiResult, if there is data, it will add to this array.
- 
+		An array containing all the generated response data. Each time you invoke Update-GradioApiResult, if there is data, it will add to this array.  
 		
 		- events  
-		List of events that have been generated by the server. 
+		List of events that were generated by the server. 
 		
 		- error  
 		If there were errors in the response, this field will contain some object, string, etc., describing more details.
 		
 		- LastQueryStatus  
-		Indicates the status of the last query to the API.
- 
-		If "normal", indicates that the API was queried and returned until the end normally.
-		If "HeartBeatExpired", indicates that the query was interrupted due to the heartbeat timeout configured by the user in the cmdlet Update-GradioApiResult
+		Indicates the status of the last query to the API.  
+		If "normal", it indicates that the API was queried and returned to the end normally.
+		If "HeartBeatExpired", it indicates that the query was interrupted due to the hearbeat timeout configured by the user in the Update-GradioApiResult cmdlet
 		
 		- req 
 		Request data made!
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Send-GradioApi [[-AppUrl] <Object>] [[-ApiName] <Object>] [[-Params] <Object>] [[-SessionHash] <Object>] [[-EventId] <Object>] [[-token] <Object>] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -AppUrl
-{{ Fill AppUrl Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ApiName
-{{ Fill ApiName Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Params
-{{ Fill Params Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -SessionHash
-{{ Fill SessionHash Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -EventId
-If provided, does not call the API, but creates the object and uses this value as if it were the return
+If informed, it does not call the API, but creates the object and uses this value as if it were the return
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -token
-{{ Fill token Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

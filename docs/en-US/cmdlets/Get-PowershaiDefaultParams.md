@@ -1,54 +1,39 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-PowershaiDefaultParams
 
-## SYNOPSIS
-Gets a reference to a variable that defines the default parameters
+## SYNOPSIS <!--!= @#Synop !-->
+Gets a reference to the variable defining the default parameters
 
-## SYNTAX
-
-```
-Get-PowershaiDefaultParams
-```
-
-## DESCRIPTION
-In PowerShell, modules have their own variable scope.
-
-Therefore, trying to define this variable outside the correct scope will not affect the commands of the modules.
-
-This command allows the user to access the variable that controls the default parameter of the module's commands.
-
+## DESCRIPTION <!--!= @#Desc !-->
+In Powershell, modules have their own variable scope.  
+Therefore, trying to set this variable outside of the correct scope will not affect the module's commands.  
+This command allows the user to access the variable that controls the default parameters of the module's commands.  
 For the most part, this will be used for debugging, but eventually, a user may want to set default parameters.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
+
+```
+Get-PowershaiDefaultParams [<CommonParameters>]
+```
+
+## EXAMPLES <!--!= @#Ex !-->
 
 ### EXAMPLE 1
+```powershell
+The example below shows how to set the debug variable default of the Invoke-Http command.
 ```
-The example below shows how to set the default debug variable for the command Invoke-Http.
-```
 
-$HttpDebug = @{}
-$ModDefaults = Get-PowershaiDefaultParams
-$ModDefaults\['Invoke-Http:DebugVarName'\] = 'HttpDebug';
-Note that the parameter -DebugVarName is an existing parameter in the command Invoke-Http.
 
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

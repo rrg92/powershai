@@ -1,105 +1,83 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Set-PowershaiChatContextFormatter
 
-## SYNOPSIS
-Defines which function will be used to format the objects passed to the Send-PowershaiChat -Context parameter.
+## SYNOPSIS <!--!= @#Synop !-->
+Defines the function that will be used to format the objects passed to the Send-PowershaiChat -Context parameter.
 
-## SYNTAX
-
-```
-Set-PowershaiChatContextFormatter [[-ChatId] <Object>] [[-Func] <Object>] [[-Params] <Object>]
-```
-
-## DESCRIPTION
-When invoking Send-PowershaiChat in a pipe, or directly passing the -Context parameter, it will inject this object into the LLM prompt.
-
+## DESCRIPTION <!--!= @#Desc !-->
+When invoking Send-PowershaiChat in a pipe, or passing the -Context parameter directly, it will inject this object into the LLM prompt.
 Before injecting, it must convert this object to a string.
-
 This conversion is called "Context Formatter" here in Powershai.
+The Context Formatter is a function that will take each object passed and convert it to a string to be injected into the prompt.
+The function used should receive the object to be converted as the first parameter.
 
-The Context Formatter is a function that will take each object passed and convert it to a string to be injected into the prompt. The function used must accept the object to be converted as the first parameter.
-
-The other parameters are at your discretion. Their values can be specified using the -Params parameter of this function!
+The remaining parameters are at your discretion. Their values can be specified using the -Params parameter of this function!
 
 Powershai provides native context formatters.
+Use Get-Command ConvertTo-PowershaiContext* or Get-PowershaiContextFormatters to get the list!
 
-Use Get-Command ConvertTo-PowershaiContext* or Get-PowershaiContextFormatters to obtain the list!
+Since native context formatters are just PowerShell functions, you can use Get-Help Name to get more details.
 
-Since the native context formatters are just PowerShell functions, you can use the Get-Help Name command to get more details.
+## SYNTAX <!--!= @#Syntax !-->
 
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Set-PowershaiChatContextFormatter [[-ChatId] <Object>] [[-Func] <Object>] [[-Params] <Object>] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -ChatId
-{{ Fill ChatId Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Func
-Name of the PowerShell function
+PowerShell function name
 Use the Get-PowershaiContextFormatters command to see the list
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: Str
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: Str
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Params
-{{ Fill Params Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

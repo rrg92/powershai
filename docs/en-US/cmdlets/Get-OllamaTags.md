@@ -1,51 +1,26 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-OllamaTags
 
-## SYNOPSIS
-{{ Fill in the Synopsis }}
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
+Get-OllamaTags [<CommonParameters>]
+
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
 Get-OllamaTags [<CommonParameters>]
 ```
 
-## DESCRIPTION
-{{ Fill in the Description }}
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
-```
-
-{{ Add example description here }}
-
-## PARAMETERS
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-### None
-
-## OUTPUTS
-
-### System.Object
-## NOTES
-
-## RELATED LINKS
+## PARAMETERS <!--!= @#Params !-->
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

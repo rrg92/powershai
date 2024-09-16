@@ -1,125 +1,98 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # New-GradioSession
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Creates a new Gradio session.
 
-## SYNTAX
+## DESCRIPTION <!--!= @#Desc !-->
+A Session represents a connection to a Gradio app.  
+Think of a session as a browser tab open and connected to a particular Gradio app.  
+Uploaded files, calls made, logins are all recorded in this session.
 
-```
-New-GradioSession [[-AppUrl] <Object>] [[-Name] <Object>] [[-DownloadPath] <Object>] [-Force]
- [<CommonParameters>]
-```
+This cmdlet returns an object that we call "GradioSession".  
+This object can be used in other cmdlets that depend on session (and a default active session can be set that all cmdlets use by default if not specified).  
 
-## DESCRIPTION
-A Session represents a connection to a Gradio app.
- 
-Imagine that a session is like a tab in a browser open connected to a specific Gradio app.
- 
-The files uploaded, calls made, logins, are all recorded in this session.
-
-This cmdlet returns an object that we call "GradioSession".
- 
-This object can be used in other cmdlets that depend on a session (and an active session can be set, which all cmdlets use by default if not specified).
- 
-
-Every session has a name that uniquely identifies it.
-If not provided by the user, it will be automatically created based on the app's URL.
- 
+Every session has a name that uniquely identifies it. If not provided by the user, it will be automatically created based on the app's URL.  
 There cannot be 2 sessions with the same name.
 
-When creating a session, this cmdlet saves this session in an internal repository of sessions.
+When creating a session, this cmdlet saves this session in an internal session repository.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+New-GradioSession [[-AppUrl] <Object>] [[-Name] <Object>] [[-DownloadPath] <Object>] [-Force] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -AppUrl
-URL of the app
+Url of the app
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Name
 Unique name that identifies this session!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -DownloadPath
-Directory where to download the files
+Directory where to download files
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Force
 Force recreate
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

@@ -1,138 +1,113 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Invoke-GradioHttp
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
+
+## DESCRIPTION <!--!= @#Desc !-->
+Makes HTTP calls to Gradio and already adds common headers, such as authentication, etc.
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>]
- [[-StreamCallback] <Object>] [[-token] <Object>] [<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] 
+[<CommonParameters>]
 ```
 
-## DESCRIPTION
-Executes HTTP calls to Gradio and already adds common headers, such as authentication, etc.
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
-```
-
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -url
-{{ Fill url Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -method
-{{ Fill method Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: GET
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: GET
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -data
-{{ Fill data Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ContentType
-{{ Fill ContentType Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: Application/json
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: application/json
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-{{ Fill StreamCallback Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -token
-{{ Fill token Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 6
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

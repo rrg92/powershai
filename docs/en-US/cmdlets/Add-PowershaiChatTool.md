@@ -1,146 +1,120 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Add-PowershaiChatTool
 
-## SYNOPSIS
-Adds functions, scripts, executables as a tool callable by the LLM in the current chat (or default for all).
+## SYNOPSIS <!--!= @#Synop !-->
+Adds functions, scripts, executables as a tool invocable by the LLM in the current chat (or default for all).
 
-## SYNTAX
-
-```
-Add-PowershaiChatTool [[-names] <Object>] [[-description] <Object>] [-ForceCommand] [[-ChatId] <Object>]
- [-Global] [<CommonParameters>]
-```
-
-## DESCRIPTION
-Adds functions in the current session to the list of allowed Tool calling!
+## DESCRIPTION <!--!= @#Desc !-->
+Adds functions to the current session to the list of allowed Tool calling!
 When a command is added, it is sent to the current model as an option for Tool Calling.
-The available help from the function will be used to describe it, including the parameters.
-With this, you can, at runtime, add new skills to the AI that can be invoked by the LLM and executed by PowershAI.
- 
+The available help of the function will be used to describe it, including the parameters.
+With that, you can, at runtime, add new skills to the AI that can be invoked by the LLM and executed by PowershAI.
 
 When adding scripts, all functions within the script are added at once.
 
-For more information about tools, consult the topic about_Powershai_Chats
+For more information on tools see the about_Powershai_Chats topic
 
-VERY IMPORTANT: 
-NEVER ADD COMMANDS THAT YOU DO NOT KNOW OR THAT MAY COMPROMISE YOUR COMPUTER.
- 
-POWERSHELL WILL EXECUTE IT AT THE REQUEST OF THE LLM AND WITH THE PARAMETERS THAT THE LLM INVOKES, AND WITH THE CREDENTIALS OF THE CURRENT USER.
- 
-IF YOU ARE LOGGED IN WITH A PRIVILEGED ACCOUNT, SUCH AS ADMINISTRATOR, NOTE THAT YOU WILL BE ABLE TO EXECUTE ANY ACTION AT THE REQUEST OF A REMOTE SERVER (THE LLM).
+VERY IMPORTANT:
+NEVER ADD COMMANDS THAT YOU DO NOT KNOW OR THAT COULD COMPROMISE YOUR COMPUTER.
+POWERSHELL WILL EXECUTE IT AT THE REQUEST OF THE LLM AND WITH THE PARAMETERS THAT THE LLM INVOKES, AND WITH THE CURRENT USER'S CREDENTIALS.
+IF YOU ARE LOGGED IN WITH A PRIVILEGED ACCOUNT, SUCH AS THE ADMINISTRATOR, NOTE THAT YOU MAY PERFORM ANY ACTION AT THE REQUEST OF A REMOTE SERVER (THE LLM).
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Add-PowershaiChatTool [[-names] <Object>] [[-description] <Object>] [-ForceCommand] [[-ChatId] <Object>] [-Global] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -names
-Name of the command, script path, or executable
-Can be an array of strings with these mixed elements.
-When a name that ends with .ps1 is passed, it is treated as a script (that is, the functions from the script will be loaded)
-If you want to treat it as a command (execute the script), specify the -Command parameter to force it to be treated as a command!
+Command name, script path or executable
+It can be an array of string with these elements mixed.
+When a name ending with .ps1 is passed, it is treated as a script (that is, the functions of the script will be loaded)
+If you want to treat it as a command (execute the script), inform the -Command parameter, to force it to be treated as a command!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -description
 Description for this tool to be passed to the LLM.
- 
-The command will use the help and also send the described content
+The command will use the help and send the described content as well.
 If this parameter is added, it is sent along with the help.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ForceCommand
-Forces treatment as a command.
-Useful when you want a script to be executed as a command.
-Only useful when you pass an ambiguous file name that matches the name of some command!
+Forces to be treated as a command. Useful when you want a script to be executed as a command.
+Useful only when you pass an ambiguous file name, which coincides with the name of some command!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ChatId
 Chat in which to create the tool
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Global
 Creates the tool globally, that is, it will be available in all chats
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

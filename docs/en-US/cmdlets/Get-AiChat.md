@@ -1,205 +1,191 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-AiChat
 
-## SYNOPSIS
-Sends messages to a LLM and returns the response
+## SYNOPSIS <!--!= @#Synop !-->
+Sends messages to an LLM and returns the response
 
-## SYNTAX
+## DESCRIPTION <!--!= @#Desc !-->
+This is the most basic form of Chat promoted by PowershAI.  
+With this function, you can send a message to an LLM from the current provider.  
 
-```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>]
- [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>]
- [<CommonParameters>]
-```
-
-## DESCRIPTION
-This is the most basic form of Chat promoted by PowershAI.
- 
-With this function, you can send a message to a LLM from the current provider.
- 
-
-This function is a lower-level, standardized way to access a LLM that powershai provides.
- 
-It does not manage history or context.
-It is useful for invoking simple prompts that do not require multiple interactions like in a Chat. 
+This function is a lower level, standardized way to access an LLM that powershai provides.  
+It does not manage history or context. It is useful for invoking simple prompts that do not require multiple interactions like a Chat.
 Although it supports Function Calling, it does not execute any code and only returns the model's response.
 
-
-
-** PROVIDER INFORMATION
+** INFORMATION FOR PROVIDERS
 	The provider must implement the Chat function for this functionality to be available. 
-	The chat function must return an object with the response following the same specification as OpenAI, Chat Completion function.
+	The chat function should return an object with the response with the same specification as the OpenAI, Chat Completion function.
 	The following links serve as a basis:
 		https://platform.openai.com/docs/guides/chat-completions
-		https://platform.openai.com/docs/api-reference/chat/object (non-streaming return)
+		https://platform.openai.com/docs/api-reference/chat/object (return without streaming)
 	The provider must implement the parameters of this function. 
 	See the documentation for each parameter for details and how to map to a provider;
 	
-	When the model does not support one of the specified parameters (i.e., there is no equivalent functionality, or it cannot be implemented in an equivalent manner), an error should be returned.
+	When the model does not support one of the informed parameters (that is, there is no equivalent functionality, or that can be implemented in an equivalent way) an error should be returned.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
+<Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -prompt
-The prompt to be sent.
-Must be in the format described by the ConvertTo-OpenaiMessage function
+The prompt to be sent. It must be in the format described by the ConvertTo-OpenaiMessage function
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -temperature
 Model temperature
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: 0.6
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 0.6
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -model
-Model name.
-If not specified, uses the default from the provider.
+Model name. If not specified, it uses the provider's default.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-Maximum tokens to be returned
+Maximum number of tokens to be returned
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: 1024
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 1024
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ResponseFormat
-Response format 
-The acceptable formats and behavior should follow the same as OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
+Response format
+The acceptable formats, and behavior, should follow the same as OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
 Shortcuts:
-	"json", equivalent to {"type": "json_object"}
+	"json", is equivalent to {"type": "json_object"}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 5
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Functions
 List of tools that should be invoked!
-You can use commands like Get-OpenaiTool*, to easily transform PowerShell functions into the expected format!
-If the model invokes the function, the response, both in stream and normal, should also follow the OpenAI tool calling model.
-This parameter should follow the same scheme as OpenAI's Function Calling: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+You can use commands like Get-OpenaiTool*, to easily transform powershell functions into the expected format!
+If the model invokes the function, the response, both in stream, and normal, must also follow the OpenAI tool caling model.
+This parameter must follow the same schema as OpenAI Function Calling: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 6
-Default value: @()
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: @()
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -RawParams
-Specify direct parameters from the provider's API.
-This will override the values that were calculated and generated based on the other parameters.
+Specify direct parameters of the provider's API.
+This will overwrite the values that were calculated and generated based on the other parameters.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 7
-Default value: @{}
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-Enables the Stream model 
-You must specify a ScriptBlock that will be invoked for each text generated by the LLM.
-The script should receive a parameter representing each piece, in the same streaming format returned
-	This parameter is an object that will contain the property choices, which follows the same scheme returned by OpenAI's streaming:
+Enables the Stream model
+You must specify a ScriptBlock that will be invoked for each piece of text generated by the LLM.
+The script should receive a parameter that represents each piece, in the same streaming format returned
+	This parameter is an object that will contain the choices property, which is in the same schema returned by OpenAI streaming:
 		https://platform.openai.com/docs/api-reference/chat/streaming
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 8
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
+### -IncludeRawResp
+Include the API response in a field called IncludeRawResp
 
-## INPUTS
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
 
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

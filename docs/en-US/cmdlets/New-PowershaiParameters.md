@@ -1,323 +1,289 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # New-PowershaiParameters
 
-## SYNOPSIS
-Creates a new object that represents the parameters of a PowershaiChat.
+## SYNOPSIS <!--!= @#Synop !-->
+Creates a new object representing the parameters of a PowershaiChat
 
-## SYNTAX
-
-```
-New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>]
- [[-ShowFullSend] <Boolean>] [[-ShowTokenStats] <Object>] [[-MaxInteractions] <Object>]
- [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>]
- [[-ContextFormatterParams] <Object>] [[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>]
- [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
-```
-
-## DESCRIPTION
+## DESCRIPTION <!--!= @#Desc !-->
 Creates a default object containing all possible parameters that can be used in the chat!
-The user can use get-help New-PowershaiParameters to get the documentation of the parameters.
+The user can use a get-help New-PowershaiParameters to get the documentation of the parameters.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] <Boolean>] [[-ShowTokenStats] <Object>] 
+[[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] 
+[[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>] [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -stream
-When true, uses stream mode, that is, messages are shown as the model produces them.
+When true, use stream mode, that is, messages are displayed as the model produces them
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: True
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: True
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Json
-Enables JSON mode.
-In this mode, the model is forced to return a response in JSON.
- 
+Enables JSON mode. In this mode, the model is forced to return a response with JSON.  
 When activated, messages generated via stream are not displayed as they are produced, and only the final result is returned.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -model
 Name of the model to be used  
-If null, uses the model defined with Set-AiDefaultModel.
+If null, uses the model defined with Set-AiDefaultModel
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: String
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-Maximum number of tokens to be returned by the model.
+Maximum number of tokens to be returned by the model
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: 2048
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 2048
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ShowFullSend
-Prints the entire prompt that is being sent to the LLM.
+Prints the entire prompt that is being sent to the LLM
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Boolean
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 5
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ShowTokenStats
-At the end of each message, displays the consumption statistics, in tokens, returned by the API.
+At the end of each message, displays the consumption statistics, in tokens, returned by the API
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 6
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-Maximum number of interactions to be made at once. 
-Each time a message is sent, the model executes 1 iteration (sends the message and receives a response).
- 
-If the model requests a function calling, the generated response will be sent back to the model.
-This counts as another interaction.
- 
+Maximum number of interactions to be made at once 
+Each time a message is sent, the model performs 1 iteration (sends the message and receives a response).  
+If the model requests a function calling, the generated response will be sent back to the model. This counts as another interaction.  
 This parameter controls the maximum number of interactions that can exist in each call.
-This helps to prevent unexpected infinite loops.
+This helps prevent unexpected infinite loops.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 7
-Default value: 50
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 50
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
-Maximum number of sequential errors generated by Tool Calling.
- 
-When using tool calling, this parameter limits how many non-sequential tools that resulted in errors can be called.
- 
-The considered error is the exception thrown by the script or configured command.
+Maximum number of sequential errors generated by Tool Calling.  
+When using tool calling, this parameter limits how many tools without sequence that resulted in an error can be called.  
+The error considered is the exception thrown by the script or command configured.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 8
-Default value: 5
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 5
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxContextSize
-Maximum context size, in characters. 
-In the future, it will be in tokens. 
-Controls the amount of messages in the current chat context.
-When this number is exceeded, Powershai automatically clears the oldest messages.
+Maximum size of the context, in characters 
+In the future, it will be in tokens 
+Controls the amount of messages in the current chat context. When this number is exceeded, Powershai automatically cleans up the oldest messages.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 9
-Default value: 8192
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 8192
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ContextFormatterFunc
-Function used for formatting the objects passed via pipeline.
+Function used for formatting objects passed via pipeline
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 10
-Default value: ConvertTo-PowershaiContextOutString
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: ConvertTo-PowershaiContextOutString
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ContextFormatterParams
-Arguments to be passed to the ContextFormatterFunc.
+Arguments to be passed to the ContextFormatterFunc
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 11
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ShowArgs
-If true, displays the arguments of the functions when Tool Calling is activated to execute some function.
+If true, displays the arguments of the functions when Tool Calling is activated to execute any function
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 12
-Default value: True
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: True
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -PrintToolsResults
-Displays the results of the tools when they are executed by PowershAI in response to the model's tool calling.
+Displays the results of the tools when they are executed by PowershAI in response to the model's tool calling
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 13
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -SystemMessageFixed
-System Message that is guaranteed to be sent always, regardless of the chat history and cleanup!
+System Message that is guaranteed to be sent always, regardless of the chat history and clenaup!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 14
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -RawParams
-Parameters to be passed directly to the API that invokes the model.
- 
-The provider must implement support for this.
- 
+Parameters to be passed directly to the API that invokes the model.  
+The provider must implement support for this.  
 To use it, you must know the implementation details of the provider and how its API works!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 15
-Default value: @{}
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ContextFormat
 Controls the template used when injecting context data!
-This parameter is a scriptblock that must return a string with the context to be injected into the prompt!
+This parameter is a scriptblock that should return a string with the context to be injected into the prompt!
 The parameters of the scriptblock are:
-	FormattedObject 	- The object that represents the active chat, already formatted with the configured Formatter.
-	CmdParams 			- The parameters passed to Send-PowershaAIChat.
-It is the same object returned by GetMyParams.
-	Chat 				- The chat in which the data is being sent.
-If null, it will generate a default.
-Check the cmdlet Send-PowershaiChat for details.
+	FormattedObject 	- The object that represents the active chat, already formatted with the configured Formatter
+	CmdParams 			- The parameters passed to Send-PowershaAIChat. It is the same object returned by GetMyParams
+	Chat 				- The chat to which the data is being sent.
+If null, it will generate a default. Check the Send-PowershaiChat cmdlet for details
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 16
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

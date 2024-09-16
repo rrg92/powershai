@@ -1,68 +1,54 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-PowershaiChatParameter
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Returns the list of available parameters in a chat
 
-## SYNTAX
+## DESCRIPTION <!--!= @#Desc !-->
+This command returns an object containing the list of properties.  
+The object is actually an array, where each element represents a property.  
 
-```
-Get-PowershaiChatParameter [[-ChatId] <Object>]
-```
-
-## DESCRIPTION
-This command returns an object containing the list of properties.
- 
-The object is, in fact, an array, where each element represents a property.
- 
-
-This returned array has some modifications to facilitate access to the parameters. 
-You can access the parameters using the returned object directly, without the need to filter over the list of parameters.
+This returned array has some modifications to facilitate access to parameters. 
+You can access the parameters using the returned object directly, without the need to filter the list of parameters.
 This is useful when you want to access a specific parameter from the list.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
+
+```
+Get-PowershaiChatParameter [[-ChatId] <Object>] [<CommonParameters>]
+```
+
+## EXAMPLES <!--!= @#Ex !-->
 
 ### EXAMPLE 1
-```
+```powershell
 $MyParams = Get-PowershaiChatParameter
 ```
 
-\> $MyParams.MaxTokens # Accesses the max TOKENS parameter
-\> $MyParams | %{ write-host Parameter $_.name has the value $_.value } # iterates over the parameters!
 
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -ChatId
-{{ Fill ChatId Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->

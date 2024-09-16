@@ -1,268 +1,219 @@
 ﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # New-GradioSessionApiProxyFunction
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
 
-```
-New-GradioSessionApiProxyFunction [[-ApiName] <Object>] [[-Prefix] <Object>] [[-Session] <Object>] [-Force]
- [<CommonParameters>]
-```
+## DESCRIPTION <!--!= @#Desc !-->
+Creates functions that encapsulate calls to a Gradio endpoint (or all endpoints).  
+This cmdlet is very useful for creating powershell functions that encapsulate a Gradio API endpoint, where API parameters are created as function parameters.  
+Thus, native powershell features, such as auto complete, data type and documentation, can be used and it becomes very easy to invoke any endpoint of a session.
 
-## DESCRIPTION
-Creates functions that encapsulate calls to a Gradio endpoint (or all endpoints).
- 
-This cmdlet is very useful for creating PowerShell functions that encapsulate a Gradio API endpoint, where the API parameters are created as function parameters.
- 
-Thus, native PowerShell features, such as auto-complete, data types, and documentation, can be used, and it becomes very easy to invoke any endpoint from a session.
+The command queries the metadata of the endpoints and parameters and creates the powershell functions in the global scope.  
+With this, the user can invoke the functions directly, as if they were normal functions.  
 
-The command queries the metadata of the endpoints and parameters and creates PowerShell functions in the global scope.
- 
-With this, the user can invoke the functions directly, as if they were normal functions.
- 
+For example, suppose a Gradio application at address http://mydemo1.hf.space has an endpoint called /GenerateImage to generate images with Stable Diffusion.  
+Assume that this application accepts 2 parameters: Prompt (the description of the image to be generated) and Steps (the total number of steps).
 
-For example, suppose a Gradio application at the address http://mydemo1.hf.space has an endpoint called /GenerateImage to generate images with Stable Diffusion.
- 
-Assume this application accepts 2 parameters: Prompt (the description of the image to be generated) and Steps (the total number of steps).
-
-Normally, you could use the command Invoke-GradioSessionApi like this: 
+Normally, you could use the Invoke-GradioSessionApi command, like this: 
 
 $MySession = Get-GradioSession http://mydemo1.hf.space
 $ApiEvent = $MySession | Invoke-GradioSessionApi -ApiName 'GenerateImage' -params "A car",100
 
-This would start the API, and you could obtain the results using Update-GradioApiResult:
+This would start the API, and you could get the results using Update-GradioApiResult:
 
 $ApiEvent | Update-GradioApiResult
 
-With this cmdlet, you can encapsulate these calls a bit more:
+With this cmdlet, you can encapsulate these calls a little more:
 
 $MySession = Get-GradioSession http://mydemo1.hf.space
 $MySession | New-GradioSessionApiProxyFunction
 
-The command above will create a function called Invoke-GradioApiGenerateimage.
-Then, you can use it simply to generate the image:
+The above command will create a function called Invoke-GradioApiGenerateimage.
+Then, you can use it in a simple way to generate the image:
 
 Invoke-GradioApiGenerateimage -Prompt "A car" -Steps 100 
 
-By default, the command would execute and would already obtain the result events, writing to the pipeline so you can integrate with other commands.
- 
+By default, the command would execute and already get the result events, writing to the pipeline so you can integrate with other commands.  
 In fact, connecting multiple spaces is very simple, see below about the pipeline.
 
-NAMING CONVENTION
+NOMENCLATURE 
 
-	The name of the created functions follows the format:  \<Prefix\>\<OperationName\>
-		\<Prefix\> is the value of the -Prefix parameter of this cmdlet. 
-		\<OperationName\> is the name of the operation, kept to only letters and numbers
+	The name of the created functions follows the format:  <Prefix><NomeOp>
+		<Prefix> is the value of the -Prefix parameter of this cmdlet. 
+		<NomeOp> is the name of the operation, only letters and numbers are kept
 		
-		For example, if the operation is /Op1, and the Prefix is Invoke-GradioApi, the following function will be created: Invoke-GradioApiOp1
+		For examplei, if the operation is /Op1, and the Prefix INvoke-GradioApi, the following function will be created: Invoke-GradioApiOp1
 
 	
 PARAMETERS
-	The created functions contain the necessary logic to transform the passed parameters and execute the Invoke-GradioSessionApi cmdlet.
- 
-	In other words, the same return applies as if you were invoking this cmdlet directly. 
-(That is, an event will be returned and added to the list of events of the current session).
+	The created functions contain the logic necessary to transform the passed parameters and execute the Invoke-GradioSessionApi cmdlet.  
+	That is, the same return applies as if you were invoking this cmdlet directly.  (That is, an event will be returned and added to the list of events of the current session).
 	
 	The parameters of the functions may vary according to the API endpoint, as each endpoint has a different set of parameters and data types.
-	Parameters that are files (or lists of files) have an additional upload step.
-The file can be referenced locally, and the upload will be done to the server.
- 
-	If a URL is provided, or a FileData object received from another command, no additional upload will be done; only a corresponding FileData object will be generated for sending via API.
+	Parameters that are files (or list of files) have an additional upload step. The file can be referenced locally and its upload will be done to the server.  
+	If a URL is provided, or a FileData object received from another command, no additional upload will be done, only a corresponding FileData object will be generated for sending via API.
 
-	In addition to the endpoint parameters, there is an additional set of parameters that will always be added to the created function.
- 
+	In addition to the endpoint parameters, there is an additional set of parameters that will always be added to the created function.  
 	They are:
 		- Manual  
-		If used, it makes the cmdlet return the event generated by Invoke-GradioSessionApi.
- 
-		In this case, you will have to manually obtain the results using Update-GradioSessionApiResult
+		If used, causes the cmdlet to return the event generated by INvoke-GradioSessionApi.  
+		In this case you will have to manually get the results using Update-GradioSessionApiResult
 		
 		- ApiResultMap 
-		Maps the results of other commands to the parameters.
-See more in the PIPELINE section.
+		Maps the results of other commands to the parameters. See more about it in the PIPELINE section.
 		
 		- DebugData
 		For debugging purposes by developers.
 		
 UPLOAD 	
-	Parameters that accept files are treated in a special way.
- 
-	Before invoking the API, the Send-GradioSessionFiles cmdlet is used to upload these files to the respective Gradio app.
- 
-	This is another great advantage of using this cmdlet, as it remains transparent, and the user does not need to deal with uploads.
+	Parameters that accept files are handled in a special way.  
+	Before invoking the API, the Send-GradioSessionFiles cmdlet is used to upload these files to the respective gradio app.  
+	This is another great advantage of using this cmdlet, as this is transparent, and the user does not need to deal with uploads.
 
 PIPELINE 
 	
-	One of the most powerful features of PowerShell is the pipeline, where it is possible to connect multiple commands using the pipe |.
-	And this cmdlet also seeks to take full advantage of this resource.
- 
+	One of the most powerful features of powershell is the pipeline, one is able to connect multiple commands using the pipe |.
+	And this cmdlet also seeks to make the most of this feature.  
 	
 	All created functions can be connected with the |.
-	By doing this, each event generated by the previous cmdlet is passed to the next.
- 
+	When doing so, each event generated by the previous cmdlet is passed to the next.  
 	
-	Consider two Gradio apps, App1 and App2.
-	App1 has the Img endpoint, with a parameter called Text that generates images using Diffusers, displaying the partials of each image as they are generated.
-	App2 has an Ascii endpoint, with a parameter called Image that transforms an image into an ASCII text version.
+	Consider two gradio apps, App1 and App2.
+	App1 has the Img endpoint, with a parameter called Text, which generates images using Diffusers, displaying the partials of each image as they are generated.
+	App2 has an Ascii endpoint, with an Image parameter, which transforms an image into an ascii version in text.
 	
-	You can connect these two commands in a very simple way with the pipeline.
- 
+	You can connect these two commands in a very simple way with the pipeline.  
 	First, create the sessions
 
 		$App1 = New-GradioSession http://stable-diffusion
 		$App2 = New-GradioSession http://ascii-generator
 		
 	Create the functions 
-		$App1 | New-GradioSessionApiProxy -Prefix App # this creates the function AppImg
-		$App2 | New-GradioSessionApiProxy -Prefix App # this creates the function AppAscii
+		$App1 | New-GradioSessionApiProxy -Prefix App # this will create the AppImg function
+		$App2 | New-GradioSessionApiProxy -Prefix App # this will create the AppAscii function
 		
-	Generate the image and connect with the ASCII generator:
+	Generate the image and connect it with the ascii generator:
 	
-	AppImg -Text "A car" | AppAscii -Map ImageInput=0 | %{  $_.data\[0\]; write-host $_.pipeline\[0\].data\[0\].url } 
+	AppImg -Text "A car" | AppAscii -Map ImageInput=0 | %{  $_.data[0]; write-host $_.pipeline[0].data[0].url } 
 	
-	Now let's break down the above sequence.
+	Now let's break down the sequence above.
 	
 	Before the first pipe, we have the command that generates the image: AppImg -Text "A car" 
-	This function is calling the /Img endpoint of App1.
-This endpoint produces an output for the image generation stage using the Diffusers library from Hugging Face.
- 
-	In this case, each output will be an image (very messy), until the last output, which will be the final image.
- 
-	This result is in the data property of the pipeline object.
-It is an array with the results.
+	This function is calling the /Img endpoint of App1. This endpoint produces an output for the step of generating images with the Diffusers lib from hugging face.  
+	In this case, each output will be an image (pretty messed up), until the last output which will be the final image.  
+	This result is in the data property of the pipeline object. It is an array with the results.
 	
-Right after in the pipe, we have the command: AppAscii -Map ImageInput=0
-	This command will receive each object generated by the AppImg command, which in this case are the partial images of the diffusion process.
- 
+	Right after the pipe, we have the command: AppAscii -Map ImageInput=0
+	This command will receive each object generated by the AppImg command, which in this case, are the partial images of the diffusion process.  
 	
-	Due to the fact that the commands can generate an array of outputs, it is necessary to map exactly which results should be associated with which parameters.
- 
-	That is why we use the -Map parameter (-Map is an alias; the correct name is ApiResultMap).
-	The syntax is simple: ParamName=DataIndex,ParamName=DataIndex  
-	In the above command, we are saying: AppAscii, use the first value from the data property in the ImageInput parameter.
- 
-	For example, if AppImg returned 4 values, and the image was in the last position, you would use ImageInput=3 (0 is the first).
+	Due to the fact that commands can generate an array of outputs, it is necessary to map exactly which of the results should be associated with which parameters.  
+	That's why we use the -Map parameter (-Map is an Alias, in fact, the correct name is ApiResultMap)
+	The syntax is simple: NomeParam=DataIndex,NomeParam=DataIndex  
+	In the command above, we are saying: AppAscii, use the first value of the data property in the ImageInput parameter.  
+	For example, if AppImg returned 4 values, and image was in the last position, you should use ImageInput=3 (0 is the first).
 	
 	
-	Finally, the last pipe simply evaluates the result of AppAscii, which is now in the pipeline object, $_, in the .data property (just like the result of AppImg).
- 
-	And, to complement, the pipeline object has a special property called pipeline.
-With it, you can access all the results of the generated commands.  
-	For example, $_.pipeline\[0\] contains the result of the first command (AppImg). 
+	Finally, the last pipe just evoles the result of AppAscii, which is now in the pipeline object, $_, in the .data property (like the result of AppImg).  
+	And, to complement, the pipeline object has a special property, called pipeline. With it, you can access all the results of the generated commands.  
+	For example, $_.pipeline[0], contains the result of the first command (AppImg). 
 	
-	Thanks to this mechanism, it becomes much easier to connect different Gradio apps in a single pipeline.	Note that this sequence only works between commands generated by New-GradioSessionApiProxy.
-Piping other commands will not produce the same effect (you will need to use something like For-EachObject and associate the parameters directly)
+	Thanks to this mechanism, it becomes much easier to connect different Gradio apps into a single pipeline.
+	Note that this sequence only works between commands generated by New-GradioSessionApiProxy. Piping other commands will not produce the same effect (you will have to use something like For-EachObject and associate the parameters directly)
 
 
 SESSIONS 
-	When the function is created, the source session is pinned along with the function.
-
-	If the session is removed, the cmdlet will generate an error.
-In this case, you must create the function by invoking this cmdlet again.
+	When the function is created, the origin session is ingrained with the function .  
+	If the session is removed, the cmdlet will throw an error. In this case, you must create the function by invoking this cmdlet again.  
 
 
 The following diagram summarizes the dependencies involved:
 
 	New-GradioSessionApiProxyFunction(Prefix)
-		---\> function \<Prefix\>\<OpName\>
-			---\> Send-GradioSessionFiles (when there are files)
-			---\> Invoke-GradioSessionApi | Update-GradioSessionApiResult
+		---> function <Prefix><OpName>
+			---> Send-GradioSessionFiles (when there are files)
+			---> Invoke-GradioSessionApi | Update-GradioSessionApiResult
 
-Once Invoke-GradioSessionApi is executed in the end, all its rules apply.
-You can use Get-GradioSessionApiProxyFunction to obtain a list of what has been created and Remove-GradioSessionApiProxyFunction to remove one or more created functions.
-
+Since Invoke-GradioSessionApi is executed in the end, all its rules apply.
+You can be Get-GradioSessionApiProxyFunction to get a list of what was created and Remove-GradioSessionApiProxyFunction to remove one or more created functions.  
 Functions are created with a dynamic module.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+New-GradioSessionApiProxyFunction [[-ApiName] <Object>] [[-Prefix] <Object>] [[-Session] <Object>] [-Force] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -ApiName
 Create only for this specific endpoint
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: @()
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: @()
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Prefix
 Prefix of the created functions
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: Invoke-GradioApi
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: Invoke-GradioApi
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Session
 Session
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: .
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: true (ByValue)
+Accept wildcard characters: false
 ```
 
 ### -Force
 Forces the creation of the function, even if one with the same name already exists!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI_
 <!--PowershaiAiDocBlockEnd-->
