@@ -1,41 +1,22 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-PowershaiContextFormatters
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Lista todos os Context Formatters compactos disponíveis
 
-## SYNTAX
-
-```
-Get-PowershaiContextFormatters
-```
-
-## DESCRIPTION
-Certos Context Formatters disponibilizados pelo PowershAI podem ter um nome compacto (ou alias, se preferir), para facilitar sua definição.
- 
+## DESCRIPTION <!--!= @#Desc !-->
+Certos Context Formatters disponibilizados pelo PowershAI podem ter um nome compacto (ou alias, se preferir), para facilitar sua definição.  
 Este cmdlet retorna todos esses momes que podem ser usados ao uisar Set-PowershaiChatContextFormatter
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Get-PowershaiContextFormatters [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
+## PARAMETERS <!--!= @#Params !-->

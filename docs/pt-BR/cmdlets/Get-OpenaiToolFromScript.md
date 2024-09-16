@@ -1,29 +1,21 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-OpenaiToolFromScript
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
 
-```
-Get-OpenaiToolFromScript [[-ScriptPath] <Object>] [<CommonParameters>]
-```
-
-## DESCRIPTION
+## DESCRIPTION <!--!= @#Desc !-->
 Função auxiliar para converter um script .ps1 em um formato de schema esperado pela OpenAI.
-Basicamente, o que essa fução faz é ler um arquivo .ps1 (ou string) juntamente com sua help doc.
- 
+Basicamente, o que essa fução faz é ler um arquivo .ps1 (ou string) juntamente com sua help doc.  
 Então, ele retorna um objeto no formato especifiado pela OpenAI para que o modelo possa invocar!
 
 Retorna um hashtable contendo as seguintes keys:
-	functions - A lista de funções, com seu codigo lido do arquivo.
- 
+	functions - A lista de funções, com seu codigo lido do arquivo.  
 				Quando o modelo invocar, você pode executar diretamente daqui.
 				
 	tools - Lista de tools, para ser enviando na chamada da OpenAI.
@@ -31,39 +23,24 @@ Retorna um hashtable contendo as seguintes keys:
 Você pode documentar suas funções e parâmetros seguindo o Comment Based Help do PowerShell:
 https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Get-OpenaiToolFromScript [[-ScriptPath] <Object>] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -ScriptPath
-{{ Fill ScriptPath Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS

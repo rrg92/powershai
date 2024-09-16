@@ -1,57 +1,34 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-OpenAiAnswerCost
 
-## SYNOPSIS
-{{ Fill in the Synopsis }}
+## SYNOPSIS <!--!= @#Synop !-->
 
-## SYNTAX
-
-```
 Get-OpenAiAnswerCost [[-answers] <Object>]
+
+
+## SYNTAX <!--!= @#Syntax !-->
+
+```
+Get-OpenAiAnswerCost [[-answers] <Object>] [<CommonParameters>]
 ```
 
-## DESCRIPTION
-{{ Fill in the Description }}
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
-```
-
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -answers
-{{ Fill answers Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 0
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
 ```
-
-## INPUTS
-
-### None
-
-## OUTPUTS
-
-### System.Object
-## NOTES
-
-## RELATED LINKS

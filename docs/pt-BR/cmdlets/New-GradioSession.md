@@ -1,119 +1,91 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # New-GradioSession
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Cria uma nova sessão Gradio.
 
-## SYNTAX
-
-```
-New-GradioSession [[-AppUrl] <Object>] [[-Name] <Object>] [[-DownloadPath] <Object>] [-Force]
- [<CommonParameters>]
-```
-
-## DESCRIPTION
-Uma Sessions representa uma conexão para uma app Gradio.
- 
-Imagina que uma session seja como se fosse uma aba do browser aberto conectado em uma determinada app gradio.
- 
+## DESCRIPTION <!--!= @#Desc !-->
+Uma Sessions representa uma conexão para uma app Gradio.  
+Imagina que uma session seja como se fosse uma aba do browser aberto conectado em uma determinada app gradio.  
 Os arquivos enviados, chamadas feitas, logins, são todas gravas nesta session.
 
-Este cmndlet retorna um objeto que chamamos de "GradioSesison".
- 
-Este objeto pode ser usado em outros commandlets que dependem de session (e pode ser definido uma session ativa, que todos os cmdlets usam por padrão se não especificado).
- 
+Este cmndlet retorna um objeto que chamamos de "GradioSesison".  
+Este objeto pode ser usado em outros commandlets que dependem de session (e pode ser definido uma session ativa, que todos os cmdlets usam por padrão se não especificado).  
 
-Toda session tem um nome que a identifica unicamente.
-Se não informado pelo usuário, será criado autoamticamente com base na URL da app.
- 
+Toda session tem um nome que a identifica unicamente. Se não informado pelo usuário, será criado autoamticamente com base na URL da app.  
 Não podem existir 2 sessions com o mesmo nome.
 
 Ao criar um session, este cmdlet salva esta session em um repositorio interno de sessions.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+New-GradioSession [[-AppUrl] <Object>] [[-Name] <Object>] [[-DownloadPath] <Object>] [-Force] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -AppUrl
 Url da app
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Name
 Nome unico que identifica esta sessao!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -DownloadPath
 Diretório onde fazer o donwload dos arqiovpos
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Force
 Force recreate
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS

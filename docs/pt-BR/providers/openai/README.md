@@ -1,4 +1,4 @@
-# Provider OpenAI  
+﻿# Provider OpenAI  
 
 # RESUMO <!--! @#Short --> 
 

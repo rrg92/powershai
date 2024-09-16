@@ -1,109 +1,85 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Get-HuggingFaceSpace
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Obtém informacoes de um space específocp!
 
-## SYNTAX
-
-### Single
-```
-Get-HuggingFaceSpace [[-Space] <Object>] [-NoGradioSession] [<CommonParameters>]
-```
+## SYNTAX <!--!= @#Syntax !-->
 
 ### Multiple
 ```
 Get-HuggingFaceSpace [-author <Object>] [-My] [-NoGradioSession] [<CommonParameters>]
 ```
 
-## DESCRIPTION
-{{ Fill in the Description }}
-
-## EXAMPLES
-
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+### Single
+```
+Get-HuggingFaceSpace [[-Space] <Object>] [-NoGradioSession] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -Space
 Filtra por um space especifico (ou array de spaces)
 
-```yaml
+```yml
+Parameter Set: Single
 Type: Object
-Parameter Sets: Single
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: True (ByValue)
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: true (ByValue)
+Accept wildcard characters: false
 ```
 
 ### -author
 Filtrar todos os spaces por autor
 
-```yaml
+```yml
+Parameter Set: Multiple
 Type: Object
-Parameter Sets: Multiple
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -My
 Filtrar todos os spaces do usuario atual!
 
-```yaml
+```yml
+Parameter Set: Multiple
 Type: SwitchParameter
-Parameter Sets: Multiple
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -NoGradioSession
 Não cria uma sessão gradio automatica.
 Por padrao, em spaces gradios, ele ja cria uma gradio session!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS

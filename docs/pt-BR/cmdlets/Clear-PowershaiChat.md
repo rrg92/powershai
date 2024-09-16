@@ -1,88 +1,67 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Clear-PowershaiChat
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Apaga elementos de um chat!
 
-## SYNTAX
-
-```
-Clear-PowershaiChat [-History] [-Context] [[-ChatId] <Object>]
-```
-
-## DESCRIPTION
-Apaga elementos específico de um chat.
- 
+## DESCRIPTION <!--!= @#Desc !-->
+Apaga elementos específico de um chat.  
 Útil apra liberar recursos, ou tirar o vício do llm devido ao histórico.
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Clear-PowershaiChat [-History] [-Context] [[-ChatId] <Object>] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -History
 Apaga todo o histórico
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Context
 Apaga o contexto 
-Id do chat.
-Padrão: ativo.
+Id do chat. Padrão: ativo.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -ChatId
-{{ Fill ChatId Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: .
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: .
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS

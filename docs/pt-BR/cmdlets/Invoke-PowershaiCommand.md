@@ -1,76 +1,61 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Invoke-PowershaiCommand
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Permite invocar a maioria das funções de uma maneira compacta
 
-## SYNTAX
+## DESCRIPTION <!--!= @#Desc !-->
+Este é um simples utilizario que permite invocar diversas funcoes de uma forma mais reduzia na linha de comando.  
+Note que nem todos os comandos podem ser suportados ainda.
+
+É melhor usado com o alia pshai.
+
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
 Invoke-PowershaiCommand [[-CommandName] <Object>] [[-RemArgs] <Object>] [<CommonParameters>]
 ```
 
-## DESCRIPTION
-Este é um simples utilizario que permite invocar diversas funcoes de uma forma mais reduzia na linha de comando.
- 
-Note que nem todos os comandos podem ser suportados ainda.
-
-É melhor usado com o alia pshai.
-
-## EXAMPLES
+## EXAMPLES <!--!= @#Ex !-->
 
 ### EXAMPLE 1
-```
+```powershell
 pshai tools # lista as tools
 ```
 
-\> pshai params MaxTokens 2048 #atualiza um parâmetro
 
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -CommandName
 Command name
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -RemArgs
-{{ Fill RemArgs Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS

@@ -1,175 +1,156 @@
----
+﻿---
 external help file: powershai-help.xml
-Module Name: powershai
-online version:
 schema: 2.0.0
+powershai: true
 ---
 
 # Invoke-AiChatTools
 
-## SYNOPSIS
+## SYNOPSIS <!--!= @#Synop !-->
 Envia mensagem para um LLM, com suporte a Tool Calling, e executa as tools solicitadas pelo modelo como comandos powershell.
 
-## SYNTAX
-
-```
-Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>]
- [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-temperature] <Object>] [[-model] <Object>]
- [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [<CommonParameters>]
-```
-
-## DESCRIPTION
+## DESCRIPTION <!--!= @#Desc !-->
 Esta é uma função auxiliar para ajudar a fazer o processamento de tools mais fácil com powershell.
 Ele lida com o processamento das "Tools", executando quando o modelo solicita!
 
 Você deve passar as tools em um formato específico, documentando no tópico about_Powershai_Chats
-Esse formato mapeia corretamente funções e comandos powershell pra o esquema aceitável pela OpenAI (OpenAPI Schema).
- 
+Esse formato mapeia corretamente funções e comandos powershell pra o esquema aceitável pela OpenAI (OpenAPI Schema).  
 
-Este comando encapsula toda a lógica que identifica quando o modelo quer invocar a função, a execução dessas funções,e o envio dessa resposta de volta ao modelo.
- 
+Este comando encapsula toda a lógica que identifica quando o modelo quer invocar a função, a execução dessas funções,e o envio dessa resposta de volta ao modelo.  
 Ele fica nesse loop até que o modelo pare de decidir invocar mais funções, ou que o limite de interações (sim, aqui chamamos de interações mesmo, e não iterações) com o modelo tenha finalizado.
 
-O conceito de interação é simples: Cada vez que a função envia um prompt para o modelo, conta como uma integração.
- 
+O conceito de interação é simples: Cada vez que a função envia um prompt para o modelo, conta como uma integração.  
 Abaixo está um fluxo típico que pode acontecer:
 	
 
 Você pode obter mais detalhes do funcionamento consultando o tópico about_Powershai_Chats
 
-## EXAMPLES
+## SYNTAX <!--!= @#Syntax !-->
 
-### Example 1
-```powershell
-PS C:\> {{ Add example code here }}
+```
+Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] 
+[[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [<CommonParameters>]
 ```
 
-{{ Add example description here }}
-
-## PARAMETERS
+## PARAMETERS <!--!= @#Params !-->
 
 ### -prompt
-{{ Fill prompt Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 1
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Tools
 Array de tools, conforme explicado na doc deste comando
-Use os resultado de Get-OpenaiTool* para gerar os valores possíveis.
- 
+Use os resultado de Get-OpenaiTool* para gerar os valores possíveis.  
 Você pode passar um array de objetos do tipo OpenaiTool.
 Se uma mesma funcoes estiver definida em mais de 1 tool, a primeira encontrada na ordem definida será usada!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 2
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -PrevContext
-{{ Fill PrevContext Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 3
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxTokens
 máx output!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 4
-Default value: 500
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 500
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
 No total, permitir no max 5 iteracoes!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 5
-Default value: 10
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 10
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
 Quantidade maximo de erros consecutivos que sua funcao pode gerar antes que ele encerre.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 6
-Default value: 2
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 2
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -temperature
-{{ Fill temperature Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 7
-Default value: 0.6
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 0.6
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -model
-{{ Fill model Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 8
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -on
@@ -181,75 +162,61 @@ func: disparado antes de iniciar a execução de uma tool solicitada pelo modelo
 	exec: disparado após o modelo executar a funcao.
 	error: disparado quando a funcao executada gera um erro
 	stream: disparado quando uma resposta foi enviada (pelo stream) e -DifferentStreamEvent
-	beforeAnswer: Disparado após todas as respostas.
-Util quando usado em stream!
-	afterAnswer: Disparado antes de iniciar as respostas.
-Util quando usado em stream!
+	beforeAnswer: Disparado após todas as respostas. Util quando usado em stream!
+	afterAnswer: Disparado antes de iniciar as respostas. Util quando usado em stream!
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 9
-Default value: @{}
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Json
 Envia o response_format = "json", forçando o modelo a devolver um json.
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -RawParams
 Adicionar parâmetros customizados diretamente na chamada (irá sobrescrever os parâmetros definidos automaticamente).
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
+Aliases: 
+Accepted Values: 
+Required: false
 Position: 10
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Stream
-{{ Fill Stream Description }}
 
-```yaml
+```yml
+Parameter Set: (All)
 Type: SwitchParameter
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: False
-Accept pipeline input: False
-Accept wildcard characters: False
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
-
-### CommonParameters
-This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
-
-## INPUTS
-
-## OUTPUTS
-
-## NOTES
-
-## RELATED LINKS
