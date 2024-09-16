@@ -879,6 +879,10 @@ function Get-AiChat {
 		 #	Este parâmetro é um objeto que conterá a propridade choices, que é nom mesmo esquema retornado pelo streaming da OpenAI:
 		 #		https://platform.openai.com/docs/api-reference/chat/streaming		 
 			$StreamCallback = $null
+			
+		,#Incluir a resposta da API em um campo chamado IncludeRawResp
+			[switch]$IncludeRawResp
+			
 	)
 	
 	$Provider = Get-AiCurrentProvider
@@ -1278,20 +1282,20 @@ function Invoke-AiChatTools {
 		Este comando foi criado com o intuito de ser interativo, isto é, precisa da entrada do usuário em teclado.
 		
 	.EXAMPLE 
-		Export-PowershaiSettings 
+		# Exportando as configurações padrões!
+		> Export-PowershaiSettings 
 		
-		Exporta com as configurações padrões!
+		
 		
 	.EXAMPLE 
-		Export-PowershaiSettings -Chat  
+		# Exporta tudo, incluindo os chats!
+		> Export-PowershaiSettings -Chat  
 	
-		Exporta incluindo os chats!
-
 	.EXAMPLE
-		PS> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
-		PS> Export-PowershaiSettings
-		
-			Exporta para um diretório no OneDrive.
+		# Exportando para o OneDrive
+		> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
+		> Export-PowershaiSettings
+			
 #>
 function Export-PowershaiSettings {
 	[CmdletBinding()]
@@ -1373,15 +1377,17 @@ function Export-PowershaiSettings {
 		
 		
 	.EXAMPLE 
-		Import-PowershaiSettings
+		# Import padrão
+		> Import-PowershaiSettings
 		
-		Importa as configurações do diretório padrão.
+		
 	
 	.EXAMPLE
-		PS> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
-		PS> Import-PowershaiSettings
+		# Importando do OneDrive
+		> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
+		> Import-PowershaiSettings
 		
-			Importa as configurações que foram exportadas para um diretório alternativo (one drive).
+		Importa as configurações que foram exportadas para um diretório alternativo (one drive).
 #>
 function Import-PowershaiSettings {
 	[CmdletBinding()]
