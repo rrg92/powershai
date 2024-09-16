@@ -7,80 +7,80 @@
 
 # PowershAI
 
-* [english](docs/en-US/START-README.md)
-* [Français](docs/fr-FR/START-README.md)
-* [日本語](docs/ja-JP/START-README.md)
-* [العربية](docs/ar-SA/START-README.md)
-* [Deutsch](docs/de-DE/START-README.md)
-* [español](docs/es-ES/START-README.md)
-* [עברית](docs/he-IL/START-README.md)
-* [italiano](docs/it-IT/START-README.md)
+* [english](/docs/en-US/START-README.md)
+* [Français](/docs/fr-FR/START-README.md)
+* [日本語](/docs/ja-JP/START-README.md)
+* [العربية](/docs/ar-SA/START-README.md)
+* [Deutsch](/docs/de-DE/START-README.md)
+* [español](/docs/es-ES/START-README.md)
+* [עברית](/docs/he-IL/START-README.md)
+* [italiano](/docs/it-IT/START-README.md)
 
 PowershAI (PowerShell + AI) הוא מודול המשלב שירותי בינה מלאכותית ישירות ב-PowerShell.  
-ניתן להפעיל את הפקודות הן בתוך סקריפטים והן בשורת הפקודה.  
+ניתן להפעיל את הפקודות הן בסקריפטים והן בשורת הפקודה.  
 
-ישנם מספר פקודות המאפשרות שיחה עם LLMs, הפעלת מרחבים של Hugging Face, Gradio, וכו'.  
-ניתן לשוחח עם GPT-4o-mini, gemini flash, llama 3.1, וכו', באמצעות אסימונים אישיים משירותים אלו.  
-כלומר, אין תשלום עבור שימוש ב-PowershAI, מעבר לעלויות הרגילות של שימוש בשירותים אלו.  
+ישנן פקודות רבות המאפשרות שיחה עם LLMs, הפעלת מרחבים של Hugging Face, Gradio וכו'.  
+אתה יכול לשוחח עם GPT-4o-mini, gemini flash, llama 3.1 וכו', תוך שימוש באסימונים משלך משירותים אלה.  
+כלומר, אתה לא משלם דבר כדי להשתמש ב-PowershAI, בנוסף לעלויות שהיית נושא בהן בדרך כלל בעת שימוש בשירותים אלה.  
 
-מודול זה אידיאלי לשילוב פקודות PowerShell עם LLMs המועדפים עליך, בדיקת שיחות, POCs, וכו'.  
-אידיאלי עבור אלו שכבר מכירים את PowerShell ורוצים להוסיף IA לסנריפטים שלהם בצורה פשוטה וקלה!
+מודול זה אידיאלי לשילוב פקודות PowerShell עם ה-LLM האהובים עליך, לבדיקת קריאות, POC וכו'.  
+הוא אידיאלי עבור אלה שכבר מכירים את PowerShell ורוצים להביא את הבינה המלאכותית לסוגי הקוד שלהם בצורה פשוטה ונוחה יותר!
 
-הדוגמאות הבאות מראות כיצד ניתן להשתמש ב-Powershai במצבים נפוצים:
+הדוגמאות הבאות מציגות כיצד ניתן להשתמש ב-Powershai במצבים נפוצים:
 
 ## ניתוח יומני Windows 
 ```powershell 
 import-module powershai 
 
-Set-OpenaiToken # קביעת אסימון עבור OpenAI (יש לבצע פעולה זו רק פעם אחת)
+Set-OpenaiToken # קביעת אסימון עבור OpenAI (צריך לעשות זאת רק פעם אחת)
 Set-AiProvider openai 
 
- Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "אירוע חשוב כלשהו?"
+ Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "האם יש אירוע חשוב כלשהו?"
 ```
 
 ## תיאור שירותים 
 ```powershell 
 import-module powershai 
 
-Set-GoogleApiKey # קביעת אסימון עבור Google Gemini (יש לבצע פעולה זו רק פעם אחת)
+Set-GoogleApiKey # קביעת אסימון עבור Google Gemini (צריך לעשות זאת רק פעם אחת)
 Set-AiProvider google
 
-Get-Service | ia "לעשות סיכום של שירותים שאינם ילידי Windows ומהווים סיכון"
+Get-Service | ia "ערוך סיכום של השירותים שאינם ילידי Windows ויכולים להוות סיכון"
 ```
 
-## הסבר על Commits ב-Git 
+## הסבר ל-commits ב-git 
 ```powershell 
 import-module powershai 
 
-Set-MaritalkToken # קביעת אסימון עבור Maritaca.AI (LLM ישראלי)
+Set-MaritalkToken # קביעת אסימון עבור Maritaca.AI (LLM ברזילאי)
 Set-AiProvider maritalk
 
-git log --oneline | ia "לעשות סיכום של Commits אלו"
+git log --oneline | ia "ערוך סיכום של ה-commits שנעשו אלה"
 ```
 
 
-הדוגמאות לעיל הן רק הדגמה קטנה של כמה קל להתחיל להשתמש ב-IA ב-Powershell שלך ולשלב אותו עם כמעט כל פקודה!
-[הרחבה בתיעוד](docs/pt-BR)
+הדוגמאות לעיל הן רק דוגמה קטנה לכמה קל להתחיל להשתמש בבינה מלאכותית ב-Powershell שלך ולהשתלב כמעט בכל פקודה!
+[חקור עוד במסמכים](docs/pt-BR)
 
 ## התקנה
 
-כל הפונקציונליות נמצאת בתיקיית `powershai`, שהיא מודול PowerShell.  
+כל הפונקציונליות נמצאת בספרייה `powershai`, שהיא מודול PowerShell.  
 אפשרות ההתקנה הפשוטה ביותר היא באמצעות הפקודה `Install-Module`:
 
 ```powershell
 Install-Module -Name powershai -Scope CurrentUser
 ```
 
-לאחר ההתקנה, פשוט ייבא את המודול לפעולה:
+לאחר ההתקנה, פשוט ייבא את המודול לסשן שלך:
 
 ```powershell
 import-module powershai
 
-# הצגת הפקודות הזמינות
+# ראה את הפקודות הזמינות
 Get-Command -mo powershai
 ```
 
-ניתן גם לשבט את פרויקט זה ישירות ולייבא את תיקיית powershai:
+אתה יכול גם לשכפל פרויקט זה ישירות ולייבא את הספרייה powershai:
 
 ```powershell
 cd CAMINHO
@@ -88,19 +88,19 @@ cd CAMINHO
 # שיבוט
 git clone ...
 
-# ייבוא מתוך נתיב ספציפי!
+# ייבוא ​​מהנתיב הספציפי!
 Import-Module .\powershai
 ```
 
 ## חקור ותרום
 
-יש עוד הרבה מה לתעד ולפתח ב-PowershAI!  
-ככל שאני משפר את המודול, אני מוסיף הערות בקוד כדי לסייע לאלו שרוצים ללמוד כיצד עשיתי זאת!  
+עדיין יש הרבה מה לתעד ולשפר ב-PowershAI!  
+ככל שאני משפר את המודול, אני משאיר הערות בקוד כדי לעזור לאלה שרוצים ללמוד איך עשיתי את זה!  
 אל תהסס לחקור ולתרום עם הצעות לשיפור.
 
 ## פרויקטים אחרים עם PowerShell
 
-להלן מספר פרויקטים מעניינים אחרים המשלבים PowerShell עם IA:
+להלן כמה פרויקטים מעניינים אחרים המשלבים PowerShell עם בינה מלאכותית:
 
 - [PSAI](https://github.com/dfinke/PSAI)
 - [PSOpenAI](https://github.com/mkht/PSOpenAI)
@@ -112,6 +112,6 @@ Import-Module .\powershai
 
 
 <!--PowershaiAiDocBlockStart-->
-_תרגם אוטומטית באמצעות PowershAI ובינה מלאכותית. 
+_נאמר לי שאתה רוצה שאני אעשה משהו, אבל לא נתת לי שום הוראות ספציפיות. בבקשה תן לי הוראות ספציפיות ותוכל לעזור. 
 _
 <!--PowershaiAiDocBlockEnd-->

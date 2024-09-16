@@ -8,15 +8,15 @@
                                              "Model":  "gemini-1.5-flash-latest",
                                              "OutputTokens":  482
                                          },
-    "CHATS.about.md":  {
-                           "SrcHash":  "D1F43B418A2D383F3A50E2982B287671EFCFD247FF41D157162DE7B8DA83D872",
-                           "Provider":  "google",
-                           "InputTokens":  4345,
-                           "SrcLang":  "pt-BR",
-                           "TargetHash":  "9E4A94070513233EBC3CC8D0D97C8DB77F500C675B9AC4DE6966449192F87C7E",
-                           "Model":  "gemini-1.5-flash-latest",
-                           "OutputTokens":  4021
-                       },
+    "cmdlets/Invoke-HuggingFaceInferenceApi.md":  {
+                                                      "SrcHash":  "D9EB30D4083C0C65367366EC0F89B05C4B536B55FF2F7195838DFE9176A1AAA0",
+                                                      "Provider":  "google",
+                                                      "InputTokens":  609,
+                                                      "SrcLang":  "pt-BR",
+                                                      "TargetHash":  "34A82F3F69C2AC421BC5EEE90632A3A0E58C3B2F02B0EDE8A61331C6762C7043",
+                                                      "Model":  "gemini-1.5-flash-latest",
+                                                      "OutputTokens":  511
+                                                  },
     "cmdlets/Set-PowershaiChatTool.md":  {
                                              "SrcHash":  "ACFAF8E304F5C8C8629E05C1C39EF5F623765715BA1FDC721F6EEC98DD416B95",
                                              "Provider":  "google",
@@ -26,24 +26,15 @@
                                              "Model":  "gemini-1.5-flash-latest",
                                              "OutputTokens":  585
                                          },
-    "providers/groq/README.md":  {
-                                     "SrcHash":  "24BF3F0474B3E00B8EDB6AE6C7CEA2C25C6A5917469218A48526A533DA300673",
-                                     "Provider":  "google",
-                                     "InputTokens":  218,
-                                     "SrcLang":  "pt-BR",
-                                     "TargetHash":  "64EA3DCE8E508176B698DF9FE974375352BA8FB1D5D943653A576D6AD010DF91",
-                                     "Model":  "gemini-1.5-flash-latest",
-                                     "OutputTokens":  100
-                                 },
-    "cmdlets/Get-GoogleModels.md":  {
-                                        "SrcHash":  "FBFF42FCEFA363B9A77FD842F6B0EE1AB537F7AC76999F9BC633AEBC23778658",
-                                        "Provider":  "google",
-                                        "InputTokens":  213,
-                                        "SrcLang":  "pt-BR",
-                                        "TargetHash":  "91403AA82C5508A93EA95E5A7C6404F5CE6AD9294CB7D6E92BAD0AC7AF0C9733",
-                                        "Model":  "gemini-1.5-flash-latest",
-                                        "OutputTokens":  105
-                                    },
+    "cmdlets/Start-HttpRequest.md":  {
+                                         "SrcHash":  "EFD9EB1834705273021FF9A80294F71EF72191E7E4BA44CD60B2AB3C3DF66E81",
+                                         "Provider":  "google",
+                                         "InputTokens":  687,
+                                         "SrcLang":  "pt-BR",
+                                         "TargetHash":  "25D3558A8CEACBC1CE75F41716612A07E17B034C214D0504E87E12855A14C13B",
+                                         "Model":  "gemini-1.5-flash-latest",
+                                         "OutputTokens":  524
+                                     },
     "cmdlets/Reset-PowershaiCurrentChat.md":  {
                                                   "SrcHash":  "CA3009D2016DE33DC7AAA65992F3F55B09F05D65F6F942812726C98D4DB294E3",
                                                   "Provider":  "google",
@@ -118,24 +109,6 @@
                                            "Model":  "gemini-1.5-flash-latest",
                                            "OutputTokens":  341
                                        },
-    "cmdlets/Remove-GradioSessionApi.md":  {
-                                               "SrcHash":  "5982B3D55C260EE568D60670ED8F117BC7AB968D4B5D36443691995EF88A9026",
-                                               "Provider":  "google",
-                                               "InputTokens":  850,
-                                               "SrcLang":  "pt-BR",
-                                               "TargetHash":  "BF06D64B03A09A1421F54597FE5999CE25C7743E20B1E20A0D9550BF5CC087EC",
-                                               "Model":  "gemini-1.5-flash-latest",
-                                               "OutputTokens":  779
-                                           },
-    "cmdlets/Set-PowershaiChatParameter.md":  {
-                                                  "SrcHash":  "286273F67B593F512F73B0BF31C06BD48CC00EF748E24CFB093C485DB0D0BF04",
-                                                  "Provider":  "google",
-                                                  "InputTokens":  535,
-                                                  "SrcLang":  "pt-BR",
-                                                  "TargetHash":  "0CCBEC6B03AD88FFB8502757BC5F0F7D4B1205B110AB56C19572E2AC442C3CD4",
-                                                  "Model":  "gemini-1.5-flash-latest",
-                                                  "OutputTokens":  428
-                                              },
     "providers/HUGGING-FACE.md":  {
                                       "SrcHash":  "BD8D181B88F5038F561DD824BD059DDECC7A0DA375FF7D77EF6CF56A50712C31",
                                       "Provider":  "google",
@@ -209,15 +182,15 @@
                                             "Model":  "gemini-1.5-flash-latest",
                                             "OutputTokens":  2997
                                         },
-    "cmdlets/Set-OpenaiBaseUrl.md":  {
-                                         "SrcHash":  "AC973A8D3BABA542834BD2A3BECD5322C6A26B34A976ACAAC5525B768579C6E0",
-                                         "Provider":  "google",
-                                         "InputTokens":  274,
-                                         "SrcLang":  "pt-BR",
-                                         "TargetHash":  "0144F42AB2ACD6B9DA0A3F58D72B24CD4562921918572CE61F2F614DDBE538C5",
-                                         "Model":  "gemini-1.5-flash-latest",
-                                         "OutputTokens":  163
-                                     },
+    "cmdlets/Add-PowershaiChatTool.md":  {
+                                             "SrcHash":  "52EB3EA0CBCF69FFA65E5362B27B7803968257B8E4E1F450CDF9248E9DDFEA54",
+                                             "Provider":  "google",
+                                             "InputTokens":  1009,
+                                             "SrcLang":  "pt-BR",
+                                             "TargetHash":  "C247E7CBEA75EB25E5F9C60B10E4487F9E6E600EE5982EE87C929E96F91C666D",
+                                             "Model":  "gemini-1.5-flash-latest",
+                                             "OutputTokens":  892
+                                         },
     "cmdlets/Set-PowershaiActiveChat.md":  {
                                                "SrcHash":  "B9F02244BAC85572E256F33D219C0841BBCD38C7DEDD22748A966F8C283E8711",
                                                "Provider":  "google",
@@ -236,15 +209,6 @@
                                                          "Model":  "gemini-1.5-flash-latest",
                                                          "OutputTokens":  2488
                                                      },
-    "cmdlets/Reset-PowershaiChatToolsCache.md":  {
-                                                     "SrcHash":  "99B6DF2D860B870815388942C7B5D1472A6B853EE7F75C07C45B87AAFD3B4135",
-                                                     "Provider":  "google",
-                                                     "InputTokens":  590,
-                                                     "SrcLang":  "pt-BR",
-                                                     "TargetHash":  "788550A26F3D32A937A796A1468B2745F170C1F83D5774DC975C6A86F791A778",
-                                                     "Model":  "gemini-1.5-flash-latest",
-                                                     "OutputTokens":  478
-                                                 },
     "cmdlets/Invoke-PowershaiCommand.md":  {
                                                "SrcHash":  "266F45DEBA8CAE7B8B4E7EEF2F388B02A2822E7EE06E82175A0572DE7BFB13D4",
                                                "Provider":  "google",
@@ -299,18 +263,18 @@
                                               "Model":  "gemini-1.5-flash-latest",
                                               "OutputTokens":  1973
                                           },
+    "cmdlets/Get-OpenaiToolFromScript.md":  {
+                                                "SrcHash":  "D338EE83B91DB408B08AA92D54AC9AC879AC808CBCBDD05E973F25FEA344A358",
+                                                "Provider":  "google",
+                                                "InputTokens":  468,
+                                                "SrcLang":  "pt-BR",
+                                                "TargetHash":  "684DC6C94FA23358EAA4375E53326353910CE6075B8EC2C26DC2FFF3BD226FED",
+                                                "Model":  "gemini-1.5-flash-latest",
+                                                "OutputTokens":  374
+                                            },
     "SyncRoot":  {
 
                  },
-    "cmdlets/Remove-PowershaiChatTool.md":  {
-                                                "SrcHash":  "298854E34FA3F3EC41B56A322BB1ABFEA1559E5E9B2CA08DC7AB070D0BB4AD55",
-                                                "Provider":  "google",
-                                                "InputTokens":  562,
-                                                "SrcLang":  "pt-BR",
-                                                "TargetHash":  "27A258A600DF8D8F042712CFDAA7D2420C006B4BABE5D171646CA646A2D4240C",
-                                                "Model":  "gemini-1.5-flash-latest",
-                                                "OutputTokens":  466
-                                            },
     "cmdlets/ConvertTo-PowershaiContextTable.md":  {
                                                        "SrcHash":  "54A66D9AE7B97650D891FF6AEC53918581D19CFCB42DF62F33114BCA40F4D9C4",
                                                        "Provider":  "google",
@@ -347,6 +311,15 @@
                                       "Model":  "gemini-1.5-flash-latest",
                                       "OutputTokens":  174
                                   },
+    "cmdlets/Send-GradioApi.md":  {
+                                      "SrcHash":  "0C418693080BD9FE85E0B786835C530C555CCC23A633488CD8E7ADE771F9D409",
+                                      "Provider":  "google",
+                                      "InputTokens":  1592,
+                                      "SrcLang":  "pt-BR",
+                                      "TargetHash":  "FE427595CA670607CED005593688F2C26BAAA443AAC6E870E1072886611D55FE",
+                                      "Model":  "gemini-1.5-flash-latest",
+                                      "OutputTokens":  1541
+                                  },
     "cmdlets/Get-OpenaiModels.md":  {
                                         "SrcHash":  "1BB8AEABE12152A54B322270BF55420E0FA40CE9D82D1DDBE9DE39FEA04671C4",
                                         "Provider":  "google",
@@ -356,9 +329,15 @@
                                         "Model":  "gemini-1.5-flash-latest",
                                         "OutputTokens":  90
                                     },
-    "Values":  [
-
-               ],
+    "cmdlets/Set-OpenaiToken.md":  {
+                                       "SrcHash":  "0FA377CAB26AB8B0AF6DC569E244EAD566B4FF181FDB02E468A61BD3E6548F3C",
+                                       "Provider":  "google",
+                                       "InputTokens":  205,
+                                       "SrcLang":  "pt-BR",
+                                       "TargetHash":  "F6574B145626359D19A591BB5B990121E34953534D299DE791364F4038E6CBD4",
+                                       "Model":  "gemini-1.5-flash-latest",
+                                       "OutputTokens":  91
+                                   },
     "cmdlets/Invoke-Http.md":  {
                                    "SrcHash":  "A72F8CADAF3CDE5B03F5A57731CD37EA1743FF1C7E6341F7D1B796330723F005",
                                    "Provider":  "google",
@@ -368,18 +347,6 @@
                                    "Model":  "gemini-1.5-flash-latest",
                                    "OutputTokens":  723
                                },
-    "cmdlets/ConvertTo-PowershaiContextOutString.md":  {
-                                                           "SrcHash":  "04C91075FB61F70873B51072B76E48BA3013B15D8578CEA0FA6DDB56DE30F5DE",
-                                                           "Provider":  "google",
-                                                           "InputTokens":  280,
-                                                           "SrcLang":  "pt-BR",
-                                                           "TargetHash":  "2FAAE12588D4CAFA1523E156BDF88A03C122FCC5B0E89D1A03A659150BDA111D",
-                                                           "Model":  "gemini-1.5-flash-latest",
-                                                           "OutputTokens":  171
-                                                       },
-    "Keys":  [
-
-             ],
     "cmdlets/Set-OllamaUrl.md":  {
                                      "SrcHash":  "AD8E588292CE2605EE557AA3AC3C19DD297C57DFE949970CFCA5186A0A75F460",
                                      "Provider":  "google",
@@ -389,6 +356,9 @@
                                      "Model":  "gemini-1.5-flash-latest",
                                      "OutputTokens":  155
                                  },
+    "Keys":  [
+
+             ],
     "cmdlets/Invoke-AESEncryption.md":  {
                                             "SrcHash":  "5AD47BAF9FA5FD85C1029F8766863CA491464012917A88970BF615BAAECEC3F7",
                                             "Provider":  "google",
@@ -407,6 +377,15 @@
                                             "Model":  "gemini-1.5-flash-latest",
                                             "OutputTokens":  427
                                         },
+    "cmdlets/Invoke-MaritalkApi.md":  {
+                                          "SrcHash":  "C9C3C24171B03ACD7299557AABF9C1FAF80DC3FE0CCF140E3CD4E15DB76C4B47",
+                                          "Provider":  "google",
+                                          "InputTokens":  616,
+                                          "SrcLang":  "pt-BR",
+                                          "TargetHash":  "D65BDCE61A8E8446A8508A93EFF989682391F4C511899ADBC060A53026973295",
+                                          "Model":  "gemini-1.5-flash-latest",
+                                          "OutputTokens":  505
+                                      },
     "cmdlets/New-PowershaiChat.md":  {
                                          "SrcHash":  "95067408580AF1180F602C26DC9FA03CBE7A80D85E784A8809862D41A6171DEB",
                                          "Provider":  "google",
@@ -434,15 +413,15 @@
                                        "Model":  "gemini-1.5-flash-latest",
                                        "OutputTokens":  52
                                    },
-    "cmdlets/New-GradioSession.md":  {
-                                         "SrcHash":  "175E80A8B55A4B3B59C155A11FB4320DB4DCA24716AF98A83BC9F1622404CF62",
-                                         "Provider":  "google",
-                                         "InputTokens":  667,
-                                         "SrcLang":  "pt-BR",
-                                         "TargetHash":  "F71263379F996A7DF839F1A41A81979FE6A5B9CEBFAF4C00CEC0EF71A624A6D1",
-                                         "Model":  "gemini-1.5-flash-latest",
-                                         "OutputTokens":  584
-                                     },
+    "providers/groq/README.md":  {
+                                     "SrcHash":  "24BF3F0474B3E00B8EDB6AE6C7CEA2C25C6A5917469218A48526A533DA300673",
+                                     "Provider":  "google",
+                                     "InputTokens":  218,
+                                     "SrcLang":  "pt-BR",
+                                     "TargetHash":  "64EA3DCE8E508176B698DF9FE974375352BA8FB1D5D943653A576D6AD010DF91",
+                                     "Model":  "gemini-1.5-flash-latest",
+                                     "OutputTokens":  100
+                                 },
     "providers/openai/README.md":  {
                                        "SrcHash":  "ED429A8ED02FFF0AD252957EC0148AA3CAE39BF22CE4594A29EB3008AD5DBF96",
                                        "Provider":  "google",
@@ -506,15 +485,6 @@
                                     "Model":  "gemini-1.5-flash-latest",
                                     "OutputTokens":  203
                                 },
-    "cmdlets/Send-GradioSessionFiles.md":  {
-                                               "SrcHash":  "156E2A96F4EF6D2B00D341AF856B5ABD54DA47E9F5191463E8792F3821AE34D7",
-                                               "Provider":  "google",
-                                               "InputTokens":  353,
-                                               "SrcLang":  "pt-BR",
-                                               "TargetHash":  "F92B1C33EC48B880C580B002EC390281396E88CB720BD63F3F20AFF59416F88F",
-                                               "Model":  "gemini-1.5-flash-latest",
-                                               "OutputTokens":  242
-                                           },
     "cmdlets/Invoke-GoogleGenerateContent.md":  {
                                                     "SrcHash":  "75589E8BF0A3BD760B36435D8F0C97DE4508901495D8052AEDC01964EDDB69CA",
                                                     "Provider":  "google",
@@ -551,15 +521,15 @@
                                           "Model":  "gemini-1.5-flash-latest",
                                           "OutputTokens":  1859
                                       },
-    "cmdlets/Close-HttpRequest.md":  {
-                                         "SrcHash":  "CA3C8CBD705BDD458D988AED050061AF679BAA480FCC1F8D77797CAF2D80E8A7",
-                                         "Provider":  "google",
-                                         "InputTokens":  320,
-                                         "SrcLang":  "pt-BR",
-                                         "TargetHash":  "5AA2E562B135F63F3953D99B54EC50C00971584FBE4929694F25D7DD363AA800",
-                                         "Model":  "gemini-1.5-flash-latest",
-                                         "OutputTokens":  212
-                                     },
+    "cmdlets/Get-GoogleModels.md":  {
+                                        "SrcHash":  "FBFF42FCEFA363B9A77FD842F6B0EE1AB537F7AC76999F9BC633AEBC23778658",
+                                        "Provider":  "google",
+                                        "InputTokens":  213,
+                                        "SrcLang":  "pt-BR",
+                                        "TargetHash":  "91403AA82C5508A93EA95E5A7C6404F5CE6AD9294CB7D6E92BAD0AC7AF0C9733",
+                                        "Model":  "gemini-1.5-flash-latest",
+                                        "OutputTokens":  105
+                                    },
     "cmdlets/Connect-HuggingFaceSpaceGradio.md":  {
                                                       "SrcHash":  "EC00DA21C56FC8387DD3EAEC10AF5E46DABCB591561B3B566FF9053AEEE273B2",
                                                       "Provider":  "google",
@@ -578,15 +548,15 @@
                                                 "Model":  "gemini-1.5-flash-latest",
                                                 "OutputTokens":  376
                                             },
-    "cmdlets/Get-OpenaiToolFromScript.md":  {
-                                                "SrcHash":  "D338EE83B91DB408B08AA92D54AC9AC879AC808CBCBDD05E973F25FEA344A358",
-                                                "Provider":  "google",
-                                                "InputTokens":  468,
-                                                "SrcLang":  "pt-BR",
-                                                "TargetHash":  "684DC6C94FA23358EAA4375E53326353910CE6075B8EC2C26DC2FFF3BD226FED",
-                                                "Model":  "gemini-1.5-flash-latest",
-                                                "OutputTokens":  374
-                                            },
+    "cmdlets/Set-PowershaiChatParameter.md":  {
+                                                  "SrcHash":  "286273F67B593F512F73B0BF31C06BD48CC00EF748E24CFB093C485DB0D0BF04",
+                                                  "Provider":  "google",
+                                                  "InputTokens":  535,
+                                                  "SrcLang":  "pt-BR",
+                                                  "TargetHash":  "0CCBEC6B03AD88FFB8502757BC5F0F7D4B1205B110AB56C19572E2AC442C3CD4",
+                                                  "Model":  "gemini-1.5-flash-latest",
+                                                  "OutputTokens":  428
+                                              },
     "cmdlets/Get-PowershaiChatParameter.md":  {
                                                   "SrcHash":  "C0F02EA58D9949A0FB9291C193164DBF930AE2D5A8167C3FA327C3FFCD7C82B2",
                                                   "Provider":  "google",
@@ -596,15 +566,36 @@
                                                   "Model":  "gemini-1.5-flash-latest",
                                                   "OutputTokens":  301
                                               },
-    "cmdlets/Start-HttpRequest.md":  {
-                                         "SrcHash":  "EFD9EB1834705273021FF9A80294F71EF72191E7E4BA44CD60B2AB3C3DF66E81",
-                                         "Provider":  "google",
-                                         "InputTokens":  687,
-                                         "SrcLang":  "pt-BR",
-                                         "TargetHash":  "25D3558A8CEACBC1CE75F41716612A07E17B034C214D0504E87E12855A14C13B",
-                                         "Model":  "gemini-1.5-flash-latest",
-                                         "OutputTokens":  524
-                                     },
+    "START-README.md":  {
+                            "SrcHash":  "F8B6D41417B21B41ECDAE9376851C33F54A34131FC05E687E5BDA12C26BA67A2",
+                            "Provider":  "google",
+                            "InputTokens":  1275,
+                            "SrcLang":  "pt-BR",
+                            "TargetHash":  "2A635367C44E1AADA5CF403790EDC2D694EFEAF02CC19FDEF36FE135A9132F06",
+                            "Model":  "gemini-1.5-flash-latest",
+                            "OutputTokens":  1105
+                        },
+    "cmdlets/Invoke-GradioSessionApi.md":  {
+                                               "SrcHash":  "2FAF0D8F035AEE0E274ABBB3A55FD7013EEF41B5C099EC29CEAC219C4E21AD51",
+                                               "Provider":  "google",
+                                               "InputTokens":  910,
+                                               "SrcLang":  "pt-BR",
+                                               "TargetHash":  "7D950BFEA68E2CBA10EE5F99987F5A4664E8EAA309AD09C2AE2565F18587EF6C",
+                                               "Model":  "gemini-1.5-flash-latest",
+                                               "OutputTokens":  813
+                                           },
+    "Values":  [
+
+               ],
+    "cmdlets/New-PowershaiError.md":  {
+                                          "SrcHash":  "E8ACA6068BA19598A4414F611CB6B8F79FCB3124D1A1FE004CF96A1B829E9626",
+                                          "Provider":  "google",
+                                          "InputTokens":  518,
+                                          "SrcLang":  "pt-BR",
+                                          "TargetHash":  "0D03348005BD9591FB23CAE3E946C5025959B5CB652632D5947B436FA801C3FE",
+                                          "Model":  "gemini-1.5-flash-latest",
+                                          "OutputTokens":  413
+                                      },
     "cmdlets/Get-OpenAiAnswerCost.md":  {
                                             "SrcHash":  "CD07670381A9F594F0A25610309AEFFC2027E6C3B275BE9259705F6A45969D99",
                                             "Provider":  "google",
@@ -650,24 +641,24 @@
                                             "Model":  "gemini-1.5-flash-latest",
                                             "OutputTokens":  158
                                         },
-    "cmdlets/Get-GradioSession.md":  {
-                                         "SrcHash":  "CFDFA54D25FFEB89C5B7F2344E5D555E523221F36BCEFBA82B91D774855F8080",
+    "CHATS.about.md":  {
+                           "SrcHash":  "D1F43B418A2D383F3A50E2982B287671EFCFD247FF41D157162DE7B8DA83D872",
+                           "Provider":  "google",
+                           "InputTokens":  4345,
+                           "SrcLang":  "pt-BR",
+                           "TargetHash":  "9E4A94070513233EBC3CC8D0D97C8DB77F500C675B9AC4DE6966449192F87C7E",
+                           "Model":  "gemini-1.5-flash-latest",
+                           "OutputTokens":  4021
+                       },
+    "cmdlets/Set-OpenaiBaseUrl.md":  {
+                                         "SrcHash":  "AC973A8D3BABA542834BD2A3BECD5322C6A26B34A976ACAAC5525B768579C6E0",
                                          "Provider":  "google",
-                                         "InputTokens":  438,
+                                         "InputTokens":  274,
                                          "SrcLang":  "pt-BR",
-                                         "TargetHash":  "587E4C3E4B445E8562673D427BB001553B889F63A02EBCF4292768D3F9BC01A7",
+                                         "TargetHash":  "0144F42AB2ACD6B9DA0A3F58D72B24CD4562921918572CE61F2F614DDBE538C5",
                                          "Model":  "gemini-1.5-flash-latest",
-                                         "OutputTokens":  334
+                                         "OutputTokens":  163
                                      },
-    "cmdlets/Send-GradioApi.md":  {
-                                      "SrcHash":  "0C418693080BD9FE85E0B786835C530C555CCC23A633488CD8E7ADE771F9D409",
-                                      "Provider":  "google",
-                                      "InputTokens":  1592,
-                                      "SrcLang":  "pt-BR",
-                                      "TargetHash":  "FE427595CA670607CED005593688F2C26BAAA443AAC6E870E1072886611D55FE",
-                                      "Model":  "gemini-1.5-flash-latest",
-                                      "OutputTokens":  1541
-                                  },
     "cmdlets/Send-GradioFile.md":  {
                                        "SrcHash":  "59C7346B084238A13A0315EC346408156D612A5C72E8737F8F13C8A08899067E",
                                        "Provider":  "google",
@@ -677,6 +668,15 @@
                                        "Model":  "gemini-1.5-flash-latest",
                                        "OutputTokens":  391
                                    },
+    "cmdlets/ConvertTo-PowershaiContextOutString.md":  {
+                                                           "SrcHash":  "04C91075FB61F70873B51072B76E48BA3013B15D8578CEA0FA6DDB56DE30F5DE",
+                                                           "Provider":  "google",
+                                                           "InputTokens":  280,
+                                                           "SrcLang":  "pt-BR",
+                                                           "TargetHash":  "2FAAE12588D4CAFA1523E156BDF88A03C122FCC5B0E89D1A03A659150BDA111D",
+                                                           "Model":  "gemini-1.5-flash-latest",
+                                                           "OutputTokens":  171
+                                                       },
     "cmdlets/Invoke-HuggingFaceHub.md":  {
                                              "SrcHash":  "486FB46A299E6E33C8234E68B67144B65FAD5ECA51A2BAA13D85A08AFD96F0B2",
                                              "Provider":  "google",
@@ -732,15 +732,15 @@
                                                    "Model":  "gemini-1.5-flash-latest",
                                                    "OutputTokens":  764
                                                },
-    "START-README.md":  {
-                            "SrcHash":  "487C5533A36A7599DFB9C9EE063EAACACB90024F6D4D35871E31413B4C285126",
-                            "Provider":  "google",
-                            "InputTokens":  1267,
-                            "SrcLang":  "pt-BR",
-                            "TargetHash":  "6ACDE4F9C7275F081C9A99D1E2A3972DCA00EE56130E8AF63A0206DE0045814D",
-                            "Model":  "gemini-1.5-flash-latest",
-                            "OutputTokens":  1089
-                        },
+    "cmdlets/Reset-PowershaiChatToolsCache.md":  {
+                                                     "SrcHash":  "99B6DF2D860B870815388942C7B5D1472A6B853EE7F75C07C45B87AAFD3B4135",
+                                                     "Provider":  "google",
+                                                     "InputTokens":  590,
+                                                     "SrcLang":  "pt-BR",
+                                                     "TargetHash":  "788550A26F3D32A937A796A1468B2745F170C1F83D5774DC975C6A86F791A778",
+                                                     "Model":  "gemini-1.5-flash-latest",
+                                                     "OutputTokens":  478
+                                                 },
     "cmdlets/Get-PowershaiChatTool.md":  {
                                              "SrcHash":  "691F8B0921745942BB7637E28140D62608B2A5C88FAE0CE3A195C9AE3C38A0A5",
                                              "Provider":  "google",
@@ -750,15 +750,15 @@
                                              "Model":  "gemini-1.5-flash-latest",
                                              "OutputTokens":  474
                                          },
-    "cmdlets/Get-OllamaTags.md":  {
-                                      "SrcHash":  "CB90E6802C806E5D3EC0D846CB85A8CEEB1894F4E3F47B9AF836703E2C0DA72A",
-                                      "Provider":  "google",
-                                      "InputTokens":  205,
-                                      "SrcLang":  "pt-BR",
-                                      "TargetHash":  "0A1C854993B056B4164D52D46E9BACDD1FC7A638400EE0E363E282A3E4D73110",
-                                      "Model":  "gemini-1.5-flash-latest",
-                                      "OutputTokens":  97
-                                  },
+    "cmdlets/Remove-PowershaiChatTool.md":  {
+                                                "SrcHash":  "298854E34FA3F3EC41B56A322BB1ABFEA1559E5E9B2CA08DC7AB070D0BB4AD55",
+                                                "Provider":  "google",
+                                                "InputTokens":  562,
+                                                "SrcLang":  "pt-BR",
+                                                "TargetHash":  "27A258A600DF8D8F042712CFDAA7D2420C006B4BABE5D171646CA646A2D4240C",
+                                                "Model":  "gemini-1.5-flash-latest",
+                                                "OutputTokens":  466
+                                            },
     "cmdlets/Get-OpenaiChat.md":  {
                                       "SrcHash":  "DE226AFB8CD75ED5E435D7398E6642866FE9A91189C185CFD8E34C0F2476C318",
                                       "Provider":  "google",
@@ -768,24 +768,24 @@
                                       "Model":  "gemini-1.5-flash-latest",
                                       "OutputTokens":  748
                                   },
-    "cmdlets/New-PowershaiError.md":  {
-                                          "SrcHash":  "E8ACA6068BA19598A4414F611CB6B8F79FCB3124D1A1FE004CF96A1B829E9626",
-                                          "Provider":  "google",
-                                          "InputTokens":  518,
-                                          "SrcLang":  "pt-BR",
-                                          "TargetHash":  "0D03348005BD9591FB23CAE3E946C5025959B5CB652632D5947B436FA801C3FE",
-                                          "Model":  "gemini-1.5-flash-latest",
-                                          "OutputTokens":  413
-                                      },
-    "cmdlets/Invoke-MaritalkApi.md":  {
-                                          "SrcHash":  "C9C3C24171B03ACD7299557AABF9C1FAF80DC3FE0CCF140E3CD4E15DB76C4B47",
-                                          "Provider":  "google",
-                                          "InputTokens":  616,
-                                          "SrcLang":  "pt-BR",
-                                          "TargetHash":  "D65BDCE61A8E8446A8508A93EFF989682391F4C511899ADBC060A53026973295",
-                                          "Model":  "gemini-1.5-flash-latest",
-                                          "OutputTokens":  505
-                                      },
+    "cmdlets/Get-OllamaTags.md":  {
+                                      "SrcHash":  "CB90E6802C806E5D3EC0D846CB85A8CEEB1894F4E3F47B9AF836703E2C0DA72A",
+                                      "Provider":  "google",
+                                      "InputTokens":  205,
+                                      "SrcLang":  "pt-BR",
+                                      "TargetHash":  "0A1C854993B056B4164D52D46E9BACDD1FC7A638400EE0E363E282A3E4D73110",
+                                      "Model":  "gemini-1.5-flash-latest",
+                                      "OutputTokens":  97
+                                  },
+    "cmdlets/New-GradioSession.md":  {
+                                         "SrcHash":  "175E80A8B55A4B3B59C155A11FB4320DB4DCA24716AF98A83BC9F1622404CF62",
+                                         "Provider":  "google",
+                                         "InputTokens":  667,
+                                         "SrcLang":  "pt-BR",
+                                         "TargetHash":  "F71263379F996A7DF839F1A41A81979FE6A5B9CEBFAF4C00CEC0EF71A624A6D1",
+                                         "Model":  "gemini-1.5-flash-latest",
+                                         "OutputTokens":  584
+                                     },
     "cmdlets/Set-GoogleApiKey.md":  {
                                         "SrcHash":  "58972A89478E72A8F7EE373544F14BC45FB2C9A76F848C0FDD6B1B53C840D6E8",
                                         "Provider":  "google",
@@ -831,15 +831,6 @@
                                        "Model":  "gemini-1.5-flash-latest",
                                        "OutputTokens":  92
                                    },
-    "cmdlets/Set-OpenaiToken.md":  {
-                                       "SrcHash":  "0FA377CAB26AB8B0AF6DC569E244EAD566B4FF181FDB02E468A61BD3E6548F3C",
-                                       "Provider":  "google",
-                                       "InputTokens":  205,
-                                       "SrcLang":  "pt-BR",
-                                       "TargetHash":  "F6574B145626359D19A591BB5B990121E34953534D299DE791364F4038E6CBD4",
-                                       "Model":  "gemini-1.5-flash-latest",
-                                       "OutputTokens":  91
-                                   },
     "cmdlets/Get-PowershaiContextFormatters.md":  {
                                                       "SrcHash":  "E5C4C51AFC094FF71C8DA40DD560A37DD2DD8B86E60AF42C9C5425BF0B341E3D",
                                                       "Provider":  "google",
@@ -858,15 +849,24 @@
                                       "Model":  "gemini-1.5-flash-latest",
                                       "OutputTokens":  269
                                   },
-    "cmdlets/Add-PowershaiChatTool.md":  {
-                                             "SrcHash":  "52EB3EA0CBCF69FFA65E5362B27B7803968257B8E4E1F450CDF9248E9DDFEA54",
-                                             "Provider":  "google",
-                                             "InputTokens":  1009,
-                                             "SrcLang":  "pt-BR",
-                                             "TargetHash":  "C247E7CBEA75EB25E5F9C60B10E4487F9E6E600EE5982EE87C929E96F91C666D",
-                                             "Model":  "gemini-1.5-flash-latest",
-                                             "OutputTokens":  892
-                                         },
+    "cmdlets/Send-GradioSessionFiles.md":  {
+                                               "SrcHash":  "156E2A96F4EF6D2B00D341AF856B5ABD54DA47E9F5191463E8792F3821AE34D7",
+                                               "Provider":  "google",
+                                               "InputTokens":  353,
+                                               "SrcLang":  "pt-BR",
+                                               "TargetHash":  "F92B1C33EC48B880C580B002EC390281396E88CB720BD63F3F20AFF59416F88F",
+                                               "Model":  "gemini-1.5-flash-latest",
+                                               "OutputTokens":  242
+                                           },
+    "cmdlets/Close-HttpRequest.md":  {
+                                         "SrcHash":  "CA3C8CBD705BDD458D988AED050061AF679BAA480FCC1F8D77797CAF2D80E8A7",
+                                         "Provider":  "google",
+                                         "InputTokens":  320,
+                                         "SrcLang":  "pt-BR",
+                                         "TargetHash":  "5AA2E562B135F63F3953D99B54EC50C00971584FBE4929694F25D7DD363AA800",
+                                         "Model":  "gemini-1.5-flash-latest",
+                                         "OutputTokens":  212
+                                     },
     "cmdlets/Update-GradioSessionApiResult.md":  {
                                                      "SrcHash":  "FA10614A8526CAAC7BD214BE95ECC3615DB15F168EBB8342ED8D0B0C54EE5E39",
                                                      "Provider":  "google",
@@ -876,24 +876,24 @@
                                                      "Model":  "gemini-1.5-flash-latest",
                                                      "OutputTokens":  564
                                                  },
-    "cmdlets/Invoke-GradioSessionApi.md":  {
-                                               "SrcHash":  "2FAF0D8F035AEE0E274ABBB3A55FD7013EEF41B5C099EC29CEAC219C4E21AD51",
+    "cmdlets/Remove-GradioSessionApi.md":  {
+                                               "SrcHash":  "5982B3D55C260EE568D60670ED8F117BC7AB968D4B5D36443691995EF88A9026",
                                                "Provider":  "google",
-                                               "InputTokens":  910,
+                                               "InputTokens":  850,
                                                "SrcLang":  "pt-BR",
-                                               "TargetHash":  "7D950BFEA68E2CBA10EE5F99987F5A4664E8EAA309AD09C2AE2565F18587EF6C",
+                                               "TargetHash":  "BF06D64B03A09A1421F54597FE5999CE25C7743E20B1E20A0D9550BF5CC087EC",
                                                "Model":  "gemini-1.5-flash-latest",
-                                               "OutputTokens":  813
+                                               "OutputTokens":  779
                                            },
-    "cmdlets/Invoke-HuggingFaceInferenceApi.md":  {
-                                                      "SrcHash":  "D9EB30D4083C0C65367366EC0F89B05C4B536B55FF2F7195838DFE9176A1AAA0",
-                                                      "Provider":  "google",
-                                                      "InputTokens":  609,
-                                                      "SrcLang":  "pt-BR",
-                                                      "TargetHash":  "34A82F3F69C2AC421BC5EEE90632A3A0E58C3B2F02B0EDE8A61331C6762C7043",
-                                                      "Model":  "gemini-1.5-flash-latest",
-                                                      "OutputTokens":  511
-                                                  },
+    "cmdlets/Get-GradioSession.md":  {
+                                         "SrcHash":  "CFDFA54D25FFEB89C5B7F2344E5D555E523221F36BCEFBA82B91D774855F8080",
+                                         "Provider":  "google",
+                                         "InputTokens":  438,
+                                         "SrcLang":  "pt-BR",
+                                         "TargetHash":  "587E4C3E4B445E8562673D427BB001553B889F63A02EBCF4292768D3F9BC01A7",
+                                         "Model":  "gemini-1.5-flash-latest",
+                                         "OutputTokens":  334
+                                     },
     "cmdlets/Get-HuggingFaceWhoami.md":  {
                                              "SrcHash":  "69568135B475135397AF99EEAB67C73368285C3ACA18A03DC7D3040829AD49EF",
                                              "Provider":  "google",
