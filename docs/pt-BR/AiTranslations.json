@@ -1,13 +1,13 @@
 {
     "IsFixedSize":  false,
     "START-README.md":  {
-                            "SrcHash":  "EC59D1366CA644A043CFE35F92F5FC6097E9E07A17C9CDABF8EA787A927F721E",
+                            "SrcHash":  "487C5533A36A7599DFB9C9EE063EAACACB90024F6D4D35871E31413B4C285126",
                             "Provider":  "google",
-                            "InputTokens":  1196,
+                            "InputTokens":  1267,
                             "SrcLang":  "pt-BR",
-                            "TargetHash":  "CA687D96E01F6511DF28D34E0B33A749D8F9AB223C7DD0B127842625832CD2A5",
+                            "TargetHash":  "2BE629B17132116DDBB149E215366176E95EE634C1B6B5AC81ED063DAED6F3A1",
                             "Model":  "gemini-1.5-flash-latest",
-                            "OutputTokens":  994
+                            "OutputTokens":  1065
                         },
     "Count":  0,
     "IsSynchronized":  false,

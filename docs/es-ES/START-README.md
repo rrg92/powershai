@@ -10,102 +10,108 @@
 * [english](docs/en-US/START-README.md)
 * [Français](docs/fr-FR/START-README.md)
 * [日本語](docs/ja-JP/START-README.md)
-* [العربية](docs/sa-SA/START-README.md)
+* [العربية](docs/ar-SA/START-README.md)
+* [Deutsch](docs/de-DE/START-README.md)
+* [español](docs/es-ES/START-README.md)
+* [עברית](docs/he-IL/START-README.md)
+* [italiano](docs/it-IT/START-README.md)
 
-PowershAI (PowerShell + AI) é um módulo que integra serviços de Inteligência Artificial diretamente no PowerShell.  
-Você pode invocar os comandos tanto em scripts quanto na linha de comando.  
+PowershAI (PowerShell + AI) es un módulo que integra servicios de Inteligencia Artificial directamente en PowerShell.  
+Puedes invocar los comandos tanto en scripts como en la línea de comandos.  
 
-Existem vários comandos que permitem conversas com LLMs, invocar spaces do Hugging Face, Gradio, etc.  
-Você pode conversar com o GPT-4o-mini, gemini flash, llama 3.1, etc, usando seus próprios tokens destes serviço.  
-Isso é, você não paga nada pra usar o PowershAI, além dos custos que você já teria normalmente ao usar esses serviços.  
+Hay varios comandos que te permiten conversar con LLMs, invocar espacios de Hugging Face, Gradio, etc.  
+Puedes conversar con GPT-4o-mini, gemini flash, llama 3.1, etc., usando tus propios tokens de estos servicios.  
+Esto es, no pagas nada por usar PowershAI, además de los costos que ya tendrías normalmente al usar estos servicios.  
 
-Este módulo é ideal para integrar comandos powershell com seus LLM favoritos, testar chamadas, pocs, etc.  
-É ideal para quem já está acostumado com o PowerShell e quer trazer a IA pro seus scripts de uma maneira mais simples e fácil!
+Este módulo es ideal para integrar comandos powershell con tus LLMs favoritos, probar llamadas, POCs, etc.  
+¡Es ideal para aquellos que ya están acostumbrados a PowerShell y quieren traer la IA a sus scripts de una manera más simple y fácil!
 
-Os seguintes exemplos mostram como você pode o Powershai em situações comuns:
+Los siguientes ejemplos muestran cómo puedes usar Powershai en situaciones comunes:
 
-## Analisando logs do Windows 
+## Analizando logs del Windows 
 ```powershell 
 import-module powershai 
 
-Set-OpenaiToken # configura um token para OpenAI (precisa fazer isso apenas 1x)
+Set-OpenaiToken # configura un token para OpenAI (solo necesitas hacerlo 1x)
 Set-AiProvider openai 
 
- Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Algum evento importante?"
+ Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Algún evento importante?"
 ```
 
-## Descrição de serviços 
+## Descripción de servicios 
 ```powershell 
 import-module powershai 
 
-Set-GoogleApiKey # configura um token para o Google Gemini (precisa fazer isso apenas 1x)
+Set-GoogleApiKey # configura un token para Google Gemini (solo necesitas hacerlo 1x)
 Set-AiProvider google
 
-Get-Service | ia "Faça um resumo de quais serviços não são nativos do Windows e podem representar um risco"
+Get-Service | ia "Haz un resumen de qué servicios no son nativos de Windows y pueden representar un riesgo"
 ```
 
-## Explicação commits do git 
+## Explicación commits del git 
 ```powershell 
 import-module powershai 
 
-Set-MaritalkToken # configura um token para Maritaca.AI (LLM brasileiro)
+Set-MaritalkToken # configura un token para Maritaca.AI (LLM brasileño)
 Set-AiProvider maritalk
 
-git log --oneline | ia "Faça um resumo desses commits feitos"
+git log --oneline | ia "Haz un resumen de estos commits realizados"
 ```
 
 
-Os exemplos acima são apenas uma pequena demonstração de como é fácil começar a usar IA no seu Powershell e integrar com praticamente qualquer comando!
-[Explore mais na documentação](docs/pt-BR)
+Los ejemplos anteriores son solo una pequeña demostración de lo fácil que es empezar a usar IA en tu Powershell e integrarlo con prácticamente cualquier comando.
+[Explora más en la documentación](docs/pt-BR)
 
-## Instalação
+## Instalación
 
-Toda a funcionalidade está no diretório `powershai`, que é um módulo PowerShell.  
-A opção mais simples de instalação é com o comando `Install-Module`:
+Toda la funcionalidad está en el directorio `powershai`, que es un módulo PowerShell.  
+La opción más simple de instalación es con el comando `Install-Module`:
 
 ```powershell
 Install-Module -Name powershai -Scope CurrentUser
 ```
 
-Após instalar, basta importar na sua sessão:
+Después de instalar, solo tienes que importarlo en tu sesión:
 
 ```powershell
 import-module powershai
 
-# Veja os comandos disponiveis
+# Ver los comandos disponibles
 Get-Command -mo powershai
 ```
 
-Você também pode clonar esse projeto diretamente e importar o diretório powershai:
+También puedes clonar este proyecto directamente e importar el directorio powershai:
 
 ```powershell
-cd CAMINHO
+cd CAMINO
 
-# Clona
+# Clonar
 git clone ...
 
-#Importar a partir do caminho específico!
+# Importar desde la ruta específica!
 Import-Module .\powershai
 ```
 
-## Explore e Contribua
+## Explora y Contribuye
 
-Ainda há muito a documentar e evoluir no PowershAI!  
-À medida que faço melhorias, deixo comentários no código para ajudar aqueles que querem aprender como eu fiz!  
-Sinta-se à vontade para explorar e contribuir com sugestões de melhorias.
+¡Todavía hay mucho que documentar y evolucionar en PowershAI!  
+A medida que hago mejoras, dejo comentarios en el código para ayudar a aquellos que quieren aprender cómo lo hice!  
+Siéntete libre de explorar y contribuir con sugerencias de mejora.
 
-## Outros Projetos com PowerShell
+## Otros Proyectos con PowerShell
 
-Aqui estão alguns outros projetos interessantes que integram PowerShell com IA:
+Aquí hay algunos otros proyectos interesantes que integran PowerShell con IA:
 
 - [PSAI](https://github.com/dfinke/PSAI)
 - [PSOpenAI](https://github.com/mkht/PSOpenAI)
 - [dbatools.ai](https://github.com/potatoqualitee/dbatools.ai)
 
-Explore, aprenda e contribua!
+¡Explora, aprende y contribuye!
+
 
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA_
+_Traducido automáticamente usando PowershAI e IA. 
+_
 <!--PowershaiAiDocBlockEnd-->
