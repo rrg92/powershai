@@ -10,7 +10,11 @@
 * [english](docs/en-US/START-README.md)
 * [Français](docs/fr-FR/START-README.md)
 * [日本語](docs/ja-JP/START-README.md)
-* [العربية](docs/sa-SA/START-README.md)
+* [العربية](docs/ar-SA/START-README.md)
+* [Deutsch](docs/de-DE/START-README.md)
+* [español](docs/es-ES/START-README.md)
+* [עברית](docs/he-IL/START-README.md)
+* [italiano](docs/it-IT/START-README.m)
 
 PowershAI (PowerShell + AI) é um módulo que integra serviços de Inteligência Artificial diretamente no PowerShell.  
 Você pode invocar os comandos tanto em scripts quanto na linha de comando.  
