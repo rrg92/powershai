@@ -1,0 +1,24 @@
+{
+    "IsFixedSize":  false,
+    "START-README.md":  {
+                            "SrcHash":  "EC59D1366CA644A043CFE35F92F5FC6097E9E07A17C9CDABF8EA787A927F721E",
+                            "Provider":  "google",
+                            "InputTokens":  1196,
+                            "SrcLang":  "pt-BR",
+                            "TargetHash":  "A4277F604C118AC5D7F0694F80048024295F45C29B7989B3AF4F21496B335EAF",
+                            "Model":  "gemini-1.5-flash-latest",
+                            "OutputTokens":  1058
+                        },
+    "Count":  0,
+    "IsSynchronized":  false,
+    "IsReadOnly":  false,
+    "Keys":  [
+
+             ],
+    "Values":  [
+
+               ],
+    "SyncRoot":  {
+
+                 }
+}

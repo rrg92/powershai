@@ -1,16 +1,16 @@
 {
+    "providers/groq/README.md":  {
+                                     "SrcHash":  "24BF3F0474B3E00B8EDB6AE6C7CEA2C25C6A5917469218A48526A533DA300673",
+                                     "TargetHash":  "D59CA39791ACFA83634E26B0740DF34F6CB9CBB8920FC956A401D46CF9FF27C6"
+                                 },
     "providers/ollama/README.md":  {
                                        "SrcHash":  "F413EF1C4BFB9E7E63E6F50CDF4DDB851D3F57E4D146CFFC873D82DA8C2A4FD4",
                                        "TargetHash":  "CF3D003FE1567623E14CC746C94693AFD4C1211BBECFEC86660C78E2125A7D9A"
                                    },
-    "CHATS.about.md":  {
-                           "SrcHash":  "2630A3C1D96C4BB98D2168452F4145AFCCE88D2734D30045A98DD27267DE6CB9",
-                           "TargetHash":  "5AC76A2D5906D61CA5082A602F640AD607A91CC83A5FDD96B12E84F736363899"
-                       },
-    "providers/huggingface/README.md":  {
-                                            "SrcHash":  "2C58332EBD5C7C26A85C90EAD1177199F42AD1F4B3812C90B00E67B57B2D1A74",
-                                            "TargetHash":  "D0B25D241E1A770A689872E5BE6FB790D780AB4A995656A996158792AFD438A5"
-                                        },
+    "providers/openai/README.md":  {
+                                       "SrcHash":  "A7A339DFAB9E18E54C9CD15B9D7BA3092BE66D52169F04546BB56AEE252DDC66",
+                                       "TargetHash":  "4B6971F3F54C578C97F9F79D48CD3275758F2F1B827556AF2A05933E412B2CE9"
+                                   },
     "providers/maritalk/README.md":  {
                                          "SrcHash":  "6E10FE375DA3A983D3A2F20F0A48B5C9E533D29CAC7905A1EF96C7F414C63030",
                                          "TargetHash":  "C01B1A15E69AE90A50846B849AD1FA5B551D350434A41C54A2B33662B4D611C3"
@@ -19,16 +19,25 @@
                                 "SrcHash":  "A34C9F88F035C1C4B62EA5168CEC7AB9E866F1EFFE961615310140955AD81F26",
                                 "TargetHash":  "46A7D9392543E86E203DDBFBFF08830DAB3C8726F58A69C8B507470C1A9EF887"
                             },
-    "providers/groq/README.md":  {
-                                     "SrcHash":  "24BF3F0474B3E00B8EDB6AE6C7CEA2C25C6A5917469218A48526A533DA300673",
-                                     "TargetHash":  "D59CA39791ACFA83634E26B0740DF34F6CB9CBB8920FC956A401D46CF9FF27C6"
-                                 },
+    "providers/huggingface/README.md":  {
+                                            "SrcHash":  "2C58332EBD5C7C26A85C90EAD1177199F42AD1F4B3812C90B00E67B57B2D1A74",
+                                            "TargetHash":  "D0B25D241E1A770A689872E5BE6FB790D780AB4A995656A996158792AFD438A5"
+                                        },
     "README.md":  {
                       "SrcHash":  "FB3E439D50ADB781363CB0CCE051E196870CA8033CC9FDEB6165F095F153843D",
                       "TargetHash":  "6CCB2746EDE1F61A685DAE2B89F2BF34D45639BF49D519659A0105429540EDE6"
                   },
-    "providers/openai/README.md":  {
-                                       "SrcHash":  "A7A339DFAB9E18E54C9CD15B9D7BA3092BE66D52169F04546BB56AEE252DDC66",
-                                       "TargetHash":  "4B6971F3F54C578C97F9F79D48CD3275758F2F1B827556AF2A05933E412B2CE9"
-                                   }
+    "CHATS.about.md":  {
+                           "SrcHash":  "2630A3C1D96C4BB98D2168452F4145AFCCE88D2734D30045A98DD27267DE6CB9",
+                           "TargetHash":  "5AC76A2D5906D61CA5082A602F640AD607A91CC83A5FDD96B12E84F736363899"
+                       },
+    "START-README.md":  {
+                            "SrcHash":  "EC59D1366CA644A043CFE35F92F5FC6097E9E07A17C9CDABF8EA787A927F721E",
+                            "Provider":  "google",
+                            "InputTokens":  1196,
+                            "SrcLang":  "pt-BR",
+                            "TargetHash":  "980AE114BE26579B0F31519C68EDD7BEED3FB073B566C0362D6C7BFBDCE411EC",
+                            "Model":  "gemini-1.5-flash-latest",
+                            "OutputTokens":  1130
+                        }
 }
