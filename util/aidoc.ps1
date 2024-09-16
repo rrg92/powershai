@@ -142,19 +142,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop";
-
-function JoinPath {
-	return ($Args -Join [IO.Path]::DirectorySeparatorChar)
-}
-
-function JoinPath {
-	return ($Args -Join [IO.Path]::DirectorySeparatorChar)
-}
-
-$ProjectRoot = $PSScriptRoot;
+. (Join-Path "$PsScriptRoot" UtilLib.ps1)
+CheckPowershaiRoot
 
 write-host "Loading local powershai module";
-import-module -force (JoinPath $ProjectRoot powershai)
+import-module .\powershai -force;
 
 if(!$SourceLang){
 	throw "Must specifuy -SourceLang"
@@ -164,8 +156,8 @@ if(!$TargetLang){
 	throw "Must specifuy -TargetLang"
 }
 
-$SourcePath = JoinPath $ProjectRoot docs $SourceLang;
-$TargetPath = JoinPath $ProjectRoot docs $TargetLang
+$SourcePath = Resolve-Path (JoinPath docs $SourceLang)
+$TargetPath = Resolve-Path (JoinPath docs $TargetLang)
 
 if(-not(Test-Path $SourcePath)){
 	throw "Invalid Lang: $SourceLang, PathNotfound = $SourcePath";
@@ -363,9 +355,12 @@ foreach($SrcFile in $SourceFiles){
 			"Traduza o texto do usuário para a linguagem de código $($TargetLang). Retorne APENAS o texto traduzido."
 			"Manter o conteúdo original entre <!--! -->. Traduzir comentários de código, nomes de funções de exemplo. Não traduzir nomes de comandos do PowershAI."
 			"Não altere ou complemente partes, foque apenas na tradução do texto."
-			$Initial
-		) -Join "`n"
+		)
 		
+		
+		
+		
+		$system = $system -Join "`n";
 		$prompt = @(
 			"s: $system"
 			$BufferText 

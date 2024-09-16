@@ -98,39 +98,24 @@ param(
 	#Directory where compile 
 	$WorkDir
 	
+	,#List languages to run 
+	 [ArgumentCompleter( {
+				param ($cmd,$param,$word,$ast,$fk)
+				
+				gci docs | ? {$_.PsIsContainer -and $_.name -like "$word*"}|%{$_.name}
+			})]
+		$SupportedLangs = @() # "pt-BR","en-US";
+	
 	,#Filter files using regex. DebugOnly.
 		$FilterRegex = $null
 )
 
 $ErrorActionPreference = "Stop";
+. (Join-Path "$PsScriptRoot" UtilLib.ps1)
+CheckPowershaiRoot
 
-function ReplaceVars($Str,$Vars){
-	
-	if(!$Vars){
-		return $Str;
-	}
-		
-	$ReplaceFunc = {
-		param($m)
 
-		[string]$VarName 	= $m.Groups['VarName'];
-		[string]$PrevChar 	= $m.Groups['PrevChar'];
-		
-		if($PrevChar -eq '\'){
-			return $m.Value;
-		}
-		
-		$VarValue = $Vars[$VarName]
-		return $PrevChar+$Vars[$VarName];
-	}
-	
-	$lines = @();
-	foreach($Str in @($Str)){
-		$lines += [regex]::Replace($str,'(?<PrevChar>.)\$(?<VarName>\w+)',$ReplaceFunc);
-	}
-	
-	return $lines;
-}
+
 function ParseRun($str,$vars){
 	
 	$RunMode = $false;
@@ -164,16 +149,17 @@ function ParseRun($str,$vars){
 	
 }
 
-function JoinPath {
-	return ($Args -Join [IO.Path]::DirectorySeparatorChar)
-}
+
+
+
+
 
 
 if(!$WorkDir -or !(Test-Path $WorkDir)){
 	throw "Must inform valid directory in -WorkDir: $WorkDir"
 }
 
-[string]$DocsDir = JoinPath "$PsScriptRoot" docs;
+[string]$DocsDir = Resolve-Path docs;
 
 
 $TempDir = (JoinPath $WorkDir "platyps")
@@ -185,14 +171,35 @@ if(Test-Path $TempDir){
 write-host "Recreating dir $TempDir";
 $null =New-Item -ItemType Directory -Path $TempDir
 
-write-host "Creating lang dirs...";
-$SupportedLangs = "pt-BR","en-US";
+write-host "Creating lang dirs: $SupportedLangs";
+
+if($SupportedLangs -eq "*"){
+	$SupportedLangs = Get-ChildItem $DocsDir | ? {$_.PsIsContainer} | %{$_.name}
+}
+
+write-host "Langs: $SupportedLangs";
+
 $LangDirs  = $SupportedLangs | %{  
-	$DirPath = JoinPath $TempDir $_;
+	$LangName = $_;
+	
+	$SrcLangExists = Test-Path (JoinPath $DocsDir $LangName)
+	
+	if(!$LangName){
+		throw "LANG_NOTFOUND: $LangName";
+	}
+
+	$DirPath = JoinPath $TempDir $LangName;
 	
 	write-host "	Creating $DirPath";
 	New-Item -ItemType Directory -Path $DirPath
 }
+
+
+if(!$LangDirs){
+	write-warning "No src langs to process!";
+	return;
+}
+
 
 $Utf8Bom = New-Object System.Text.UTF8Encoding $true
 
@@ -203,15 +210,7 @@ Function ParseFile($Source,$Target,$Vars){
 	
 	$Lines = $NewContent -split "`r?`n"
 	
-	$HEADERS = @{
-		'Short' 	= "SHORT DESCRIPTION"
-		'Long' 		= "LONG DESCRIPTION"
-		'Ex' 		= "EXAMPLES"
-		'Note' 		= "NOTE"
-		'Troub' 	= "TROUBLESHOOTING NOTE"
-		'Also' 		= "SEE ALSO"
-		'Kw' 		= "KEYWORDS"
-	}
+	$HEADERS = GetHeaderShorts
 	
 	$HeaderNum = 0;
 	$LineNum = 0;
@@ -366,17 +365,18 @@ foreach($MdFile in $AllMarkDowns){
 		continue;
 	}
 
-	if($FileName -match '((.*?)/)?(.*?)\.md'){
+	if($FileName -match '((.*?)/)?([^/]+)\.md'){
 		if($matches[1]){
 			$Topic += "_" + $Matches[2].replace("/","_")
 		}
 		
 		$BaseName = $matches[3];
 		
-		if($BaseName -like '*.about' -or $BaseName -eq "README"){
+		if($BaseName -like '*.about'){
 			$Topic += "_" + ($BaseName -replace '\.about$','')
-		} elseif($BaseName -ne 'README') {
-			write-host "	MdFileNotSupported: leftname=$fileName"
+		} 
+		if($BaseName -ne 'README') {
+			write-host "	MdFileNotSupported: leftname=$fileName, BaseName = $BaseName"
 			continue;
 		}
 	}
@@ -415,11 +415,13 @@ foreach($Lang in $LangDirs){
 		
 		
 		
-		$ModuleLangDir = JoinPath "$PsScriptRoot" "powershai" $LangName
+		$ModuleLangDir = JoinPath powershai $LangName
 		
 		if(Test-Path $ModuleLangDir){
 			write-host "	Cleaning target dir: $ModuleLangDir";
 			gci (JoinPath $ModuleLangDir *) | remove-item -force -recurse;
+		} else {
+			$null = New-Item -ItemType Directory $ModuleLangDir
 		}
 		
 		write-host "	Copying back to docs: $ModuleLangDir"

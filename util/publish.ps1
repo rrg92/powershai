@@ -9,10 +9,25 @@ param(
 
 $ErrorActionPreference = "Stop";
 
+if(!$Global:POWERSHAI_PUBLISH_DATA){
+	$Global:POWERSHAI_PUBLISH_DATA = @{}
+}
+
+if(!$POWERSHAI_PUBLISH_DATA.TempDir){
+	$TempFile =  [Io.Path]::GetTempFileName()
+	$TempDir  = $TempFile+"-powershai";
+	$POWERSHAI_PUBLISH_DATA.TempDir = New-Item -Force -ItemType Directory -Path $TempDir;
+}
+
+$TempDir = $POWERSHAI_PUBLISH_DATA.TempDir;
+
+$PlatyDir = Join-Path $TempDir "platy"
+$null = New-Item -Force -ItemType Directory -Path $PlatyDir
 
 if($CompileDoc){
-	$DocsScript = Join-Path $PsScriptRoot docs.ps1
-	& $DocsScript -Publish
+	write-host "DocCompileWorkDir: $PlatyDir";
+	$DocsScript = Join-Path $PsScriptRoot doc.ps1
+	& $DocsScript $PlatyDir
 }
 
 $ModuleRoot = Join-Path "$PsScriptRoot" powershai
