@@ -13,8 +13,17 @@ jobs:
         uses: actions/checkout@v4
       - name: Fetch tags
         run: git fetch --prune --unshallow --tags
+      - name: Test
+        shell: pwsh
+        env:
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          POWERSHAI_TEST_MODELS: ${{ env.POWERSHAI_TEST_MODELS }}
+        run: ./util/publish-prepare.ps1 -BasicTest
       - name: Publish
         shell: pwsh
         env:
           PSGALERY_KEY: ${{ secrets.PSGALERY_KEY }}
-        run: ./util/publish.ps1 -CompileDoc
+        run: ./util/publish.ps1 -Publish
+        
