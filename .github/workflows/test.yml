@@ -1,0 +1,21 @@
+name: TestPowershai
+on: 
+    workflow_call:
+
+jobs:
+  Test:
+    name: BasicTests 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Fetch tags
+        run: git fetch --prune --unshallow --tags
+      - name: Test
+        shell: pwsh
+        env:
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          POWERSHAI_TEST_MODELS: ${{ vars.POWERSHAI_TEST_MODELS }}
+        run: ./util/publish-prepare.ps1 -BasicTest

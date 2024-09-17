@@ -1,0 +1,11 @@
+name: TestOnly
+on: 
+    push:
+        branches:
+            - test-*
+
+jobs:
+  BasicTests:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
+        
