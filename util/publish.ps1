@@ -38,7 +38,7 @@ if($CompileDoc){
 
 
 # Module version!
-if($$CheckVersion){
+if($CheckVersion){
 	# Current version!
 	$LastTaggedVersion = git describe --tags --match "v*" --abbrev=0;
 
