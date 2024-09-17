@@ -5,12 +5,7 @@ on:
             - test-*
 
 jobs:
-  Test:
+  BasicTests:
     uses: ./.github/workflows/test.yml
-    with:
-        TestModels : ${{ vars.POWERSHAI_TEST_MODELS }}
-    secrets:
-          HuggingFaceToken: ${{ secrets.HF_API_TOKEN }}
-          OpenaiToken: ${{ secrets.OPENAI_API_KEY }}
-          GoogleApiToken: ${{ secrets.GOOGLE_API_KEY }}
+    secrets: inherit
         

@@ -1,18 +1,10 @@
 name: TestPowershai
 on: 
     workflow_call:
-        secrets:
-            HuggingFaceToken:
-            OpenaiToken:
-            GoogleApiToken:
-        inputs:
-            TestModels:
-                required: true
-                type: string
 
 jobs:
-  PsGallery:
-    name: PsGallery 
+  Test:
+    name: BasicTests 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,8 +14,8 @@ jobs:
       - name: Test
         shell: pwsh
         env:
-          HF_API_TOKEN: ${{ secrets.HuggingFaceToken }}
-          OPENAI_API_KEY: ${{ secrets.OpenaiToken }}
-          GOOGLE_API_KEY: ${{ secrets.GoogleApiToken }}
-          POWERSHAI_TEST_MODELS: ${{ inputs.TestModels }}
+          HF_API_TOKEN: ${{ secrets.HF_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          POWERSHAI_TEST_MODELS: ${{ vars.POWERSHAI_TEST_MODELS }}
         run: ./util/publish-prepare.ps1 -BasicTest
