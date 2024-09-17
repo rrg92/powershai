@@ -12,15 +12,19 @@ function InvokeGoogleApi {
 	)
 
 	$Provider = Get-AiCurrentProvider
-	write-verbose "InvokeGoogleApi, current provider = $($Provider.name)"
+	verbose "InvokeGoogleApi, current provider = $($Provider.name)"
 	$TokenRequired = GetCurrentProviderData RequireToken;
 
 	if(!$Token){
 		$TokenEnvName = GetCurrentProviderData TokenEnvName;
 		
 		if($TokenEnvName){
-			write-verbose "Trying get token from environment var: $($TokenEnvName)"
+			verbose "Trying get token from environment var: $($TokenEnvName)"
 			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
+			if($Token){
+				verbose "	Token got from ENV VAR $TokenEnvName!";
+			}
+			
 		}
 	}	
 	
@@ -49,11 +53,15 @@ function InvokeGoogleApi {
 
 	$JsonParams = @{Depth = 10}
 	
-	write-verbose "InvokeGoogleApi: Converting body to json (depth: $($JsonParams.Depth))... $($body|out-string)"
+	verbose "InvokeGoogleApi: Converting body to json (depth: $($JsonParams.Depth))... $($body|out-string)"
     $ReqBodyPrint = $body | ConvertTo-Json @JsonParams
-	write-verbose "ReqBody:`n$($ReqBodyPrint|out-string)"
+	verbose "ReqBody:`n$($ReqBodyPrint|out-string)"
 	
-	$ReqBody = $body | ConvertTo-Json @JsonParams -Compress
+	$ReqBody = $null
+	if($body){
+		$ReqBody = $body | ConvertTo-Json @JsonParams -Compress
+	}
+	
     $ReqParams = @{
         data            = $ReqBody
         url             = $url
@@ -67,9 +75,9 @@ function InvokeGoogleApi {
 	}
 
 
-	write-verbose "ReqParams:`n$($ReqParams|out-string)"
+	verbose "ReqParams:`n$($ReqParams|out-string)"
     $RawResp 	= InvokeHttp @ReqParams
-	write-verbose "RawResp: `n$($RawResp|out-string)"
+	verbose "RawResp: `n$($RawResp|out-string)"
 
 	if($RawResp.stream){
 		return $RawResp;
@@ -228,7 +236,7 @@ function google_Chat {
 			
 			$AnswerJson = $RawJson | ConvertFrom-Json;
 			
-			$AnswerText = $AnswerJson.candidates[0].content.parts[0].text;
+			$AnswerText = @($AnswerJson.candidates)[0].content.parts[0].text;
 			$StreamData.answers += $AnswerJson;
 			
 			$StreamData.fullContent += $AnswerText

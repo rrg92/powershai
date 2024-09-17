@@ -1918,7 +1918,7 @@ function Get-PowershaiChatParameter {
 	$ParamBaseHelp = @(get-help New-PowershaiParameters).parameters.parameter
 	
 	#Lista tudo para garantir mesmo os chats criados previamente possam exibir novas opcoes que aparecem!
-	$AllParams = @($Chat.params.keys) + @($ParamBaseHelp | %{$_.name}) | sort -Unique
+	$AllParams = @($Chat.params.keys) + @($ParamBaseHelp | %{$_.name}) | Sort-object -Unique
 	
 	# Parametros da funcao!
 	$AiChatParams = ((Get-Command Invoke-AiChatTools).Parameters).Keys;
@@ -2371,6 +2371,7 @@ function Send-PowershaiChat {
 			$WriteData = @{
 				BufferedText 	= ""
 				LinesBuffer		= @()
+				streamed 		= $False;
 			}
 			function WriteModelAnswer {
 				param(
@@ -2378,10 +2379,22 @@ function Send-PowershaiChat {
 					,$evt
 				)
 				
-				if($interaction -eq "FlushLine" -and $WriteData.BufferedText){
-					$MainCmdlet.WriteObject($WriteData.BufferedText)
+				$Stream = $interaction.stream;
+				$str = "";
+				$EventName = $evt.event;
+				
+				if($interaction -eq "FlushLine"){
+					if($WriteData.BufferedText){
+						$MainCmdlet.WriteObject($WriteData.BufferedText)
+					}
+					
 					return;
 				}
+				
+				if($EventName -eq "answer" -and $WriteData.streamed){
+					return;
+				}
+					
 				
 				if($Object){
 					write-verbose "ObjectMode enabled. No writes...";
@@ -2393,9 +2406,7 @@ function Send-PowershaiChat {
 					ForegroundColor = "Cyan"
 				}
 				
-				$Stream = $interaction.stream;
-				$str = "";
-				$EventName = $evt.event;
+
 				
 				
 				function FormatPrompt {
@@ -2414,9 +2425,10 @@ function Send-PowershaiChat {
 
 
 				if($Stream){
-					$PartNum 	= $Stream.num;
-					$text 		= $Stream.answer.choices[0].delta.content;
-					$WriteParams.NoNewLine = $true;
+					$WriteData.streamed 	= $true;
+					$PartNum 				= $Stream.num;
+					$text 					= $Stream.answer.choices[0].delta.content;
+					$WriteParams.NoNewLine 	= $true;
 					
 					if($PartNum -eq 1){
 						$str = FormatPrompt
@@ -2804,10 +2816,12 @@ function Send-PowershaiChat {
 					write-host "** $HistoryLog"
 				}
 			} catch {
-				write-host ($_|out-string)
-				write-host "==== ERROR STACKTRACE ==="
-				write-host "StackTrace: " $_.ScriptStackTrace;
-				throw;
+				$StackTrace = $_.ScriptStackTrace;
+				$Msg = [string]$_;
+				
+				$ex = new-object Exception("$Msg`n$StackTrace");
+				
+				throw $ex;
 			}
 		}
 
