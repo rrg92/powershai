@@ -8,7 +8,7 @@ jobs:
   Test:
     uses: ./.github/workflows/test.yml
     with:
-        TestModel: ${{ vars.POWERSHAI_TEST_MODELS }}
+        TestModels : ${{ vars.POWERSHAI_TEST_MODELS }}
     secrets:
           HuggingFaceToken: ${{ secrets.HF_API_TOKEN }}
           OpenaiToken: ${{ secrets.OPENAI_API_KEY }}
