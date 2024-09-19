@@ -1,4 +1,27 @@
 ﻿<#
+	OpenAI Powershai Provider
+	
+		Este arquivo implementa o provider da OpenAI.
+		Link úteis:
+			- https://platform.openai.com/docs/api-reference
+			
+	A OpenAI foi o primeiro provider a ser implementado no PowershAI. 
+	Quando o PowershAI nasceu, eu inicialmente tinha chamado ele de "Poshai" (posh + openai, posh = abrevição alternative de powershell).
+	O objetivo inicial era aprender a usar a openai e ter algum scritp fácil para que eu conseguisse, a partir do powershell, conversar com algum LLM e estudar, fazer testes, etc.  
+	
+	Então, o poshai virou esse provider, quando vi que poderíamos resuar muita coisa da OpenAI para implementar outros LLM.  
+	A partir daí, além de ser um provider de acesso a API da OpenAI, esse provider também é "reusável", isto é, serve de base para outros providers que usam os mesmos princípios da OpenAI.  
+	
+	Qualquer provider que seja compatível coma OpenAI, pode reusar esse provider.  
+	Eventualmente, algum ajuste pode ser feito para melhor abstrair, mas a ideia é que a cada novo provider, menos ajustes precisem ser feitos aqui.
+	Para que um provider possa usar este, basta retornar as keys (documentadas no final deste arquivo) e invocar as funcoes.
+
+	
+#>
+
+
+
+<#
 	Esta função é usada como base para invocar a a API da OpenAI!
 #>
 function InvokeOpenai {
@@ -13,24 +36,7 @@ function InvokeOpenai {
 
 	$Provider = Get-AiCurrentProvider
 	write-verbose "InvokeOpenAI, current provider = $($Provider.name)"
-	$TokenRequired = GetCurrentProviderData RequireToken;
-
-	if(!$Token){
-		$TokenEnvName = GetCurrentProviderData TokenEnvName;
-		
-		if($TokenEnvName){
-			write-verbose "Trying get token from environment var: $($TokenEnvName)"
-			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
-		}
-	}	
-	
-	if(!$Token){
-			$Token = GetCurrentProviderData Token;
-			
-			if(!$token -and $TokenRequired){
-				throw "POWERSHAI_OPENAI_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
-			}
-	}
+	$Token = GetCurrentOpenaiToken $Token
 	
     $headers = @{}
 	
@@ -38,8 +44,6 @@ function InvokeOpenai {
 		 $headers["Authorization"] = "Bearer $token"
 	}
 
-
-	
 	if($endpoint -match '^https?://'){
 		$url = $endpoint
 	} else {
@@ -59,6 +63,8 @@ function InvokeOpenai {
 	write-verbose "ReqBody:`n$($ReqBodyPrint|out-string)"
 	
 	$ReqBody = $body | ConvertTo-Json @JsonParams -Compress
+	
+
     $ReqParams = @{
         data            = $ReqBody
         url             = $url
@@ -137,8 +143,17 @@ function InvokeOpenai {
 			}
 		}
 	}
-
-
+	
+	# Give chance to underline provider change request params if necessary!
+	$ReqChanger = GetCurrentProviderData ReqChanger;
+	
+	# ReqParams is parameters of Invoke-Http function, implement ib lib/http.ps1
+	# Providers developers must know how it works and know how openai provider will habndle that answer!
+	if($ReqChanger){
+		$MyParams 	= GetMyParams
+		$null 		= & $ReqChanger $ReqParams $MyParams
+	}
+	
 	write-verbose "ReqParams:`n$($ReqParams|out-string)"
     $RawResp 	= InvokeHttp @ReqParams
 	write-verbose "RawResp: `n$($RawResp|out-string)"
@@ -173,40 +188,107 @@ function InvokeOpenai {
 }
 
 
+function GetCurrentOpenaiToken {
+	param($OverrideToken)
+	
+	
+	if($OverrideToken){
+		return $OverrideToken;
+	}
+	
+	$TokenEnvName = GetCurrentProviderData TokenEnvName;
+	if($TokenEnvName){
+		verbose "Trying get token from environment var: $($TokenEnvName)"
+		$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
+		
+		if($Token){
+			verbose "	Token from evn $TokenEnvName";
+			return $Token;
+		}
+	}
+	
+	$Token = GetCurrentProviderData Token;
+	
+	if($Token){
+		return $Token;
+	}
+	
+	
+	$TokenRequired = GetCurrentProviderData RequireToken;
+	if($TokenRequired){
+		$Provider = Get-AiCurrentProvider
+		throw "POWERSHAI_OPENAI_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
+	}
+}
 
 
-# Define o token a ser usado nas chamadas da OpenAI!
-# Faz um testes antes para certificar de que é acessível!
-function Set-OpenaiToken {
-	[CmdletBinding()]
-	param()
+# Função interna e base para definir o token da Openai!
+function SetOpenaiTokenBase {
+	param(
+		# alternative title 
+		$title = $null
+		
+		,#Nome da key no provider data em que deve ser salvo o token 
+			$SetData = "Token"
+			
+		,#Script to be invoke as test. IF test fails, must throw some esception!
+		 #Will receive token
+			$TestScript = $null
+	)
 	
 	$ErrorActionPreference = "Stop";
 	
+
 	write-host "Forneça o token no campo senha na tela em que se abrir";
 	
 	$Provider = Get-AiCurrentProvider
 	$ProviderName = $Provider.name.toUpper();
-	$creds = Get-Credential "$ProviderName API TOKEN";
+	
+	if(!$Title){
+		$Title = "$ProviderName API TOKEN"
+	}
+	
+	$creds = Get-Credential $Title;
 	
 	$TempToken = $creds.GetNetworkCredential().Password;
 	
 	write-host "Checando se o token é válido";
-	try {
-		$result = InvokeOpenai 'models' -m 'GET' -token $TempToken
-	} catch [System.Net.WebException] {
-		$resp = $_.exception.Response;
-		
-		if($resp.StatusCode -eq 401){
-			throw "INVALID_TOKEN: Token is not valid!"
-		}
-		
-		throw;
+	if($TestData){
+		$null = & $TestScript $TempToken
 	}
 	write-host -ForegroundColor green "	TOKEN ALTERADO!";
 	
-	SetCurrentProviderData Token $TempToken;
-	return;
+	if($SetData -is [scriptblock]){
+		$null = & $SetData $TempToken
+	} else {
+		SetCurrentProviderData Token $TempToken;
+	}
+}
+
+# Define o token a ser usado nas chamadas da OpenAI!
+# Faz um testes antes para certificar de que é acessível!
+function Set-OpenaiToken {
+	<#
+		.DESCRIPTION
+			Configura a api key para conectar com a openai. 
+			Para gerar uma API KEY, você deve ir no site da OpenAI, fazer o cadastro e gerar o token.  
+			É importante lembrar que a OpenAI é paga, e, portanto, você deverá inserir créditos para conseguir usar a API aqui pelo powershai.
+			
+		
+	#>
+	[CmdletBinding()]
+	param()
+	
+	SetOpenaiTokenBase "$ProviderName API TOKEN" -Test {
+		param($token)
+		
+		try {
+			InvokeOpenai 'models' -m 'GET' -token $Token
+		} catch {
+			throw "POWERSHAI_OPENAI_TOKENTEST_FAILED: Token is invalid";
+		}
+	
+	}
 }
 
 # Configura a Url base a ser usada!
@@ -1003,14 +1085,31 @@ function SplitOpenAiString {
 }
 
 
-
+ # providers que querem reaproveitar a openai, devem ajustar essas keys!
 return @{
+	# If true and no token available, throws error!
 	RequireToken 	= $true
+	
+	# url base. nao obrigatorio (preisará de um ReqChanger)
 	BaseUrl 		= "https://api.openai.com/v1"
-	ResetUrl 		= "https://api.openai.com/v1"
-	DefaultModel 	= "gpt-4o-mini"
+	
+
+	#Nome da variável de ambiente que contém o token.
 	TokenEnvName 	= "OPENAI_API_KEY"
 	
+	# Função, comando, script que deve ser invocado para alterar a requisção.
+	# Será invocada antes de enviar a requisi~~aohttp
+	# Irá receber no primeiro parametro a requisicao e no segundo os parametros originais da InvokeOpenai
+	ReqChanger = $null
+	
+	###### Abaixo as keys padroes do PowershAI (todo provider deve exporta-las)
+	######
+	
+	# Modelo default para ser usado. Será usado quando o usuário não forncer um.
+	DefaultModel 	= "gpt-4o-mini"
+	
+	
+	# informacoes adicionais (key exigida pelo powershai)
 	info = @{
 		desc	= "OpenAI"
 		url 	= "https://openai.com/"

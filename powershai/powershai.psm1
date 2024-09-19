@@ -156,6 +156,30 @@ function GetMyParams(){
 	}
 }
 
+
+function Get-PowershaiErrorDetails {
+	<#
+		.SYNOPSIS 
+			Obtém mais detalhes sobre exceptions e ErrorRecords disparaods pelo Powershai!
+	#>
+	param(
+		#O erro a ser analisado. Se null, utiliza o ultimo error!
+		$ErrorObject = $error[0]
+	)
+	
+	write-host $ErrorObject.GetType().FullName;
+	write-host ([string]$ErrorObject);
+	
+	
+	write-host "=== STACK === "
+	if($ErrorObject.ScriptStackTrace){
+		write-host $ErrorObject.ScriptStackTrace
+	}
+	
+	
+	
+}
+
 <#
 	Obtém uma string codificada com um encoding específico. 
 	Internamente, o Powershell (.NET) armazena tudo como unicode utf16 (https://learn.microsoft.com/en-us/dotnet/standard/base-types/character-encoding-introduction)
@@ -1516,6 +1540,7 @@ function New-PowershaiParameters {
 			$ContextFormatterParams = $null 
 			
 		,#Se true, exibe os argumenots das funcoes quando o Tool Calling é ativado para executar alguma funcao 
+		 #DEPRECIADO. Será removido em breve. Use -PrintToolCalls
 			$ShowArgs = $true 
 			
 		,#Exibe os resultados das tools quando são executadas pelo PowershAI em resposta ao tool calling do modelo 
@@ -1538,6 +1563,14 @@ function New-PowershaiParameters {
 		 #		Chat 				- O chat no qual os dados estão sendo enviados.
 		 # Se nulo, irá gerar um default. Verifique o cmdlet Send-PowershaiChat para detalhes
 			$ContextFormat = $null
+			
+		,#Controla como as Tools Calls são exibidas pelo comando Send-PowershaiChat
+		 #Valores possíveis:
+		 #	No			- não exibe nada relacionado ao tool calls.
+		 #	NameOnly 	- Exibe apenas o nome no formato FunctionaName{...} , em uma linha própria.
+		 #	NameArgs	- Exibe o nome e os argumentos!
+			[ValidateSet("No","NameOnly","NameArgs")]
+			$PrintToolCalls = $null
 	)
 	
     # Get the command name
@@ -1546,6 +1579,12 @@ function New-PowershaiParameters {
     $ParameterList = (Get-Command -Name $CommandName).Parameters;
 	
 	$NewParams = @{}
+	
+	# compatibility
+	if($ShowArgs -and $PrintToolCalls -eq $null){
+		$PrintToolCalls = "NameArgs"
+	}
+	
 	
 	foreach($ParamName in @($ParameterList.keys) ){
 		
@@ -2372,6 +2411,7 @@ function Send-PowershaiChat {
 				BufferedText 	= ""
 				LinesBuffer		= @()
 				streamed 		= $False;
+				premsg 			= $false
 			}
 			function WriteModelAnswer {
 				param(
@@ -2430,8 +2470,9 @@ function Send-PowershaiChat {
 					$text 					= $Stream.answer.choices[0].delta.content;
 					$WriteParams.NoNewLine 	= $true;
 					
-					if($PartNum -eq 1){
+					if(!$WriteData.premsg){
 						$str = FormatPrompt
+						$WriteData.premsg = $true;
 					}
 
 					if($text){
@@ -2478,6 +2519,7 @@ function Send-PowershaiChat {
 					return;
 				}
 				
+
 				if($str){
 					write-host @WriteParams $Str;
 				}
@@ -2631,9 +2673,9 @@ function Send-PowershaiChat {
 								func = {
 									param($interaction)
 									
-									$ans = $interaction.rawAnswer;
-									$model = $ans.model;
-									$funcName = $interaction.toolResults[-1].name
+									$ans 		= $interaction.rawAnswer;
+									$model 		= $ans.model;
+									$funcName 	= $interaction.toolResults[-1].name
 									
 									
 									if($PassThru){
@@ -2641,17 +2683,19 @@ function Send-PowershaiChat {
 										return;
 									}
 									
-									write-host -ForegroundColor Blue "$funcName{" -NoNewLine
+									if($Chat.params.PrintToolCalls -like "Name*"){
+										write-host -ForegroundColor Blue "$funcName{" -NoNewLine
 									
-									if($Chat.params.ShowArgs){
-										write-host ""
-										write-host "Args:"
-										$ToolArgs = $interaction.toolResults[-1].obj;
-										write-host ($ToolArgs|fl|out-string)
-									} else {
-										write-host -ForegroundColor Blue -NoNewLine ...
+										if($Chat.params.PrintToolCalls -eq "NameArgs"){
+												write-host ""
+												write-host "Args:"
+												$ToolArgs = $interaction.toolResults[-1].obj;
+												write-host ($ToolArgs|fl|out-string)
+										} else {
+												write-host -ForegroundColor Blue -NoNewLine ...
+										}
+									
 									}
-									
 								}
 								
 								funcresult = {
@@ -2679,8 +2723,11 @@ function Send-PowershaiChat {
 										return;
 									}
 									
-									write-host -ForegroundColor Blue "}"
-									write-host ""
+									if($Chat.params.PrintToolCalls -like "Name*"){
+										write-host -ForegroundColor Blue "}"
+										write-host ""
+									}
+
 								}
 						}
 				}
