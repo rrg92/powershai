@@ -247,6 +247,8 @@ function google_Chat {
 						delta = @{content = $AnswerText }
 					}
 				)
+				
+				model = $model
 			}
 
 			& $UserScriptCallback $StdAnswer

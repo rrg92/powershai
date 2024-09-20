@@ -320,92 +320,6 @@ function Get-MaritalkChat {
 	Invoke-MaritalkApi -openai -method POST -endpoint 'chat/completions' -body $Body -StreamCallback $StreamCallback	
 }
 
-Set-Alias maritalk_Chat Get-MaritalkChat
-
-function maritalk_Chat {
-	param(
-         $prompt
-        ,$temperature   = 0.6
-        ,$model         = $null
-        ,$MaxTokens     = 200
-		,$ResponseFormat = $null
-		
-		,#Function list, as acceptable by Openai
-		 #OpenAuxFunc2Tool can be used to convert from powershell to this format!
-			$Functions 	= @()	
-			
-		#Add raw params directly to api!
-		#overwite previous
-		,$RawParams	= @{}
-		,$StreamCallback = $null
-	)
-	
-	if(!$model){
-		$model = "sabia-2-medium"
-	}
-	
-
-	$Params = @{
-		prompt = $prompt
-		temperature = $temperature 
-		model = $model
-		MaxTokens = $MaxTokens
-		StreamCallback = $StreamCallback
-	}
-	
-	if($RawParams){
-		foreach($Key in @($RawParams.keys)){
-			$Params[$key] = $RawParams[$Key]
-		}
-	}
-	
-	
-	
-	$result = Invoke-MaritalkInference @Params
-	
-	if($result.stream){
-		return $result;
-	}
-	
-	
-	$ResultText = $result.answer;
-	if($ResponseFormat.type -eq "json_object"){
-		if($ResultText -match '(?s)```json(.*?)```'){
-			$ResultText = $matches[1];
-		} else {
-			write-warning "Maritalk nao conseguiu retornar o JSON corretamente. A resposta será ajustada mas pode não ser no formato esperado!"
-			$ResultText = @{PowerShaiJsonResult = $ResultText} | ConvertTo-Json -Compress;
-		}
-		
-	}
-
-	
-	
-	#converte para o mesmo formato da OpenAI!
-	return @{
-		choices = @(
-			@{
-				finish_reason 	= "stop"
-				index 			= 0
-				logprobs 		= $null
-				message 		= @{
-									role = "assistant"
-									content = $ResultText
-								}
-			}
-		)
-		
-		usage 	= $result.usage
-		model 	= $result.model
-		created = [int](((Get-Date) - (Get-Date "1970-01-01T00:00:00Z")).TotalSeconds)
-		object	= "chat.completion"
-		id 		= "chatcmpl-maritalkpowershai"
-		system_fingerprint = $null
-	}
-	
-	
-}
-
 # Retorna os models!
 function Get-MaritalkModels {
 	$Result = Invoke-MaritalkApi "chat/models" -method GET
@@ -421,6 +335,15 @@ function Get-MaritalkModels {
 
 Set-Alias maritalk_GetModels Get-MaritalkModels
 
+function maritalk_Chat {
+	$RawParams = $ProviderFuncRawData.params;
+	
+	# Tools calling nao suportado!
+	$null = $RawParams.Remove('Functions');
+
+	openai_Chat @RawParams
+}
+
 
 function maritalk_FormatPrompt {
 	param($model)
@@ -432,31 +355,22 @@ function Set-MaritalkToken {
 	[CmdletBinding()]
 	param()
 	
-	$ErrorActionPreference = "Stop";
+	SetOpenaiTokenBase "MARITALK API TOKEN" -Test {
+		param($token)
+		
+		try {
+			$result =  Get-MaritalkModels
+		} catch [System.Net.WebException] {
+			$resp = $_.exception.Response;
+			
+			if($resp.StatusCode -eq 401){
+				throw "POWERSHAI_OPENAI_TOKENTEST_FAILED: Token is invalid";
+			}
+			
+			throw;
+		}
 	
-	write-host "Forneça o token no campo senha na tela em que se abrir";
-	$creds = Get-Credential "MARITALK TOKEN";
-	$TempToken = $creds.GetNetworkCredential().Password;
-	#
-	#write-host "Checando se o token é válido";
-	#try {
-	#	$result = InvokeOpenai 'models' -m 'GET' -token $TempToken
-	#} catch [System.Net.WebException] {
-	#	$resp = $_.exception.Response;
-	#	
-	#	if($resp.StatusCode -eq 401){
-	#		throw "INVALID_TOKEN: Token is not valid!"
-	#	}
-	#	
-	#	throw;
-	#}
-	#write-host "	Tudo certo!";
-	
-	$Provider = Get-AiCurrentProvider
-	
-	SetCurrentProviderData Token $TempToken;
-	
-	return;
+	}
 }
 
 
@@ -470,8 +384,7 @@ return @{
 	}
 	
 	RequireToken 	= $true
-	BaseUrl 		= "https://chat.maritaca.ai/api"
-	desc 			= "Maritalk" 			
-	DefaultModel 	= "sabia-2-medium"
+	BaseUrl 		= "https://chat.maritaca.ai/api"			
+	DefaultModel 	= "sabia-3"
+	TokenEnvName 	= "MARITACA_API_KEY"
 }
-

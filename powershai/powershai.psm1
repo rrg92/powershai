@@ -569,7 +569,7 @@ function Get-AiCurrentProvider {
 function Get-AiNearProvider {
 	$CallStack = Get-PSCallStack
 	
-	$NearProvider = $CallStack | ? { $_.ScriptName -like (JoinPath $POWERSHAI_PROVIDERS_DIR '*.ps1') } | select -last 1;
+	$NearProvider = $CallStack | ? { $_.ScriptName -like (JoinPath $POWERSHAI_PROVIDERS_DIR '*.ps1') } | select -first 1;
 	
 	if(!$NearProvider){
 		return;
@@ -649,6 +649,11 @@ function PowerShaiProviderFunc {
 			return $true;
 		}
 		
+		# these parameter must be available to providers have access to raw invoked data!
+		$ProviderFuncRawData = @{
+			params = $FuncParams
+		}
+		
 		& $FullFuncName @FuncParams
 	} else {
 		
@@ -679,8 +684,15 @@ function GetProviderData {
 	$UserDefined 	= $POWERSHAI_SETTINGS.providers[$name];
 	$provider 		= $PROVIDERS[$name]
 	
-	$UserSetting 	= $UserDefined[$Key];
-	$DefaultSetting	= $Provider[$key];
+	if($UserDefined){
+		$UserSetting 	= $UserDefined[$Key];
+	} else {
+		$UserDefined = @{};
+	}
+	
+	if($provider){
+		$DefaultSetting	= $Provider[$key];
+	}
 	
 	if($UserDefined.contains($Key)){
 		return $UserSetting
@@ -2469,6 +2481,7 @@ function Send-PowershaiChat {
 					$PartNum 				= $Stream.num;
 					$text 					= $Stream.answer.choices[0].delta.content;
 					$WriteParams.NoNewLine 	= $true;
+					$model 					= $Stream.answer.model;
 					
 					if(!$WriteData.premsg){
 						$str = FormatPrompt

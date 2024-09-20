@@ -5,39 +5,52 @@ Os modelos seguem o mesmo padrão da OpenAI, e a maioria dos comandos funcionam 
 
 # Início rápido  
 
+Usar o provider do Azure envolve os seguintes passos:
+
+- Criar os recursos no portal do Azure, ou Azure AI Studio.  
+	- Com isso você terá as URLs e API Keys necessárias para autenticação.  
+- Usar `Set-AiProvider azure` para mudar o provider atual para o azure.  
+- Definir informações da URL da API usando o comando  `Set-AiAzureApiUrl`. o parâmetro `-ChangeToken` permite que você defina o token junto.  
+
+Uma vez que seguiu estes passos, você pode conversar normalmente usando comandos com `ia`.  
+
+
+## APIs e URL  
+
 Para usar o provider azure, ative ele usando `Set-AiProvider azure`.  
-No azure, além da Api Key, é necessário os seguintes dados para construir a URL da API:
+Basicamente, o azure fornece as seguintes APIs para conversar com LLM:
 
-- ResourceName  
-Este é o nome do recurso que representa o seu serviço do tipo Azure OpenAI.  
+- API Azure OpenAI   
+Esta API permite que você converse com os modelos da OpenAI que estão na infra do Azure ou que foram provisionados exclusivamente para você.  
 
-- DeploymentName  
-Este é o nome que você configurou ao implementar o modelo no Azure AI Studio
+- API de Inferência  
+Esta API permite que você converse com outros modelos, como Phi3, Llama3.1, diversos modelos do hugging face, etc.  
+Estes modelos podem ser provisionados de forma serveless (você tem uma API funcional, independente de onde executa, com quem compartilha, etc.) ou de forma exclusiva (onde o modelo é disponibilizado exclusivamente em um máquina para você). 
 
-- ApiVersion  
-A versão da API a ser usada. O provider sempre usará a última versão estável GA como padrão.   
+No fim das contas, para você, enquanto usuário do powershai, apenas precisa saber que este provider consegue ajustar corretamente as chamadas da API.  
+E elas são todas compatíveis com o mesmo formato da APi da OpenAI (porém nem todas as funcionalidades podem estar disponíveis para certos modelos, como o Tool Calling).  
 
-Com estes dados, o powershai monta a URL da API.  
+É importante saber que existem esses dois tipos, pois isso vai te guiar na configuração inicial.  
+Você deve ser o comando `Set-AiAzureApiUrl` para definir a URL da sua API.  
 
-O comando `Set-OpenaiAzureUrl`  pode ser usado para configurar estas informações:
+Este cmdlet é bem flexível.  
+Você pode especificar um URL do Azure OpenAI. Ex.:
 
-```powershell 
-# Definindo resource name e deploy. ApiVersion é opcional.
-Set-OpenaiAzureUrl -ResourceName iatalking-azai123456789 -DeploymentName testdeploy
+```powershell
+Set-AiAzureApiUrl -ChangeToken https://iatalking.openai.azure.com/openai/deployments/gpt-4o-mini/chat/completions?api-version=2023-03-15-preview 
 ```
 
-Por praticidade, você pode usar uma URL que copiou diretamente do portal ou do Azure AI Studio:
-Por exemplo:
+Com o comando acima, ele vai identificar qual API deve ser usada e os parâmetros corretos.  
+Também, ele identifica as URLs referentes à API de inferência:
 
-```powershell 
-Set-OpenaiAzureUrl https://iatalking-azai123456789.openai.azure.com/openai/deployments/testdeploy/chat/completions?api-version=2023-03-15-preview
+```powershell
+Set-AiAzureApiUrl -ChangeToken https://test-powershai.eastus2.models.ai.azure.com
 ```
 
+Note o uso do parãmetro `-ChangeToken`.  
+Este parâmetro forçar você ter que inserir o token novamente.  Ele é útil quando se está mudando, ou configurando a primeira vez.
 
-Isso irá configurar o ResourceName como `iatalking-azai123456789`, DeploymentName como `testdeploy`, e ApiVersion como `2023-03-15-preview`.  
-O comando também irá solicitar a Api key, que é disponbilizada no portal ou no ai studio.  
-
-Você pode trocar a API key posteriormente, se precisar, usando o comando `Set-OpenaiAzureApiKey`
+Você pode trocar a API key posteriormente, se precisar, usando o comando `Set-AiAzureApiKey`
 
 
 ## Links úteis  

@@ -75,6 +75,7 @@ Por exemplo: `Get-AiProvider`, `Send-PowershaiChat`, `New-PowershaiChat`.
 Os providers também exportam comandos, que geralmente terão um nome do provider. Consulte a documentação do provider para saber mais sobre o padrão de comandos exportado.  
 
 Por convenção,  nenhum provider deve implementar comandos com "Ai" ou "Powershai" no nome, pois são reservados aos comandos globais, independente de provider.  
+Porém, os nome Ai + NomeProvider podem ainda ser usados pelos mesmos (ex.: AiHuggingFace*, AiOpenai*, AiAzure*, AiGoogle*) e são reservados apenas ao provider.
 Também, os alias definidos pelos providers devem sempre conter mais de 5 caractares. Alias menores estão reservados para os comandos globais.
 
 Você pode encontrar a documentação destes comandos na [doc de comandos globais](cmdlets/).  

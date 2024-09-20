@@ -29,9 +29,9 @@ function InvokeOpenai {
     param(
 		$endpoint
 		,$body
-		,$method = 'POST'
-		,$StreamCallback = $null
-		,$Token = $null
+		,$method 			= 'POST'
+		,$StreamCallback 	= $null
+		,$Token 			= $null
 	)
 
 	$Provider = Get-AiCurrentProvider
@@ -51,11 +51,6 @@ function InvokeOpenai {
 		$url = "$BaseUrl/$endpoint"
 	}
 
-	if($StreamCallback){
-		$body.stream = $true;
-		$body.stream_options = @{include_usage = $true};
-	}
-
 	$JsonParams = @{Depth = 10}
 	
 	write-verbose "InvokeOpenai: Converting body to json (depth: $($JsonParams.Depth))..."
@@ -70,79 +65,10 @@ function InvokeOpenai {
         url             = $url
         method          = $method
         Headers         = $headers
+		SseCallback 	= $StreamCallback
     }
 
-	$StreamData = @{
-		#Todas as respostas enviadas!
-		answers = @()
-		
-		fullContent = ""
-		
-		FinishMessage = $null
-		
-		#Todas as functions calls
-		calls = @{
-			all = @()
-			funcs = @{}
-		}
-		
-		CurrentCall = $null
-	}
-				
-	if($StreamCallback){
-		$ReqParams['SseCallBack'] = {
-			param($data)
-
-			$line = $data.line;
-			$StreamData.lines += $line;
-			
-			if($line -like 'data: {*'){
-				$RawJson = $line.replace("data: ","");
-				$Answer = $RawJson | ConvertFrom-Json;
-				
-				$FinishReason 	= $Answer.choices[0].finish_reason;
-				$DeltaResp 		= $Answer.choices[0].delta;
-				
-				$Role = $DeltaResp.role; #Parece vir somente no primeiro chunk...
-				
-				$StreamData.fullContent += $DeltaResp.content;
-				
-				if($FinishReason){
-					$StreamData.FinishMessage = $Answer
-				}
-				
-
-				foreach($ToolCall in $DeltaResp.tool_calls){
-					$CallId 		= $ToolCall.id;
-					$CallType 		= $ToolCall.type;
-					verbose "Processing tool`n$($ToolCall|out-string)"
-					
-					
-					if($CallId){
-						$StreamData.calls.all += $ToolCall;
-						$StreamData.CurrentCall = $ToolCall;
-						continue;
-					}
-					
-					$CurrentCall = $StreamData.CurrentCall;
-				
-					
-					if($CurrentCall.type -eq 'function' -and $ToolCall.function){
-						$CurrentCall.function.arguments += $ToolCall.function.arguments;
-					}
-				}
-				
-				
-				$StreamData.answers += $Answer
-				& $StreamCallback $Answer
-			}
-			elseif($line -eq 'data: [DONE]'){
-				#[DONE] documentando aqui:
-				#https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream
-				return $false;
-			}
-		}
-	}
+	
 	
 	# Give chance to underline provider change request params if necessary!
 	$ReqChanger = GetCurrentProviderData ReqChanger;
@@ -157,31 +83,10 @@ function InvokeOpenai {
 	write-verbose "ReqParams:`n$($ReqParams|out-string)"
     $RawResp 	= InvokeHttp @ReqParams
 	write-verbose "RawResp: `n$($RawResp|out-string)"
-	
+
+
 	if($RawResp.stream){
-		
-		#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
-		$MessageResponse = @{
-			role		 	= "assistant"
-			content 		= $StreamData.fullContent
-		}
-		
-		if($StreamData.calls.all){
-			$MessageResponse.tool_calls = $StreamData.calls.all;
-		}
-		
-		return @{
-			stream = @{
-				RawResp = $RawResp
-				answers = $StreamData.answers
-				tools 	= $StreamData.calls.all
-			}
-			
-			message = $MessageResponse
-			finish_reason = $StreamData.FinishMessage.choices[0].finish_reason
-			usage = $StreamData.answers[-1].usage
-			model = $StreamData.answers[-1].model
-		}
+		return $RawResp;
 	}
 
     return $RawResp.text | ConvertFrom-Json
@@ -237,10 +142,7 @@ function SetOpenaiTokenBase {
 	)
 	
 	$ErrorActionPreference = "Stop";
-	
 
-	write-host "Forneça o token no campo senha na tela em que se abrir";
-	
 	$Provider = Get-AiCurrentProvider
 	$ProviderName = $Provider.name.toUpper();
 	
@@ -252,16 +154,19 @@ function SetOpenaiTokenBase {
 	
 	$TempToken = $creds.GetNetworkCredential().Password;
 	
-	write-host "Checando se o token é válido";
-	if($TestData){
-		$null = & $TestScript $TempToken
+	$BackupToken = $TempToken;
+	
+	SetCurrentProviderData Token $TempToken;
+	
+	try {
+		$null = & $TestScript $TempToken $BackupToken
+	} catch {
+		SetCurrentProviderData Token $BackupToken;
+		throw "INVALID_TOKEN";
 	}
-	write-host -ForegroundColor green "	TOKEN ALTERADO!";
 	
 	if($SetData -is [scriptblock]){
 		$null = & $SetData $TempToken
-	} else {
-		SetCurrentProviderData Token $TempToken;
 	}
 }
 
@@ -284,8 +189,14 @@ function Set-OpenaiToken {
 		
 		try {
 			InvokeOpenai 'models' -m 'GET' -token $Token
-		} catch {
-			throw "POWERSHAI_OPENAI_TOKENTEST_FAILED: Token is invalid";
+		} catch [System.Net.WebException] {
+			$resp = $_.exception.Response;
+			
+			if($resp.StatusCode -eq 401){
+				throw "POWERSHAI_OPENAI_TOKENTEST_FAILED: Token is invalid";
+			}
+			
+			throw;
 		}
 	
 	}
@@ -468,8 +379,126 @@ function Get-OpenaiChat {
 		$Body.tool_choice = "auto";
 	}
 	
+
+	if($StreamCallback){
+		$body.stream = $true;
+		$body.stream_options = @{include_usage = $true};
+	}
+
+	
+	$StreamData = @{
+		#Todas as respostas enviadas!
+		answers = @()
+		
+		fullContent = ""
+		
+		FinishMessage = $null
+		
+		#Todas as functions calls
+		calls = @{
+			all = @()
+			funcs = @{}
+		}
+		
+		CurrentCall = $null
+	}
+	
+	# modo stream!
+	$StreamScript = $null
+	if($StreamCallback){
+		# #https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream
+		$StreamScript = {
+			param($data)
+		
+
+			$line 				= $data.line;
+			$StreamData.lines 	+= $line;
+			
+			# Ignore no json data receive events...
+			if(!$line -or $line -NotLike 'data: {*'){
+				return;
+			}
+			
+			
+			
+			$RawJson = $line.replace("data: ","");
+			$Answer = $RawJson | ConvertFrom-Json;
+			
+			if(!$Answer){
+				return;
+			}
+			
+			if(!$Answer.object){
+				return;
+			}
+			
+			$FinishReason 	= $Answer.choices[0].finish_reason;
+			$DeltaResp 		= $Answer.choices[0].delta;
+				
+			$Role = $DeltaResp.role; #Parece vir somente no primeiro chunk...
+				
+			$StreamData.fullContent += $DeltaResp.content;
+				
+			if($FinishReason){
+				$StreamData.FinishMessage = $Answer
+			}
+				
+
+			foreach($ToolCall in $DeltaResp.tool_calls){
+				$CallId 		= $ToolCall.id;
+				$CallType 		= $ToolCall.type;
+				verbose "Processing tool`n$($ToolCall|out-string)"
+				
+				
+				if($CallId){
+					$StreamData.calls.all += $ToolCall;
+					$StreamData.CurrentCall = $ToolCall;
+					continue;
+				}
+				
+				$CurrentCall = $StreamData.CurrentCall;
+			
+				
+				if($CurrentCall.type -eq 'function' -and $ToolCall.function){
+					$CurrentCall.function.arguments += $ToolCall.function.arguments;
+				}
+			}
+				
+				
+			$StreamData.answers += $Answer
+			& $StreamCallback $Answer
+		}.GetNewClosure()
+	}
+	
 	write-verbose "Body:$($body|out-string)"
-    InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamCallback
+    $Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
+	
+	if($Resp.stream){
+		#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
+		$MessageResponse = @{
+			role		 	= "assistant"
+			content 		= $StreamData.fullContent
+		}
+		
+		if($StreamData.calls.all){
+			$MessageResponse.tool_calls = $StreamData.calls.all;
+		}
+		
+		return @{
+			stream = @{
+				RawResp = $Resp
+				answers = $StreamData.answers
+				tools 	= $StreamData.calls.all
+			}
+			
+			message 		= $MessageResponse
+			finish_reason 	= $StreamData.FinishMessage.choices[0].finish_reason
+			usage 			= $StreamData.answers[-1].usage
+			model		 	= $StreamData.answers[-1].model
+		}
+	}
+	
+	return $Resp;
 }
 
 
