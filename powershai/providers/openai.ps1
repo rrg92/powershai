@@ -143,7 +143,10 @@ function SetOpenaiTokenBase {
 	
 	$ErrorActionPreference = "Stop";
 
-	$Provider = Get-AiCurrentProvider
+	# Elimina a chamada atual que é openai, para considerar apenas os callers, quepode ser sido a propria openai ou outros providers!
+	$CurrentStack,$PrevStack = Get-PSCallStack
+	
+	$Provider = Get-AiCurrentProvider -Context -CallStack $PrevStack
 	$ProviderName = $Provider.name.toUpper();
 	
 	if(!$Title){
@@ -155,6 +158,25 @@ function SetOpenaiTokenBase {
 	$TempToken = $creds.GetNetworkCredential().Password;
 	
 	$BackupToken = $TempToken;
+	
+	IF(!$TestScript){
+		$TestScript = {
+			param($token)
+			
+			try {
+				InvokeOpenai 'models' -m 'GET' -token $Token
+			} catch [System.Net.WebException] {
+				$resp = $_.exception.Response;
+				
+				if($resp.StatusCode -eq 401){
+					throw "POWERSHAI_OPENAI_TOKENTEST_FAILED: Token is invalid";
+				}
+				
+				throw;
+			}
+		}
+	}
+	
 	
 	SetCurrentProviderData Token $TempToken;
 	
@@ -178,28 +200,11 @@ function Set-OpenaiToken {
 			Configura a api key para conectar com a openai. 
 			Para gerar uma API KEY, você deve ir no site da OpenAI, fazer o cadastro e gerar o token.  
 			É importante lembrar que a OpenAI é paga, e, portanto, você deverá inserir créditos para conseguir usar a API aqui pelo powershai.
-			
-		
 	#>
 	[CmdletBinding()]
 	param()
 	
-	SetOpenaiTokenBase "$ProviderName API TOKEN" -Test {
-		param($token)
-		
-		try {
-			InvokeOpenai 'models' -m 'GET' -token $Token
-		} catch [System.Net.WebException] {
-			$resp = $_.exception.Response;
-			
-			if($resp.StatusCode -eq 401){
-				throw "POWERSHAI_OPENAI_TOKENTEST_FAILED: Token is invalid";
-			}
-			
-			throw;
-		}
-	
-	}
+	SetOpenaiTokenBase "$ProviderName API TOKEN"
 }
 
 # Configura a Url base a ser usada!
@@ -447,7 +452,7 @@ function Get-OpenaiChat {
 			foreach($ToolCall in $DeltaResp.tool_calls){
 				$CallId 		= $ToolCall.id;
 				$CallType 		= $ToolCall.type;
-				verbose "Processing tool`n$($ToolCall|out-string)"
+				#verbose "Processing tool`n$($ToolCall|out-string)"
 				
 				
 				if($CallId){
@@ -1143,5 +1148,8 @@ return @{
 		desc	= "OpenAI"
 		url 	= "https://openai.com/"
 	}
+	
+	#Assume every openai model support tools.
+	ToolsModels = "*"
 }
 

@@ -295,6 +295,9 @@ return @{
 	
 	# Req changer
 	ReqChanger = (Get-Command OpenaiAzureChangeRequest)
+	
+	#Assume every openai model support tools.
+	ToolsModels = "gpt-4*","o1-*"
 }
 
 
