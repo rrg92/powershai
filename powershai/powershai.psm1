@@ -533,10 +533,13 @@ function Get-AiCurrentProvider {
 		#Se habilitado, usa o provider de contexto, isto é, se o código está rodando em um arquivo no diretorio de um provider, assume este provider.
 		#Caso contrario, obtem o provider habilitado atualmente.
 		[switch]$ContextProvider
+		
+		,#Stack alternativa a considerar! Veja mais em Get-AiNearProvider
+			$CallStack = $null
 	)
 	
 	if($ContextProvider){
-		$Provider = Get-AiNearProvider
+		$Provider = Get-AiNearProvider -CallStack $CallStack
 		
 		if($Provider){
 			return $Provider;
@@ -550,6 +553,8 @@ function Get-AiCurrentProvider {
 }
 
 
+
+function Get-AiNearProvider {
 <#
 	.SYNOPSIS
 		Obtém o provider mais recente do script atual
@@ -566,8 +571,15 @@ function Get-AiCurrentProvider {
 		Neste caso, note que existem 2 calls de providers envolvidas.  
 		Neste caso, a funcao Get-AiNearProvider retornará o provider y, pois ele é o mais recente da call stack.  
 #>
-function Get-AiNearProvider {
-	$CallStack = Get-PSCallStack
+	param(
+		#Usar um call stack específica.
+		#Este parâmetro é útil quando uma funcao que invocou quer que se considere a olhar a partir de um ponto específico!
+		$callstack
+	)
+	
+	if(!$callstack){
+		$CallStack = Get-PSCallStack
+	}
 	
 	$NearProvider = $CallStack | ? { $_.ScriptName -like (JoinPath $POWERSHAI_PROVIDERS_DIR '*.ps1') } | select -first 1;
 	
@@ -758,8 +770,11 @@ function Get-AiProviders {
 $POWERSHAI_MODEL_CACHE = @{
 	Provider = $null
 	ModelList = $null
+	ByName = @{}
 }
 
+
+function Get-AiModels {
 <#
 	.SYNOPSIS
 		lista os modelos disponíveis no provider atual
@@ -770,16 +785,114 @@ $POWERSHAI_MODEL_CACHE = @{
 		
 		O objeto retornado varia conforme o provider, mas, todo provider deve retorna um array de objetos, cada deve conter, pelo menos, a propridade id, que deve ser uma string usada para identificar o modelo em outros comandos que dependam de um modelo.
 #>
-function Get-AiModels {
 	[CmdletBinding()]
 	param()
-	$ModelList = PowerShaiProviderFunc "GetModels"
+	$ModelList 	= PowerShaiProviderFunc "GetModels"
+	$Provider 	= Get-AiCurrentProvider;
+	$ProviderName = $Provider.name;
 	
-	$POWERSHAI_MODEL_CACHE.ModelList = $ModelList | %{$_.name} 
+	$POWERSHAI_MODEL_CACHE.ModelList = $ModelList | %{  
+									$POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$($_.name)"] = $_;
+									
+									if($_.tools -eq $null){
+										$ModelInfo = Get-AiModel -ProviderOnly -CheckTools $_.name
+										$_ | Add-member -Force noteproperty tools $ModelInfo.tools;
+									}
+									
+									
+									
+									$_.name;
+								} 
 	$POWERSHAI_MODEL_CACHE.Provider = (Get-AiCurrentProvider).name
 	
 	return $ModelList
 }
+
+
+function Get-AiModel {
+<#
+	.SYNOPSIS
+		Retorna as informacoes de um model específico do cache!
+	
+	.DESCRIPTION
+		Se o model existe em cache, usa os dados em cache!
+		Se não existe, tenta consultar, caso não tenha sido tentado ainda.
+#>	
+	param(
+		#Nome do model 
+			$ModelName
+			
+		,#Se informado, verifica se o modelo está na lista de supported tools do provider!
+		#Se sim, evita ir ao cache ou enviar requisição!
+			[switch]$CheckTools
+			
+		,#Checa somente no provider!
+			[switch]$ProviderOnly
+	)
+	
+	$provider = Get-AiCurrentProvider
+	$ProviderName = $provider.name;
+	
+	$SupportedTools = GetCurrentProviderData ToolsModels
+	
+	$FakeModel = @{tools = $true}
+	if($SupportedTools){
+		if($SupportedTools -eq "*"){
+			return $FakeModel;
+		}
+		
+		if($SupportedTools -eq "*none*"){
+			$FakeModel.tools = $false;
+			return $FakeModel;
+		}
+		
+		foreach($ToolReg in @($SupportedTools)){
+			
+			if($ToolReg -like 'reg:*'){
+				$RegExpr = $ToolReg -replace '^reg:','';
+				
+				if($ModelName -match $RegExpr){
+					return $FakeModel;
+				}
+			}
+			elseif($ModelName -like $ToolReg){
+				return $FakeModel;
+			}
+		}
+		
+		$FakeModel.tools = $False;
+		return $FakeModel;		
+	}
+	elseif($ProviderOnly){
+		$FakeModel.tools = $false;
+		return $FakeModel;
+	}
+	
+	
+	$i = 2;
+	$CachedModel = $POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$ModelName"]
+	
+	if($CachedModel){
+		
+		if($CachedModel.NotFound){
+			return;
+		}
+		
+		return $CachedModel;
+	}
+	
+	# check in cache...
+	$null = Get-AiModels
+	
+	# If not found, update to avoid repetitive calls!
+	$CachedModel = $POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$ModelName"]
+	if(!$CachedModel){
+		$POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$ModelName"] = @{NotFound = $true};
+	}
+}
+
+
+function Set-AiDefaultModel {
 <#
 	.SYNOPSIS
 		Configurar o LLM default do provider atual
@@ -788,7 +901,6 @@ function Get-AiModels {
 		Usuários podem configurar o LLM default, que será usado quando um LLM for necessário.  
 		Comandos como Send-PowershaAIChat, Get-AiChat, esperam um modelo, e se não for informado, ele usa o que foi definido com esse comando.  
 #>
-function Set-AiDefaultModel {
 	[CmdletBinding()]
 	param(
 		#Id do modelo, conforme retornado por Get-AiModels
@@ -852,6 +964,8 @@ RegArgCompletion Set-AiDefaultModel model {
 	GetModelsId | ? {$_ -like "$word*"} | %{$_}
 }
 
+
+function Get-AiChat {
 <#
 	.SYNOPSIS
 		Envia mensagens para um LLM e retorna a resposta 
@@ -877,7 +991,6 @@ RegArgCompletion Set-AiDefaultModel model {
 			
 			Quando o modelo não suportar um dos parâmetros informados (isto pé, não houver funcionalidade equivalente,ou que possa ser implementanda de maneira equivalente) um erro deverá ser retornado.
 #>
-function Get-AiChat {
 	[CmdletBinding()]
 	param(
          #O prompt a ser enviado. Deve ser no formato descrito pela função ConvertTo-OpenaiMessage
@@ -928,10 +1041,23 @@ function Get-AiChat {
 		$ResponseFormat = @{type = "json_object"}
 	}
 
-	if(!$model){
-		$FuncParams['model'] = GetCurrentProviderData DefaultModel
+	$ModelName = $model;
+	if(!$ModelName){
+		$ModelName = GetCurrentProviderData DefaultModel
 	}
 	
+	
+	$model = Get-AiModel $ModelName -CheckTools;
+	
+	if(!$model.tools){
+		verbose "Turning off functions due to unsuportted tool calling in model $ModelName";
+		# Remove function call!
+		# TODO: Add Chat parameter to control what do!
+		$FuncParams.Functions = $null
+		
+	}
+	
+	$FuncParams['model'] = $ModelName
 	PowerShaiProviderFunc "Chat" -FuncParams $FuncParams;
 }
 
