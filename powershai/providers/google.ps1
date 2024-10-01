@@ -162,6 +162,12 @@ function Invoke-GoogleGenerateContent {
 	#Note que reaproveitamos o convert to openai message do provider!
 	$GoogleContent = @(ConvertTo-GoogleContentMessage $messages)
 	
+	$Config = @{}
+	
+	if($ResponseFormat.type -eq "json_object"){
+		$Config.responseMimeType = "application/json"
+	}
+	
 	$Data = @{
 		contents = $GoogleContent.content
 		#tools = @()
@@ -170,6 +176,8 @@ function Invoke-GoogleGenerateContent {
 						@{text = $GoogleContent.SystemMessage }
 					)
 			}
+			
+		generationConfig = $Config
 	}
 	
 	$ReqParams = @{

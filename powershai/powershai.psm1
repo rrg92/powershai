@@ -859,7 +859,7 @@ function Get-AiChat {
 		,#Formato da resposta 
 		 #Os formatos aceitáveis, e comportamento, devem seguir o mesmo da OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
 		 #Atalhos:
-		 #	"json", equivale a {"type": "json_object"}
+		 #	"json"|"json_object", equivale a {"type": "json_object"}
 			$ResponseFormat = $null
 		
 		,#Lista de tools que devem ser invocadas!
@@ -888,8 +888,8 @@ function Get-AiChat {
 	$Provider = Get-AiCurrentProvider
 	$FuncParams = $PsBoundParameters;
 	
-	if($ResponseFormat -eq "json"){
-		$ResponseFormat = @{type = "json_object"}
+	if($ResponseFormat -in "json","json_object"){
+		$FuncParams.ResponseFormat = @{type = "json_object"}
 	}
 
 	if(!$model){
