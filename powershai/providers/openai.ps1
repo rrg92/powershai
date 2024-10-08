@@ -946,55 +946,30 @@ function NewAiInteraction {
 }
 
 
-
-
-# Invoca a api para ober os mebddings
+# Invoca a api para obter os embeddings
 function Get-OpenaiEmbeddings {
-	param($inputText,$model)
+	[CmdletBinding()]
+	param(
+		$text
+		,$model
+		,$dimensions = $null
+	)
 	
 	if(!$model){
 		$model = 'text-embedding-3-small'
 	}
 	
 	$body = @{
-		input = $inputText 
+		input = $text 
 		model = $model 
+	}
+	
+	if($dimensions){
+		$body['dimensions'] = $dimensions;
 	}
 	
 	InvokeOpenai -endpoint 'embeddings' -body $Body
 }
-
-<#
-	Gera o embedding de um texto!
-#>
-function Get-OpenaiEmbeddings {
-	[CmdletBinding()]
-	param(
-		[Parameter(ValueFromPipeline)]
-		$text
-		,$model
-	)
-	
-	process {
-	
-		$ans = Invoke-OpenaiEmbeddings  -input $text -model $model
-		$costs = Get-OpenAiAnswerCost $ans
-		
-		[object[]]$AllEmbeddings = @($null) * $ans.data.length;
-		
-		$ans.data | %{ $AllEmbeddings[$_.index] = $_.embedding }
-		
-		return [PsCustomObject]@{
-			rawAnswer 	= $ans
-			costs 		= $costs
-			embeddings 	= $AllEmbeddings
-			text 	 	= $text
-		}
-		
-	}
-}
-
-
 
 
 #quebra o texto em tokens...
