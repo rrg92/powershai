@@ -13,7 +13,7 @@
 	HelpInfoURI 		= "https://github.com/rrg92/powershai"
 	PrivateData 		= @{
 							PSData = @{
-								Tags = 'ai','openai','google','gemini','ollama','inteliência artificial','ia'
+								Tags = 'ai','openai','google','gemini','ollama','ia'
 								LicenseUri = 'https://github.com/rrg92/powershai/blob/main/LICENSE'
 								ProjectUri = 'https://github.com/rrg92/powershai'
 								IconUri = 'https://iatalk.ing/powershai85.png'
