@@ -652,6 +652,12 @@ function Set-AiProvider {
 	$POWERSHAI_SETTINGS.provider = $provider;
 }
 
+RegArgCompletion Set-AiProvider provider {
+	param($cmd,$param,$word,$ast,$fake)
+	
+	@($PROVIDERS.keys) | ? {$_ -like "$word*"} | %{$_}
+}
+
 <#
 	Invoca funções em um provider!
 	O PowershAI espera que certas funções sejam implementandas pelos providers.  
