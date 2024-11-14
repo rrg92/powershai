@@ -258,6 +258,70 @@ function New-PowershaiError {
 # LOW LEVEL HTTP Functions
 . (JoinPath $PSSCriptRoot "lib" "http.ps1")
 
+<#
+	.SYNOPSIS
+		Mescla hashtables em uma hashtable de destino
+		
+	.DESCRIPTION  
+		A hashtable de destino irá conter o valor atualizado das hashtables de origem. 
+		Pode se especificar várias hashtables de origem, basta informar.
+		Uma nova hashtable é retornada, sem alterar as existentes!
+#>
+function HashTableMerge {
+	[CmdletBinding()]
+	param(
+		$Target
+		
+		,[parameter(ValueFromRemainingArguments)]
+			$SourceTables
+	)
+	
+	$Me = $MyInvocation.MyCommand;
+	
+	$NewTable = @{}
+	
+	if(!$Target){
+		$Target = @{}
+	}
+	
+	if(!$SourceTables){
+		$SourceTables = @{}
+	}
+	
+	$TableList = @($Target)
+	$TableList += $SourceTables;
+	
+	foreach($SrcTable in $TableList){
+		
+		if($SrcTable -isnot [hashtable]){
+			throw "POWERSHAI_MERGEHASH_ISNOT_HASHTABLE";
+		}
+		
+		foreach($key in @($SrcTable.keys) ){
+			
+			#New table
+			if(!$NewTable.Contains($key)){
+				$NewTable[$key] = $SrcTable[$key];
+				continue;
+			}
+			
+			#Se as duas são com tipos diferentes, então sobrescreve
+			$SrcValue = $SrcTable[$key]
+			$NewValue = $NewTable[$key];
+			
+			# Se for um hashtable, recursivamente atualiza!
+			if($SrcValue -is [hashtable] -and $NewValue -is [hashtable]){
+				$SrcValue = & $Me $SrcValue $NewValue 
+			}
+			
+			#Em todos o caso, src substitui o valor!
+			$NewTable[$key] = $SrcValue;
+		}
+	}
+	
+	return $NewTable;
+}
+
 
 function RegArgCompletion {
 	param(
@@ -899,6 +963,21 @@ function Get-AiChat {
 	PowerShaiProviderFunc "Chat" -FuncParams $FuncParams;
 }
 
+# Representa cada interação feita com o modelo!
+function NewAiInteraction {
+	return @{
+			req  		= $null	# the current req count!
+			sent 		= $null # Sent data!
+			rawAnswer  	= $null # the raw answer returned by api!
+			stopReason 	= $null	# The reason stopped!
+			error 		= $null # If apply, the error ocurred when processing the answer!
+			seqError 	= $null # current sequence error
+			toolResults	= @() # lot of about running functino!
+		}
+}
+
+
+
 <#
 	.SYNOPSIS
 		Envia mensagem para um LLM, com suporte a Tool Calling, e executa as tools solicitadas pelo modelo como comandos powershell.
@@ -988,7 +1067,8 @@ function Invoke-AiChatTools {
 	}
 	
 	# initliza message!
-	[object[]]$Message 	= @($prompt);
+	$Message 	= New-Object System.Collections.ArrayList
+	$Message.AddRange($prompt);
 	
 	$TotalPromptTokens 	= 0;
 	$TotalOutputTokens 	= 0;
@@ -1028,7 +1108,7 @@ function Invoke-AiChatTools {
 		
 		# Parametros que vamos enviar a openai usando a funcao openai!
 		$Params = @{
-			prompt 			= $Message
+			prompt 			= @($Message)
 			temperature   	= $temperature
 			MaxTokens     	= $MaxTokens
 			Functions 		= $OpenaiTools
@@ -1065,7 +1145,7 @@ function Invoke-AiChatTools {
 		}
 		
 		$AiInteraction.sent = $Params;
-		$AiInteraction.message = $Message;
+		$AiInteraction.message = @($Message);
 		
 		# Se chegamos no limite, então naos vamos enviar mais nada!
 		if($ReqsCount -gt $MaxInteractions){
@@ -1089,7 +1169,7 @@ function Invoke-AiChatTools {
 			$ModelResponse = $Answer.choices[0];
 		}
 		
-		write-verbose "FinishReason: $($ModelResponse.finish_reason)"
+		verbose "FinishReason: $($ModelResponse.finish_reason)"
 		
 		$WarningReasons = 'length','content_filter';
 		
@@ -1102,18 +1182,25 @@ function Invoke-AiChatTools {
 			
 			# A primeira opcao de resposta...
 			$AnswerMessage = $ModelResponse.message;
+			$ToolCallMsg = $AnswerMessage
 		
-			# Add current message to original message to provided previous context!
-			$Message += $AnswerMessage;
-			
 			$ToolCalls = $AnswerMessage.tool_calls
 			
-			write-verbose "TotalToolsCals: $($ToolCalls.count)"
+			verbose "TotalToolsCals: $($ToolCalls.count)"
 			foreach($ToolCall in $ToolCalls){
 				$CallType = $ToolCall.type;
 				$ToolCallId = $ToolCall.id;
 				
-				write-verbose "ProcessingTooll: $ToolCallId"
+				#Build the response message that will sent back!
+				$FuncResp = @{
+					role 			= "tool"
+					tool_call_id 	= $ToolCallId
+					
+					#Set to a default message!
+					content	= "ERROR: Tools was not executed due some unknown problem!";
+				}
+					
+				verbose "Processing tool call $ToolCallId"
 				
 				try {
 					if($CallType -ne 'function'){
@@ -1124,17 +1211,8 @@ function Invoke-AiChatTools {
 					
 					#Get the called function name!
 					$FuncName = $FuncCall.name
-					write-verbose "	FuncName: $FuncName"
-					
-					#Build the response message that will sent back!
-					$FuncResp = @{
-						role 			= "tool"
-						tool_call_id 	= $ToolCallId
-						
-						#Set to a default message!
-						content	= "ERROR: Some error ocurred processing function!";
-					}
-					
+					verbose "	FuncName: $FuncName"
+
 					# acha a tool na lista!
 					$FunctionInfo = $FunctionMap[$FuncName]
 					
@@ -1163,10 +1241,11 @@ function Invoke-AiChatTools {
 					
 					#Here wil have all that we need1
 					$FuncArgsRaw =  $FuncCall.arguments
-					write-verbose "	Arguments: $FuncArgsRaw";
+					verbose "	Arguments: $FuncArgsRaw";
 					
 					#We assuming model sending something that can be converted...
 					$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
+					
 					
 					#Then, we can call the function!
 					$ArgsHash = @{};
@@ -1184,7 +1263,7 @@ function Invoke-AiChatTools {
 					
 					& $emit "func" $AiInteraction $CurrentToolResult
 					
-					write-verbose "Calling function $FuncName ($FuncInfo)"
+					verbose "Calling function $FuncName ($FuncInfo)"
 					
 					if($NoSplatArgs){
 						$ArgsHash = @($ArgsHash)
@@ -1234,7 +1313,13 @@ function Invoke-AiChatTools {
 				
 				& $emit "exec" $AiInteraction
 				
-				$Message += $FuncResp;
+				# Add tool and its answer!
+				# Add current message to original message to provided previous context!
+				$Message.AddRange(@(
+					$ToolCallMsg
+					$FuncResp
+				))
+				
 			}
 			
 			#Start sending again...
@@ -2270,6 +2355,18 @@ function Send-PowershaiChat {
 		,#Retorna um array de linhas 
 		 #Se o modo stream estiver ativado, retornará uma linha por vez!
 			[switch]$Lines
+			
+		,#Sobrescrever parâmetros do chat!
+		 #Especifique cada opção em umas hastables!
+		 $ChatParamsOverride = @{}
+		 
+		,#Especifica diretamente o valor do chat parameter RawParams!
+		 #Se especificado também em ChatParamOverride, um merge é feito, dando prioridade aos parametros especificados aqui.
+		 #O RawParams é um chat parameter que define parametros que serão enviados diretamente a api do modelo!
+		 #Estes parametros irão sobrescrever os valores padrões calculados pelo powershai!
+		 #Com isso, o usuario tem total controle sobre os parâmetros, mas precisa conmhecer cada provider!
+		 #Também, cada provider é responsável por prover essa implementaão e usar esses parâmetros na sua api.
+			$RawParams = @{}
 	)
 	
 	
@@ -2333,14 +2430,27 @@ function Send-PowershaiChat {
 			direct = @{}
 		};
 		
+		#Merge raw params!
+		$ChatParamsOverride['RawParams'] = HashTableMerge $ChatParamsOverride['RawParams'] $RawParams;
+		
 		$ChatMyParams | %{
+			
+			$ParamValue = $_.value;
+			
+			if($ChatParamsOverride.Contains($_.name)){
+				verbose "ChatParam $($_.name) overrided"
+				$ParamValue = $ChatParamsOverride[$_.name];
+			}
+
 			if($_.direct){
 				verbose "Adding direct param $($_.name)";
-				$CurrentChatParams.direct[$_.name] = $_.value;
+				$CurrentChatParams.direct[$_.name] = $ParamValue;
 			}
 			
-			$CurrentChatParams.all[$_.name] = $_.value;
+			$CurrentChatParams.all[$_.name] = $ParamValue;
 		}
+		
+		
 		
 		$ContextFormat = $CurrentChatParams.all.ContextFormat;
 		
@@ -2818,9 +2928,7 @@ function Send-PowershaiChat {
 			} catch {
 				$StackTrace = $_.ScriptStackTrace;
 				$Msg = [string]$_;
-				
-				$ex = new-object Exception("$Msg`n$StackTrace");
-				
+				$ex = New-PowershaiError -Message "$Msg`n$StackTrace" -parent $_.Exception
 				throw $ex;
 			}
 		}
