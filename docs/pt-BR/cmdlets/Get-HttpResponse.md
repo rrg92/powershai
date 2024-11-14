@@ -14,8 +14,8 @@ Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] 
-[<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] 
+<Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->

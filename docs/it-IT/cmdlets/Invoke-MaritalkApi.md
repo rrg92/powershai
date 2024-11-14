@@ -14,7 +14,8 @@ Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
+Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] 
+[-OpenAI] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -104,8 +105,6 @@ Accept wildcard characters:
 ```
 
 
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

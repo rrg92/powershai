@@ -7,29 +7,30 @@ powershai: true
 # Invoke-AiChatTools
 
 ## SYNOPSIS <!--!= @#Synop !-->
-LLM にメッセージを送信し、ツール呼び出しをサポートし、モデルによって要求されたツールを PowerShell コマンドとして実行します。
+LLMにメッセージを送信し、ツール呼び出しをサポートし、モデルによって要求されたツールをPowerShellコマンドとして実行します。
 
 ## DESCRIPTION <!--!= @#Desc !-->
-これは、PowerShell でのツール処理を簡単にするためのヘルパー関数です。
-それは "ツール" の処理を処理し、モデルが要求したときに実行します！
+これは、PowerShellでツールの処理を容易にするための補助関数です。
+モデルが要求したときに「ツール」の処理を行います！
 
-ツールを特定の形式で渡す必要があります。これは、about_Powershai_Chats トピックで文書化されています。
-この形式は、PowerShell 関数とコマンドを OpenAI (OpenAPI スキーマ) で受け入れられるスキーマに正しくマッピングします。
+ツールは特定の形式で渡す必要があり、about_Powershai_Chatsトピックで文書化されています。
+この形式は、OpenAI（OpenAPIスキーマ）によって受け入れられるスキーマに対して、PowerShellの関数とコマンドを正しくマッピングします。
 
-このコマンドは、モデルが関数を呼び出そうとしたときの識別、これらの関数の実行、およびその応答をモデルに送り返すためのすべてのロジックをカプセル化します。
-これは、モデルがさらに関数を呼び出すことを決定するのをやめたり、モデルとの相互作用の制限（はい、ここでは相互作用と呼び、反復と呼びません）が終了するまで、このループにとどまります。
+このコマンドは、モデルが関数を呼び出そうとしているときにそれを識別するロジック、これらの関数の実行、およびその応答をモデルに戻すロジックをすべてカプセル化しています。
+モデルがさらに関数を呼び出すことを決定するのをやめるまで、またはモデルとのインタラクションの制限（はい、ここでは「インタラクション」と呼びます、そして「イテレーション」ではありません）が終了するまで、このループに留まります。
 
-相互作用の概念は簡単です。関数でモデルにプロンプトを送信するたびに、相互作用としてカウントされます。
-以下は、発生する可能性のある一般的なフローです。
+インタラクションの概念は簡単です：関数がモデルにプロンプトを送信するたびに、それは1回のインタラクションとしてカウントされます。
+以下は、発生する可能性のある典型的なフローです：
+	
 
-
-about_Powershai_Chats トピックで、詳細な動作を確認できます。
+動作の詳細については、about_Powershai_Chatsトピックを参照してください。
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] 
-[[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [<CommonParameters>]
+Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] 
+<Object>] [[-MaxSeqErrors] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] 
+[-Stream] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -49,10 +50,10 @@ Accept wildcard characters: false
 ```
 
 ### -Tools
-このコマンドのドキュメントで説明されているように、ツールの配列。
-Get-OpenaiTool* の結果を使用して、可能な値を生成します。
-OpenaiTool 型のオブジェクトの配列を渡すことができます。
-同じ関数が複数のツールで定義されている場合、定義された順序で最初に検出されたものが使用されます！
+ツールの配列。このコマンドのドキュメントで説明されています。
+Get-OpenaiTool*の結果を使用して、可能な値を生成します。  
+OpenaiToolタイプのオブジェクトの配列を渡すことができます。
+同じ関数が複数のツールで定義されている場合、定義された順序で最初に見つかったものが使用されます！
 
 ```yml
 Parameter Set: (All)
@@ -96,7 +97,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-合計で、最大 5 つの反復を許可します！
+合計で、最大5回のインタラクションを許可します！
 
 ```yml
 Parameter Set: (All)
@@ -111,7 +112,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
-関数が終了するまでに生成できる連続エラーの最大数。
+関数が生成できる連続エラーの最大数です。
 
 ```yml
 Parameter Set: (All)
@@ -155,15 +156,15 @@ Accept wildcard characters: false
 
 ### -on
 イベントハンドラー
-各キーは、このコマンドによってある時点でトリガーされるイベントです！
-イベント:
-answer: モデルから応答を取得した後（またはストリームを使用しているときに応答が利用可能になった場合）にトリガーされます。
+各キーは、このコマンドによっていつかトリガーされるイベントです！
+イベント：
+answer: モデルからの応答を取得した後にトリガーされます（またはストリームを使用して応答が利用可能になったとき）。
 func: モデルによって要求されたツールの実行を開始する前にトリガーされます。
-	exec: モデルが関数を呼び出した後にトリガーされます。
+	exec: モデルが関数を実行した後にトリガーされます。
 	error: 実行された関数がエラーを生成したときにトリガーされます。
-	stream: 応答が（ストリームによって）送信されたときにトリガーされ、-DifferentStreamEvent
-	beforeAnswer: すべての応答の後にトリガーされます。ストリームで使用する場合に役立ちます！
-	afterAnswer: 応答を開始する前にトリガーされます。ストリームで使用する場合に役立ちます！
+	stream: 応答が送信されたとき（ストリームによって）および-DifferentStreamEvent。
+	beforeAnswer: すべての応答の後にトリガーされます。ストリームで使用するときに便利です！
+	afterAnswer: 応答を開始する前にトリガーされます。ストリームで使用するときに便利です！
 
 ```yml
 Parameter Set: (All)
@@ -178,7 +179,7 @@ Accept wildcard characters: false
 ```
 
 ### -Json
-response_format = "json" を送信し、モデルに JSON を返すように強制します。
+response_format = "json"を送信し、モデルにJSONを返すよう強制します。
 
 ```yml
 Parameter Set: (All)
@@ -193,7 +194,7 @@ Accept wildcard characters: false
 ```
 
 ### -RawParams
-カスタムパラメーターを直接呼び出しに追加します（自動的に定義されたパラメーターを上書きします）。
+カスタムパラメーターを呼び出しに直接追加（自動的に定義されたパラメーターを上書きします）。
 
 ```yml
 Parameter Set: (All)
@@ -222,8 +223,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

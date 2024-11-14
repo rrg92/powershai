@@ -8,14 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Ottieni HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] 
-[<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] 
+<Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -119,9 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

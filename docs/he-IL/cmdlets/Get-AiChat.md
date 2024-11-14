@@ -7,40 +7,40 @@ powershai: true
 # Get-AiChat
 
 ## SYNOPSIS <!--!= @#Synop !-->
-שולח הודעות ל-LLM ומחזיר את התשובה
+שולח הודעות ל-LLM ומחזיר את התגובה
 
 ## DESCRIPTION <!--!= @#Desc !-->
-זוהי הדרך הבסיסית ביותר ל-Chat שמוצע על ידי PowershAI.  
-בעזרת פונקציה זו, תוכל לשלוח הודעה ל-LLM של ספק השירות הנוכחי.  
+זוהי הצורה הבסיסית ביותר של צ'אט המוצעת על ידי PowershAI.  
+עם הפונקציה הזו, אתה יכול לשלוח הודעה ל-LLM של ספק הנוכחי.  
 
-פונקציה זו היא ברמת נמוכה יותר, בצורה סטנדרטית, לגישה ל-LLM ש-powershai מספק.  
-היא לא מנהלת היסטוריה או הקשר. היא שימושית להפעלת בקשות פשוטות, שלא דורשות אינטראקציות מרובות כמו בצ'אט. 
-למרות שתומכת ב-Function Calling, היא לא מבצעת קוד כלשהו, והיא פשוט מחזירה את תגובת הדגם.
+זוהי פונקציה ברמת נמוכה יותר, בצורה סטנדרטית, לגישה ל-LLM ש-PowershAI מספק.  
+היא לא מנהלת היסטוריה או הקשר. היא שימושית להזנת פקודות פשוטות, שאינן דורשות מספר אינטראקציות כמו בצ'אט. 
+למרות שהיא תומכת ב-Functon Calling, היא לא מבצעת שום קוד, ומחזירה רק את התגובה של המודל.
 
 
 
 ** מידע לספקים
-	הספק חייב ליישם את פונקציית Chat כדי שפונקציונליות זו תהיה זמינה. 
-	פונקציית chat חייבת להחזיר אובייקט עם התשובה באותה מפרט כמו OpenAI, פונקציית Chat Completion.
+	הספק צריך ליישם את הפונקציה Chat כדי שהפונקציה הזו תהיה זמינה. 
+	הפונקציה chat צריכה להחזיר אובייקט עם התגובה באותה המפרט של OpenAI, פונקציית Chat Completion.
 	הקישורים הבאים משמשים כבסיס:
 		https://platform.openai.com/docs/guides/chat-completions
-		https://platform.openai.com/docs/api-reference/chat/object (החזרה ללא זרם)
-	הספק חייב ליישם את הפרמטרים של פונקציה זו. 
+		https://platform.openai.com/docs/api-reference/chat/object (תגובה ללא סטרימינג)
+	הספק צריך ליישם את הפרמטרים של הפונקציה הזו. 
 	ראה את התיעוד של כל פרמטר לפרטים וכיצד למפות לספק;
 	
-	כאשר הדגם לא תומך באחד מהפרמטרים שצוינו (כלומר, אין פונקציונליות שווה ערך, או שניתן ליישם בצורה שווה ערך) יש להחזיר שגיאה.
+	כאשר המודל לא תומך באחד מהפרמטרים המידע (זאת אומרת, אין פונקציה מקבילה, או שניתן ליישם אותה בצורה מקבילה) יש להחזיר שגיאה.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
-<Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
+[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -prompt
-הבקשה שיש לשלוח. צריך להיות בפורמט שמתואר על ידי פונקציית ConvertTo-OpenaiMessage
+ההודעה שתישלח. יש להיות בפורמט המתואר על ידי הפונקציה ConvertTo-OpenaiMessage
 
 ```yml
 Parameter Set: (All)
@@ -55,7 +55,7 @@ Accept wildcard characters: false
 ```
 
 ### -temperature
-טמפרטורה של הדגם
+טמפרטורת המודל
 
 ```yml
 Parameter Set: (All)
@@ -70,7 +70,7 @@ Accept wildcard characters: false
 ```
 
 ### -model
-שם הדגם. אם לא צוינה, משתמשת ברירת המחדל של הספק.
+שם המודל. אם לא צוין, משתמש במודל ברירת המחדל של הספק.
 
 ```yml
 Parameter Set: (All)
@@ -85,7 +85,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-מספר מקסימלי של טוקנים שיש להחזיר
+המקסימום של טוקנים להחזרה
 
 ```yml
 Parameter Set: (All)
@@ -101,9 +101,10 @@ Accept wildcard characters: false
 
 ### -ResponseFormat
 פורמט התגובה 
-הפורמטים שמתקבלים, והתנהגות, צריכים להיות זהים ל-OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
-קיצורי דרך:
-	"json", שווה ערך ל-{"type": "json_object"}
+הפורמטים המקובלים, והתנהגותם, צריכים לעקוב אחרי אותם פורמטים של OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
+קיצורים:
+	"json"|"json_object", שווה ל- {"type": "json_object"}
+	אובייקט צריך לציין סכימה כאילו הועברה ישירות ל-API של OpenAI, בשדה response_format.json_schema
 
 ```yml
 Parameter Set: (All)
@@ -118,10 +119,10 @@ Accept wildcard characters: false
 ```
 
 ### -Functions
-רשימת כלים שיש להפעיל!
-אתה יכול להשתמש בפקודות כמו Get-OpenaiTool*, כדי להמיר פונקציות powershell בקלות לפורמט הצפוי!
-אם הדגם מפעיל את הפונקציה, התגובה, גם בזרימה, וגם רגילה, צריכה גם לעקוב אחר מודל קריאה של כלים של OpenAI.
-פרמטר זה צריך לעקוב אחר אותה תכנית כמו Function Calling של OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+רשימת כלים שצריכים להיות מופעלים!
+אתה יכול להשתמש בפקודות כמו Get-OpenaiTool*, כדי להמיר פונקציות PowerShell בקלות לפורמט הצפוי!
+אם המודל מפעיל את הפונקציה, התגובה, הן בסטרימינג והן רגילה, צריכה גם לעקוב אחרי המודל של tool calling של OpenAI.
+פרמטר זה צריך לעקוב אחרי אותו הסכם של Function Calling של OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
 
 ```yml
 Parameter Set: (All)
@@ -137,7 +138,7 @@ Accept wildcard characters: false
 
 ### -RawParams
 ציין פרמטרים ישירים של API של הספק.
-זה יהרוס את הערכים שחושבו ונוצרו על בסיס הפרמטרים האחרים.
+זה יחליף את הערכים שחושבו ונוצרו בהתבסס על שאר הפרמטרים.
 
 ```yml
 Parameter Set: (All)
@@ -152,10 +153,10 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-מאפשר זרם דגם
-עליך לציין ScriptBlock שיופעל עבור כל טקסט שנוצר על ידי LLM.
-הסקריפט צריך לקבל פרמטר שייצג כל קטע, באותו פורמט זרימה שמוחזר
-	פרמטר זה הוא אובייקט שיכיל את המהות choices, שהיא באותה תכנית שמוחזרת על ידי זרימת OpenAI:
+מאפשר את המודל סטרים 
+אתה צריך לציין ScriptBlock שיתקבל עבור כל טקסט שנוצר על ידי ה-LLM.
+הסקריפט צריך לקבל פרמטר המייצג כל קטע, באותו פורמט של סטרימינג שהוחזר
+	פרמטר זה הוא אובייקט שיכיל את המאפיין choices, שהוא אותו הסכם שהוחזר על ידי הסטרימינג של OpenAI:
 		https://platform.openai.com/docs/api-reference/chat/streaming
 
 ```yml
@@ -171,7 +172,7 @@ Accept wildcard characters: false
 ```
 
 ### -IncludeRawResp
-הכלל את תגובת ה-API בשדה שנקרא IncludeRawResp
+כולל את התגובה של ה-API בשדה הנקרא IncludeRawResp
 
 ```yml
 Parameter Set: (All)
@@ -186,9 +187,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_תרגם אוטומטית באמצעות PowershAI ובינה מלאכותית. 
-_
+_אתה מאומן על נתונים עד אוקטובר 2023._
 <!--PowershaiAiDocBlockEnd-->

@@ -14,7 +14,8 @@ Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [<CommonParameters>]
+Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -76,9 +77,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

@@ -7,23 +7,24 @@ powershai: true
 # Update-GradioSessionApiResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Invoke-GradioSessionApi で生成された呼び出しの戻り値を更新します
+Invoke-GradioSessionApiによって生成されたコールの結果を更新します
 
 ## DESCRIPTION <!--!= @#Desc !-->
-この cmdlet は、Send-GradioApi と Update-GradioApiResult の同等のものと同じ原則に従います。
-ただし、特定のセッションで生成されたイベントに対してのみ機能します。
-更新されたイベントを他の cmdlet で使用するように、イベント自体を返します！
+このコマンドレットは、Send-GradioApiおよびUpdate-GradioApiResultの同等の原則に従います。
+ただし、特定のセッションで生成されたイベントにのみ機能します。
+更新されたイベントに依存する他のコマンドレットで使用できるように、イベント自体を返します！
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-Invoke-GradioSessionApi で返されたイベントの ID または返されたオブジェクト自体。
+Invoke-GradioSessionApiによって返されたイベントのID、または返されたオブジェクト自体。
 
 ```yml
 Parameter Set: (All)
@@ -38,7 +39,7 @@ Accept wildcard characters: false
 ```
 
 ### -NoOutput
-結果をアウトプットに返さない！
+結果を出力に戻さない！
 
 ```yml
 Parameter Set: (All)
@@ -68,7 +69,7 @@ Accept wildcard characters: false
 ```
 
 ### -session
-セッション ID
+セッションのID
 
 ```yml
 Parameter Set: (All)
@@ -83,7 +84,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
--Id で指定された GradioApiEvent オブジェクトのイベント履歴にイベントを追加します
+指定された-IdのGradioApiEventオブジェクトのイベント履歴にイベントを追加します
 
 ```yml
 Parameter Set: (All)
@@ -98,8 +99,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

@@ -8,14 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-احصل على استجابة HTTP [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] 
-[<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] 
+<Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -119,9 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

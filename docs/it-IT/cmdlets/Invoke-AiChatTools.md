@@ -7,29 +7,30 @@ powershai: true
 # Invoke-AiChatTools
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Invia un messaggio a un LLM, con supporto a Tool Calling, ed esegue gli strumenti richiesti dal modello come comandi powershell.
+Invia un messaggio a un LLM, con supporto per Tool Calling, ed esegue gli strumenti richiesti dal modello come comandi powershell.
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Questa è una funzione ausiliaria per aiutare a rendere più facile il processing degli strumenti con powershell.
-Gestisce l'elaborazione degli "Strumenti", eseguendoli quando il modello lo richiede!
+Questa è una funzione ausiliaria per aiutare a rendere il processamento degli strumenti più facile con powershell.
+Si occupa del processamento degli "Strumenti", eseguendo quando il modello lo richiede!
 
-Dovresti passare gli strumenti in un formato specifico, documentato nel topic about_Powershai_Chats
-Questo formato mappa correttamente funzioni e comandi powershell allo schema accettabile da OpenAI (OpenAPI Schema).  
+Devi passare gli strumenti in un formato specifico, documentato nel topic about_Powershai_Chats
+Questo formato mappa correttamente funzioni e comandi powershell per lo schema accettabile da OpenAI (OpenAPI Schema).  
 
-Questo comando incapsula tutta la logica che identifica quando il modello vuole invocare la funzione, l'esecuzione di queste funzioni e l'invio di questa risposta al modello.  
-Rimane in questo loop finché il modello non decide di invocare più funzioni o finché il limite di interazioni (sì, qui le chiamiamo interazioni, non iterazioni) con il modello non è terminato.
+Questo comando racchiude tutta la logica che identifica quando il modello vuole invocare la funzione, l'esecuzione di queste funzioni e l'invio di questa risposta di nuovo al modello.  
+Rimane in questo ciclo fino a quando il modello smette di decidere di invocare ulteriori funzioni, o fino a quando il limite di interazioni (sì, qui chiamiamo interazioni e non iterazioni) con il modello è terminato.
 
 Il concetto di interazione è semplice: ogni volta che la funzione invia un prompt al modello, conta come un'integrazione.  
-Di seguito è riportato un tipico flusso che può verificarsi:
+Di seguito è riportato un flusso tipico che può verificarsi:
 	
 
-Puoi ottenere maggiori dettagli sul funzionamento consultando il topic about_Powershai_Chats
+Puoi ottenere ulteriori dettagli sul funzionamento consultando il topic about_Powershai_Chats
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] 
-[[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [<CommonParameters>]
+Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] 
+<Object>] [[-MaxSeqErrors] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] 
+[-Stream] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -49,10 +50,10 @@ Accept wildcard characters: false
 ```
 
 ### -Tools
-Array di strumenti, come spiegato nella doc di questo comando
+Array di strumenti, come spiegato nella documentazione di questo comando
 Usa i risultati di Get-OpenaiTool* per generare i valori possibili.  
 Puoi passare un array di oggetti di tipo OpenaiTool.
-Se una stessa funzione è definita in più di uno strumento, verrà utilizzata la prima trovata nell'ordine definito!
+Se una stessa funzione è definita in più di 1 strumento, la prima trovata nell'ordine definito sarà utilizzata!
 
 ```yml
 Parameter Set: (All)
@@ -81,7 +82,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-max output!
+massimo output!
 
 ```yml
 Parameter Set: (All)
@@ -96,7 +97,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-In totale, consentire al massimo 5 iterazioni!
+In totale, consentire un massimo di 5 iterazioni!
 
 ```yml
 Parameter Set: (All)
@@ -111,7 +112,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
-Quantità massima di errori consecutivi che la tua funzione può generare prima che termini.
+Numero massimo di errori consecutivi che la tua funzione può generare prima di terminare.
 
 ```yml
 Parameter Set: (All)
@@ -155,15 +156,15 @@ Accept wildcard characters: false
 
 ### -on
 Gestore eventi
-Ogni chiave è un evento che verrà attivato in un determinato momento da questo comando!
+Ogni chiave è un evento che sarà attivato in qualche momento da questo comando!
 eventi:
-answer: attivato dopo aver ottenuto la risposta dal modello (o quando una risposta diventa disponibile usando lo stream).
+answer: attivato dopo aver ottenuto la risposta dal modello (o quando una risposta è disponibile usando lo stream).
 func: attivato prima di iniziare l'esecuzione di uno strumento richiesto dal modello.
 	exec: attivato dopo che il modello ha eseguito la funzione.
-	error: attivato quando la funzione eseguita genera un errore
-	stream: attivato quando una risposta è stata inviata (tramite lo stream) e -DifferentStreamEvent
-	beforeAnswer: Attivato dopo tutte le risposte. Utile quando usato in streaming!
-	afterAnswer: Attivato prima di iniziare le risposte. Utile quando usato in streaming!
+	error: attivato quando la funzione eseguita genera un errore.
+	stream: attivato quando una risposta è stata inviata (dallo stream) e -DifferentStreamEvent
+	beforeAnswer: Attivato dopo tutte le risposte. Utile quando usato in stream!
+	afterAnswer: Attivato prima di iniziare le risposte. Utile quando usato in stream!
 
 ```yml
 Parameter Set: (All)
@@ -193,7 +194,7 @@ Accept wildcard characters: false
 ```
 
 ### -RawParams
-Aggiungi parametri personalizzati direttamente alla chiamata (sovrascriverà i parametri definiti automaticamente).
+Aggiungi parametri personalizzati direttamente nella chiamata (sovrascriverà i parametri definiti automaticamente).
 
 ```yml
 Parameter Set: (All)
@@ -222,9 +223,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

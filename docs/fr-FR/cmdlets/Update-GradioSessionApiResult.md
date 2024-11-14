@@ -7,23 +7,24 @@ powershai: true
 # Update-GradioSessionApiResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Met à jour la réponse d'un appel généré en tant qu'Invoke-GradioSessionApi
+Met à jour le retour d'un appel généré comme Invoke-GradioSessionApi
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Cet cmdlet suit le même principe que ses équivalents dans Send-GradioApi et Update-GradioApiResult.
-Cependant, il ne fonctionne que pour les événements générés dans une session spécifique.
-Retourne l'événement lui-même afin qu'il puisse être utilisé avec d'autres cmdlets qui nécessitent l'événement mis à jour !
+Ce cmdlet suit le même principe que ses équivalents dans Send-GradioApi et Update-GradioApiResult.
+Cependant, il fonctionne uniquement pour les événements générés dans une session spécifique.
+Il retourne l'événement lui-même afin qu'il puisse être utilisé avec d'autres cmdlets qui dépendent de l'événement mis à jour !
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-Id de l'événement, retourné par Invoke-GradioSessionApi ou l'objet lui-même retourné.
+Identifiant de l'événement, retourné par Invoke-GradioSessionApi ou l'objet retourné lui-même.
 
 ```yml
 Parameter Set: (All)
@@ -53,7 +54,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxHeartBeats
-Nombre maximal de battements de cœur consécutifs.
+Max battements consécutifs.
 
 ```yml
 Parameter Set: (All)
@@ -68,7 +69,7 @@ Accept wildcard characters: false
 ```
 
 ### -session
-Id de la session
+Identifiant de la session
 
 ```yml
 Parameter Set: (All)
@@ -83,7 +84,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
-Ajoute l'événement à l'historique des événements de l'objet GradioApiEvent renseigné dans -Id
+Ajoute les événements à l'historique des événements de l'objet GradioApiEvent spécifié dans -Id
 
 ```yml
 Parameter Set: (All)
@@ -98,9 +99,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

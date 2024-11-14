@@ -1,56 +1,66 @@
 ﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
-powershai: true
+fichier d'aide externe : powershai-help.xml
+schéma : 2.0.0
+powershai : vrai
 ---
 
 # Get-OpenaiEmbeddings
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Obtenez des plongements OpenAI [[-text] <Objet>] [[-model] <Objet>] [<CommonParameters>]
-
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiEmbeddings [[-text] <Objet>] [[-model] <Objet>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
+### -dimensions
+
+```yml
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 2
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
+```
+
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 1
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -text
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: true (ByValue)
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 0
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

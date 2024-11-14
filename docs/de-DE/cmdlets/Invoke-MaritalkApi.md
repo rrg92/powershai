@@ -14,7 +14,8 @@ Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
+Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] 
+[-OpenAI] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -22,7 +23,7 @@ Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>
 ### -OpenAI
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: switch
 Aliases: 
 Accepted Values: 
@@ -36,7 +37,7 @@ Accept wildcard characters:
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -50,7 +51,7 @@ Accept wildcard characters:
 ### -Token
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -64,7 +65,7 @@ Accept wildcard characters:
 ### -body
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -78,7 +79,7 @@ Accept wildcard characters:
 ### -endpoint
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -92,7 +93,7 @@ Accept wildcard characters:
 ### -method
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -105,6 +106,5 @@ Accept wildcard characters:
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

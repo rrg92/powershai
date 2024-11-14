@@ -14,8 +14,8 @@ Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-cont
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-SseCallBack] <Object>] 
-[[-DebugVarPrefix] <Object>] [<CommonParameters>]
+Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] 
+<Object>] [[-SseCallBack] <Object>] [[-DebugVarPrefix] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -133,9 +133,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

@@ -14,8 +14,8 @@ Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-cont
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-SseCallBack] <Object>] 
-[[-DebugVarPrefix] <Object>] [<CommonParameters>]
+Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] 
+<Object>] [[-SseCallBack] <Object>] [[-DebugVarPrefix] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -133,8 +133,6 @@ Accept wildcard characters:
 ```
 
 
-
 <!--PowershaiAiDocBlockStart-->
-_תרגם אוטומטית באמצעות PowershAI ובינה מלאכותית. 
-_
+_אתה מאומן על נתונים עד אוקטובר 2023._
 <!--PowershaiAiDocBlockEnd-->

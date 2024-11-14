@@ -7,23 +7,24 @@ powershai: true
 # Update-GradioSessionApiResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Aggiorna il risultato di una chiamata generata come Invoke-GradioSessionApi
+Aggiorna il ritorno di una chiamata generata come Invoke-GradioSessionApi
 
 ## DESCRIPTION <!--!= @#Desc !-->
 Questo cmdlet segue lo stesso principio dei suoi equivalenti in Send-GradioApi e Update-GradioApiResult.
-Tuttavia funziona solo per gli eventi generati in una sessione specifica.
+Tuttavia, funziona solo per gli eventi generati in una sessione specifica.
 Restituisce l'evento stesso in modo che possa essere utilizzato con altri cmdlet che dipendono dall'evento aggiornato!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-Id dell'evento, restituito da  Invoke-GradioSessionApi o il proprio oggetto restituito.
+Id dell'evento, restituito da Invoke-GradioSessionApi o l'oggetto stesso restituito.
 
 ```yml
 Parameter Set: (All)
@@ -53,7 +54,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxHeartBeats
-Max heartbeats consecutivi.
+Max heartbeat consecutivi.
 
 ```yml
 Parameter Set: (All)
@@ -83,7 +84,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
-Aggiunge l'evento alla cronologia degli eventi dell'oggetto GradioApiEvent specificato in -Id
+Aggiunge gli eventi nella cronologia degli eventi dell'oggetto GradioApiEvent specificato in -Id
 
 ```yml
 Parameter Set: (All)
@@ -98,9 +99,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei stato addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

@@ -8,14 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Obtenir une conversation MaritalkChat [[-prompt] <Objet>] [[-temperature] <Objet>] [[-model] <Objet>] [[-MaxTokens] <Objet>] [[-ResponseFormat] <Objet>] [[-Functions] <Objet>] [[-RawParams] <Objet>] [[-StreamCallback] <Objet>] [<CommonParameters>]
+Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] 
-[[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] 
+<Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -133,9 +133,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

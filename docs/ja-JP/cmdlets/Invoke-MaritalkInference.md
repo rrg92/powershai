@@ -14,8 +14,8 @@ Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-tempe
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] 
-[-do_sample] [<CommonParameters>]
+Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] 
+<Object>] [[-StreamCallback] <Object>] [-do_sample] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -119,8 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

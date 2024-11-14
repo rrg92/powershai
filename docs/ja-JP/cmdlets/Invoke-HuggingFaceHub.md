@@ -7,14 +7,15 @@ powershai: true
 # Invoke-HuggingFaceHub
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Hugging Hub API を呼び出します。
+Hugging HubのAPIを呼び出します。
 https://huggingface.co/docs/hub/en/api
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] [[-limit] <Object>] [[-sort] <Object>] 
-[-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] 
+[[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -174,7 +175,7 @@ Accept wildcard characters: false
 ```
 
 ### -Public
-現在のトークンを無視し、パブリックリソースのみをリストします
+現在のトークンを無視し、公開リソースのみをリストします。
 
 ```yml
 Parameter Set: (All)
@@ -189,7 +190,7 @@ Accept wildcard characters: false
 ```
 
 ### -Token
-特定のトークンを使用します
+特定のトークンを使用します。
 
 ```yml
 Parameter Set: (All)
@@ -204,8 +205,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAI e IA を使用して自動翻訳されました。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

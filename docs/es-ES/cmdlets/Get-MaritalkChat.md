@@ -6,135 +6,133 @@ powershai: true
 
 # Get-MaritalkChat
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 
-Obtiene una respuesta de la API de MaritalkChat.
+Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
 
-## SYNTAX <!--!= @#Syntax !-->
+
+## SINTAXIS <!--!= @#Syntax !-->
 
 ```
-Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] 
-[[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] 
+<Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
 ### -Functions
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 5
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 5
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 3
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -RawParams
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 6
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 6
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -ResponseFormat
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 4
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 7
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 7
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 2
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -prompt
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 0
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -temperature
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 1
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

@@ -14,8 +14,8 @@ Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Objec
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] 
-[[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Get-MaritalkChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] 
+<Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->

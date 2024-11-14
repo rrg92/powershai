@@ -8,13 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Ottieni i messaggi di Claude [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] 
+<Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -90,9 +91,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

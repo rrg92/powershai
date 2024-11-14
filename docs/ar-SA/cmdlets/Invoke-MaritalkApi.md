@@ -1,111 +1,109 @@
 ﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
+ملف المساعدة الخارجي: powershai-help.xml
+المخطط: 2.0.0
 powershai: true
 ---
 
 # Invoke-MaritalkApi
 
-## SYNOPSIS <!--!= @#Synop !-->
+## ملخص <!--!= @#Synop !-->
 
 Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
 
-
-## SYNTAX <!--!= @#Syntax !-->
+## الصيغة <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
+Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] 
+[-OpenAI] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## المعلمات <!--!= @#Params !-->
 
 ### -OpenAI
 
 ```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+مجموعة المعلمات: (الكل)
+النوع: مفتاح تبديل
+الأسماء المستعارة: 
+القيم المقبولة: 
+مطلوب: لا
+الموقع: مسمى
+القيمة الافتراضية: 
+قبول إدخال خط الأنابيب: لا
+قبول أحرف البدل: 
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الأسماء المستعارة: 
+القيم المقبولة: 
+مطلوب: لا
+الموقع: 4
+القيمة الافتراضية: 
+قبول إدخال خط الأنابيب: لا
+قبول أحرف البدل: 
 ```
 
 ### -Token
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الأسماء المستعارة: 
+القيم المقبولة: 
+مطلوب: لا
+الموقع: 3
+القيمة الافتراضية: 
+قبول إدخال خط الأنابيب: لا
+قبول أحرف البدل: 
 ```
 
 ### -body
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الأسماء المستعارة: 
+القيم المقبولة: 
+مطلوب: لا
+الموقع: 1
+القيمة الافتراضية: 
+قبول إدخال خط الأنابيب: لا
+قبول أحرف البدل: 
 ```
 
 ### -endpoint
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الأسماء المستعارة: 
+القيم المقبولة: 
+مطلوب: لا
+الموقع: 0
+القيمة الافتراضية: 
+قبول إدخال خط الأنابيب: لا
+قبول أحرف البدل: 
 ```
 
 ### -method
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الأسماء المستعارة: 
+القيم المقبولة: 
+مطلوب: لا
+الموقع: 2
+القيمة الافتراضية: 
+قبول إدخال خط الأنابيب: لا
+قبول أحرف البدل: 
 ```
 
 
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

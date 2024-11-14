@@ -7,13 +7,14 @@ powershai: true
 # Invoke-HuggingFaceInferenceApi
 
 ## SYNOPSIS <!--!= @#Synop !-->
-تنفيذ واجهة برمجة تطبيقات الاستدلال Hugging Face
+استدعاء واجهة برمجة تطبيقات استدلال Hugging Face
 https://huggingface.co/docs/hub/en/api
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -61,10 +62,10 @@ Accept wildcard characters: false
 ```
 
 ### -OpenaiChatCompletion
-فرض استخدام نقطة نهاية اكتمال الدردشة
-يجب معالجة Params كـ params  نفسه لواجهة برمجة تطبيقات Openai (راجع cmdlet Get-OpenaiChat).
+فرض استخدام نقطة النهاية لإكمال الدردشة 
+يجب التعامل مع Params كـ params نفسه لواجهة برمجة تطبيقات Openai (انظر الأمر Get-OpenaiChat).
 مزيد من المعلومات: https://huggingface.co/blog/tgi-messages-api
-يعمل فقط مع النماذج التي تحتوي على قالب دردشة!
+يعمل فقط مع النماذج التي تحتوي على نموذج دردشة!
 
 ```yml
 Parameter Set: (All)
@@ -79,7 +80,7 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-دالة استدعاء Stream لاستخدامها في حالة streamS!
+استدعاء التدفق للاستخدام في حالة StreamS!
 
 ```yml
 Parameter Set: (All)
@@ -94,9 +95,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

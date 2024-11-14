@@ -10,12 +10,13 @@ powershai: true
 
 
 ## DESCRIPTION <!--!= @#Desc !-->
-تنفيذ مكالمات HTTP لـ Gradio مع إضافة الرؤوس الشائعة، مثل المصادقة، وما إلى ذلك.
+ينفذ مكالمات HTTP إلى Gradio ويضيف بالفعل الرؤوس الشائعة، مثل المصادقة، إلخ.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] 
+[[-token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -105,9 +106,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

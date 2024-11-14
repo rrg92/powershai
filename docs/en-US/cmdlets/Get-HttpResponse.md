@@ -8,13 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Gets the response for an HTTP request.
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
+
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] 
-[<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] 
+<Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -118,8 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI._
 <!--PowershaiAiDocBlockEnd-->

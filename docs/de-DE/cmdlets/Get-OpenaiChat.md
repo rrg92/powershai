@@ -8,13 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Ruft OpenAI-Chat-Modell-Antworten ab
+Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
+
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
-<Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
+Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
+[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -146,9 +147,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

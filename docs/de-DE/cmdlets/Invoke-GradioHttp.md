@@ -10,12 +10,13 @@ powershai: true
 
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Führt HTTP-Aufrufe an Gradio aus und fügt bereits die gängigen Header wie Authentifizierung usw. hinzu.
+Führt HTTP-Anfragen an Gradio aus und fügt bereits die gängigen Header hinzu, wie Authentifizierung usw.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] 
+[[-token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -105,9 +106,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

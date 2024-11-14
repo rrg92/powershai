@@ -14,8 +14,8 @@ Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-c
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] 
-<Object>] [<CommonParameters>]
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] 
+[[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -119,8 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

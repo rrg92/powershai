@@ -13,7 +13,8 @@ https://huggingface.co/docs/hub/en/api
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -61,8 +62,8 @@ Accept wildcard characters: false
 ```
 
 ### -OpenaiChatCompletion
-Erzwingt die Verwendung des Chat-Completion-Endpunkts
-Params sollten wie die gleichen Params der Openai Api behandelt werden (siehe Cmdlet Get-OpenaiChat).
+Zwingt zur Verwendung des Chat-Vervollständigungsendpunkts 
+Params sollten wie die gleichen Params der Openai-API behandelt werden (Siehe den Befehl Get-OpenaiChat).
 Weitere Informationen: https://huggingface.co/blog/tgi-messages-api
 Funktioniert nur mit Modellen, die eine Chat-Vorlage haben!
 
@@ -79,7 +80,7 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-Stream-Callback für die Verwendung im Falle von Streams!
+Stream-Callback, das im Fall von Streams verwendet werden soll!
 
 ```yml
 Parameter Set: (All)
@@ -94,9 +95,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

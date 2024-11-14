@@ -8,13 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Ruft die HTTP-Antwort ab.
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
+
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] 
-[<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] 
+<Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -22,12 +23,12 @@ Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] 
 ### -ForceEnd
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: switch
 Aliases: 
 Accepted Values: 
 Required: false
-Position: Named
+Position: Benannt
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: 
@@ -36,7 +37,7 @@ Accept wildcard characters:
 ### -HttpRequest
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -50,7 +51,7 @@ Accept wildcard characters:
 ### -ReadCount
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -64,7 +65,7 @@ Accept wildcard characters:
 ### -ReadMode
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -78,12 +79,12 @@ Accept wildcard characters:
 ### -StreamsOnly
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: switch
 Aliases: 
 Accepted Values: 
 Required: false
-Position: Named
+Position: Benannt
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: 
@@ -92,7 +93,7 @@ Accept wildcard characters:
 ### -Timeout
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -106,7 +107,7 @@ Accept wildcard characters:
 ### -WaitSleep
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -118,9 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

@@ -13,8 +13,9 @@ https://huggingface.co/docs/hub/en/api
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] [[-limit] <Object>] [[-sort] <Object>] 
-[-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] 
+[[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -174,7 +175,7 @@ Accept wildcard characters: false
 ```
 
 ### -Public
-Ignora il token corrente e elenca solo le risorse pubbliche
+Ignora il token attuale e elenca solo le risorse pubbliche
 
 ```yml
 Parameter Set: (All)
@@ -204,9 +205,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

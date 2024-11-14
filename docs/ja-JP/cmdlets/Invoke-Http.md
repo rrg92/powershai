@@ -14,8 +14,8 @@ Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-content
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-SseCallBack] <Object>] 
-[[-DebugVarName] <Object>] [[-Timeout] <Object>] [<CommonParameters>]
+Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] 
+<Object>] [[-SseCallBack] <Object>] [[-DebugVarName] <Object>] [[-Timeout] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -147,8 +147,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

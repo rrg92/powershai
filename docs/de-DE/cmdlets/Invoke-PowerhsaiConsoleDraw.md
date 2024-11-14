@@ -10,33 +10,34 @@ powershai: true
 Erstellt einen virtuellen Textrahmen und schreibt Zeichen innerhalb der Grenzen dieses Rahmens
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Erstellt einen Zeichenrahmen in der Konsole, der nur in einem bestimmten Bereich aktualisiert wird!
-Sie können mehrere Textzeilen senden und die Funktion kümmert sich darum, die Zeichnung im selben Rahmen zu halten, was den Eindruck erweckt, dass nur ein Bereich aktualisiert wird.
-Für den gewünschten Effekt muss diese Funktion wiederholt aufgerufen werden, ohne weitere Schreibvorgänge zwischen den Aufrufen!
+Erstellt einen Zeichnungsrahmen in der Konsole, der nur in einem bestimmten Bereich aktualisiert wird!
+Sie können mehrere Zeilen Text senden und die Funktion wird dafür sorgen, dass die Zeichnung im selben Rahmen bleibt, was den Eindruck erweckt, dass nur ein Bereich aktualisiert wird.
+Für den gewünschten Effekt sollte diese Funktion wiederholt aufgerufen werden, ohne andere Writes zwischen den Aufrufen!
 
-Diese Funktion sollte nur im interaktiven Modus von Powershell verwendet werden, der in einem Konsolenfenster ausgeführt wird.
-Sie ist nützlich, wenn Sie den Fortschritt eines Streingergebnisses genau im selben Bereich sehen möchten, um Variationen besser vergleichen zu können.
+Diese Funktion sollte nur im interaktiven Modus von PowerShell verwendet werden, der in einem Konsolenfenster ausgeführt wird.
+Sie ist nützlich in Situationen, in denen Sie den Fortschritt eines Ergebnisses in einer Zeichenfolge genau im selben Bereich sehen möchten, um Variationen besser vergleichen zu können.
 Es ist nur eine Hilfsfunktion.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] [-PassThru] [<CommonParameters>]
+Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] 
+[-PassThru] [<CommonParameters>]
 ```
 
 ## EXAMPLES <!--!= @#Ex !-->
 
 ### EXAMPLE 1
 ```powershell
-Das folgende Beispiel schreibt alle 2 Sekunden 3 Textstrings.
+Das folgende Beispiel schreibt alle 2 Sekunden 3 Textzeichenfolgen.
 ```
 
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Text
-Text, der geschrieben werden soll. Kann ein Array sein. Wenn er die Grenzen von W und H überschreitet, wird er abgeschnitten.
-Wenn es sich um einen Scriptblock handelt, ruft den Code auf und übergibt das Objekt aus der Pipeline!
+Zu schreibender Text. Kann ein Array sein. Wenn die Grenzen von W und H überschritten werden, wird er abgeschnitten. 
+Wenn es sich um einen Skriptblock handelt, wird der Code aufgerufen und das Pipeline-Objekt übergeben!
 
 ```yml
 Parameter Set: (All)
@@ -51,7 +52,7 @@ Accept wildcard characters: false
 ```
 
 ### -w
-Max. Zeichen pro Zeile
+Maximale Anzahl von Zeichen pro Zeile
 
 ```yml
 Parameter Set: (All)
@@ -66,7 +67,7 @@ Accept wildcard characters: false
 ```
 
 ### -h
-Max. Zeilen
+Maximale Anzahl von Zeilen
 
 ```yml
 Parameter Set: (All)
@@ -81,7 +82,7 @@ Accept wildcard characters: false
 ```
 
 ### -BlankChar
-Zeichen, das als leerer Raum verwendet wird
+Zeichen, das als Leerraum verwendet wird
 
 ```yml
 Parameter Set: (All)
@@ -96,7 +97,7 @@ Accept wildcard characters: false
 ```
 
 ### -PipeObj
-Objekt aus der Pipeline
+Pipeline-Objekt
 
 ```yml
 Parameter Set: (All)
@@ -111,7 +112,7 @@ Accept wildcard characters: false
 ```
 
 ### -PassThru
-Gibt das Objekt weiter
+Gibt das Objekt zurück
 
 ```yml
 Parameter Set: (All)
@@ -126,9 +127,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

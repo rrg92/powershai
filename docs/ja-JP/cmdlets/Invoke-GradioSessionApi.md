@@ -7,41 +7,42 @@ powershai: true
 # Invoke-GradioSessionApi
 
 ## SYNOPSIS <!--!= @#Synop !-->
-現在のセッションのエンドポイントへの新しい呼び出しを作成します。
+現在のセッションのエンドポイントに新しいコールを作成します。
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Gradio API を使用して、指定されたエンドポイントに呼び出しを行い、必要なパラメーターを渡します。  
-この呼び出しは、GradioApiEvent（Send-GradioApi を参照）を生成します。これは、セッション設定に内部的に保存されます。  
-このオブジェクトには、API の結果を取得するために必要なものがすべて含まれています。  
+特定のエンドポイントに対して、指定されたパラメータを渡してGradio APIを使用してコールを実行します。  
+このコールはGradioApiEventを生成し（Send-GradioApiを参照）、セッションの設定に内部的に保存されます。  
+このオブジェクトには、APIの結果を取得するために必要なすべての情報が含まれています。  
 
-この cmdlet は、SessionApiEvent 型のオブジェクトを返します。このオブジェクトには、次のプロパティが含まれています。
-	id - 生成されたイベントの内部 ID。
-	event - 生成された内部イベント。イベントを操作する cmdlet で直接使用できます。
+コマンドレットは、次のプロパティを持つSessionApiEventタイプのオブジェクトを返します：
+	id - 生成されたイベントの内部ID。
+	event - 生成された内部イベント。イベントを操作するコマンドレットと直接使用できます。
 	
-セッションには、定義された呼び出しの制限があります。
-目的は、制御を失うような、無限の呼び出しを作成することを防ぐことです。
+セッションには定義されたコールの制限があります。
+これは、制御を失わないように無制限のコールを作成するのを防ぐことを目的としています。
 
-呼び出しに影響を与えるセッションのオプションは 2 つあります（Set-GradioSession で変更できます）。
+コールに影響を与えるセッションの2つのオプションがあります（Set-GradioSessionで変更可能）：
 	- MaxCalls 
-	作成できる呼び出しの最大数を制御します。
+	作成できるコールの最大数を制御します。
 	
 	- MaxCallsPolicy 
-	最大値に達した場合の動作を制御します。
-	可能な値:
-		- Error 	= エラーが発生します！
+	Maxが達成されたときに何をするかを制御します。
+	可能な値：
+		- Error 	= エラーになります！
 		- Remove 	= 最も古いものを削除します。
-		- Warning 	= 警告を表示しますが、制限を超えることができます。
+		- Warning 	= 警告を表示しますが、制限を超えることを許可します。
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] [<CommonParameters>]
+Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -ApiName
-エンドポイントの名前（先頭のスラッシュなし）。
+エンドポイントの名前（最初のスラッシュなし）
 
 ```yml
 Parameter Set: (All)
@@ -56,9 +57,9 @@ Accept wildcard characters: false
 ```
 
 ### -Params
-パラメーターのリスト。
-配列の場合、Gradio の API に直接渡されます。
-ハッシュテーブルの場合、/info で返されるパラメーターの位置に基づいて配列が構築されます。
+パラメータのリスト 
+配列の場合、Gradio APIに直接渡されます。 
+ハッシュテーブルの場合、/infoによって返されたパラメータの位置に基づいて配列を構築します。
 
 ```yml
 Parameter Set: (All)
@@ -73,7 +74,7 @@ Accept wildcard characters: false
 ```
 
 ### -EventId
-指定した場合、既存のイベント ID で作成します（モジュール外で生成された可能性があります）。
+指定された場合、既存のイベントIDで作成します（モジュールの外部で生成されている可能性があります）。
 
 ```yml
 Parameter Set: (All)
@@ -88,7 +89,7 @@ Accept wildcard characters: false
 ```
 
 ### -session
-セッション。
+セッション
 
 ```yml
 Parameter Set: (All)
@@ -103,7 +104,7 @@ Accept wildcard characters: false
 ```
 
 ### -Token
-新しいトークンの使用を強制します。「public」の場合、トークンは使用されません。
+新しいトークンの使用を強制します。"public"の場合、トークンは使用されません！
 
 ```yml
 Parameter Set: (All)
@@ -118,8 +119,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

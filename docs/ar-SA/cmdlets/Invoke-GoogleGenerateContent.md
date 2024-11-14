@@ -1,6 +1,6 @@
 ﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
+ملف المساعدة الخارجي: powershai-help.xml
+المخطط: 2.0.0
 powershai: true
 ---
 
@@ -13,7 +13,8 @@ powershai: true
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] 
+<Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -21,49 +22,74 @@ Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-Strea
 ### -messages
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: @()
-Accept pipeline input: false
-Accept wildcard characters: false
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الألقاب: 
+القيم المقبولة: 
+مطلوب: غير مطلوب
+الموقع: 1
+القيمة الافتراضية: @()
+قبول إدخال الأنبوب: غير مطلوب
+قبول أحرف البدل: غير مطلوب
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: gemini-1.5-flash
-Accept pipeline input: false
-Accept wildcard characters: false
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الألقاب: 
+القيم المقبولة: 
+مطلوب: غير مطلوب
+الموقع: 2
+القيمة الافتراضية: gemini-1.5-flash
+قبول إدخال الأنبوب: غير مطلوب
+قبول أحرف البدل: غير مطلوب
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الألقاب: 
+القيم المقبولة: 
+مطلوب: غير مطلوب
+الموقع: 3
+القيمة الافتراضية: 
+قبول إدخال الأنبوب: غير مطلوب
+قبول أحرف البدل: غير مطلوب
+```
+
+### -RawParams
+
+```yml
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الألقاب: 
+القيم المقبولة: 
+مطلوب: غير مطلوب
+الموقع: 4
+القيمة الافتراضية: @{}
+قبول إدخال الأنبوب: غير مطلوب
+قبول أحرف البدل: غير مطلوب
+```
+
+### -Tools
+
+```yml
+مجموعة المعلمات: (الكل)
+النوع: كائن
+الألقاب: 
+القيم المقبولة: 
+مطلوب: غير مطلوب
+الموقع: 5
+القيمة الافتراضية: 
+قبول إدخال الأنبوب: غير مطلوب
+قبول أحرف البدل: غير مطلوب
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

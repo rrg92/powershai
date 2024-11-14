@@ -14,8 +14,8 @@ Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-content
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-SseCallBack] <Object>] 
-[[-DebugVarName] <Object>] [[-Timeout] <Object>] [<CommonParameters>]
+Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] 
+<Object>] [[-SseCallBack] <Object>] [[-DebugVarName] <Object>] [[-Timeout] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -147,9 +147,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

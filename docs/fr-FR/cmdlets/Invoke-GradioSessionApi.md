@@ -7,41 +7,42 @@ powershai: true
 # Invoke-GradioSessionApi
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Crée un nouvel appel vers une extrémité de la session actuelle.
+Crée un nouvel appel à un point de terminaison dans la session actuelle.
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Effectue un appel en utilisant l'API Gradio, sur une extrémité spécifique en passant les paramètres souhaités.  
-Cet appel générera un GradioApiEvent (voir Send-GradioApi), qui sera enregistré en interne dans les paramètres de la session.  
+Effectue un appel en utilisant l'API de Gradio, à un point de terminaison spécifique et en passant les paramètres souhaités.  
+Cet appel générera un GradioApiEvent (voir Send-GradioApi), qui sera enregistré en interne dans les configurations de la session.  
 Cet objet contient tout ce qui est nécessaire pour obtenir le résultat de l'API.  
 
-Le cmdlet retournera un objet de type SessionApiEvent contenant les propriétés suivantes :
-	id - Id interne de l'événement généré.
-	event - L'événement interne généré. Peut être utilisé directement avec les cmdlets qui manipulent les événements.
+Le cmdlet renverra un objet de type SessionApiEvent contenant les propriétés suivantes :
+	id - Identifiant interne de l'événement généré.
+	event - L'événement interne généré. Peut être utilisé directement avec les cmdlets qui manipulent des événements.
 	
-Les sessions ont une limite d'appels définies.
-Le but est d'empêcher la création d'appels indéfinies de manière à perdre le contrôle.
+Les sessions ont une limite de Calls définies.
+L'objectif est d'empêcher de créer des appels indéfinis de manière à perdre le contrôle.
 
-Il existe deux options de la session qui affectent l'appel (peuvent être modifiées avec Set-GradioSession) :
+Il existe deux options de session qui affectent l'appel (peuvent être modifiées avec Set-GradioSession) :
 	- MaxCalls 
-	Contrôle le nombre maximum d'appels pouvant être créées
+	Contrôle le maximum d'appels qui peuvent être créés
 	
 	- MaxCallsPolicy 
-	Contrôle ce qu'il faut faire lorsque le Max est atteint.
+	Contrôle ce qu'il faut faire lorsque le maximum est atteint.
 	Valeurs possibles :
-		- Error 	= génère une erreur !
-		- Remove 	= supprime la plus ancienne
+		- Error 	= entraîne une erreur !
+		- Remove 	= supprime le plus ancien 
 		- Warning 	= Affiche un avertissement, mais permet de dépasser la limite.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] [<CommonParameters>]
+Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -ApiName
-Nom de l'extrémité (sans la barre initiale)
+Nom du point de terminaison (sans la barre initiale)
 
 ```yml
 Parameter Set: (All)
@@ -57,8 +58,8 @@ Accept wildcard characters: false
 
 ### -Params
 Liste de paramètres 
-S'il s'agit d'un tableau, il est passé directement à l'API Gradio 
-S'il s'agit d'une table de hachage, il assemble le tableau en fonction de la position des paramètres retournés par /info
+S'il s'agit d'un tableau, passe directement à l'API de Gradio 
+S'il s'agit d'une table de hachage, construit le tableau en fonction de la position des paramètres retournés par /info
 
 ```yml
 Parameter Set: (All)
@@ -73,7 +74,7 @@ Accept wildcard characters: false
 ```
 
 ### -EventId
-Si spécifié, il est créé avec un id d'événement existant (il peut avoir été généré en dehors du module).
+S'il est spécifié, crée avec un identifiant d'événement déjà existant (peut avoir été généré en dehors du module).
 
 ```yml
 Parameter Set: (All)
@@ -103,7 +104,7 @@ Accept wildcard characters: false
 ```
 
 ### -Token
-Forcer l'utilisation d'un nouveau jeton. Si "public", alors aucun jeton n'est utilisé !
+Forcer l'utilisation d'un nouveau token. Si "public", alors n'utilise aucun token !
 
 ```yml
 Parameter Set: (All)
@@ -118,9 +119,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

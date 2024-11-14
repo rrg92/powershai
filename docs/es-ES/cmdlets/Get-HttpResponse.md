@@ -6,121 +6,119 @@ powershai: true
 
 # Get-HttpResponse
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 
-Obtiene la respuesta HTTP.
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 
-## SYNTAX <!--!= @#Syntax !-->
+
+## SÍNTAXIS <!--!= @#Syntax !-->
 
 ```
-Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] <Object>] [-ForceEnd] [-StreamsOnly] 
-[<CommonParameters>]
+Get-HttpResponse [[-HttpRequest] <Object>] [[-ReadMode] <Object>] [[-ReadCount] <Object>] [[-Timeout] <Object>] [[-WaitSleep] 
+<Object>] [-ForceEnd] [-StreamsOnly] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
 ### -ForceEnd
 
 ```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: interruptor
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: Nombrado
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -HttpRequest
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: true (ByValue)
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 0
+Valor Predeterminado: 
+Aceptar entrada de canalización: verdadero (PorValor)
+Aceptar caracteres comodín: 
 ```
 
 ### -ReadCount
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 2
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -ReadMode
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 1
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -StreamsOnly
 
 ```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: interruptor
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: Nombrado
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -Timeout
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 3
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -WaitSleep
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 4
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

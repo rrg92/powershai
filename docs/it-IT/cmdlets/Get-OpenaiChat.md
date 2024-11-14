@@ -8,14 +8,14 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Ottieni chat OpenAI [[-prompt] <Oggetto>] [[-temperature] <Oggetto>] [[-model] <Oggetto>] [[-MaxTokens] <Oggetto>] [[-ResponseFormat] <Oggetto>] [[-Functions] <Oggetto>] [[-RawParams] <Oggetto>] [[-StreamCallback] <Oggetto>] [[-endpoint] <Oggetto>] [<CommonParameters>]
+Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiChat [[-prompt] <Oggetto>] [[-temperature] <Oggetto>] [[-model] <Oggetto>] [[-MaxTokens] <Oggetto>] [[-ResponseFormat] <Oggetto>] [[-Functions] <Oggetto>] [[-RawParams] 
-<Oggetto>] [[-StreamCallback] <Oggetto>] [[-endpoint] <Oggetto>] [<CommonParameters>]
+Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
+[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -147,9 +147,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

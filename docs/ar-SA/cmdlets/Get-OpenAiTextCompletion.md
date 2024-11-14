@@ -14,7 +14,8 @@ Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [<CommonParameters>]
+Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -76,9 +77,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

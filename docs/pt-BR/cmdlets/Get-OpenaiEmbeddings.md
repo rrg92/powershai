@@ -8,16 +8,30 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
+
+### -dimensions
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
+```
 
 ### -model
 
@@ -43,6 +57,6 @@ Accepted Values:
 Required: false
 Position: 0
 Default Value: 
-Accept pipeline input: true (ByValue)
+Accept pipeline input: false
 Accept wildcard characters: 
 ```

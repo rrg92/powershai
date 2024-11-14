@@ -6,121 +6,118 @@ powershai: true
 
 # Start-HttpRequest
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 
-Inicia una solicitud HTTP.
+Inicia una solicitud HTTP [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
 
-## SYNTAX <!--!= @#Syntax !-->
+## SINTAXIS <!--!= @#Syntax !-->
 
 ```
-Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] 
-<Object>] [<CommonParameters>]
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] 
+[[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
 ### -Encoding
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: false
+Posición: 4
+Valor por Defecto: 
+Aceptar entrada de canalización: false
+Aceptar caracteres comodín: 
 ```
 
 ### -MaxConnections
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 6
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: false
+Posición: 6
+Valor por Defecto: 
+Aceptar entrada de canalización: false
+Aceptar caracteres comodín: 
 ```
 
 ### -contentType
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: false
+Posición: 3
+Valor por Defecto: 
+Aceptar entrada de canalización: false
+Aceptar caracteres comodín: 
 ```
 
 ### -data
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: false
+Posición: 1
+Valor por Defecto: 
+Aceptar entrada de canalización: false
+Aceptar caracteres comodín: 
 ```
 
 ### -headers
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 5
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: false
+Posición: 5
+Valor por Defecto: 
+Aceptar entrada de canalización: false
+Aceptar caracteres comodín: 
 ```
 
 ### -method
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: false
+Posición: 2
+Valor por Defecto: 
+Aceptar entrada de canalización: false
+Aceptar caracteres comodín: 
 ```
 
 ### -url
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: false
+Posición: 0
+Valor por Defecto: 
+Aceptar entrada de canalización: false
+Aceptar caracteres comodín: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

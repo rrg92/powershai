@@ -7,43 +7,46 @@ powershai: true
 # Send-PowershaiChat
 
 ## SYNOPSIS <!--!= @#Synop !-->
-إرسال رسالة في محادثة Powershai
+يرسل رسالة في دردشة PowerShai
 
 ## DESCRIPTION <!--!= @#Desc !-->
-يتيح لك هذا cmdlet إرسال رسالة جديدة إلى نموذج اللغة الكبير (LLM) لمزود الخدمة الحالي. 
-بشكل افتراضي، يتم الإرسال إلى المحادثة النشطة. يمكنك تجاوز المحادثة باستخدام المعلمة -Chat. 
-إذا لم تكن هناك محادثة نشطة، فسيتم استخدام المحادثة الافتراضية.
+هذا الأمر يسمح لك بإرسال رسالة جديدة إلى LLM لمزود الخدمة الحالي.  
+بشكل افتراضي، يتم الإرسال في الدردشة النشطة. يمكنك تجاوز الدردشة باستخدام المعامل -Chat. إذا لم تكن هناك دردشة نشطة، فسيستخدم الافتراضي.  
 
-تؤثر العديد من معلمات المحادثة على كيفية عمل هذا الأمر. راجع الأمر Get-PowershaiChatParameter لمزيد من المعلومات حول معلمات المحادثة.
-بالإضافة إلى معلمات المحادثة، يمكن لمعلمات الأمر نفسها تجاوز السلوك. لمزيد من التفاصيل، راجع وثائق كل معلمة من معلمات هذا cmdlet باستخدام get-help. 
+تؤثر معلمات الدردشة المختلفة على كيفية عمل هذا الأمر. راجع الأمر Get-PowershaiChatParameter لمزيد من المعلومات حول معلمات الدردشة.  
+بالإضافة إلى معلمات الدردشة، يمكن أن تتجاوز معلمات الأمر نفسها السلوك. لمزيد من التفاصيل، يرجى الرجوع إلى الوثائق الخاصة بكل معلمة من هذا الأمر باستخدام get-help.  
 
-من أجل البساطة، والحفاظ على سطر الأوامر نظيفاً، مما يسمح للمستخدم بالتركيز أكثر على طلبات النموذج والبيانات، تم توفير بعض الأسماء المستعارة.
-يمكن لهذه الأسماء المستعارة تنشيط بعض المعلمات.
+للتبسيط، وللحفاظ على سطر الأوامر نظيفًا، مما يسمح للمستخدم بالتركيز أكثر على الموجه والبيانات، تتوفر بعض الأسماء المستعارة.  
+يمكن أن تفعيل هذه الأسماء المستعارة بعض المعلمات.
 وهي:
 	ia|ai
-		اختصار لـ "الذكاء الاصطناعي". هذا مجرد اسم مستعار ولا يغير أي معلمة. يساعد في اختصار سطر الأوامر بشكل كبير.
+		اختصار لـ "الذكاء الاصطناعي" باللغة البرتغالية. هذا اسم مستعار بسيط ولا يغير أي معلمة. إنه يساعد بشكل كبير في تقليل سطر الأوامر.
 	
 	iat|ait
-		يُعَدّ هو نفسه Send-PowershaAIChat -Temporary
+	نفس الشيء مثل Send-PowershaAIChat -Temporary
 		
 	io|ao
-		يُعَدّ هو نفسه Send-PowershaAIChat -Object
+	نفس الشيء مثل Send-PowershaAIChat -Object
+		
+	iam|aim 
+	نفس الشيء مثل Send-PowershaiChat -Screenshot 
 
 يمكن للمستخدم إنشاء أسماء مستعارة خاصة به. على سبيل المثال:
-	Set-Alias ki ia # حدد اسم مستعار للغة الألمانية!
-	Set-Alias kit iat # حدد اسم مستعار "kit" لـ "iat"، مما يجعل السلوك هو نفسه "iat" (محادثة مؤقتة) عند استخدام "kit"!
+	Set-Alias ki ia # تعريف الاسم المستعار للألمانية!
+	Set-Alias kit iat # تعريف الاسم المستعار kit لـ iat، مما يجعل السلوك متساويًا مع iat (دردشة مؤقتة) عند استخدام kit!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Send-PowershaiChat [[-prompt] <Object>] [-SystemMessages <Object>] [-context <Object>] [-ForEach] [-Json] [-Object] [-PrintContext] [-Forget] [-Snub] [-Temporary] 
-[-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [-Lines] [<CommonParameters>]
+Send-PowershaiChat [[-prompt] <Object>] [-SystemMessages <Object>] [-context <Object>] [-ForEach] [-Json] [-Object] [-PrintContext] 
+[-Forget] [-Snub] [-Temporary] [-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [-Lines] 
+[-ChatParamsOverride <Object>] [-RawParams <Object>] [-Screenshot] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -prompt
-طلب النموذج المراد إرساله.
+الموجه الذي سيتم إرساله إلى النموذج
 
 ```yml
 Parameter Set: (All)
@@ -58,7 +61,7 @@ Accept wildcard characters: false
 ```
 
 ### -SystemMessages
-رسالة النظام المراد تضمينها.
+رسالة النظام المراد تضمينها
 
 ```yml
 Parameter Set: (All)
@@ -73,9 +76,9 @@ Accept wildcard characters: false
 ```
 
 ### -context
-السياق.
-يفضل استخدام هذه المعلمة عن طريق الأنبوب.
-سيؤدي ذلك إلى جعل الأمر يضع البيانات في علامات `<contexto></contexto>` ويدمجها مع طلب النموذج.
+السياق 
+يجب استخدام هذا المعامل بشكل تفضيلي من خلال أنبوب البيانات.
+سوف يجعل الأمر يضع البيانات داخل علامات <contexto></contexto> ويحقنها معًا في الموجه.
 
 ```yml
 Parameter Set: (All)
@@ -90,8 +93,8 @@ Accept wildcard characters: false
 ```
 
 ### -ForEach
-يجبر cmdlet على التنفيذ لكل كائن في الأنبوب.
-بشكل افتراضي، فإنه يجمع جميع الكائنات في مصفوفة، ويحول المصفوفة إلى سلسلة ثم يرسلها في وقت واحد إلى LLM.
+يجبر الأمر على التنفيذ لكل كائن في أنبوب البيانات
+بشكل افتراضي، يقوم بتجميع جميع الكائنات في مصفوفة، وتحويل المصفوفة إلى سلسلة واحدة وإرسالها دفعة واحدة إلى LLM.
 
 ```yml
 Parameter Set: (All)
@@ -106,8 +109,8 @@ Accept wildcard characters: false
 ```
 
 ### -Json
-يُفعّل وضع JSON.
-في هذا الوضع، تكون النتائج المُعادة دائمًا بتنسيق JSON.
+يفعل وضع JSON 
+في هذا الوضع، ستكون النتائج المرتجعة دائمًا بتنسيق JSON.
 يجب أن يدعم النموذج الحالي ذلك!
 
 ```yml
@@ -123,10 +126,10 @@ Accept wildcard characters: false
 ```
 
 ### -Object
-وضع كائن!
+وضع الكائن!
 في هذا الوضع، سيتم تفعيل وضع JSON تلقائيًا!
-لن يكتب الأمر أي شيء على الشاشة، وسيرجع النتائج ككائن!
-سيتم تمريرها مرة أخرى إلى الأنبوب!
+لن يكتب الأمر أي شيء على الشاشة، وسيعيد النتائج ككائن!
+الذي سيتم إعادته إلى أنبوب البيانات!
 
 ```yml
 Parameter Set: (All)
@@ -141,8 +144,8 @@ Accept wildcard characters: false
 ```
 
 ### -PrintContext
-يعرض بيانات السياق المُرسلة إلى LLM قبل الرد!
-مفيد في تصحيح الأخطاء لمعرفة ما يتم حقنه في طلب النموذج من بيانات.
+يظهر بيانات السياق المرسلة إلى LLM قبل الاستجابة!
+مفيد لتصحيح الأخطاء حول ما يتم حقنه من بيانات في الموجه.
 
 ```yml
 Parameter Set: (All)
@@ -157,7 +160,7 @@ Accept wildcard characters: false
 ```
 
 ### -Forget
-لا تُرسل المحادثات السابقة (سجل السياق)، ولكن قم بتضمين طلب النموذج والرد في سجل السياق.
+لا ترسل المحادثات السابقة (تاريخ السياق)، ولكن تشمل الموجه والاستجابة في السياق التاريخي.
 
 ```yml
 Parameter Set: (All)
@@ -172,7 +175,7 @@ Accept wildcard characters: false
 ```
 
 ### -Snub
-تجاهل رد LLM، ولا تقم بتضمين طلب النموذج في سجل السياق.
+تجاهل استجابة LLM، ولا تشمل الموجه في السياق التاريخي
 
 ```yml
 Parameter Set: (All)
@@ -187,8 +190,8 @@ Accept wildcard characters: false
 ```
 
 ### -Temporary
-لا تُرسل السجل ولا تقم بتضمين الرد وطلب النموذج. 
-يُعَدّ هو نفسه تمرير -Forget و -Snub معًا.
+لا ترسل التاريخ ولا تشمل الاستجابة والموجه.  
+هذا هو نفس الشيء مثل تمرير -Forget و -Snub معًا.
 
 ```yml
 Parameter Set: (All)
@@ -203,7 +206,7 @@ Accept wildcard characters: false
 ```
 
 ### -DisableTools
-يُغلق استدعاء الدالة لهذا التنفيذ فقط!
+يوقف استدعاء الوظائف لهذه التنفيذ فقط!
 
 ```yml
 Parameter Set: (All)
@@ -218,8 +221,8 @@ Accept wildcard characters: false
 ```
 
 ### -FormatterFunc
-يُغيّر مُنسق السياق لهذا الأمر.
-شاهد المزيد في Format-PowershaiContext.
+تغيير تنسيق السياق إلى هذا
+راجع المزيد عن ذلك في Format-PowershaiContext
 
 ```yml
 Parameter Set: (All)
@@ -234,7 +237,7 @@ Accept wildcard characters: false
 ```
 
 ### -FormatterParams
-معلمات مُنسق السياق المُغيّر.
+معلمات تنسيق السياق المعدلة.
 
 ```yml
 Parameter Set: (All)
@@ -249,13 +252,13 @@ Accept wildcard characters: false
 ```
 
 ### -PassThru
-يرجع الرسائل إلى الأنبوب، دون كتابة أي شيء على الشاشة!
-يُفترض من هذا الخيار أن يكون المستخدم هو المسؤول عن توجيه الرسالة بشكل صحيح!
-سيكون للكائن الذي يتم تمريره إلى الأنبوب الخصائص التالية:
-	text 			- نص (أو مقطع) النص المُرجع من النموذج
-	formatted		- النص المُنسق، بما في ذلك طلب النموذج، كما لو كان مكتوبًا مباشرة على الشاشة (بدون ألوان)
-	event			- الحدث. يشير إلى الحدث الذي نشأ منه. تُعَدّ هي نفس الأحداث التي تم توثيقها في Invoke-AiChatTools
-	interaction 	- كائن "interaction" تم إنشاؤه بواسطة Invoke-AiChatTools
+يعيد الرسائل مرة أخرى إلى أنبوب البيانات، دون الكتابة مباشرة على الشاشة!
+تتوقع هذه الخيار أن يكون المستخدم مسؤولاً عن توجيه الرسالة بشكل صحيح!
+سوف يحتوي الكائن الممرر إلى أنبوب البيانات على الخصائص التالية:
+	text 			- النص (أو جزء) من النص المرتجع من النموذج 
+	formatted		- النص المنسق، بما في ذلك الموجه، كما لو كان مكتوبًا مباشرة على الشاشة (بدون الألوان)
+	event			- الحدث. يشير إلى الحدث الذي نشأ عنه. هي نفس الأحداث الموثقة في Invoke-AiChatTools
+	interaction 	- كائن التفاعل الذي تم إنشاؤه بواسطة Invoke-AiChatTools
 
 ```yml
 Parameter Set: (All)
@@ -270,8 +273,8 @@ Accept wildcard characters: false
 ```
 
 ### -Lines
-يرجع مصفوفة من الأسطر.
-إذا كان وضع "stream" مُفعلاً، فسيتم إرجاع سطر واحد في كل مرة!
+يعيد مصفوفة من الأسطر 
+إذا كان وضع التدفق مفعلًا، سيعيد سطرًا واحدًا في كل مرة!
 
 ```yml
 Parameter Set: (All)
@@ -285,10 +288,59 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -ChatParamsOverride
+تجاوز معلمات الدردشة!
+حدد كل خيار في جداول هاش!
 
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -RawParams
+يحدد مباشرة قيمة معلمة الدردشة RawParams!
+إذا تم تحديده أيضًا في ChatParamOverride، يتم دمجها، مع إعطاء الأولوية للمعلمات المحددة هنا.
+RawParams هي معلمة دردشة تحدد المعلمات التي سيتم إرسالها مباشرة إلى واجهة برمجة تطبيقات النموذج!
+ستتجاوز هذه المعلمات القيم الافتراضية المحسوبة بواسطة PowerShai!
+مع ذلك، يمتلك المستخدم تحكمًا كاملاً على المعلمات، ولكن يحتاج إلى معرفة كل مزود!
+أيضًا، كل مزود مسؤول عن توفير هذا التنفيذ واستخدام هذه المعلمات في واجهته البرمجية.
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Screenshot
+يلتقط لقطة شاشة للشاشة التي وراء نافذة PowerShell ويرسلها مع الموجه. 
+لاحظ أن الوضع الحالي يجب أن يدعم الصور (نماذج اللغة البصرية).
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: ss
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
 
 
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

@@ -7,23 +7,24 @@ powershai: true
 # Update-GradioSessionApiResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-يُحدّث نتيجة واجهة برمجة التطبيقات لجلسة Gradio التي تم إنشاؤها كـ Invoke-GradioSessionApi
+تحديث نتيجة استدعاء تم إنشاؤه كـ Invoke-GradioSessionApi
 
 ## DESCRIPTION <!--!= @#Desc !-->
-يتبع هذا cmdlet نفس المبدأ مثل نظرائه في Send-GradioApi و Update-GradioApiResult.
-ومع ذلك ، فهو يعمل فقط للأحداث التي تم إنشاؤها في جلسة محددة.
-يُرجع الحدث نفسه حتى يمكن استخدامه مع cmdlets أخرى تتطلب الحدث المُحدّث!
+تتبع هذه الأداة نفس المبدأ كأدواتها المعادلة في Send-GradioApi و Update-GradioApiResult.
+ومع ذلك، فإنها تعمل فقط للأحداث التي تم إنشاؤها في جلسة معينة.
+تعيد الحدث نفسه بحيث يمكن استخدامه مع أدوات أخرى تعتمد على الحدث المحدث!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-معرف الحدث ، مُرجع من Invoke-GradioSessionApi أو الكائن المُرجع نفسه.
+معرف الحدث، الذي تم إرجاعه بواسطة  Invoke-GradioSessionApi أو الكائن نفسه المعاد.
 
 ```yml
 Parameter Set: (All)
@@ -38,7 +39,7 @@ Accept wildcard characters: false
 ```
 
 ### -NoOutput
-لا تُرجع النتيجة إلى الإخراج!
+عدم إعادة النتيجة إلى المخرجات!
 
 ```yml
 Parameter Set: (All)
@@ -53,7 +54,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxHeartBeats
-أقصى عدد دقات القلب المتتالية.
+أقصى عدد من نبضات القلب المتتالية.
 
 ```yml
 Parameter Set: (All)
@@ -83,7 +84,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
-يضيف الأحداث إلى سجل أحداث كائن GradioApiEvent المحدد في -Id
+يضيف الأحداث إلى تاريخ الأحداث للكائن GradioApiEvent المحدد في -Id
 
 ```yml
 Parameter Set: (All)
@@ -98,9 +99,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->
