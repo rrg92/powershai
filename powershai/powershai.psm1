@@ -2288,6 +2288,9 @@ function Send-PowershaiChat {
 					
 				io|ao
 					O mesmo que Send-PowershaAIChat -Object
+					
+				iam|aim 
+					O mesmo que Send-PowershaaiChat -Screenshot 
 			
 			O usuário pode criar seus próprios alias. Por exemplo:
 				Set-Alias ki ia # DEfine o alias para o alemao!
@@ -2372,6 +2375,12 @@ function Send-PowershaiChat {
 		 #Com isso, o usuario tem total controle sobre os parâmetros, mas precisa conmhecer cada provider!
 		 #Também, cada provider é responsável por prover essa implementaão e usar esses parâmetros na sua api.
 			$RawParams = @{}
+			
+		,#Captura um print screen da tela que está atrás da janela do powershell e envia junto com o prompt. 
+		 #Note que o mode atual deve suportar imagens (Vision Language Models).
+			[switch]
+			[Alias("ss")]
+			$Screenshot
 	)
 	
 	
@@ -2419,6 +2428,10 @@ function Send-PowershaiChat {
 			$Temporary = $true;
 		}
 		
+		if($CallName -eq "iam"){
+			$Screenshot = $true;
+		}
+		
 		if($Temporary){
 			write-warning "Temporary Chat enabled";
 			$Snub 	= $true;
@@ -2433,6 +2446,16 @@ function Send-PowershaiChat {
 			
 			write-verbose "Setting active...";
 			$ActiveChat = Get-PowershaiChat -SetActive $NewChat.id;
+		}
+		
+		if($Screenshot){
+			if(-not(Get-Command -EA SilentlyContinue Get-PowershaiPrintSCreen)){
+				throw "POWERSHAI_ENABLE_EXPLAIN: Você deve habilitar com Enable-AiScreenshots"
+			}
+			
+			$sspath = Get-PowershaiPrintSCreen;
+			
+			$prompt += "file: $sspath";
 		}
 		
 		$AllContext = @()
@@ -3024,6 +3047,7 @@ function Send-PowershaiChat {
 Set-Alias -Name ia -Value Send-PowershaiChat
 Set-Alias -Name iat -Value Send-PowershaiChat
 Set-Alias -Name io -Value Send-PowershaiChat
+Set-Alias -Name iam -Value Send-PowershaiChat
 
 # Estes são alias secundários, que são criados apenas para melhor interface com usuários de outros idiomas.
 # Definimos uma alias para o alias primario, pois isso manterá o comportamento do Send-PowershaiChat, que pode alterar conforme o alias primário.
@@ -3031,6 +3055,7 @@ Set-Alias -Name io -Value Send-PowershaiChat
 Set-Alias -Name ai 	-Value ia
 Set-Alias -Name ait -Value iat
 Set-Alias -Name ao 	-Value io
+Set-Alias -Name aim -Value io
 
 
 
@@ -3583,6 +3608,30 @@ Set-Alias CompileChatTools CompilePowershaiChatTools
 
 
 
+function Enable-AiScreenshots {
+	[CmdletBinding()]
+	param()
+	<#
+		.SYNOPSIS
+			Habilita o explain screen!
+			
+		.DESCRIPTION
+			Explain Screen é uma feature que permite obter prints de uma área da tela e enviar ao LLM que suporta vision!
+			É um recurso que está sendo testado ainda, e por isso, você deve habilita!
+	#>
+
+	
+	$ModScript = {
+		. "$PsScriptRoot/lib/screenshotservices.ps1"
+	}
+			
+	$DummyMod = New-Module -Name "PowershaiExplainScreen" -ScriptBlock $ModScript
+	verbose "	Importing dummy module"
+	import-module -force $DummyMod 
+}
+
+
+
 function Get-PowershaiHelp {
 	<#
 		.SYNOPSIS
@@ -3691,6 +3740,9 @@ set-alias aihelp Get-PowershaiHelp
 set-alias aid Get-PowershaiHelp
 set-alias ajudai Get-PowershaiHelp
 set-alias iajuda Get-PowershaiHelp
+
+
+
 
 
 # Carrega os providers!
