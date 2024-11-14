@@ -26,6 +26,11 @@ Isso é, você não paga nada pra usar o PowershAI, além dos custos que você j
 Este módulo é ideal para integrar comandos powershell com seus LLM favoritos, testar chamadas, pocs, etc.  
 É ideal para quem já está acostumado com o PowerShell e quer trazer a IA pro seus scripts de uma maneira mais simples e fácil!
 
+> [!IMPORTANT]
+> Este não é um módulo oficial OpenAI, Google, Microsoft ou de qualquer outro provider listado aqui!
+> Este projeto é uma iniciativa pessoal e, com o objetivo de ser mantido pela própria comunidade open source.
+
+
 Os seguintes exemplos mostram como você pode o Powershai em situações comuns:
 
 ## Analisando logs do Windows 
