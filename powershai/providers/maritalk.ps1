@@ -202,10 +202,11 @@ function Invoke-MaritalkInference {
 	$SystemMessage = "";
 	$PrevMessage = $null
 	foreach($m in $messages){
+
 		if($m.role -eq "system"){
-			$SystemMessage += $m.content;
+			$SystemMessage += $TextContent;
 		} else {
-			$NewMessage = @{ role = $m.role; content = $m.content };
+			$NewMessage = @{ role = $m.role; content = $TextContent };
 			if($PrevMessage.role -eq $NewMessage.role){
 				$PrevMessage.content += $NewMessage.content;
 			} else {
@@ -274,10 +275,19 @@ function Get-MaritalkChat {
 	$SystemMessage = "";
 	$PrevMessage = $null
 	foreach($m in $messages){
-		if($m.role -eq "system"){
-			$SystemMessage += $m.content;
+		
+		
+		if($m.content -isnot [string]){
+			$TextContent =  @($m.content | ? {$_.text} | %{ $_.text }) -Join "`n"
 		} else {
-			$NewMessage = @{ role = $m.role; content = $m.content };
+			$TextContent = $m.content;
+		}
+		
+		
+		if($m.role -eq "system"){
+			$SystemMessage += $TextContent;
+		} else {
+			$NewMessage = @{ role = $m.role; content =$TextContent };
 			if($PrevMessage.role -eq $NewMessage.role){
 				$PrevMessage.content += $NewMessage.content;
 			} else {
