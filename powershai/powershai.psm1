@@ -57,6 +57,8 @@
 #>
 $ErrorActionPreference = "Stop";
 
+$PowershaiRoot = $PSScriptRoot
+
 if(!$Global:POWERSHAI_SETTINGS){
 	$Global:POWERSHAI_SETTINGS = @{
 		provider = $null #ollama, huggingface
@@ -3609,8 +3611,6 @@ Set-Alias CompileChatTools CompilePowershaiChatTools
 
 
 function Enable-AiScreenshots {
-	[CmdletBinding()]
-	param()
 	<#
 		.SYNOPSIS
 			Habilita o explain screen!
@@ -3619,7 +3619,8 @@ function Enable-AiScreenshots {
 			Explain Screen é uma feature que permite obter prints de uma área da tela e enviar ao LLM que suporta vision!
 			É um recurso que está sendo testado ainda, e por isso, você deve habilita!
 	#>
-
+	[CmdletBinding()]
+	param()
 	
 	$ModScript = {
 		. "$PsScriptRoot/lib/screenshotservices.ps1"
@@ -3630,6 +3631,102 @@ function Enable-AiScreenshots {
 	import-module -force $DummyMod 
 }
 
+function Invoke-AiScreenshots {
+	<#
+		.SYNOPSIS
+			Faz print constantes da tela e envia para o modelo ativo.
+			Este comando é EXPERIMENTAL e pode mudar ou não ser disponibilizado nas próximas versões!
+			
+		.DESCRIPTION
+			Este comando permite, em um loop, obter prints da tela!
+	#>
+	param(
+		#Prompt padrão para ser usado com a imagem enviada!
+			$prompt = "Explique essa imagem"
+			
+		,#Se especificado, habilita o modo automático, onde a cada número de ms especificados, ele irá enviar para a tela tela.
+		 #ATENÇÃO: No modo automatico, você poderá ver a janela piscar constatemente, o que pode ser ruim para a leitura.
+		 #Se não especificado, você está no modo manual, onde deve pressionar enter para continuar!
+		 #Além do enter, nesse modo as seguintes teclas possuem funcoes especiais:
+		 #	c - limpa a tela 
+		 # ctrl + c - encerra o comando
+			$AutoMs = $nulls
+			
+		,#Recria o chat usado!
+			[switch]$RecreateChat
+	)
+	
+	# Create new chat!
+	$CurrentChat = Get-PowershaiChat .
+	
+	try {
+		# Create internal chat!
+		$IfNotExists = !$RecreateChat
+		$sschat 	= New-PowershaiChat -ChatId "pwshai-screenshots" -IfNotExists:$IfNotExists -Recreate:$RecreateChat;
+		$null 		= Set-PowershaiActiveChat $sschat;
+		
+		
+		$jobdata = @{
+			ms = $AutoMs
+			modpath = $PowershaiRoot
+		}
+		
+		if($AutoMs){
+			Get-Job "PowershaiScreenshot" -ea SilentlyContinue | Stop-Job -PassThru | Remove-job;
+			
+			$PrintJob = Start-Job -Name "PowershaiScreenshot" {
+				param($data)
+				
+				import-module -force $data.modpath;
+				Enable-AiScreenshots
+				while($true){
+					
+					write-output $(Get-PowershaiPrintSCreen)
+					Start-Sleep -m $data.ms
+				}
+			} -ArgumentList $jobdata
+		}
+		
+		$PendingPrints = New-Object Collections.ArrayList
+		$PendingPrints.Add( (Get-PowershaiPrintSCreen) )
+		
+		while($true){
+			
+			foreach($file in $PendingPrints){
+				Send-PowershaiChat -Temporary -prompt "$prompt","file: $file";
+			}
+			
+			$PendingPrints.Clear();
+			while(!$PendingPrints){
+				if($AutoMs){
+					$null = $PrintJob | Receive-Job | %{ $PendingPrints.Add($_) };
+					start-sleep -m $AutoMs;
+				} else {
+					[Console]::TreatControlCAsInput = $true;
+					$key = [console]::ReadKey($true)
+					[Console]::TreatControlCAsInput = $False;
+					
+					if($key.Key -eq "C"){
+						if($key.Modifiers -eq "Control"){
+							return;
+						}
+						
+						clear-host;continue;
+					}
+
+					$null = $PendingPrints.Add( (Get-PowershaiPrintSCreen) )
+				}
+			}
+			
+			write-host "";
+		}
+		
+	} finally {
+		$null = Set-PowershaiActiveChat $CurrentChat;
+		$null = Get-Job "PowershaiScreenshot" -ea SilentlyContinue | Stop-Job
+	}
+}
+Set-Alias printai Invoke-AiScreenshots
 
 
 function Get-PowershaiHelp {
