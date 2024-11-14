@@ -251,7 +251,11 @@ function google_Chat {
 	} 
 	
 	if($ResponseFormat.type -eq "json_object"){
-		$CalcParams.generationConfig.responseMimeType = "application/json"
+		$CalcParams.generationConfig.response_mime_type = "application/json"
+	}
+	elseif($ResponseFormat.json_schema){
+		$CalcParams.generationConfig.response_mime_type = "application/json"
+		$CalcParams.generationConfig.response_schema = $ResponseFormat.json_schema.schema
 	}
 	
 	$OpenApiFunctions = @()
