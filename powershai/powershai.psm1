@@ -832,6 +832,12 @@ function Set-AiDefaultModel {
 	$ElegibleModels = @(Get-AiModels | ? { $_.name -like $model+"*" })
 	$ExactModel 	= $ElegibleModels | ?{ $_.name -eq $model }
 	
+	if($ExactModel){
+		verbose "Using exact model!";
+		SetCurrentProviderData DefaultModel $model;
+		return;
+	}
+	
 	verbose "ElegibleModels: $($ElegibleModels|out-string)"
 	
 	if(!$ElegibleModels){
@@ -851,7 +857,7 @@ function Set-AiDefaultModel {
 	$model = $ElegibleModels[0].name
 	
 	if($ElegibleModels.count -eq 1 -and !$ExactModel){
-		write-warning "Modelo exato $model nao encontrado. Usnado o único mais próximo: $model"
+		write-warning "Modelo exato $model nao encontrado. Usando o único mais próximo: $model"
 	}
 	
 	SetCurrentProviderData DefaultModel $model;
@@ -2500,14 +2506,13 @@ function Send-PowershaiChat {
 				param($Params)
 				
 				$ContextObject 	= $Params.FormattedObject;
-				$UserPrompt 	= $Params.CmdParams.bound.prompt;
+				$UserPrompt 	= $Params.prompt;
 				
 				@(
-					"Responda a mensagem com base nas informacoes de contexto que estao na tag <contexto></contexto>"
-					"<contexto>"
-					$ContextObject
-					"</contexto>"
-					"Mensagem:"
+					"Answer user message based on context data inside tag <data-context>"
+					"Context data:`n<data-context>`n$($ContextObject)`n</data-context>"
+					"Answer in same language of user, or in language explicit asked"
+					"User message:"
 					$UserPrompt	
 				)
 			}
@@ -2987,6 +2992,7 @@ function Send-PowershaiChat {
 				FormattedObject = $Context
 				CmdParams 		= $MyParameters
 				Chat 			= $ActiveChat
+				prompt 			= $Prompt #processed prompt!
 			}
 			
 			
@@ -3643,17 +3649,23 @@ function Invoke-AiScreenshots {
 	param(
 		#Prompt padrão para ser usado com a imagem enviada!
 			$prompt = "Explique essa imagem"
-			
-		,#Se especificado, habilita o modo automático, onde a cada número de ms especificados, ele irá enviar para a tela tela.
-		 #ATENÇÃO: No modo automatico, você poderá ver a janela piscar constatemente, o que pode ser ruim para a leitura.
-		 #Se não especificado, você está no modo manual, onde deve pressionar enter para continuar!
-		 #Além do enter, nesse modo as seguintes teclas possuem funcoes especiais:
+		
+		,#Fica em loop em tirando vários screenshots
+		 #Por padrão, o modo manual é usado, onde você precisa pressionar uma tecla para continuar.
+		 #as seguintes teclas possuem funcoes especiais:
 		 #	c - limpa a tela 
 		 # ctrl + c - encerra o comando
+			[switch]$repeat
+		
+		,#Se especificado, habilita o modo repeat automático, onde a cada número de ms especificados, ele irá enviar para a tela tela.
+		 #ATENÇÃO: No modo automatico, você poderá ver a janela piscar constatemente, o que pode ser ruim para a leitura.
 			$AutoMs = $nulls
+		
 			
 		,#Recria o chat usado!
 			[switch]$RecreateChat
+			
+		
 	)
 	
 	# Create new chat!
@@ -3688,12 +3700,17 @@ function Invoke-AiScreenshots {
 		}
 		
 		$PendingPrints = New-Object Collections.ArrayList
-		$PendingPrints.Add( (Get-PowershaiPrintSCreen) )
+		$null = $PendingPrints.Add( (Get-PowershaiPrintSCreen) )
 		
 		while($true){
-			
 			foreach($file in $PendingPrints){
+				$WarningPreference = "SilentlyContinue"
 				Send-PowershaiChat -Temporary -prompt "$prompt","file: $file";
+				$WarningPreference = "Continue";
+			}
+			
+			if(!$repeat){
+				break;
 			}
 			
 			$PendingPrints.Clear();
