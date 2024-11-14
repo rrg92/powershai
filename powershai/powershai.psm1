@@ -954,7 +954,7 @@ function Get-AiChat {
 	
 	if($ResponseFormat -in "json","json_object"){
 		$FuncParams.ResponseFormat = @{type = "json_object"}
-	} else {
+	} elseif($ResponseFormat) {
 		$FuncParams.ResponseFormat = @{
 				type = "json_schema"
 				json_schema = $FuncParams.ResponseFormat
@@ -2378,7 +2378,18 @@ function Send-PowershaiChat {
 	begin {
 		$ErrorActionPreference = "Stop";
 		
-		$prompt = @($prompt) -Join " "
+		
+		
+		$ProcessedPrompt = @();
+		@($prompt) | %{
+			if($_ -is [IO.FileInfo]){
+				$ProcessedPrompt += "file: $($_.FullName)";
+			} else {
+				$ProcessedPrompt += $_;
+			}
+		}
+		
+		$prompt = $ProcessedPrompt;
 		
 		$MyInvok 		= $MyInvocation;
 		$CallName 		= $MyInvok.InvocationName;
@@ -2481,7 +2492,6 @@ function Send-PowershaiChat {
 		function ProcessPrompt {
 			param($prompt)
 			
-			$prompt = @($prompt) -join "`n";
 			
 			$WriteData = @{
 				BufferedText 	= ""
@@ -2684,7 +2694,7 @@ function Send-PowershaiChat {
 				$Msg = @(
 					@($SystemMessages|%{ [string]"s: $_"})
 					@($InternalMessages|%{ [string]"s: $_"})
-					[string]"u: $prompt"
+					$prompt
 				)
 				
 				if($ShowFullSend){

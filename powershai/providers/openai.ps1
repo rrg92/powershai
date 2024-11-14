@@ -430,11 +430,61 @@ function ConvertTo-OpenaiMessage {
 	
 	[object[]]$InputMessages = @($prompt);
 	
+	$LastUserMessage = $null;
+	
+	#Base on https://gist.github.com/jdmallen/82c4be9cf0f6c86cd8911a4af13848d9
+	# Thanks!
+	function GetFileBase64 {
+		param($file)
+		
+		$FileBytes = Get-Content -Raw -Encoding Byte $file.FullName;
+		
+		[Convert]::ToBase64String($FileBytes)
+	}
+	
+	function GetFileMime {
+		param($file)
+		
+		return @{
+			".png" = "image/png"
+			".jpg" = "image/jpeg"
+			".jpeg" = "image/jpeg"
+			".gif" = "image/gif"
+			".webp" = "image/webp"
+			".svg" = "image/svg+xml"
+		}[$file.Extension]
+		
+	}
+	
 	foreach($m in $InputMessages){
 		$ChatMessage =  $null;
 		
 		#Se não for uma string, assume que é um objeto message contendo as props necessarias
-		if($m -isnot [string]){
+		if($m -is [IO.FileInfo] -or $m -like "file: *"){
+			$ChatMessage = $LastUserMessage;
+			
+			
+			if($m -match 'file: (.+)'){
+				$file = Get-Item $matches[1];
+			} else {
+				$file = $m;
+			}
+			
+			$File64 = GetFileBase64 $file;
+			$FileMime = GetFileMime $file;
+			
+			if(!$FileMime){
+				write-warning "Cannot determine MimeType of file: $($m.FullName). This can raise errors!";
+			}
+			
+			$ChatMessage.content += @{
+						type = "image_url"
+						image_url = @{ url = "data:$FileMime;base64,$File64" }
+					}
+				
+			continue;
+		} 
+		elseif($m -isnot [string]){	
 			verbose "Adding chat message directly:`n$($m|out-string)"
 			$ChatMessage = $m;
 		} else {
@@ -453,9 +503,18 @@ function ConvertTo-OpenaiMessage {
 				$Content    = $m;
 			}
 			
-			$ChatMessage = @{role = $RoleName; content = $Content};
+			$ChatMessage = @{
+					role = $RoleName
+					content = @(
+						@{type="text";"text"=$Content}
+					)
+				};
 		}
-		
+
+		if($ChatMessage.role -eq "user"){
+			$LastUserMessage = $ChatMessage;
+		}
+			
 		verbose "	ChatMessage: $($ChatMessage|out-string)"
 
 		$Messages += $ChatMessage

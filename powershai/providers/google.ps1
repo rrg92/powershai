@@ -509,17 +509,29 @@ function ConvertTo-GoogleContentMessage {
 		$MsgContent = $m.content;
 		$NewContent.role = $m.role;
 		
+		# default conversion!
+		$MsgPart = @()
+		foreach($content in $MsgContent){
+			if($content.text){
+				$MsgPart += @{ text = $content.text }
+			}
+			
+			if($content.type -eq "image_url" -and $content.image_url.url -match 'data:(.+?);base64,(.+)'){
+				$MimeType	= $matches[1];
+				$Base64 	= $matches[2];
+				$MsgPart += @{ inlineData = @{ mimeType = $MimeType; data = $Base64 }}
+			}
+			
+		}
+		
 		switch($m.role){
 			
 			"user" {
 				$NewContent.role = "user"
-				$MsgPart = @{ text = $MsgContent }
 			}
 			
 			"assistant" {
 				$NewContent.role = "model"
-				$MsgPart = @{ text = $MsgContent }
-				
 				if($m.tool_calls){
 					
 					$MsgPart = @()
