@@ -511,17 +511,21 @@ function ConvertTo-GoogleContentMessage {
 		
 		# default conversion!
 		$MsgPart = @()
-		foreach($content in $MsgContent){
-			if($content.text){
-				$MsgPart += @{ text = $content.text }
+		if($MsgContent -is [string]){
+			$MsgPart += @{ text = $MsgContent }
+		} else {
+			foreach($content in $MsgContent){
+				if($content.text){
+					$MsgPart += @{ text = $content.text }
+				}
+				
+				if($content.type -eq "image_url" -and $content.image_url.url -match 'data:(.+?);base64,(.+)'){
+					$MimeType	= $matches[1];
+					$Base64 	= $matches[2];
+					$MsgPart += @{ inlineData = @{ mimeType = $MimeType; data = $Base64 }}
+				}
+				
 			}
-			
-			if($content.type -eq "image_url" -and $content.image_url.url -match 'data:(.+?);base64,(.+)'){
-				$MimeType	= $matches[1];
-				$Base64 	= $matches[2];
-				$MsgPart += @{ inlineData = @{ mimeType = $MimeType; data = $Base64 }}
-			}
-			
 		}
 		
 		switch($m.role){
