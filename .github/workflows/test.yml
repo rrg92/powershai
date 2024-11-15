@@ -18,4 +18,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           POWERSHAI_TEST_MODELS: ${{ vars.POWERSHAI_TEST_MODELS }}
-        run: ./util/publish-prepare.ps1 -BasicTest
+        run: ./util/publish-prepare.ps1 -Tests

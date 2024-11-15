@@ -6,8 +6,4 @@ describe "Set-AiProvider HuggingFace" {
 		(Get-AiCurrentProvider).name | Should -Be "huggingface"
 	}
 	
-	
-	
-	
-	
 }
