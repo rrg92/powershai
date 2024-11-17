@@ -348,9 +348,6 @@ Set-Alias maritalk_GetModels Get-MaritalkModels
 function maritalk_Chat {
 	$RawParams = $ProviderFuncRawData.params;
 	
-	# Tools calling nao suportado!
-	$null = $RawParams.Remove('Functions');
-
 	openai_Chat @RawParams
 }
 
@@ -397,4 +394,12 @@ return @{
 	BaseUrl 		= "https://chat.maritaca.ai/api"			
 	DefaultModel 	= "sabia-3"
 	TokenEnvName 	= "MARITACA_API_KEY"
+	
+	
+	#source: https://docs.maritaca.ai/pt/chamada-funcao
+	ToolsModels		= @(
+		'sabia-3'
+	)
+
+	
 }
