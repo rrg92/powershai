@@ -1787,8 +1787,8 @@ function New-GradioSessionApiProxyFunction {
 				$ExistingSession = Get-GradioSession -Name $Session.Name -EA SilentlyContinue -Verbose:$IsVerbose;
 				
 				if(!$ExistingSession){
-					$msg = "POWERSHAI_HUGGINGFACE_GRADIO_APIPROXY_INVOKE_NOSESSION: Session was deleted or name was changed since proxy creation. Recreate the functions (SessonId = $($Session.SessionId))"
-					throw New-PowershaiError $msg @{Session=$Session}
+					$msg = "Session was deleted or name was changed since proxy creation. Recreate the functions (SessonId = $($Session.SessionId))"
+					throw (New-PowershaiError POWERSHAI_HUGGINGFACE_GRADIO_APIPROXY_INVOKE_NOSESSION $Msg @{Session=$Session})
 				}
 				
 				$Session = $ExistingSession
