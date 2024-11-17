@@ -7,13 +7,14 @@ powershai: true
 # Invoke-HuggingFaceInferenceApi
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Invoca la API de Inferencia Hugging Face
+Invoca la API de Inferencia de Hugging Face
 https://huggingface.co/docs/hub/en/api
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -61,10 +62,10 @@ Accept wildcard characters: false
 ```
 
 ### -OpenaiChatCompletion
-Forzar usar endpoint de chat completion 
-Params deverá ser tratado como o mesmo params da Api da Openai (Veja o cmdle Get-OpenaiChat).
+Forzar el uso del endpoint de finalización de chat 
+Params debe ser tratado como el mismo params de la API de OpenAI (Ver el cmdlet Get-OpenaiChat).
 Más info: https://huggingface.co/blog/tgi-messages-api
-So funciona con modelos que poseen un chat template!
+¡Solo funciona con modelos que tienen una plantilla de chat!
 
 ```yml
 Parameter Set: (All)
@@ -79,7 +80,7 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-Stream Callback para ser usado no caso de streamS!
+Stream Callback para ser usado en caso de streamS!
 
 ```yml
 Parameter Set: (All)
@@ -94,9 +95,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

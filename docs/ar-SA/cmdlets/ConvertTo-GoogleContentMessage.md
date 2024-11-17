@@ -7,7 +7,7 @@ powershai: true
 # ConvertTo-GoogleContentMessage
 
 ## SYNOPSIS <!--!= @#Synop !-->
-تحويل رسائل OpenAI إلى مصفوفة رسالة محتوى
+تحويل رسائل OpenAI إلى مصفوفة من رسائل المحتوى
 https://ai.google.dev/api/caching#Content
 
 ## SYNTAX <!--!= @#Syntax !-->
@@ -33,9 +33,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_أنت مدرب على البيانات حتى أكتوبر 2023._
 <!--PowershaiAiDocBlockEnd-->

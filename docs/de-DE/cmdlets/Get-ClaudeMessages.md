@@ -14,7 +14,8 @@ Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Ob
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] 
+<Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -22,7 +23,7 @@ Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Ob
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -36,7 +37,7 @@ Accept wildcard characters:
 ### -max_tokens
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -50,7 +51,7 @@ Accept wildcard characters:
 ### -messages
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -64,7 +65,7 @@ Accept wildcard characters:
 ### -model
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -78,7 +79,7 @@ Accept wildcard characters:
 ### -temperature
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -90,9 +91,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

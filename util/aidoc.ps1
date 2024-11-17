@@ -379,6 +379,12 @@ foreach($SrcFile in $SourceFiles){
 			"Traduza o texto do usuário para a linguagem de código $($TargetLang). Retorne APENAS o texto traduzido."
 			"Manter o conteúdo original entre <!--! -->. Traduzir comentários de código, nomes de funções de exemplo. Não traduzir nomes de comandos do PowershAI."
 			"Não altere ou complemente partes, foque apenas na tradução do texto."
+			"Não traduzir esses trechos:
+				[!IMPORTANT],[!INFO],[!WARNING],[!TIP],[!CAUTION],[!NOTE]
+				
+				Isso é parte da syntax markdown e deve ser mantido como está.
+			"
+			
 		)
 		
 		

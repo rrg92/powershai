@@ -7,15 +7,14 @@ powershai: true
 # Start-HttpRequest
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-بدء طلب HTTP [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
-
+ 
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>] 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] 
-<Object>] [<CommonParameters>]
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] 
+[[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -119,9 +118,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_ترجم تلقائيًا باستخدام PowershAI و AI 
-_
+_تمت الترجمة تلقائيًا باستخدام PowershAI والذكاء الاصطناعي._
 <!--PowershaiAiDocBlockEnd-->

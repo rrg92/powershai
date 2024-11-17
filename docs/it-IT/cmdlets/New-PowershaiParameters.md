@@ -10,21 +10,22 @@ powershai: true
 Crea un nuovo oggetto che rappresenta i parametri di un PowershaiChat
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Crea un oggetto standard contenente tutti i possibili parametri che possono essere utilizzati nella chat!
-L'utente può usare un get-help New-PowershaiParameters per ottenere la documentazione dei parametri.
+Crea un oggetto predefinito contenente tutti i possibili parametri che possono essere utilizzati nella chat!
+L'utente può utilizzare un get-help New-PowershaiParameters per ottenere la documentazione dei parametri.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] <Boolean>] [[-ShowTokenStats] <Object>] 
-[[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] 
-<Object>] [[-PrintToolsResults] <Object>] [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
+New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] 
+<Boolean>] [[-ShowTokenStats] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] 
+[[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>] 
+[[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -stream
-Quando true, usa la modalità stream, cioè i messaggi vengono mostrati non appena il modello li produce
+Quando true, usa la modalità stream, cioè, i messaggi vengono mostrati man mano che il modello li produce
 
 ```yml
 Parameter Set: (All)
@@ -39,8 +40,8 @@ Accept wildcard characters: false
 ```
 
 ### -Json
-Abilita la modalità JSON. In questa modalità, il modello è forzato a restituire una risposta con JSON.  
-Quando attivato, i messaggi generati via stream non vengono mostrati non appena vengono prodotti, e solo il risultato finale viene restituito.
+Abilita la modalità JSON. In questa modalità, il modello è costretto a restituire una risposta in JSON.  
+Quando attivato, i messaggi generati tramite stream non vengono visualizzati man mano che vengono prodotti, e solo il risultato finale viene restituito.
 
 ```yml
 Parameter Set: (All)
@@ -55,8 +56,8 @@ Accept wildcard characters: false
 ```
 
 ### -model
-Nome del modello da usare  
-Se null, usa il modello definito con Set-AiDefaultModel
+Nome del modello da utilizzare  
+Se null, utilizza il modello definito con Set-AiDefaultModel
 
 ```yml
 Parameter Set: (All)
@@ -86,7 +87,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowFullSend
-Stampa il prompt intero che sta per essere inviato all'LLM
+Stampa il prompt intero che viene inviato al LLM
 
 ```yml
 Parameter Set: (All)
@@ -101,7 +102,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowTokenStats
-Al termine di ogni messaggio, mostra le statistiche di consumo, in token, restituite dall'API
+Alla fine di ogni messaggio, mostra le statistiche di consumo, in token, restituite dall'API
 
 ```yml
 Parameter Set: (All)
@@ -116,11 +117,11 @@ Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-Massimo di interazioni da eseguire in una sola volta 
+Massimo di interazioni da effettuare in una sola volta  
 Ogni volta che un messaggio viene inviato, il modello esegue 1 iterazione (invia il messaggio e riceve una risposta).  
-Se il modello richiede una function calling, la risposta generata viene nuovamente inviata al modello. Questo conta come un'altra interazione.  
+Se il modello richiede una chiamata a funzione, la risposta generata verrà inviata di nuovo al modello. Questo conta come un'altra interazione.  
 Questo parametro controlla il massimo di interazioni che possono esistere in ogni chiamata.
-Ciò aiuta a prevenire loop infiniti inaspettati.
+Questo aiuta a prevenire loop infiniti imprevisti.
 
 ```yml
 Parameter Set: (All)
@@ -135,9 +136,9 @@ Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
-Massimo di errori in sequenza generato da Tool Calling.  
-Quando si utilizza il tool calling, questo parametro limita il numero di tool senza sequenza che hanno restituito un errore che possono essere chiamati.  
-L'errore considerato è l'eccezione generata dallo script o dal comando configurato.
+Massimo di errori in sequenza generati da Tool Calling.  
+Quando si utilizza il tool calling, questo parametro limita quanti tools senza sequenza che hanno generato un errore possono essere chiamati.  
+L'errore considerato è l'eccezione sollevata dallo script o comando configurato.
 
 ```yml
 Parameter Set: (All)
@@ -152,9 +153,9 @@ Accept wildcard characters: false
 ```
 
 ### -MaxContextSize
-Dimensione massima del contesto, in caratteri 
-In futuro, sarà in token 
-Controlla la quantità di messaggi nel contesto attuale della chat. Quando questo numero viene superato, il Powershai cancella automaticamente i messaggi più vecchi.
+Dimensione massima del contesto, in caratteri  
+In futuro, sarà in token  
+Controlla la quantità di messaggi nel contesto attuale della chat. Quando questo numero supera, il Powershai pulisce automaticamente i messaggi più vecchi.
 
 ```yml
 Parameter Set: (All)
@@ -169,7 +170,7 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormatterFunc
-Funzione usata per la formattazione degli oggetti passati tramite pipeline
+Funzione utilizzata per la formattazione degli oggetti passati tramite pipeline
 
 ```yml
 Parameter Set: (All)
@@ -184,7 +185,7 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormatterParams
-Argomenti da passare a ContextFormatterFunc
+Argomenti da passare alla ContextFormatterFunc
 
 ```yml
 Parameter Set: (All)
@@ -199,7 +200,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowArgs
-Se true, mostra gli argomenti delle funzioni quando il Tool Calling è attivato per eseguire una funzione
+Se true, mostra gli argomenti delle funzioni quando il Tool Calling è attivato per eseguire qualche funzione
 
 ```yml
 Parameter Set: (All)
@@ -214,7 +215,7 @@ Accept wildcard characters: false
 ```
 
 ### -PrintToolsResults
-Mostra i risultati delle tool quando vengono eseguite dal PowershAI in risposta al tool calling del modello
+Mostra i risultati degli strumenti quando vengono eseguiti dal PowershAI in risposta al tool calling del modello
 
 ```yml
 Parameter Set: (All)
@@ -229,7 +230,7 @@ Accept wildcard characters: false
 ```
 
 ### -SystemMessageFixed
-System Message che è garantito essere inviato sempre, indipendentemente dalla cronologia e dalla pulizia della chat!
+Messaggio di sistema che è garantito essere inviato sempre, indipendentemente dalla cronologia e dalla pulizia della chat!
 
 ```yml
 Parameter Set: (All)
@@ -245,8 +246,8 @@ Accept wildcard characters: false
 
 ### -RawParams
 Parametri da passare direttamente all'API che invoca il modello.  
-Il provider deve implementare il supporto a questo.  
-Per utilizzarlo devi conoscere i dettagli di implementazione del provider e come funziona la sua API!
+Il provider deve implementare il supporto per questo.  
+Per utilizzarlo, è necessario conoscere i dettagli di implementazione del provider e come funziona la sua API!
 
 ```yml
 Parameter Set: (All)
@@ -261,13 +262,13 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormat
-Controlla il template utilizzato quando si iniettano i dati di contesto!
-Questo parametro è uno scriptblock che deve restituire una stringa con il contesto da iniettare nel prompt!
-I parametri dello scriptblock sono:
+Controlla il template utilizzato per iniettare i dati di contesto!
+Questo parametro è un blocco di script che deve restituire una stringa con il contesto da iniettare nel prompt!
+I parametri del blocco di script sono:
 	FormattedObject 	- L'oggetto che rappresenta la chat attiva, già formattato con il Formatter configurato
 	CmdParams 			- I parametri passati a Send-PowershaAIChat. È lo stesso oggetto restituito da GetMyParams
-	Chat 				- La chat in cui i dati vengono inviati.
-Se nullo, genererà un default. Controlla il cmdlet Send-PowershaiChat per i dettagli
+	Chat 				- La chat nella quale i dati vengono inviati.
+Se nullo, genererà un predefinito. Controlla il cmdlet Send-PowershaiChat per dettagli
 
 ```yml
 Parameter Set: (All)
@@ -282,9 +283,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

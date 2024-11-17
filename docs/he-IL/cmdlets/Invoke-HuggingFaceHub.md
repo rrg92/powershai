@@ -7,14 +7,15 @@ powershai: true
 # Invoke-HuggingFaceHub
 
 ## SYNOPSIS <!--!= @#Synop !-->
-מפעיל את ה-API של Hugging Hub.
+מזמין את ה-API של Hugging Hub.
 https://huggingface.co/docs/hub/en/api
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] [[-limit] <Object>] [[-sort] <Object>] 
-[-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] 
+[[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -174,7 +175,7 @@ Accept wildcard characters: false
 ```
 
 ### -Public
-משתמש בטוקן הנוכחי ומציג רק משאבים ציבוריים
+מתעלם מהטוקן הנוכחי ומציג רק משאבים ציבוריים
 
 ```yml
 Parameter Set: (All)
@@ -204,9 +205,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_תרגם אוטומטית באמצעות PowershAI ובינה מלאכותית. 
-_
+_אתה מאומן על נתונים עד אוקטובר 2023._
 <!--PowershaiAiDocBlockEnd-->

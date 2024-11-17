@@ -8,16 +8,30 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Ottieni gli embedding di OpenAI [[-text] <Oggetto>] [[-model] <Oggetto>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiEmbeddings [[-text] <Oggetto>] [[-model] <Oggetto>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
+
+### -dimensions
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
+```
 
 ### -model
 
@@ -43,14 +57,11 @@ Accepted Values:
 Required: false
 Position: 0
 Default Value: 
-Accept pipeline input: true (ByValue)
+Accept pipeline input: false
 Accept wildcard characters: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

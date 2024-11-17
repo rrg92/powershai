@@ -7,13 +7,14 @@ powershai: true
 # Invoke-GoogleGenerateContent
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Endpunkt: https://ai.google.dev/api/generate-content
+Endpoint: https://ai.google.dev/api/generate-content
 Stream: https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] 
+<Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -21,7 +22,7 @@ Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-Strea
 ### -messages
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -35,7 +36,7 @@ Accept wildcard characters: false
 ### -model
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -49,7 +50,7 @@ Accept wildcard characters: false
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -60,10 +61,35 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -RawParams
 
+```yml
+Parameter Set: (Alle)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 4
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Tools
+
+```yml
+Parameter Set: (Alle)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 5
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

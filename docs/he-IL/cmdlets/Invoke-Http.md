@@ -14,8 +14,8 @@ Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-content
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-SseCallBack] <Object>] 
-[[-DebugVarName] <Object>] [[-Timeout] <Object>] [<CommonParameters>]
+Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] 
+<Object>] [[-SseCallBack] <Object>] [[-DebugVarName] <Object>] [[-Timeout] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -23,7 +23,7 @@ Invoke-Http [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-content
 ### -DebugVarName
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -37,7 +37,7 @@ Accept wildcard characters:
 ### -Encoding
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -51,7 +51,7 @@ Accept wildcard characters:
 ### -SseCallBack
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -65,7 +65,7 @@ Accept wildcard characters:
 ### -Timeout
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -79,7 +79,7 @@ Accept wildcard characters:
 ### -contentType
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -93,7 +93,7 @@ Accept wildcard characters:
 ### -data
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -107,7 +107,7 @@ Accept wildcard characters:
 ### -headers
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -121,7 +121,7 @@ Accept wildcard characters:
 ### -method
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -135,7 +135,7 @@ Accept wildcard characters:
 ### -url
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (כל)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -147,9 +147,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_תרגם אוטומטית באמצעות PowershAI ובינה מלאכותית. 
-_
+_אתה מאומן על נתונים עד אוקטובר 2023._
 <!--PowershaiAiDocBlockEnd-->

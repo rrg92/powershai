@@ -14,8 +14,8 @@ Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-tempe
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] 
-[-do_sample] [<CommonParameters>]
+Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] 
+<Object>] [[-StreamCallback] <Object>] [-do_sample] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -23,105 +23,102 @@ Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-tempe
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Set di Parametri: (Tutti)
+Tipo: Oggetto
+Alias: 
+Valori Accettati: 
+Richiesto: falso
+Posizione: 1
+Valore Predefinito: 
+Accetta input da pipeline: falso
+Accetta caratteri jolly: 
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 5
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Set di Parametri: (Tutti)
+Tipo: Oggetto
+Alias: 
+Valori Accettati: 
+Richiesto: falso
+Posizione: 5
+Valore Predefinito: 
+Accetta input da pipeline: falso
+Accetta caratteri jolly: 
 ```
 
 ### -do_sample
 
 ```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Set di Parametri: (Tutti)
+Tipo: switch
+Alias: 
+Valori Accettati: 
+Richiesto: falso
+Posizione: Named
+Valore Predefinito: 
+Accetta input da pipeline: falso
+Accetta caratteri jolly: 
 ```
 
 ### -messages
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: prompt
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Set di Parametri: (Tutti)
+Tipo: Oggetto
+Alias: prompt
+Valori Accettati: 
+Richiesto: falso
+Posizione: 0
+Valore Predefinito: 
+Accetta input da pipeline: falso
+Accetta caratteri jolly: 
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Set di Parametri: (Tutti)
+Tipo: Oggetto
+Alias: 
+Valori Accettati: 
+Richiesto: falso
+Posizione: 4
+Valore Predefinito: 
+Accetta input da pipeline: falso
+Accetta caratteri jolly: 
 ```
 
 ### -temperature
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Set di Parametri: (Tutti)
+Tipo: Oggetto
+Alias: 
+Valori Accettati: 
+Richiesto: falso
+Posizione: 2
+Valore Predefinito: 
+Accetta input da pipeline: falso
+Accetta caratteri jolly: 
 ```
 
 ### -top_p
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Set di Parametri: (Tutti)
+Tipo: Oggetto
+Alias: 
+Valori Accettati: 
+Richiesto: falso
+Posizione: 3
+Valore Predefinito: 
+Accetta input da pipeline: falso
+Accetta caratteri jolly: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Tradotto automaticamente tramite PowerShell e IA. 
-_
+_Sei addestrato su dati fino a ottobre 2023._
 <!--PowershaiAiDocBlockEnd-->

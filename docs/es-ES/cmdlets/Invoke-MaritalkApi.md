@@ -6,105 +6,105 @@ powershai: true
 
 # Invoke-MaritalkApi
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 
 Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
 
 
-## SYNTAX <!--!= @#Syntax !-->
+## SINTAXIS <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
+Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] 
+[-OpenAI] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
 ### -OpenAI
 
 ```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: interruptor
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: Nombrado
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 4
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -Token
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 3
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -body
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 1
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -endpoint
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 0
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -method
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 2
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

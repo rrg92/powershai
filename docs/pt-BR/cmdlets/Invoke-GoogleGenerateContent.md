@@ -13,7 +13,8 @@ Stream: https://ai.google.dev/api/generate-content#method:-models.streamgenerate
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] 
+<Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -55,6 +56,34 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 3
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -RawParams
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 4
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Tools
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 5
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false

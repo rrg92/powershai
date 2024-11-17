@@ -57,6 +57,8 @@
 #>
 $ErrorActionPreference = "Stop";
 
+$PowershaiRoot = $PSScriptRoot
+
 if(!$Global:POWERSHAI_SETTINGS){
 	$Global:POWERSHAI_SETTINGS = @{
 		provider = $null #ollama, huggingface
@@ -281,6 +283,70 @@ function New-PowershaiError {
 	
 # LOW LEVEL HTTP Functions
 . (JoinPath $PSSCriptRoot "lib" "http.ps1")
+
+<#
+	.SYNOPSIS
+		Mescla hashtables em uma hashtable de destino
+		
+	.DESCRIPTION  
+		A hashtable de destino irá conter o valor atualizado das hashtables de origem. 
+		Pode se especificar várias hashtables de origem, basta informar.
+		Uma nova hashtable é retornada, sem alterar as existentes!
+#>
+function HashTableMerge {
+	[CmdletBinding()]
+	param(
+		$Target
+		
+		,[parameter(ValueFromRemainingArguments)]
+			$SourceTables
+	)
+	
+	$Me = $MyInvocation.MyCommand;
+	
+	$NewTable = @{}
+	
+	if(!$Target){
+		$Target = @{}
+	}
+	
+	if(!$SourceTables){
+		$SourceTables = @{}
+	}
+	
+	$TableList = @($Target)
+	$TableList += $SourceTables;
+	
+	foreach($SrcTable in $TableList){
+		
+		if($SrcTable -isnot [hashtable]){
+			throw "POWERSHAI_MERGEHASH_ISNOT_HASHTABLE";
+		}
+		
+		foreach($key in @($SrcTable.keys) ){
+			
+			#New table
+			if(!$NewTable.Contains($key)){
+				$NewTable[$key] = $SrcTable[$key];
+				continue;
+			}
+			
+			#Se as duas são com tipos diferentes, então sobrescreve
+			$SrcValue = $SrcTable[$key]
+			$NewValue = $NewTable[$key];
+			
+			# Se for um hashtable, recursivamente atualiza!
+			if($SrcValue -is [hashtable] -and $NewValue -is [hashtable]){
+				$SrcValue = & $Me $SrcValue $NewValue 
+			}
+			
+			#Em todos o caso, src substitui o valor!
+			$NewTable[$key] = $SrcValue;
+		}
+	}
+	
+	return $NewTable;
+}
 
 
 function RegArgCompletion {
@@ -622,6 +688,12 @@ function Set-AiProvider {
 	$POWERSHAI_SETTINGS.provider = $provider;
 }
 
+RegArgCompletion Set-AiProvider provider {
+	param($cmd,$param,$word,$ast,$fake)
+	
+	@($PROVIDERS.keys) | ? {$_ -like "$word*"} | %{$_}
+}
+
 <#
 	Invoca funções em um provider!
 	O PowershAI espera que certas funções sejam implementandas pelos providers.  
@@ -914,6 +986,12 @@ function Set-AiDefaultModel {
 	$ElegibleModels = @(Get-AiModels | ? { $_.name -like $model+"*" })
 	$ExactModel 	= $ElegibleModels | ?{ $_.name -eq $model }
 	
+	if($ExactModel){
+		verbose "Using exact model!";
+		SetCurrentProviderData DefaultModel $model;
+		return;
+	}
+	
 	verbose "ElegibleModels: $($ElegibleModels|out-string)"
 	
 	if(!$ElegibleModels){
@@ -933,7 +1011,7 @@ function Set-AiDefaultModel {
 	$model = $ElegibleModels[0].name
 	
 	if($ElegibleModels.count -eq 1 -and !$ExactModel){
-		write-warning "Modelo exato $model nao encontrado. Usnado o único mais próximo: $model"
+		write-warning "Modelo exato $model nao encontrado. Usando o único mais próximo: $model"
 	}
 	
 	SetCurrentProviderData DefaultModel $model;
@@ -1008,7 +1086,8 @@ function Get-AiChat {
 		,#Formato da resposta 
 		 #Os formatos aceitáveis, e comportamento, devem seguir o mesmo da OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
 		 #Atalhos:
-		 #	"json", equivale a {"type": "json_object"}
+		 #	"json"|"json_object", equivale a {"type": "json_object"}
+		 #	objeto deve especificar um esquema como se fosse passado direatamente a API da Openai, no campo response_format.json_schema
 			$ResponseFormat = $null
 		
 		,#Lista de tools que devem ser invocadas!
@@ -1030,15 +1109,19 @@ function Get-AiChat {
 			$StreamCallback = $null
 			
 		,#Incluir a resposta da API em um campo chamado IncludeRawResp
-			[switch]$IncludeRawResp
-			
+			[switch]$IncludeRawResp	
 	)
 	
 	$Provider = Get-AiCurrentProvider
 	$FuncParams = $PsBoundParameters;
 	
-	if($ResponseFormat -eq "json"){
-		$ResponseFormat = @{type = "json_object"}
+	if($ResponseFormat -in "json","json_object"){
+		$FuncParams.ResponseFormat = @{type = "json_object"}
+	} elseif($ResponseFormat) {
+		$FuncParams.ResponseFormat = @{
+				type = "json_schema"
+				json_schema = $FuncParams.ResponseFormat
+			}
 	}
 
 	$ModelName = $model;
@@ -1060,6 +1143,21 @@ function Get-AiChat {
 	$FuncParams['model'] = $ModelName
 	PowerShaiProviderFunc "Chat" -FuncParams $FuncParams;
 }
+
+# Representa cada interação feita com o modelo!
+function NewAiInteraction {
+	return @{
+			req  		= $null	# the current req count!
+			sent 		= $null # Sent data!
+			rawAnswer  	= $null # the raw answer returned by api!
+			stopReason 	= $null	# The reason stopped!
+			error 		= $null # If apply, the error ocurred when processing the answer!
+			seqError 	= $null # current sequence error
+			toolResults	= @() # lot of about running functino!
+		}
+}
+
+
 
 <#
 	.SYNOPSIS
@@ -1150,7 +1248,8 @@ function Invoke-AiChatTools {
 	}
 	
 	# initliza message!
-	[object[]]$Message 	= @($prompt);
+	$Message 	= New-Object System.Collections.ArrayList
+	$Message.AddRange($prompt);
 	
 	$TotalPromptTokens 	= 0;
 	$TotalOutputTokens 	= 0;
@@ -1190,7 +1289,7 @@ function Invoke-AiChatTools {
 		
 		# Parametros que vamos enviar a openai usando a funcao openai!
 		$Params = @{
-			prompt 			= $Message
+			prompt 			= @($Message)
 			temperature   	= $temperature
 			MaxTokens     	= $MaxTokens
 			Functions 		= $OpenaiTools
@@ -1227,7 +1326,7 @@ function Invoke-AiChatTools {
 		}
 		
 		$AiInteraction.sent = $Params;
-		$AiInteraction.message = $Message;
+		$AiInteraction.message = @($Message);
 		
 		# Se chegamos no limite, então naos vamos enviar mais nada!
 		if($ReqsCount -gt $MaxInteractions){
@@ -1251,7 +1350,7 @@ function Invoke-AiChatTools {
 			$ModelResponse = $Answer.choices[0];
 		}
 		
-		write-verbose "FinishReason: $($ModelResponse.finish_reason)"
+		verbose "FinishReason: $($ModelResponse.finish_reason)"
 		
 		$WarningReasons = 'length','content_filter';
 		
@@ -1264,18 +1363,25 @@ function Invoke-AiChatTools {
 			
 			# A primeira opcao de resposta...
 			$AnswerMessage = $ModelResponse.message;
+			$ToolCallMsg = $AnswerMessage
 		
-			# Add current message to original message to provided previous context!
-			$Message += $AnswerMessage;
-			
 			$ToolCalls = $AnswerMessage.tool_calls
 			
-			write-verbose "TotalToolsCals: $($ToolCalls.count)"
+			verbose "TotalToolsCals: $($ToolCalls.count)"
 			foreach($ToolCall in $ToolCalls){
 				$CallType = $ToolCall.type;
 				$ToolCallId = $ToolCall.id;
 				
-				write-verbose "ProcessingTooll: $ToolCallId"
+				#Build the response message that will sent back!
+				$FuncResp = @{
+					role 			= "tool"
+					tool_call_id 	= $ToolCallId
+					
+					#Set to a default message!
+					content	= "ERROR: Tools was not executed due some unknown problem!";
+				}
+					
+				verbose "Processing tool call $ToolCallId"
 				
 				try {
 					if($CallType -ne 'function'){
@@ -1286,17 +1392,8 @@ function Invoke-AiChatTools {
 					
 					#Get the called function name!
 					$FuncName = $FuncCall.name
-					write-verbose "	FuncName: $FuncName"
-					
-					#Build the response message that will sent back!
-					$FuncResp = @{
-						role 			= "tool"
-						tool_call_id 	= $ToolCallId
-						
-						#Set to a default message!
-						content	= "ERROR: Some error ocurred processing function!";
-					}
-					
+					verbose "	FuncName: $FuncName"
+
 					# acha a tool na lista!
 					$FunctionInfo = $FunctionMap[$FuncName]
 					
@@ -1325,10 +1422,11 @@ function Invoke-AiChatTools {
 					
 					#Here wil have all that we need1
 					$FuncArgsRaw =  $FuncCall.arguments
-					write-verbose "	Arguments: $FuncArgsRaw";
+					verbose "	Arguments: $FuncArgsRaw";
 					
 					#We assuming model sending something that can be converted...
 					$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
+					
 					
 					#Then, we can call the function!
 					$ArgsHash = @{};
@@ -1346,7 +1444,7 @@ function Invoke-AiChatTools {
 					
 					& $emit "func" $AiInteraction $CurrentToolResult
 					
-					write-verbose "Calling function $FuncName ($FuncInfo)"
+					verbose "Calling function $FuncName ($FuncInfo)"
 					
 					if($NoSplatArgs){
 						$ArgsHash = @($ArgsHash)
@@ -1396,7 +1494,13 @@ function Invoke-AiChatTools {
 				
 				& $emit "exec" $AiInteraction
 				
-				$Message += $FuncResp;
+				# Add tool and its answer!
+				# Add current message to original message to provided previous context!
+				$Message.AddRange(@(
+					$ToolCallMsg
+					$FuncResp
+				))
+				
 			}
 			
 			#Start sending again...
@@ -2375,6 +2479,9 @@ function Send-PowershaiChat {
 					
 				io|ao
 					O mesmo que Send-PowershaAIChat -Object
+					
+				iam|aim 
+					O mesmo que Send-PowershaaiChat -Screenshot 
 			
 			O usuário pode criar seus próprios alias. Por exemplo:
 				Set-Alias ki ia # DEfine o alias para o alemao!
@@ -2447,13 +2554,42 @@ function Send-PowershaiChat {
 		,#Retorna um array de linhas 
 		 #Se o modo stream estiver ativado, retornará uma linha por vez!
 			[switch]$Lines
+			
+		,#Sobrescrever parâmetros do chat!
+		 #Especifique cada opção em umas hastables!
+		 $ChatParamsOverride = @{}
+		 
+		,#Especifica diretamente o valor do chat parameter RawParams!
+		 #Se especificado também em ChatParamOverride, um merge é feito, dando prioridade aos parametros especificados aqui.
+		 #O RawParams é um chat parameter que define parametros que serão enviados diretamente a api do modelo!
+		 #Estes parametros irão sobrescrever os valores padrões calculados pelo powershai!
+		 #Com isso, o usuario tem total controle sobre os parâmetros, mas precisa conmhecer cada provider!
+		 #Também, cada provider é responsável por prover essa implementaão e usar esses parâmetros na sua api.
+			$RawParams = @{}
+			
+		,#Captura um print screen da tela que está atrás da janela do powershell e envia junto com o prompt. 
+		 #Note que o mode atual deve suportar imagens (Vision Language Models).
+			[switch]
+			[Alias("ss")]
+			$Screenshot
 	)
 	
 	
 	begin {
 		$ErrorActionPreference = "Stop";
 		
-		$prompt = @($prompt) -Join " "
+		
+		
+		$ProcessedPrompt = @();
+		@($prompt) | %{
+			if($_ -is [IO.FileInfo]){
+				$ProcessedPrompt += "file: $($_.FullName)";
+			} else {
+				$ProcessedPrompt += $_;
+			}
+		}
+		
+		$prompt = $ProcessedPrompt;
 		
 		$MyInvok 		= $MyInvocation;
 		$CallName 		= $MyInvok.InvocationName;
@@ -2483,6 +2619,10 @@ function Send-PowershaiChat {
 			$Temporary = $true;
 		}
 		
+		if($CallName -eq "iam"){
+			$Screenshot = $true;
+		}
+		
 		if($Temporary){
 			write-warning "Temporary Chat enabled";
 			$Snub 	= $true;
@@ -2499,6 +2639,16 @@ function Send-PowershaiChat {
 			$ActiveChat = Get-PowershaiChat -SetActive $NewChat.id;
 		}
 		
+		if($Screenshot){
+			if(-not(Get-Command -EA SilentlyContinue Get-PowershaiPrintSCreen)){
+				throw "POWERSHAI_ENABLE_EXPLAIN: Você deve habilitar com Enable-AiScreenshots"
+			}
+			
+			$sspath = Get-PowershaiPrintSCreen;
+			
+			$prompt += "file: $sspath";
+		}
+		
 		$AllContext = @()
 		$IsPipeline = $PSCmdlet.MyInvocation.ExpectingInput   
 		
@@ -2510,14 +2660,27 @@ function Send-PowershaiChat {
 			direct = @{}
 		};
 		
+		#Merge raw params!
+		$ChatParamsOverride['RawParams'] = HashTableMerge $ChatParamsOverride['RawParams'] $RawParams;
+		
 		$ChatMyParams | %{
+			
+			$ParamValue = $_.value;
+			
+			if($ChatParamsOverride.Contains($_.name)){
+				verbose "ChatParam $($_.name) overrided"
+				$ParamValue = $ChatParamsOverride[$_.name];
+			}
+
 			if($_.direct){
 				verbose "Adding direct param $($_.name)";
-				$CurrentChatParams.direct[$_.name] = $_.value;
+				$CurrentChatParams.direct[$_.name] = $ParamValue;
 			}
 			
-			$CurrentChatParams.all[$_.name] = $_.value;
+			$CurrentChatParams.all[$_.name] = $ParamValue;
 		}
+		
+		
 		
 		$ContextFormat = $CurrentChatParams.all.ContextFormat;
 		
@@ -2526,14 +2689,13 @@ function Send-PowershaiChat {
 				param($Params)
 				
 				$ContextObject 	= $Params.FormattedObject;
-				$UserPrompt 	= $Params.CmdParams.bound.prompt;
+				$UserPrompt 	= $Params.prompt;
 				
 				@(
-					"Responda a mensagem com base nas informacoes de contexto que estao na tag <contexto></contexto>"
-					"<contexto>"
-					$ContextObject
-					"</contexto>"
-					"Mensagem:"
+					"Answer user message based on context data inside tag <data-context>"
+					"Context data:`n<data-context>`n$($ContextObject)`n</data-context>"
+					"Answer in same language of user, or in language explicit asked"
+					"User message:"
 					$UserPrompt	
 				)
 			}
@@ -2543,7 +2705,6 @@ function Send-PowershaiChat {
 		function ProcessPrompt {
 			param($prompt)
 			
-			$prompt = @($prompt) -join "`n";
 			
 			$WriteData = @{
 				BufferedText 	= ""
@@ -2750,7 +2911,7 @@ function Send-PowershaiChat {
 				$Msg = @(
 					@($SystemMessages|%{ [string]"s: $_"})
 					@($InternalMessages|%{ [string]"s: $_"})
-					[string]"u: $prompt"
+					$prompt
 				)
 				
 				if($ShowFullSend){
@@ -3004,9 +3165,7 @@ function Send-PowershaiChat {
 			} catch {
 				$StackTrace = $_.ScriptStackTrace;
 				$Msg = [string]$_;
-				
-				$ex = new-object Exception("$Msg`n$StackTrace");
-				
+				$ex = New-PowershaiError -Message "$Msg`n$StackTrace" -parent $_.Exception
 				throw $ex;
 			}
 		}
@@ -3025,6 +3184,7 @@ function Send-PowershaiChat {
 				FormattedObject = $Context
 				CmdParams 		= $MyParameters
 				Chat 			= $ActiveChat
+				prompt 			= $Prompt #processed prompt!
 			}
 			
 			
@@ -3087,6 +3247,7 @@ function Send-PowershaiChat {
 Set-Alias -Name ia -Value Send-PowershaiChat
 Set-Alias -Name iat -Value Send-PowershaiChat
 Set-Alias -Name io -Value Send-PowershaiChat
+Set-Alias -Name iam -Value Send-PowershaiChat
 
 # Estes são alias secundários, que são criados apenas para melhor interface com usuários de outros idiomas.
 # Definimos uma alias para o alias primario, pois isso manterá o comportamento do Send-PowershaiChat, que pode alterar conforme o alias primário.
@@ -3094,6 +3255,7 @@ Set-Alias -Name io -Value Send-PowershaiChat
 Set-Alias -Name ai 	-Value ia
 Set-Alias -Name ait -Value iat
 Set-Alias -Name ao 	-Value io
+Set-Alias -Name aim -Value io
 
 
 
@@ -3646,6 +3808,136 @@ Set-Alias CompileChatTools CompilePowershaiChatTools
 
 
 
+function Enable-AiScreenshots {
+	<#
+		.SYNOPSIS
+			Habilita o explain screen!
+			
+		.DESCRIPTION
+			Explain Screen é uma feature que permite obter prints de uma área da tela e enviar ao LLM que suporta vision!
+			É um recurso que está sendo testado ainda, e por isso, você deve habilita!
+	#>
+	[CmdletBinding()]
+	param()
+	
+	$ModScript = {
+		. "$PsScriptRoot/lib/screenshotservices.ps1"
+	}
+			
+	$DummyMod = New-Module -Name "PowershaiExplainScreen" -ScriptBlock $ModScript
+	verbose "	Importing dummy module"
+	import-module -force $DummyMod 
+}
+
+function Invoke-AiScreenshots {
+	<#
+		.SYNOPSIS
+			Faz print constantes da tela e envia para o modelo ativo.
+			Este comando é EXPERIMENTAL e pode mudar ou não ser disponibilizado nas próximas versões!
+			
+		.DESCRIPTION
+			Este comando permite, em um loop, obter prints da tela!
+	#>
+	param(
+		#Prompt padrão para ser usado com a imagem enviada!
+			$prompt = "Explique essa imagem"
+		
+		,#Fica em loop em tirando vários screenshots
+		 #Por padrão, o modo manual é usado, onde você precisa pressionar uma tecla para continuar.
+		 #as seguintes teclas possuem funcoes especiais:
+		 #	c - limpa a tela 
+		 # ctrl + c - encerra o comando
+			[switch]$repeat
+		
+		,#Se especificado, habilita o modo repeat automático, onde a cada número de ms especificados, ele irá enviar para a tela tela.
+		 #ATENÇÃO: No modo automatico, você poderá ver a janela piscar constatemente, o que pode ser ruim para a leitura.
+			$AutoMs = $nulls
+		
+			
+		,#Recria o chat usado!
+			[switch]$RecreateChat
+			
+		
+	)
+	
+	# Create new chat!
+	$CurrentChat = Get-PowershaiChat .
+	
+	try {
+		# Create internal chat!
+		$IfNotExists = !$RecreateChat
+		$sschat 	= New-PowershaiChat -ChatId "pwshai-screenshots" -IfNotExists:$IfNotExists -Recreate:$RecreateChat;
+		$null 		= Set-PowershaiActiveChat $sschat;
+		
+		
+		$jobdata = @{
+			ms = $AutoMs
+			modpath = $PowershaiRoot
+		}
+		
+		if($AutoMs){
+			Get-Job "PowershaiScreenshot" -ea SilentlyContinue | Stop-Job -PassThru | Remove-job;
+			
+			$PrintJob = Start-Job -Name "PowershaiScreenshot" {
+				param($data)
+				
+				import-module -force $data.modpath;
+				Enable-AiScreenshots
+				while($true){
+					
+					write-output $(Get-PowershaiPrintSCreen)
+					Start-Sleep -m $data.ms
+				}
+			} -ArgumentList $jobdata
+		}
+		
+		$PendingPrints = New-Object Collections.ArrayList
+		$null = $PendingPrints.Add( (Get-PowershaiPrintSCreen) )
+		
+		while($true){
+			foreach($file in $PendingPrints){
+				$WarningPreference = "SilentlyContinue"
+				Send-PowershaiChat -Temporary -prompt "$prompt","file: $file";
+				$WarningPreference = "Continue";
+			}
+			
+			if(!$repeat){
+				break;
+			}
+			
+			$PendingPrints.Clear();
+			while(!$PendingPrints){
+				if($AutoMs){
+					$null = $PrintJob | Receive-Job | %{ $PendingPrints.Add($_) };
+					start-sleep -m $AutoMs;
+				} else {
+					[Console]::TreatControlCAsInput = $true;
+					$key = [console]::ReadKey($true)
+					[Console]::TreatControlCAsInput = $False;
+					
+					if($key.Key -eq "C"){
+						if($key.Modifiers -eq "Control"){
+							return;
+						}
+						
+						clear-host;continue;
+					}
+
+					$null = $PendingPrints.Add( (Get-PowershaiPrintSCreen) )
+				}
+			}
+			
+			write-host "";
+		}
+		
+	} finally {
+		$null = Set-PowershaiActiveChat $CurrentChat;
+		$null = Get-Job "PowershaiScreenshot" -ea SilentlyContinue | Stop-Job
+	}
+}
+Set-Alias printai Invoke-AiScreenshots
+
+
 function Get-PowershaiHelp {
 	<#
 		.SYNOPSIS
@@ -3754,6 +4046,9 @@ set-alias aihelp Get-PowershaiHelp
 set-alias aid Get-PowershaiHelp
 set-alias ajudai Get-PowershaiHelp
 set-alias iajuda Get-PowershaiHelp
+
+
+
 
 
 # Carrega os providers!

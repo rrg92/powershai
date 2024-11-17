@@ -27,6 +27,9 @@ São eles:
 		
 	io|ao
 		O mesmo que Send-PowershaAIChat -Object
+		
+	iam|aim 
+		O mesmo que Send-PowershaaiChat -Screenshot 
 
 O usuário pode criar seus próprios alias. Por exemplo:
 	Set-Alias ki ia # DEfine o alias para o alemao!
@@ -35,8 +38,9 @@ O usuário pode criar seus próprios alias. Por exemplo:
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Send-PowershaiChat [[-prompt] <Object>] [-SystemMessages <Object>] [-context <Object>] [-ForEach] [-Json] [-Object] [-PrintContext] [-Forget] [-Snub] [-Temporary] 
-[-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [-Lines] [<CommonParameters>]
+Send-PowershaiChat [[-prompt] <Object>] [-SystemMessages <Object>] [-context <Object>] [-ForEach] [-Json] [-Object] [-PrintContext] 
+[-Forget] [-Snub] [-Temporary] [-DisableTools] [-FormatterFunc <Object>] [-FormatterParams <Object>] [-PassThru] [-Lines] 
+[-ChatParamsOverride <Object>] [-RawParams <Object>] [-Screenshot] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -276,6 +280,58 @@ Se o modo stream estiver ativado, retornará uma linha por vez!
 Parameter Set: (All)
 Type: SwitchParameter
 Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -ChatParamsOverride
+Sobrescrever parâmetros do chat!
+Especifique cada opção em umas hastables!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -RawParams
+Especifica diretamente o valor do chat parameter RawParams!
+Se especificado também em ChatParamOverride, um merge é feito, dando prioridade aos parametros especificados aqui.
+O RawParams é um chat parameter que define parametros que serão enviados diretamente a api do modelo!
+Estes parametros irão sobrescrever os valores padrões calculados pelo powershai!
+Com isso, o usuario tem total controle sobre os parâmetros, mas precisa conmhecer cada provider!
+Também, cada provider é responsável por prover essa implementaão e usar esses parâmetros na sua api.
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Screenshot
+Captura um print screen da tela que está atrás da janela do powershell e envia junto com o prompt. 
+Note que o mode atual deve suportar imagens (Vision Language Models).
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: ss
 Accepted Values: 
 Required: false
 Position: named

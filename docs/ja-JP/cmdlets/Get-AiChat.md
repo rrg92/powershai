@@ -7,40 +7,40 @@ powershai: true
 # Get-AiChat
 
 ## SYNOPSIS <!--!= @#Synop !-->
-LLM にメッセージを送信し、応答を返します
+LLMにメッセージを送信し、応答を返します
 
 ## DESCRIPTION <!--!= @#Desc !-->
-これは PowershAI が提供する最も基本的なチャット形式です。  
-この関数を使用すると、現在のプロバイダーの LLM にメッセージを送信できます。  
+これは、PowershAIによって提供される最も基本的なチャットの形式です。  
+この関数を使用すると、現在のプロバイダーのLLMにメッセージを送信できます。  
 
-この関数は、PowershAI が提供する LLM へのより低レベルな、標準化されたアクセス方法です。  
-履歴やコンテキストは管理しません。これは、チャットのような複数回のやり取りを必要としない、単純なプロンプトを呼び出すのに役立ちます。 
-関数呼び出しをサポートしていますが、コードを実行することはなく、モデルからの応答のみを返します。
+この関数は、PowershAIが提供するLLMへの標準化された低レベルのアクセス方法です。  
+それは履歴やコンテキストを管理しません。単純なプロンプトを呼び出すために便利であり、チャットのように複数のインタラクションを必要としません。  
+Function Callingをサポートしていますが、コードを実行することはなく、モデルの応答のみを返します。
 
 
 
-** プロバイダー向けの情報
-	プロバイダーは、この機能を使用できるようにするために、チャット関数を実装する必要があります。 
-	チャット関数は、OpenAI のチャット完了関数の仕様と同じ応答を含むオブジェクトを返す必要があります。
-	次のリンクは、参考になります。
+** プロバイダーへの情報
+	プロバイダーは、この機能が利用できるようにChat関数を実装する必要があります。 
+	Chat関数は、OpenAIのChat Completion関数と同じ仕様の応答を持つオブジェクトを返す必要があります。
+	以下のリンクは参考になります：
 		https://platform.openai.com/docs/guides/chat-completions
-		https://platform.openai.com/docs/api-reference/chat/object (ストリーミングなしの戻り値)
-	プロバイダーはこの関数のパラメーターを実装する必要があります。 
-	詳細については、各パラメーターのドキュメントを参照し、プロバイダーにどのようにマッピングするかを確認してください。
+		https://platform.openai.com/docs/api-reference/chat/object (ストリーミングなしの返却)
+	プロバイダーは、この関数のパラメータを実装する必要があります。 
+	各パラメータの詳細とプロバイダーへのマッピング方法については、ドキュメントを参照してください；
 	
-	モデルが指定されたパラメーターのいずれかをサポートしない場合（つまり、同等の機能がない場合、または同等に実装できない場合）、エラーが返されます。
+	モデルが指定されたパラメータのいずれかをサポートしていない場合（つまり、同等の機能がない場合、または同等に実装できない場合）、エラーが返される必要があります。
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
-<Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
+[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -prompt
-送信するプロンプト。ConvertTo-OpenaiMessage 関数で説明されている形式にする必要があります
+送信するプロンプト。ConvertTo-OpenaiMessage関数によって説明される形式である必要があります
 
 ```yml
 Parameter Set: (All)
@@ -70,7 +70,7 @@ Accept wildcard characters: false
 ```
 
 ### -model
-モデル名。指定しない場合は、プロバイダーのデフォルトを使用します。
+モデルの名前。指定されていない場合、プロバイダーのデフォルトを使用します。
 
 ```yml
 Parameter Set: (All)
@@ -85,7 +85,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-返されるトークンの最大数
+返される最大トークン数
 
 ```yml
 Parameter Set: (All)
@@ -100,10 +100,11 @@ Accept wildcard characters: false
 ```
 
 ### -ResponseFormat
-応答の形式 
-許容される形式と動作は、OpenAI のものと同じでなければなりません: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
-ショートカット:
-	"json" は、{"type": "json_object"} に相当します
+応答のフォーマット 
+受け入れ可能なフォーマットと動作は、OpenAIと同じである必要があります：https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
+ショートカット：
+	"json"|"json_object"は、{"type": "json_object"}に相当します。
+	オブジェクトは、OpenAIのAPIに直接渡されたかのように、response_format.json_schemaフィールドで指定されたスキーマを指定する必要があります。
 
 ```yml
 Parameter Set: (All)
@@ -118,10 +119,10 @@ Accept wildcard characters: false
 ```
 
 ### -Functions
-呼び出されるべきツールのリスト!
-Get-OpenaiTool* コマンドを使用して、Powershell 関数を簡単に期待される形式に変換できます。
-モデルが関数を呼び出した場合、ストリーミングでも通常でも、応答は OpenAI のツール呼び出しモデルに従う必要があります。
-このパラメーターは、OpenAI の関数呼び出しと同じスキーマに従う必要があります: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+呼び出す必要があるツールのリスト！
+Get-OpenaiTool*のようなコマンドを使用して、PowerShellの関数を期待されるフォーマットに簡単に変換できます！
+モデルが関数を呼び出す場合、ストリームおよび通常の応答の両方は、OpenAIのツール呼び出しモデルに従う必要があります。
+このパラメータは、OpenAIのFunction Callingと同じスキーマに従う必要があります：https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
 
 ```yml
 Parameter Set: (All)
@@ -136,8 +137,8 @@ Accept wildcard characters: false
 ```
 
 ### -RawParams
-プロバイダーの API の直接パラメーターを指定します。
-これにより、他のパラメーターに基づいて計算および生成された値が上書きされます。
+プロバイダーのAPIの直接パラメータを指定します。
+これにより、他のパラメータに基づいて計算および生成された値が上書きされます。
 
 ```yml
 Parameter Set: (All)
@@ -152,10 +153,10 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-モデルのストリームを有効にします 
-LLM によって生成された各テキストに対して呼び出されるスクリプトブロックを指定する必要があります。
-スクリプトは、OpenAI のストリーミングによって返されるのと同じストリーミング形式で、各セグメントを表すパラメーターを受け取る必要があります。
-	このパラメーターは、OpenAI のストリーミングによって返されるのと同じスキーマである choices プロパティを含むオブジェクトです。
+モデルストリームを有効にします 
+LLMによって生成された各テキストに対して呼び出されるScriptBlockを指定する必要があります。
+スクリプトは、ストリーミングで返されるのと同じ形式の各セクションを表すパラメータを受け取る必要があります。
+このパラメータは、OpenAIのストリーミングで返される同じスキーマであるchoicesプロパティを含むオブジェクトです：
 		https://platform.openai.com/docs/api-reference/chat/streaming
 
 ```yml
@@ -171,7 +172,7 @@ Accept wildcard characters: false
 ```
 
 ### -IncludeRawResp
-API の応答を IncludeRawResp というフィールドに含めます
+APIの応答をIncludeRawRespというフィールドに含めます
 
 ```yml
 Parameter Set: (All)
@@ -186,8 +187,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

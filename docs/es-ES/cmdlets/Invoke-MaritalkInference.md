@@ -6,122 +6,119 @@ powershai: true
 
 # Invoke-MaritalkInference
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 
 Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [-do_sample] [<CommonParameters>]
 
 
-## SYNTAX <!--!= @#Syntax !-->
+## SINTAXIS <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] 
-[-do_sample] [<CommonParameters>]
+Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] 
+<Object>] [[-StreamCallback] <Object>] [-do_sample] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 1
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 5
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 5
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -do_sample
 
 ```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: interruptor
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: Nombrada
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -messages
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: prompt
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: prompt
+Valores Aceptados: 
+Requerido: falso
+Posición: 0
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 4
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -temperature
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 2
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -top_p
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 3
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

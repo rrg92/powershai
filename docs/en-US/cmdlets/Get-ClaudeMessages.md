@@ -14,7 +14,8 @@ Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Ob
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] 
+<Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -90,8 +91,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI._
 <!--PowershaiAiDocBlockEnd-->

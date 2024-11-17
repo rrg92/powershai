@@ -35,7 +35,8 @@ function InvokeOpenai {
 	)
 
 	$Provider = Get-AiCurrentProvider
-	write-verbose "InvokeOpenAI, current provider = $($Provider.name)"
+
+	verbose "InvokeOpenAI, current provider = $($Provider.name)"
 	$Token = GetCurrentOpenaiToken $Token
 	
     $headers = @{}
@@ -53,9 +54,9 @@ function InvokeOpenai {
 
 	$JsonParams = @{Depth = 10}
 	
-	write-verbose "InvokeOpenai: Converting body to json (depth: $($JsonParams.Depth))..."
+	verbose "InvokeOpenai: Converting body to json (depth: $($JsonParams.Depth))..."
     $ReqBodyPrint = $body | ConvertTo-Json @JsonParams
-	write-verbose "ReqBody:`n$($ReqBodyPrint|out-string)"
+	verbose "ReqBody:`n$($ReqBodyPrint|out-string)"
 	
 	$ReqBody = $body | ConvertTo-Json @JsonParams -Compress
 	
@@ -79,11 +80,10 @@ function InvokeOpenai {
 		$MyParams 	= GetMyParams
 		$null 		= & $ReqChanger $ReqParams $MyParams
 	}
-	
-	write-verbose "ReqParams:`n$($ReqParams|out-string)"
-    $RawResp 	= InvokeHttp @ReqParams
-	write-verbose "RawResp: `n$($RawResp|out-string)"
 
+	verbose "ReqParams:`n$($ReqParams|out-string)"
+    $RawResp 	= InvokeHttp @ReqParams
+	verbose "RawResp: `n$($RawResp|out-string)"
 
 	if($RawResp.stream){
 		return $RawResp;
@@ -384,7 +384,6 @@ function Get-OpenaiChat {
 		$Body.tool_choice = "auto";
 	}
 	
-
 	if($StreamCallback){
 		$body.stream = $true;
 		$body.stream_options = @{include_usage = $true};
@@ -475,7 +474,7 @@ function Get-OpenaiChat {
 		}.GetNewClosure()
 	}
 	
-	write-verbose "Body:$($body|out-string)"
+	verbose "Body:$($body|out-string)"
     $Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
 	
 	if($Resp.stream){
@@ -546,12 +545,62 @@ function ConvertTo-OpenaiMessage {
 	
 	[object[]]$InputMessages = @($prompt);
 	
+	$LastUserMessage = $null;
+	
+	#Base on https://gist.github.com/jdmallen/82c4be9cf0f6c86cd8911a4af13848d9
+	# Thanks!
+	function GetFileBase64 {
+		param($file)
+		
+		$FileBytes = Get-Content -Raw -Encoding Byte $file.FullName;
+		
+		[Convert]::ToBase64String($FileBytes)
+	}
+	
+	function GetFileMime {
+		param($file)
+		
+		return @{
+			".png" = "image/png"
+			".jpg" = "image/jpeg"
+			".jpeg" = "image/jpeg"
+			".gif" = "image/gif"
+			".webp" = "image/webp"
+			".svg" = "image/svg+xml"
+		}[$file.Extension]
+		
+	}
+	
 	foreach($m in $InputMessages){
 		$ChatMessage =  $null;
 		
 		#Se não for uma string, assume que é um objeto message contendo as props necessarias
-		if($m -isnot [string]){
-			write-verbose "Adding chat message directly:`n$($m|out-string)"
+		if($m -is [IO.FileInfo] -or $m -like "file: *"){
+			$ChatMessage = $LastUserMessage;
+			
+			
+			if($m -match 'file: (.+)'){
+				$file = Get-Item $matches[1];
+			} else {
+				$file = $m;
+			}
+			
+			$File64 = GetFileBase64 $file;
+			$FileMime = GetFileMime $file;
+			
+			if(!$FileMime){
+				write-warning "Cannot determine MimeType of file: $($m.FullName). This can raise errors!";
+			}
+			
+			$ChatMessage.content += @{
+						type = "image_url"
+						image_url = @{ url = "data:$FileMime;base64,$File64" }
+					}
+				
+			continue;
+		} 
+		elseif($m -isnot [string]){	
+			verbose "Adding chat message directly:`n$($m|out-string)"
 			$ChatMessage = $m;
 		} else {
 			if($m -match '(?s)^([sua]): (.+)'){
@@ -569,10 +618,19 @@ function ConvertTo-OpenaiMessage {
 				$Content    = $m;
 			}
 			
-			$ChatMessage = @{role = $RoleName; content = $Content};
+			$ChatMessage = @{
+					role = $RoleName
+					content = @(
+						@{type="text";"text"=$Content}
+					)
+				};
 		}
-		
-		write-verbose "	ChatMessage: $($ChatMessage|out-string)"
+
+		if($ChatMessage.role -eq "user"){
+			$LastUserMessage = $ChatMessage;
+		}
+			
+		verbose "	ChatMessage: $($ChatMessage|out-string)"
 
 		$Messages += $ChatMessage
 	}
@@ -611,6 +669,8 @@ function Get-OpenaiToolFromScript {
 		$ScriptPath
 	)
 	
+	verbose "Converting script $ScriptPath to OpenaAI toools...";
+	
 	#Defs is : @{ FuncName = @{}, FuncName2 ..., FuncName3... }
 	$FunctionDefs = @{};
 	
@@ -630,7 +690,7 @@ function Get-OpenaiToolFromScript {
 	}
 	
 	[string]$FilePath = $ResolvedPath
-	write-verbose "Loading function from file $FilePath"
+	verbose "Loading function from file $FilePath"
 	
 	<#
 		Aqui é onde fazemos uma mágica interessante... 
@@ -642,7 +702,7 @@ function Get-OpenaiToolFromScript {
 		Assim, conseguimos acessar tanto a DOC da funcao, quanto manter um objeto que pode ser usado para executá-la.
 	#>
 	$GetFunctionsScript = {
-		write-verbose "Running $FilePath"
+		verbose "Running $FilePath"
 		. $FilePath
 		
 		$AllFunctions = @{}
@@ -650,7 +710,7 @@ function Get-OpenaiToolFromScript {
 		#Obtem todas as funcoes definidas no arquivo.
 		#For each function get a object 
 		Get-Command | ? {$_.scriptblock.file -eq $FilePath} | %{
-			write-verbose "Function: $($_.name)"
+			verbose "Function: $($_.name)"
 			
 			$help = get-help $_.name;
 			
@@ -678,12 +738,11 @@ function Get-OpenaiToolFromScript {
 		$FuncHelp 	= $Def.help;
 		$FuncCmd 	= $Def.func;
 		
-		write-verbose "Creating Tool for Function $FuncName"
+		verbose "Creating Tool for Function $FuncName"
 		
 		$OpenAiFunction = @{
 					name = $null 
 					description = $null
-					parameters = @{}
 				}
 		
 		$OpenAiTool = @{
@@ -707,13 +766,15 @@ function Get-OpenaiToolFromScript {
 		$FuncParams = $FuncHelp.parameters.parameter;
 		
 		$FuncParamSchema = @{}
-		$OpenaiFunction.parameters = @{
-			type 		= "object"
-			properties 	= $FuncParamSchema
-			required 	= @()
-		}
+
 		
-		if(!$FuncParams){
+		if($FuncParams){
+			$OpenaiFunction.parameters = @{
+				type 		= "object"
+				properties 	= $FuncParamSchema
+				required 	= @()
+			}
+		} else {
 			continue;
 		}
 		
@@ -762,6 +823,21 @@ function Get-OpenaiToolFromScript {
 	}
 }
 
+<#
+	.DESCRIPTION 
+		Gerar um novo id para openai tool call!
+#>
+function New-OpenaiToolCallId {
+	param()
+	
+	$RandomId = (@(
+		([char]'A')..([char]'Z')
+		([char]'a')..([char]'z')
+		([char]'0')..([char]'9')
+	) | Get-Random -Count 24 | %{ [char]$_ }) -Join ""
+	
+	return "call_$RandomId"
+}
 
 <#
 	.DESCRIPTION 
@@ -853,7 +929,7 @@ function Get-OpenaiToolFromCommand {
 			$ParamName = $ParamHelp.name;
 			
 
-			write-verbose "Processing parameter $ParamName";
+			verbose "Processing parameter $ParamName";
 			
 			if($parameters -ne "*" -and $ParamName -notin @($parameters)){
 				continue;
@@ -871,7 +947,7 @@ function Get-OpenaiToolFromCommand {
 			}
 			
 			
-			write-verbose "	Type = $ParamType"
+			verbose "	Type = $ParamType"
 			
 			$ParamSchema = @{
 					type 		= "string"
@@ -1048,69 +1124,31 @@ function Get-OpenAiAnswerCost($answers){
 }
 
 
-# Representa cada interação feita com o modelo!
-function NewAiInteraction {
-	return @{
-			req  		= $null	# the current req count!
-			sent 		= $null # Sent data!
-			rawAnswer  	= $null # the raw answer returned by api!
-			stopReason 	= $null	# The reason stopped!
-			error 		= $null # If apply, the error ocurred when processing the answer!
-			seqError 	= $null # current sequence error
-			toolResults	= @() # lot of about running functino!
-		}
-}
 
-
-
-
-# Invoca a api para ober os mebddings
+# Invoca a api para obter os embeddings
 function Get-OpenaiEmbeddings {
-	param($inputText,$model)
+	[CmdletBinding()]
+	param(
+		$text
+		,$model
+		,$dimensions = $null
+	)
 	
 	if(!$model){
 		$model = 'text-embedding-3-small'
 	}
 	
 	$body = @{
-		input = $inputText 
+		input = $text 
 		model = $model 
+	}
+	
+	if($dimensions){
+		$body['dimensions'] = $dimensions;
 	}
 	
 	InvokeOpenai -endpoint 'embeddings' -body $Body
 }
-
-<#
-	Gera o embedding de um texto!
-#>
-function Get-OpenaiEmbeddings {
-	[CmdletBinding()]
-	param(
-		[Parameter(ValueFromPipeline)]
-		$text
-		,$model
-	)
-	
-	process {
-	
-		$ans = Invoke-OpenaiEmbeddings  -input $text -model $model
-		$costs = Get-OpenAiAnswerCost $ans
-		
-		[object[]]$AllEmbeddings = @($null) * $ans.data.length;
-		
-		$ans.data | %{ $AllEmbeddings[$_.index] = $_.embedding }
-		
-		return [PsCustomObject]@{
-			rawAnswer 	= $ans
-			costs 		= $costs
-			embeddings 	= $AllEmbeddings
-			text 	 	= $text
-		}
-		
-	}
-}
-
-
 
 
 #quebra o texto em tokens...

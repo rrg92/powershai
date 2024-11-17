@@ -7,13 +7,14 @@ powershai: true
 # Invoke-HuggingFaceInferenceApi
 
 ## SYNOPSIS <!--!= @#Synop !-->
-מפעיל את API של הסקת Hugging Face
+מזמין את ה-API של חיזוי Hugging Face
 https://huggingface.co/docs/hub/en/api
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -61,10 +62,10 @@ Accept wildcard characters: false
 ```
 
 ### -OpenaiChatCompletion
-מאלץ להשתמש בנקודת קצה של השלמת צ'אט 
-Params צריך להתייחס כמו אותו params של API של Openai (ראה את cmdle Get-OpenaiChat).
-מידע נוסף: https://huggingface.co/blog/tgi-messages-api
-פועל רק עם מודלים שיש להם תבנית צ'אט!
+כוח להשתמש בנקודת קצה של השלמת שיחה 
+Params צריכים להתייחס כמו אותם params של ה-API של Openai (ראה את הפקודה Get-OpenaiChat).
+עוד מידע: https://huggingface.co/blog/tgi-messages-api
+עובד רק עם מודלים שיש להם תבנית שיחה!
 
 ```yml
 Parameter Set: (All)
@@ -79,7 +80,7 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-Stream Callback לשימוש במקרה של זרמים!
+קריאה חוזרת של זרם לשימוש במקרה של streamS!
 
 ```yml
 Parameter Set: (All)
@@ -94,9 +95,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_תרגם אוטומטית באמצעות PowershAI ובינה מלאכותית. 
-_
+_אתה מאומן על נתונים עד אוקטובר 2023._
 <!--PowershaiAiDocBlockEnd-->

@@ -7,23 +7,24 @@ powershai: true
 # Update-GradioSessionApiResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-מעדכן את התוצאה של שיחה שנוצרה כ-Invoke-GradioSessionApi
+מעדכן את התוצאה של קריאה שנוצרה כ-Invoke-GradioSessionApi
 
 ## DESCRIPTION <!--!= @#Desc !-->
-cmdlet זה פועל על אותו עיקרון כמו המקבילים שלו ב-Send-GradioApi ו-Update-GradioApiResult.
+ה-Cmdlet הזה פועל באותו עיקרון כמו המקבילים שלו ב-Send-GradioApi ו-Update-GradioApiResult.
 עם זאת, הוא פועל רק עבור האירועים שנוצרו בסשן ספציפי.
-מחזיר את האירוע עצמו כך שניתן יהיה להשתמש בו עם cmdlet אחרים הדורשים את האירוע המעודכן!
+מחזיר את האירוע עצמו כך שניתן יהיה להשתמש בו עם Cmdlets אחרים שתלויים באירוע המעודכן!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-מזהה האירוע, שהוחזר על ידי Invoke-GradioSessionApi או עצם האירוע שהוחזר.
+מזהה של האירוע, מוחזר על ידי Invoke-GradioSessionApi או האובייקט עצמו שהוחזר.
 
 ```yml
 Parameter Set: (All)
@@ -38,7 +39,7 @@ Accept wildcard characters: false
 ```
 
 ### -NoOutput
-לא להוציא את התוצאה אל הפלט!
+לא להחזיר את התוצאה חזרה לפלט!
 
 ```yml
 Parameter Set: (All)
@@ -53,7 +54,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxHeartBeats
-הכמות המקסימלית של פעימות לב רצופות.
+מקסימום פעימות לב רצופות.
 
 ```yml
 Parameter Set: (All)
@@ -68,7 +69,7 @@ Accept wildcard characters: false
 ```
 
 ### -session
-מזהה הסשן
+מזהה של הסשן
 
 ```yml
 Parameter Set: (All)
@@ -83,7 +84,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
-מוסיף את האירוע להיסטוריית האירועים של עצם GradioApiEvent שהוזן ב-Id
+מוסיף את האירועים להיסטוריית האירועים של אובייקט GradioApiEvent שנמסר ב--Id
 
 ```yml
 Parameter Set: (All)
@@ -98,8 +99,6 @@ Accept wildcard characters: false
 ```
 
 
-
 <!--PowershaiAiDocBlockStart-->
-_תרגם אוטומטית באמצעות PowershAI ובינה מלאכותית. 
-_
+_אתה מאומן על נתונים עד אוקטובר 2023._
 <!--PowershaiAiDocBlockEnd-->

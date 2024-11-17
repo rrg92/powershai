@@ -5,7 +5,7 @@
 param(
 	$ApiKey = $Env:PSGALERY_KEY
 	,[switch]$CompileDoc
-	,[switch]$BasicTest
+	,[switch]$Tests
 	,[switch]$Publish
 	,[switch]$CheckVersion
 )
@@ -26,6 +26,24 @@ if(!$POWERSHAI_PUBLISH_DATA.TempDir){
 }
 
 $TempDir = $POWERSHAI_PUBLISH_DATA.TempDir;
+
+if($Tests){
+	write-host "Starting tests..."
+	$Config = New-PesterConfiguration -HashTable @{
+		Run = @{
+			'Throw' = $true
+		}
+		
+		Path = "./tests/pester"
+		
+		Output = @{
+			CIFormat = "GithubActions"
+		}
+	}
+	Invoke-Pester -Configuration $Config;
+	
+	write-host "	Test run!";
+}
 
 if($CompileDoc){
 	$PlatyDir = Join-Path $TempDir "platy"
@@ -50,12 +68,6 @@ if($CheckVersion){
 	if($TaggedVersion -ne $Mod.Version){
 		throw "POWERSHAI_PUBLISH_INCORRECT_VERSION: Module = $($Mod.Version) Git = $TaggedVersion";
 	}
-}
-
-if($BasicTest){
-	write-host "Starting tests..."
-	./util/TestPowershai.ps1 -Basic;
-	write-host "	Test run!";
 }
 
 if($Publish){

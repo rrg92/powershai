@@ -14,7 +14,8 @@ Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [<CommonParameters>]
+Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -22,7 +23,7 @@ Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Todos)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -36,7 +37,7 @@ Accept wildcard characters:
 ### -model
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Todos)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -50,7 +51,7 @@ Accept wildcard characters:
 ### -prompt
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Todos)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -64,7 +65,7 @@ Accept wildcard characters:
 ### -temperature
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Todos)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -76,9 +77,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

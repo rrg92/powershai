@@ -10,38 +10,39 @@ powershai: true
 Erstellt einen neuen Aufruf für einen Endpunkt in der aktuellen Sitzung.
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Führt einen Aufruf über die Gradio-API aus, auf einen bestimmten Endpunkt und mit den gewünschten Parametern.  
-Dieser Aufruf generiert ein GradioApiEvent (siehe Send-GradioApi), das intern in den Sitzungseinstellungen gespeichert wird.  
-Dieses Objekt enthält alles, was zum Abrufen des API-Ergebnisses erforderlich ist.  
+Führt einen Aufruf mit der Gradio-API an einem spezifischen Endpunkt durch und übergibt die gewünschten Parameter.  
+Dieser Aufruf wird ein GradioApiEvent generieren (siehe Send-GradioApi), das intern in den Konfigurationen der Sitzung gespeichert wird.  
+Dieses Objekt enthält alles, was notwendig ist, um das Ergebnis der API zu erhalten.  
 
 Das Cmdlet gibt ein Objekt vom Typ SessionApiEvent zurück, das die folgenden Eigenschaften enthält:
 	id - Interne ID des generierten Ereignisses.
-	event - Das intern generierte Ereignis. Kann direkt mit den Cmdlets verwendet werden, die Ereignisse verarbeiten.
+	event - Das interne generierte Ereignis. Kann direkt mit den Cmdlets verwendet werden, die Ereignisse verarbeiten.
 	
-Sitzungen haben ein Limit für definierte Aufrufe.
-Der Zweck ist, die unbegrenzte Erstellung von Aufrufen zu verhindern, die den Kontrollverlust verursachen können.
+Die Sitzungen haben eine Begrenzung für die definierten Aufrufe.  
+Das Ziel ist es, unendliche Aufrufe zu verhindern, um die Kontrolle nicht zu verlieren.
 
-Es gibt zwei Sitzungsoptionen, die den Aufruf beeinflussen (diese können mit Set-GradioSession geändert werden):
+Es gibt zwei Optionen der Sitzung, die den Aufruf beeinflussen (können mit Set-GradioSession geändert werden):
 	- MaxCalls 
-	Steuert die maximale Anzahl von Aufrufen, die erstellt werden können.
+	Steuert die maximale Anzahl an Aufrufen, die erstellt werden können.
 	
 	- MaxCallsPolicy 
-	Steuert, was zu tun ist, wenn der Max-Wert erreicht wird.
+	Steuert, was zu tun ist, wenn das Maximum erreicht wird.
 	Mögliche Werte:
 		- Error 	= führt zu einem Fehler!
-		- Remove 	= entfernt die älteste
-		- Warning 	= Zeigt eine Warnung an, ermöglicht aber das Überschreiten des Limits.
+		- Remove 	= entfernt den ältesten 
+		- Warning 	= zeigt eine Warnung an, erlaubt jedoch das Überschreiten des Limits.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] [<CommonParameters>]
+Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -ApiName
-Name des Endpunkts (ohne anfänglichen Schrägstrich)
+Name des Endpunkts (ohne den führenden Schrägstrich)
 
 ```yml
 Parameter Set: (All)
@@ -56,9 +57,9 @@ Accept wildcard characters: false
 ```
 
 ### -Params
-Liste der Parameter
-Wenn es sich um ein Array handelt, wird es direkt an die Gradio-API übergeben.
-Wenn es sich um eine Hashtabelle handelt, wird das Array basierend auf der Position der Parameter erstellt, die von /info zurückgegeben werden.
+Liste der Parameter 
+Wenn es sich um ein Array handelt, wird es direkt an die Gradio-API übergeben. 
+Wenn es sich um eine Hashtable handelt, wird das Array basierend auf der Position der von /info zurückgegebenen Parameter erstellt.
 
 ```yml
 Parameter Set: (All)
@@ -73,7 +74,7 @@ Accept wildcard characters: false
 ```
 
 ### -EventId
-Wenn angegeben, wird mit einer bereits vorhandenen Event-ID erstellt (diese kann außerhalb des Moduls generiert worden sein).
+WENN angegeben, wird mit einer bereits vorhandenen Ereignis-ID erstellt (kann außerhalb des Moduls generiert worden sein).
 
 ```yml
 Parameter Set: (All)
@@ -103,7 +104,7 @@ Accept wildcard characters: false
 ```
 
 ### -Token
-Erzwingt die Verwendung eines neuen Tokens. Wenn "public", wird kein Token verwendet!
+Zwingt die Verwendung eines neuen Tokens. Wenn "public", wird kein Token verwendet!
 
 ```yml
 Parameter Set: (All)
@@ -118,9 +119,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

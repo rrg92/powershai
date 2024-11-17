@@ -1,6 +1,6 @@
 ﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
+fichier d'aide externe: powershai-help.xml
+schéma: 2.0.0
 powershai: true
 ---
 
@@ -14,7 +14,8 @@ Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [<CommonParameters>]
+Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -22,63 +23,60 @@ Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Object
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 3
+Valeur par défaut : 
+Accepte l'entrée de pipeline : faux
+Accepte les caractères génériques : 
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Object
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 2
+Valeur par défaut : 
+Accepte l'entrée de pipeline : faux
+Accepte les caractères génériques : 
 ```
 
 ### -prompt
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Object
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 0
+Valeur par défaut : 
+Accepte l'entrée de pipeline : faux
+Accepte les caractères génériques : 
 ```
 
 ### -temperature
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Object
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 1
+Valeur par défaut : 
+Accepte l'entrée de pipeline : faux
+Accepte les caractères génériques : 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

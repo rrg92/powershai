@@ -1,116 +1,119 @@
-﻿![PowerShell ギャラリーバージョン](https://img.shields.io/powershellgallery/v/powershai)
-![PowerShell ギャラリーダウンロード](https://img.shields.io/powershellgallery/dt/powershai)
-![X (旧Twitter)フォロー](https://img.shields.io/twitter/follow/iatalking)
-![YouTube チャンネル登録者数](https://img.shields.io/youtube/channel/subscribers/UCtNVhWslzx_yjbIX8JIYang)
-![YouTube チャンネル視聴回数](https://img.shields.io/youtube/channel/views/UCtNVhWslzx_yjbIX8JIYang)
+﻿![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/powershai)  
+![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/powershai)  
+![X (formerly Twitter) Follow](https://img.shields.io/twitter/follow/iatalking)  
+![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCtNVhWslzx_yjbIX8JIYang)  
+![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCtNVhWslzx_yjbIX8JIYang)  
 
 
 # PowershAI
 
-* [英語](/docs/en-US/START-README.md)
-* [フランス語](/docs/fr-FR/START-README.md)
-* [日本語](/docs/ja-JP/START-README.md)
-* [アラビア語](/docs/ar-SA/START-README.md)
-* [ドイツ語](/docs/de-DE/START-README.md)
-* [スペイン語](/docs/es-ES/START-README.md)
-* [ヘブライ語](/docs/he-IL/START-README.md)
-* [イタリア語](/docs/it-IT/START-README.md)
+* [english](/docs/en-US/START-README.md)  
+* [Français](/docs/fr-FR/START-README.md)  
+* [日本語](/docs/ja-JP/START-README.md)  
+* [العربية](/docs/ar-SA/START-README.md)  
+* [Deutsch](/docs/de-DE/START-README.md)  
+* [español](/docs/es-ES/START-README.md)  
+* [עברית](/docs/he-IL/START-README.md)  
+* [italiano](/docs/it-IT/START-README.md)  
 
 PowershAI (PowerShell + AI) は、PowerShell に直接 AI サービスを統合するモジュールです。  
-コマンドは、スクリプトでもコマンドラインでも呼び出すことができます。  
+スクリプトやコマンドラインの両方でコマンドを呼び出すことができます。  
 
-LLM との会話、Hugging Face、Gradio などのスペースの呼び出しを可能にするさまざまなコマンドがあります。  
-独自のトークンを使用して、GPT-4o-mini、gemini flash、llama 3.1 などのサービスと対話できます。  
-つまり、PowershAI を使用する際に、これらのサービスを使用する際に発生する通常のコスト以外には、追加料金はかかりません。  
+LLM と会話を行い、Hugging Face、Gradio などのスペースを呼び出すことができるコマンドがいくつかあります。  
+独自のトークンを使用して、GPT-4o-mini、gemini flash、llama 3.1 などと会話できます。  
+つまり、PowershAI を使用するために支払う必要があるのは、これらのサービスを通常使用する際に発生するコストのみです。  
 
-このモジュールは、お気に入りの LLM で PowerShell コマンドを統合し、呼び出し、POC などをテストするのに最適です。  
-PowerShell に慣れているユーザーで、より簡単かつスムーズにスクリプトに AI を導入したいユーザーに最適です。
+このモジュールは、好きな LLM と PowerShell コマンドを統合し、呼び出しや POC をテストするのに最適です。  
+PowerShell に慣れていて、より簡単で簡単な方法でスクリプトに AI を取り入れたい人に最適です！  
 
-次の例は、一般的な状況で Powershai を使用する方法を示しています。
-
-## Windows ログの分析 
-```powershell 
-import-module powershai 
-
-Set-OpenaiToken # OpenAI のトークンを設定します (1 回のみ必要です)
-Set-AiProvider openai 
-
- Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "重要なイベントはありますか？"
-```
-
-## サービスの説明 
-```powershell 
-import-module powershai 
-
-Set-GoogleApiKey # Google Gemini のトークンを設定します (1 回のみ必要です)
-Set-AiProvider google
-
-Get-Service | ia "Windows にネイティブではないサービスで、リスクになる可能性のあるサービスを要約してください"
-```
-
-## Git コミットの説明 
-```powershell 
-import-module powershai 
-
-Set-MaritalkToken # Maritaca.AI (ブラジルの LLM) のトークンを設定します
-Set-AiProvider maritalk
-
-git log --oneline | ia "これらのコミットの要約を作成してください"
-```
+> [!IMPORTANT]  
+> これは OpenAI、Google、Microsoft の公式モジュールではなく、ここにリストされている他のプロバイダーのものでもありません！  
+> このプロジェクトは個人的なイニシアチブであり、オープンソースコミュニティによって維持されることを目的としています。  
 
 
-上記の例は、Powershell で AI を使用し、ほぼすべてのコマンドと統合する方法の簡単なデモに過ぎません。
-[完全なドキュメントでさらに詳しく](/docs/ja-JP)
+以下の例は、一般的な状況で PowershAI を使用する方法を示しています。  
 
-## インストール
+## Windows のログ分析  
+```powershell  
+import-module powershai  
 
-すべての機能は、PowerShell モジュールである `powershai` ディレクトリにあります。  
-最も簡単なインストール方法は、`Install-Module` コマンドを使用することです。
+Set-OpenaiToken # OpenAI のトークンを設定します (これを 1 回だけ行う必要があります)  
+Set-AiProvider openai  
 
-```powershell
-Install-Module -Name powershai -Scope CurrentUser
-```
+Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "重要なイベントはありますか？"  
+```  
 
-インストールしたら、セッションにインポートするだけです。
+## サービスの説明  
+```powershell  
+import-module powershai  
 
-```powershell
-import-module powershai
+Set-GoogleApiKey # Google Gemini のトークンを設定します (これを 1 回だけ行う必要があります)  
+Set-AiProvider google  
 
-# 使用可能なコマンドを表示します
-Get-Command -mo powershai
-```
+Get-Service | ia "Windows のネイティブではないサービスの要約を作成し、リスクを示してください"  
+```  
 
-このプロジェクトを直接クローンして、powershai ディレクトリをインポートすることもできます。
+## Git のコミットの説明  
+```powershell  
+import-module powershai  
 
-```powershell
-cd CAMINHO
+Set-MaritalkToken # Maritaca.AI (ブラジルの LLM) のトークンを設定します  
+Set-AiProvider maritalk  
 
-# クローン
-git clone ...
-
-# 特定のパスからインポートします！
-Import-Module .\powershai
-```
-
-## 探索と貢献
-
-PowershAI には、まだドキュメント化されていないものや進化の余地が多数あります。  
-改善を行うにつれて、コードにコメントを追加して、私のやり方を学びたい人の助けになるようにしています。  
-ご自由に探索し、改善の提案をご提供ください。
-
-## その他の PowerShell プロジェクト
-
-以下は、PowerShell と AI を統合した興味深いプロジェクトです。
-
-- [PSAI](https://github.com/dfinke/PSAI)
-- [PSOpenAI](https://github.com/mkht/PSOpenAI)
-- [dbatools.ai](https://github.com/potatoqualitee/dbatools.ai)
-
-探索、学習、そして貢献しましょう！
+git log --oneline | ia "これらのコミットの要約を作成してください"  
+```  
 
 
+上記の例は、Powershell で AI を使用し、ほぼすべてのコマンドと統合を開始するのがどれほど簡単かを示す小さなデモに過ぎません！  
+[完全なドキュメントでさらに探索する](/docs/ja-JP)  
+
+## インストール  
+
+すべての機能は `powershai` ディレクトリにあり、これは PowerShell モジュールです。  
+最も簡単なインストールオプションは、`Install-Module` コマンドを使用することです:  
+
+```powershell  
+Install-Module -Name powershai -Scope CurrentUser  
+```  
+
+インストール後、セッションにインポートするだけです:  
+
+```powershell  
+import-module powershai  
+
+# 利用可能なコマンドを表示  
+Get-Command -mo powershai  
+```  
+
+このプロジェクトを直接クローンし、powershai ディレクトリをインポートすることもできます:  
+
+```powershell  
+cd パス  
+
+# クローンする  
+git clone ...  
+
+# 特定のパスからインポート!  
+Import-Module .\powershai  
+```  
+
+## 探索と貢献  
+
+PowershAI にはまだ文書化と進化が必要なことがたくさんあります！  
+改善を行うたびに、私がどのように行ったかを学びたい人のためにコードにコメントを残します！  
+探索し、改善の提案に貢献することを自由に行ってください。  
+
+## PowerShell を使用した他のプロジェクト  
+
+AI と PowerShell を統合する他の興味深いプロジェクトは次のとおりです:  
+
+- [PSAI](https://github.com/dfinke/PSAI)  
+- [PSOpenAI](https://github.com/mkht/PSOpenAI)  
+- [dbatools.ai](https://github.com/potatoqualitee/dbatools.ai)  
+
+探索し、学び、貢献してください！
 
 
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳しました。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

@@ -7,17 +7,18 @@ powershai: true
 # Update-GradioSessionApiResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Aktualisiert die Rückgabe einer Call, die als Invoke-GradioSessionApi generiert wurde
+Aktualisiert das Ergebnis eines Aufrufs, der mit Invoke-GradioSessionApi erstellt wurde.
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Dieses Cmdlet folgt dem gleichen Prinzip wie seine Gegenstücke in Send-GradioApi und Update-GradioApiResult.
-Es funktioniert jedoch nur für die Ereignisse, die in einer bestimmten Sitzung generiert wurden.
-Gibt das Ereignis selbst zurück, damit es mit anderen Cmdlets verwendet werden kann, die das aktualisierte Ereignis benötigen!
+Dieses Cmdlet folgt demselben Prinzip wie seine Äquivalente in Send-GradioApi und Update-GradioApiResult. 
+Es funktioniert jedoch nur für die Ereignisse, die in einer bestimmten Sitzung generiert wurden. 
+Es gibt das Ereignis selbst zurück, damit es mit anderen Cmdlets verwendet werden kann, die von dem aktualisierten Ereignis abhängen!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -38,7 +39,7 @@ Accept wildcard characters: false
 ```
 
 ### -NoOutput
-Das Ergebnis nicht an die Ausgabe zurückgeben!
+Gibt das Ergebnis nicht zurück!
 
 ```yml
 Parameter Set: (All)
@@ -53,7 +54,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxHeartBeats
-Maximal zulässige aufeinanderfolgende Heartbeats.
+Maximale aufeinanderfolgende Heartbeats.
 
 ```yml
 Parameter Set: (All)
@@ -83,7 +84,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
-Fügt das Ereignis zum Ereignisverlauf des in -Id angegebenen GradioApiEvent-Objekts hinzu.
+Fügt die Ereignisse zum Ereignisverlauf des angegebenen GradioApiEvent-Objekts in -Id hinzu.
 
 ```yml
 Parameter Set: (All)
@@ -98,8 +99,6 @@ Accept wildcard characters: false
 ```
 
 
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

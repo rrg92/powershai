@@ -7,29 +7,30 @@ powershai: true
 # Invoke-AiChatTools
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Sendet eine Nachricht an einen LLM, mit Unterstützung für Tool Calling, und führt die vom Modell angeforderten Tools als Powershell-Befehle aus.
+Sendet eine Nachricht an ein LLM, mit Unterstützung für Tool Calling, und führt die vom Modell angeforderten Tools als PowerShell-Befehle aus.
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Dies ist eine Hilfsfunktion, um das Tool-Processing mit Powershell zu vereinfachen.
-Es kümmert sich um die Verarbeitung der "Tools" und führt sie aus, wenn das Modell sie anfordert!
+Dies ist eine Hilfsfunktion, um die Verarbeitung von Tools mit PowerShell zu erleichtern.
+Es kümmert sich um die Verarbeitung der "Tools" und führt sie aus, wenn das Modell danach verlangt!
 
 Sie müssen die Tools in einem bestimmten Format übergeben, das im Thema about_Powershai_Chats dokumentiert ist.
-Dieses Format ordnet Funktionen und Powershell-Befehle korrekt dem von OpenAI akzeptierten Schema zu (OpenAPI Schema).  
+Dieses Format ordnet Funktionen und PowerShell-Befehle korrekt dem von OpenAI akzeptierten Schema (OpenAPI-Schema) zu.
 
-Dieser Befehl kapselt die gesamte Logik, die erkennt, wann das Modell die Funktion aufrufen möchte, die Ausführung dieser Funktionen und das Senden der Antwort zurück an das Modell.  
-Er befindet sich in dieser Schleife, bis das Modell keine Funktionen mehr aufrufen möchte oder der Grenzwert für die Interaktionen (ja, hier nennen wir sie Interaktionen und nicht Iterationen) mit dem Modell erreicht ist.
+Dieser Befehl kapselt die gesamte Logik, die identifiziert, wann das Modell die Funktion aufrufen möchte, die Ausführung dieser Funktionen und das Zurücksenden dieser Antwort an das Modell.  
+Es bleibt in dieser Schleife, bis das Modell entscheidet, keine weiteren Funktionen mehr aufzurufen, oder das Interaktionslimit (ja, hier nennen wir es tatsächlich Interaktionen und nicht Iterationen) mit dem Modell erreicht ist.
 
 Das Konzept der Interaktion ist einfach: Jedes Mal, wenn die Funktion einen Prompt an das Modell sendet, zählt dies als eine Interaktion.  
-Im Folgenden ist ein typischer Ablauf dargestellt, der auftreten kann:
+Unten ist ein typischer Ablauf, der passieren kann:
 	
 
-Weitere Informationen zur Funktionsweise finden Sie im Thema about_Powershai_Chats
+Sie können weitere Details zur Funktionsweise im Thema about_Powershai_Chats nachlesen.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] 
-[[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [<CommonParameters>]
+Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] 
+<Object>] [[-MaxSeqErrors] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] 
+[-Stream] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -49,10 +50,10 @@ Accept wildcard characters: false
 ```
 
 ### -Tools
-Array von Tools, wie in der Dokumentation zu diesem Befehl erklärt.
-Verwenden Sie die Ergebnisse von Get-OpenaiTool* , um die möglichen Werte zu generieren.  
-Sie können ein Array von Objekten vom Typ OpenaiTool übergeben.
-Wenn eine Funktion in mehr als einem Tool definiert ist, wird die erste, die in der angegebenen Reihenfolge gefunden wird, verwendet!
+Array von Tools, wie in der Dokumentation dieses Befehls erklärt.
+Verwenden Sie die Ergebnisse von Get-OpenaiTool*, um die möglichen Werte zu generieren.  
+Sie können ein Array von Objekten des Typs OpenaiTool übergeben.
+Wenn eine Funktion in mehr als 1 Tool definiert ist, wird die zuerst gefundene in der definierten Reihenfolge verwendet!
 
 ```yml
 Parameter Set: (All)
@@ -81,7 +82,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-max. Ausgabe!
+maximale Ausgabe!
 
 ```yml
 Parameter Set: (All)
@@ -96,7 +97,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-Insgesamt maximal 5 Iterationen zulassen!
+Insgesamt maximal 5 Interaktionen zulassen!
 
 ```yml
 Parameter Set: (All)
@@ -111,7 +112,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
-Maximale Anzahl aufeinanderfolgender Fehler, die Ihre Funktion auslösen kann, bevor sie beendet wird.
+Maximale Anzahl aufeinanderfolgender Fehler, die Ihre Funktion generieren kann, bevor sie beendet wird.
 
 ```yml
 Parameter Set: (All)
@@ -157,13 +158,13 @@ Accept wildcard characters: false
 Ereignis-Handler
 Jeder Schlüssel ist ein Ereignis, das zu einem bestimmten Zeitpunkt von diesem Befehl ausgelöst wird!
 Ereignisse:
-answer: wird ausgelöst, nachdem die Antwort vom Modell erhalten wurde (oder wenn eine Antwort bei Verwendung von Stream verfügbar wird).
-func: wird ausgelöst, bevor die Ausführung eines vom Modell angeforderten Tools gestartet wird.
+answer: wird ausgelöst, nachdem die Antwort des Modells erhalten wurde (oder wenn eine Antwort verfügbar ist, wenn Stream verwendet wird).
+func: wird ausgelöst, bevor die Ausführung eines vom Modell angeforderten Tools beginnt.
 	exec: wird ausgelöst, nachdem das Modell die Funktion ausgeführt hat.
 	error: wird ausgelöst, wenn die ausgeführte Funktion einen Fehler erzeugt.
-	stream: wird ausgelöst, wenn eine Antwort gesendet wurde (über Stream) und -DifferentStreamEvent
-	beforeAnswer: Wird nach allen Antworten ausgelöst. Nützlich bei Verwendung von Stream!
-	afterAnswer: Wird vor dem Start der Antworten ausgelöst. Nützlich bei Verwendung von Stream!
+	stream: wird ausgelöst, wenn eine Antwort gesendet wurde (über den Stream) und -DifferentStreamEvent.
+	beforeAnswer: Wird ausgelöst, nachdem alle Antworten vorliegen. Wird verwendet, wenn im Stream verwendet!
+	afterAnswer: Wird ausgelöst, bevor die Antworten beginnen. Wird verwendet, wenn im Stream verwendet!
 
 ```yml
 Parameter Set: (All)
@@ -178,7 +179,7 @@ Accept wildcard characters: false
 ```
 
 ### -Json
-Sendet das response_format = "json" und zwingt das Modell, einen JSON zurückzugeben.
+Sendet das response_format = "json" und zwingt das Modell, ein JSON zurückzugeben.
 
 ```yml
 Parameter Set: (All)
@@ -193,7 +194,7 @@ Accept wildcard characters: false
 ```
 
 ### -RawParams
-Fügen Sie benutzerdefinierte Parameter direkt zum Aufruf hinzu (überschreibt die automatisch definierten Parameter).
+Fügen Sie benutzerdefinierte Parameter direkt im Aufruf hinzu (überschreibt die automatisch definierten Parameter).
 
 ```yml
 Parameter Set: (All)
@@ -222,9 +223,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

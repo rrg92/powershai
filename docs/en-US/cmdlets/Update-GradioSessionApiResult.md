@@ -12,18 +12,19 @@ Updates the return of a call generated as Invoke-GradioSessionApi
 ## DESCRIPTION <!--!= @#Desc !-->
 This cmdlet follows the same principle as its equivalents in Send-GradioApi and Update-GradioApiResult.
 However, it only works for events generated in a specific session.
-Returns the event itself so it can be used with other cmdlets that require the updated event!
+It returns the event itself so that it can be used with other cmdlets that depend on the updated event!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-Id of the event, returned by Invoke-GradioSessionApi or the object itself returned.
+Event ID, returned by Invoke-GradioSessionApi or the returned object itself.
 
 ```yml
 Parameter Set: (All)
@@ -38,7 +39,7 @@ Accept wildcard characters: false
 ```
 
 ### -NoOutput
-Do not output the result to the output!
+Do not throw the result back to the output!
 
 ```yml
 Parameter Set: (All)
@@ -68,7 +69,7 @@ Accept wildcard characters: false
 ```
 
 ### -session
-Session Id
+Session ID
 
 ```yml
 Parameter Set: (All)
@@ -83,7 +84,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
-Adds the events to the history of events of the GradioApiEvent object informed in -Id
+Adds events to the event history of the GradioApiEvent object specified in -Id
 
 ```yml
 Parameter Set: (All)
@@ -98,8 +99,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI._
 <!--PowershaiAiDocBlockEnd-->

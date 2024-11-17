@@ -1,155 +1,152 @@
 ﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
-powershai: true
+fichier d'aide externe : powershai-help.xml
+schéma : 2.0.0
+powershai : vrai
 ---
 
 # Get-OpenaiChat
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
+Get-OpenaiChat [[-prompt] <Objet>] [[-temperature] <Objet>] [[-model] <Objet>] [[-MaxTokens] <Objet>] [[-ResponseFormat] <Objet>] [[-Functions] <Objet>] [[-RawParams] <Objet>] [[-StreamCallback] <Objet>] [[-endpoint] <Objet>] [<ParamètresCommuns>]
 
 
-## SYNTAX <!--!= @#Syntax !-->
+## SYNTAXE <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
-<Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
+Get-OpenaiChat [[-prompt] <Objet>] [[-temperature] <Objet>] [[-model] <Objet>] [[-MaxTokens] <Objet>] [[-ResponseFormat] <Objet>] 
+[[-Functions] <Objet>] [[-RawParams] <Objet>] [[-StreamCallback] <Objet>] [[-endpoint] <Objet>] [<ParamètresCommuns>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARAMÈTRES <!--!= @#Params !-->
 
 ### -Functions
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 5
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 5
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 3
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -RawParams
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 6
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 6
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -ResponseFormat
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 4
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 7
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 7
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -endpoint
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 8
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 8
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 2
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -prompt
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 0
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -temperature
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 1
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et de l'IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

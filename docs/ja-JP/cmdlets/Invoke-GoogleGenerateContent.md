@@ -13,7 +13,8 @@ powershai: true
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] 
+<Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -60,9 +61,35 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -RawParams
 
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 4
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Tools
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 5
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
 
 
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

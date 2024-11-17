@@ -6,64 +6,90 @@ powershai: true
 
 # Invoke-GoogleGenerateContent
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 Endpoint: https://ai.google.dev/api/generate-content
 Stream: https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent
 
-## SYNTAX <!--!= @#Syntax !-->
+## SINTAXIS <!--!= @#Syntax !-->
 
 ```
-Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] 
+<Object>] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
 ### -messages
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: @()
-Accept pipeline input: false
-Accept wildcard characters: false
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 1
+Valor Predeterminado: @()
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: gemini-1.5-flash
-Accept pipeline input: false
-Accept wildcard characters: false
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 2
+Valor Predeterminado: gemini-1.5-flash
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 3
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
+```
+
+### -RawParams
+
+```yml
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 4
+Valor Predeterminado: @{}
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
+```
+
+### -Tools
+
+```yml
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 5
+Valor Predeterminado: 
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

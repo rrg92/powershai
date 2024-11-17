@@ -154,24 +154,43 @@ function Invoke-GoogleGenerateContent {
 	[CmdletBinding()]
 	param(
 		$messages = @()
-		,$model = "gemini-1.5-flash"
-		,$StreamCallback = $null
+		,$model 			= "gemini-1.5-flash"
+		,$StreamCallback 	= $null
+		,$RawParams 		= @{}
+		,$Tools 			= $null
 	)
 	
 	
 	#Note que reaproveitamos o convert to openai message do provider!
 	$GoogleContent = @(ConvertTo-GoogleContentMessage $messages)
 	
+	$Config = @{}
+	
 	$Data = @{
 		contents = $GoogleContent.content
-		#tools = @()
 		systemInstruction  = @{
 				parts = @(
 						@{text = $GoogleContent.SystemMessage }
 					)
 			}
+			
+		generationConfig = $Config
 	}
 	
+	if($Tools){
+		$Data.tools = @{
+			function_declarations = $Tools
+		}
+		
+		$Data.tool_config = @{
+				function_calling_config = @{
+					mode = "AUTO"
+				}
+			}
+	}
+	
+	
+	$Data = HashTableMerge $Data $RawParams;
 	$ReqParams = @{
 		body = $Data 
 		method = "POST"
@@ -186,6 +205,21 @@ function Invoke-GoogleGenerateContent {
 	InvokeGoogleApi "v1beta/models/$($model):$OpName" @ReqParams
 }
 
+function ConvertTo-GoogleToolFunction {
+	param($OpenaiTool)
+	
+	$FuncName = $OpenaiTool.function.name -replace '[\-\.]','';
+	
+	$GoogleFunction = HashTableMerge $OpenaiTool.function @{ name = $FuncName }
+	
+	if($GoogleFunction.contains('arguments')){
+		$GoogleFunction.args = $GoogleFunction.arguments | ConvertFrom-Json;
+		$GoogleFunction.remove('arguments');
+	}
+	
+	return $GoogleFunction;
+}
+
 function google_Chat {
 	[CmdletBinding()]
 	param(
@@ -195,15 +229,160 @@ function google_Chat {
         ,$MaxTokens     = 200
 		,$ResponseFormat = $null
 		,$Functions 	= @()	
-		,$RawParams	= @{}
+		,$RawParams		= @{}
 		,$StreamCallback = $null
 		,[switch]$IncludeRawResp
 	)
 	
-	$Params = @{
-		messages = $prompt
-		model = $model
+
+	$CalcParams =  @{
+		generationConfig = @{
+			temperature 		= $temperature
+			maxOutputTokens 	= $MaxTokens
+		}
+		
+		safetySettings = @(
+			@{ category = "HARM_CATEGORY_HATE_SPEECH"; threshold 		= "BLOCK_NONE"  }
+			@{ category = "HARM_CATEGORY_SEXUALLY_EXPLICIT"; threshold 	= "BLOCK_NONE"  }
+			@{ category = "HARM_CATEGORY_DANGEROUS_CONTENT"; threshold 	= "BLOCK_NONE"  }
+			@{ category = "HARM_CATEGORY_HARASSMENT"; threshold 		= "BLOCK_NONE"  }
+			@{ category = 'HARM_CATEGORY_CIVIC_INTEGRITY'; threshold 	= 'BLOCK_NONE' }
+		)
+	} 
+	
+	if($ResponseFormat.type -eq "json_object"){
+		$CalcParams.generationConfig.response_mime_type = "application/json"
 	}
+	elseif($ResponseFormat.json_schema){
+		$CalcParams.generationConfig.response_mime_type = "application/json"
+		$CalcParams.generationConfig.response_schema = $ResponseFormat.json_schema.schema
+	}
+	
+	$OpenApiFunctions = @()
+	$FunctionMap = @{}
+	
+	foreach($Function in $Functions){	
+		$GoogleFunction = ConvertTo-GoogleToolFunction $Function;
+		$GoogleName = $GoogleFunction.name;
+		$FunctionMap[$GoogleName] = $Function.function
+		$OpenApiFunctions += $GoogleFunction
+	}
+
+	function Convert-GoogleFunctionCallToOpenai {
+		param($Call)	
+		
+		$OriginalFunction = $FunctionMap[$Call.name]
+		
+		return [PsCustomObject]@{
+			id 			= New-OpenaiToolCallId
+			type 		= "function"
+			'function'	= @{
+					name 		= $OriginalFunction.name
+					arguments	= $Call.args | ConvertTo-Json -Depth 10
+				} 	
+		}
+	}
+	
+	function Convert-GoogleAnswerToOpenaiAnswer {
+		param($Answer, $ChunkId)
+		
+		
+		$Result = @{
+			_raw = @{
+				obj = $Answer
+			}
+			
+			id 		= [guid]::NewGuid().Guid
+			object 	= "chat.completion"
+			created = [int](((Get-Date) - (Get-Date "1970-01-01T00:00:00Z")).TotalSeconds)
+			service_tier = $null
+			system_fingerprint = $null
+			usage = @{
+				completion_tokens 	= $Answer.usageMetadata.candidatesTokenCount
+				prompt_tokens 		= $Answer.usageMetadata.promptTokenCount
+				total_tokens 		= $Answer.usageMetadata.totalTokenCount
+			}
+			
+			logprobs = $null
+			choices = @()
+		}
+		
+		foreach($Candidate in $Answer.candidates){
+			
+			$FinishReason = "stop"
+			switch($Candidate.finishReason){
+				"MAX_TOKENS" {
+					$FinishReason = "length"
+				}
+				
+				{ $_ -in "SAFETY","RECITATION","LANGUAGE","BLOCKLIST","PROHIBITED_CONTENT","SPII" } {
+					$FinishReason = "content_filter"
+				}
+				
+				default {
+					if($Candidate.finishReason){
+						$FinishReason = $Candidate.finishReason.toLower();
+					}
+				}
+			}
+			
+						
+			if($FinishReason -eq "content_filter"){
+				$Refusal = "Google:" + $Candidate.finishReason;
+			}
+			
+			
+			#Tools!
+			$OpenAiTools = @()
+			foreach($Part in $Candidate.content.parts){
+				if($Part.functionCall){
+					$OpenAiTools += Convert-GoogleFunctionCallToOpenai $Part.functionCall
+				}
+			}
+			
+			if($OpenAiTools){
+				$FinishReason = "tool_calls"
+			}
+			
+			$NewChoice = @{
+				index 			= $Result.choices.length
+				logprobs 		= $null
+				finish_reason 	= $FinishReason
+			}
+			
+			$RespContent = $null
+			
+			$Message = @{
+				role 		= "assistant"
+				refusal 	= $null
+				content 	= @($Candidate.content.parts)[0].text
+			}
+			
+			if($OpenAiTools){
+				$Message.tool_calls = $OpenAiTools
+			}
+			
+			if($ChunkId){
+				$Result.object = "chat.completion.chunk"
+				$Result.id = $ChunkId
+				$NewChoice.delta = $Message
+			} else {
+				$NewChoice.message = $Message
+			}
+			
+			$Result.choices += $NewChoice;
+		}
+		
+		return $Result;
+	}
+
+	
+	$Params = @{
+		messages 	= $prompt
+		model 		= $model
+		RawParams 	= (HashTableMerge $CalcParams $RawParams)
+		Tools 		= $OpenApiFunctions 
+	} 
 	
 	if($StreamCallback){
 		
@@ -220,6 +399,8 @@ function google_Chat {
 			}
 			
 			CurrentCall = $null
+			ChunkId = [guid]::NewGuid().guid
+			OpenaiAnswer = $null
 		}
 		
 		$UserScriptCallback = $StreamCallback
@@ -227,123 +408,77 @@ function google_Chat {
 			param($data)
 			
 			$line = $data.line
-			
+
 			if($line -like 'data: {*'){
 				$RawJson = $line.replace("data: ","");
 			} else {
 				return;
 			}
 			
-			$AnswerJson = $RawJson | ConvertFrom-Json;
+			$Answer 			= $RawJson | ConvertFrom-Json;
+			$Answer | Add-Member Noteproperty _raw $data;
 			
-			$AnswerText = @($AnswerJson.candidates)[0].content.parts[0].text;
-			$StreamData.answers += $AnswerJson;
+			$StreamData.answers += $Answer;	
 			
-			$StreamData.fullContent += $AnswerText
-				
-			$StdAnswer = @{
-				choices = @(
-					@{
-						delta = @{content = $AnswerText }
-					}
-				)
-				
-				model = $model
+			$OpenaiAnswer = Convert-GoogleAnswerToOpenaiAnswer $Answer -ChunkId $StreamData.ChunkId
+			
+			
+			if($StreamData.OpenaiAnswer){
+				if($OpenaiAnswer.choices[0].delta.content){
+					$StreamData.OpenaiAnswer.choices[0].delta.content += $OpenaiAnswer.choices[0].delta.content
+				}				
+			} else {
+				$StreamData.OpenaiAnswer = $OpenaiAnswer
 			}
-
-			& $UserScriptCallback $StdAnswer
+			
+			if(!$StreamData.OpenaiAnswer.usage.completion_tokens){
+				$StreamData.OpenaiAnswer.usage.completion_tokens = 0
+			}
+			
+			if($OpenaiAnswer.usage.completion_tokens){
+				$StreamData.OpenaiAnswer.usage.completion_tokens += $OpenaiAnswer.usage.completion_tokens
+			}
 			
 			
-				
-			#	foreach($ToolCall in $DeltaResp.tool_calls){
-			#		$CallId 		= $ToolCall.id;
-			#		$CallType 		= $ToolCall.type;
-			#		verbose "Processing tool`n$($ToolCall|out-string)"
-			#		
-			#		
-			#		if($CallId){
-			#			$StreamData.calls.all += $ToolCall;
-			#			$StreamData.CurrentCall = $ToolCall;
-			#			continue;
-			#		}
-			#		
-			#		$CurrentCall = $StreamData.CurrentCall;
-			#	
-			#		
-			#		if($CurrentCall.type -eq 'function' -and $ToolCall.function){
-			#			$CurrentCall.function.arguments += $ToolCall.function.arguments;
-			#		}
-			#	}
-			
-			# 
+			& $UserScriptCallback $OpenaiAnswer
 		}
 		
 		$Params['StreamCallback'] = $StreamScript 
 	}
 	
-	$Resp = Invoke-GoogleGenerateContent @Params
+	try {
+		
+		$Resp = Invoke-GoogleGenerateContent @Params
+	} catch {
+		$_.Exception | Add-Member -Force Noteproperty GoogleProvider @{
+					params = $params
+				}
+		
+		throw;
+	}
 	
+
 	if($resp.stream){
-		#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
-		$MessageResponse = @{
-			role		 	= "assistant"
-			content 		= $StreamData.fullContent
-		}
-		
-		#if($StreamData.calls.all){
-		#	$MessageResponse.tool_calls = $StreamData.calls.all;
-		#}
-		
 		return @{
 			stream = @{
 				RawResp = $resp
 				answers = $StreamData.answers
-				tools 	= $null
+				tools 	= $StreamData.OpenaiAnswer.choices[0].delta.tool_calls
 			}
 			
-			message = $MessageResponse
-			finish_reason = $StreamData.answers[-1].candidates[0].finishReason
-			usage = @{
-					prompt_tokens 		= $StreamData.answers[-1].usageMetadata.promptTokenCount
-					completion_tokens 	= $StreamData.answers[-1].usageMetadata.candidatesTokenCount
-					total_tokens 		= $StreamData.answers[-1].usageMetadata.totalTokenCount
-				}
-			model = $model
-		}
-		
-	}
-
-	#Nao-stream!
-	$ResultObj = @{
-		choices = @(
-			@{
-				finish_reason 	= $resp.candidates[0].finishReason.ToLower()
-				index 			= $resp.candidates[0].index
-				logprobs 		= $null
-				message 		= @{
-									role = "assistant"
-									content = $resp.candidates[0].content.parts[0].text
-								}
+			message = @{ 
+				role = "assistant"
+				content 	= $StreamData.OpenaiAnswer.choices[0].delta.content
+				tool_calls =  $StreamData.OpenaiAnswer.choices[0].delta.tool_calls
 			}
-		)
-		
-		usage 	= @{
-					prompt_tokens 		= $resp.usageMetadata.promptTokenCount
-					completion_tokens 	= $resp.usageMetadata.candidatesTokenCount
-					total_tokens 		= $resp.usageMetadata.totalTokenCount
-				}
-		model 	= $model
-		created = [int](((Get-Date) - (Get-Date "1970-01-01T00:00:00Z")).TotalSeconds)
-		object	= "chat.completion"
-		id 		= $null
-		system_fingerprint = $null
+			finish_reason 	= $StreamData.OpenaiAnswer.choices[0].finish_reason
+			usage 			= $StreamData.OpenaiAnswer.usage
+			model 			= $StreamData.OpenaiAnswer.model
+		}
+	} else {
+		$OpenaiAnswer = Convert-GoogleAnswerToOpenaiAnswer $resp
+		return $OpenaiAnswer;
 	}
-	
-	if($IncludeRawResp){
-		$ResultObj.RawResp = $Resp
-	}
-	
-	return $ResultObj;
 }
 
 <#
@@ -361,30 +496,93 @@ function ConvertTo-GoogleContentMessage {
 	$ContentMessages = @()
 	$SystemMessage = @()
 	
-	foreach($m in $messages){
+	$CallsIds = @{}
+	
+	:MsgLoop foreach($m in $messages){
 		
 		$NewContent = @{
-			parts = @()
-			role = $null
+			parts 	= @()
+			role 	= $null
 		}
 		
 		$MsgContent = $m.content;
 		$NewContent.role = $m.role;
-		if($m.role -ne "user"){
-			$NewContent.role = "model"
+		
+		# default conversion!
+		$MsgPart = @()
+		if($MsgContent -is [string]){
+			$MsgPart += @{ text = $MsgContent }
+		} else {
+			foreach($content in $MsgContent){
+				if($content.text){
+					$MsgPart += @{ text = $content.text }
+				}
+				
+				if($content.type -eq "image_url" -and $content.image_url.url -match 'data:(.+?);base64,(.+)'){
+					$MimeType	= $matches[1];
+					$Base64 	= $matches[2];
+					$MsgPart += @{ inlineData = @{ mimeType = $MimeType; data = $Base64 }}
+				}
+				
+			}
 		}
 		
-		if($m.role -eq "system"){
-			$SystemMessage += $MsgContent;
-			continue;
+		switch($m.role){
+			
+			"user" {
+				$NewContent.role = "user"
+			}
+			
+			"assistant" {
+				$NewContent.role = "model"
+				if($m.tool_calls){
+					
+					$MsgPart = @()
+					
+					foreach($tool in $m.tool_calls){
+						
+						$GoogleFunction = ConvertTo-GoogleToolFunction $tool;
+
+						$MsgPart += @{
+							functionCall = $GoogleFunction
+						}
+
+						$CallsIds[$tool.id] = @{
+							GoogleFunction = $GoogleFunction
+						}
+					}
+				}
+				
+			}
+			
+			"tool" {
+				$NewContent.role = "model"
+				$MsgPart = @{ 
+					functionResponse = @{
+						name = $CallsIds[$m.tool_call_id].GoogleFunction.name
+						response = @{
+							result = $m.content
+						}
+					}
+				}
+			}
+			
+			"system" {
+				$SystemMessage += $MsgContent;
+				continue MsgLoop;
+			}
+			
+			default {
+				write-warning "Message role not recognized: $($NewContent.role)";
+				break;
+			}
+			
 		}
 		
-		$NewContent.parts = @(
-				@{ text = $MsgContent }
-			)
+
+		$NewContent.parts = @($MsgPart)
 		
 		$ContentMessages += $NewContent;
-		
 	}
 	
 	

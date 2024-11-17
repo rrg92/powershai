@@ -8,13 +8,13 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Démarre une requête HTTP.
+Démarre une requête HTTP avec les paramètres spécifiés.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] 
-<Object>] [<CommonParameters>]
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] 
+[[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -118,9 +118,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

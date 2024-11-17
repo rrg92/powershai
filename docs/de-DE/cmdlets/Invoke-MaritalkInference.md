@@ -14,8 +14,8 @@ Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-tempe
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] 
-[-do_sample] [<CommonParameters>]
+Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] 
+<Object>] [[-StreamCallback] <Object>] [-do_sample] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -23,7 +23,7 @@ Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-tempe
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -37,7 +37,7 @@ Accept wildcard characters:
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -51,7 +51,7 @@ Accept wildcard characters:
 ### -do_sample
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: switch
 Aliases: 
 Accepted Values: 
@@ -65,7 +65,7 @@ Accept wildcard characters:
 ### -messages
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: prompt
 Accepted Values: 
@@ -79,7 +79,7 @@ Accept wildcard characters:
 ### -model
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -93,7 +93,7 @@ Accept wildcard characters:
 ### -temperature
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -107,7 +107,7 @@ Accept wildcard characters:
 ### -top_p
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -119,9 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

@@ -1,7 +1,7 @@
 ﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
-powershai: true
+fichier d'aide externe : powershai-help.xml
+schéma : 2.0.0
+powershai : vrai
 ---
 
 # Invoke-MaritalkInference
@@ -10,12 +10,11 @@ powershai: true
 
 Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [-do_sample] [<CommonParameters>]
 
-
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] 
-[-do_sample] [<CommonParameters>]
+Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-temperature] <Object>] [[-top_p] <Object>] [[-model] 
+<Object>] [[-StreamCallback] <Object>] [-do_sample] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -23,105 +22,102 @@ Invoke-MaritalkInference [[-messages] <Object>] [[-MaxTokens] <Object>] [[-tempe
 ### -MaxTokens
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 1
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 5
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 5
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -do_sample
 
 ```yml
-Parameter Set: (All)
-Type: switch
-Aliases: 
-Accepted Values: 
-Required: false
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : interrupteur
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : Nommé
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -messages
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: prompt
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : prompt
+Valeurs acceptées : 
+Requis : faux
+Position : 0
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 4
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -temperature
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 2
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 ### -top_p
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : 3
+Valeur par défaut : 
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement à l'aide de PowershAI et de l'IA._
 <!--PowershaiAiDocBlockEnd-->

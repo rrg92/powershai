@@ -10,85 +10,85 @@ powershai: true
 
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Envía datos a un Gradio y retorna un objeto que representa el evento!
+¡Envía datos a un Gradio y devuelve un objeto que representa el evento!  
 Pasa este objeto a los demás cmdlets para obtener los resultados.
 
 FUNCIONAMIENTO DE LA API DE GRADIO 
 
-	Basado en: https://www.gradio.app/guides/querying-gradio-apps-with-curl
-	
-	Para entender mejor como usar este cmdlet, es importante entender como la API de Gradio funciona.  
-	Cuando invocamos algún endpoint de la API, él no retorna los datos inmediatamente.  
-	Esto se debe al simple hecho del procesamiento ser extenso, debido a la naturaleza (IA y Machine Learning).  
-	
-	Entonces, al invés de retornar el resultado, o aguardar indefinidamente, el Gradio retorna un "Event Id".  
-	Con este evento, conseguimos periodicamente obtener los resultaods generados.  
-	El gradio va a generar mensajes de eventos con los datos que fueron generados. Necesitamos pasar el EventId generado para obtener los nuevos pedaços generados.
-	Estos eventos son enviados vía Server Side Events (SSE), y pueden ser uno de estos:
-		- hearbeat 
-		A cada 15 segundos, el Gradio va a enviar este evento para mantener la conexión activa.  
-		Por eso que, al usar el cmdlet Update-GradioApiResult, él puede demorar un poco para retornar.
-		
-		- complete 
-		Es la última mensaje enviada por el Gradio cuando los datos fueron generados con éxito!
-		
-		- error 
-		Enviado cuando hubo algún error en el procesamiento.  
-		
-		- generating
-		Es generado cuando la API ya tiene datos disponibles, mas, aún puede venir más.
-	
-	Aquí en PowershAI, nosotros separamos esto también en 3 partes: 
-		- Este cmdlet (Send-GradioApi) hace la requisición inicial para el Gradio y retorna un objeto que representa el evento (chamamods ele de un objeto GradioApiEvent)
-		- Este objeto resultante, de tipo GradioApiEvent,  contiene todo lo que es necesario para consultar el evento y él también guarda los datos y errores obtenidos.
-		- Por fim, tenemos el cmdlet Update-GradioApiResult, donde usted debe pasar el evento generado, y él irá consultar la API del gradio y obtener los nuevos datos.  
-			Verifiaue el help deste cmdlet para más informaciones de como controlar este mecanismo de obtener los datos.
-			
-	
-	Entonces, en un flixo normal, usted debe hacer lo siguiente: 
-	
-		#INvoque el endpoint del graido!
-		$MeuEvento = SEnd-GradioApi ... 
-	
-		# Obtenha resultados hasta que tenha temrinado!
-		# Verifique el help deste cmdlet para aprender más!
-		$MeuEvento | Update-GradioApiResult
-		
+    Basado en: https://www.gradio.app/guides/querying-gradio-apps-with-curl
+
+    Para entender mejor cómo usar este cmdlet, es importante comprender cómo funciona la API de Gradio.  
+    Cuando invocamos algún endpoint de la API, no devuelve los datos de inmediato.  
+    Esto se debe al simple hecho de que el procesamiento es extenso, debido a la naturaleza (IA y Machine Learning).  
+    
+    Entonces, en lugar de devolver el resultado, o esperar indefinidamente, Gradio devuelve un "Event Id".  
+    Con este evento, podemos obtener periódicamente los resultados generados.  
+    Gradio generará mensajes de eventos con los datos que se han generado. Necesitamos pasar el EventId generado para obtener los nuevos fragmentos generados.  
+    Estos eventos se envían a través de Server Side Events (SSE), y pueden ser uno de estos:  
+        - heartbeat  
+        Cada 15 segundos, Gradio enviará este evento para mantener la conexión activa.  
+        Por eso, al usar el cmdlet Update-GradioApiResult, puede tardar un poco en devolver.  
+        
+        - complete  
+        ¡Es el último mensaje enviado por Gradio cuando los datos se han generado con éxito!  
+        
+        - error  
+        Enviado cuando hubo algún error en el procesamiento.  
+        
+        - generating  
+        Se genera cuando la API ya tiene datos disponibles, pero aún puede venir más.  
+    
+    Aquí en PowershAI, también separamos esto en 3 partes:  
+        - Este cmdlet (Send-GradioApi) realiza la solicitud inicial a Gradio y devuelve un objeto que representa el evento (lo llamamos un objeto GradioApiEvent).  
+        - Este objeto resultante, de tipo GradioApiEvent, contiene todo lo necesario para consultar el evento y también almacena los datos y errores obtenidos.  
+        - Por último, tenemos el cmdlet Update-GradioApiResult, donde debes pasar el evento generado, y consultará la API de Gradio y obtendrá los nuevos datos.  
+            Consulta la ayuda de este cmdlet para más información sobre cómo controlar este mecanismo de obtención de datos.  
+            
+    Entonces, en un flujo normal, debes hacer lo siguiente:  
+    
+        # ¡Invoca el endpoint de Gradio!  
+        $MiEvento = Send-GradioApi ...  
+    
+        # ¡Obtén resultados hasta que haya terminado!  
+        # ¡Consulta la ayuda de este cmdlet para aprender más!  
+        $MiEvento | Update-GradioApiResult  
+        
 Objeto GradioApiEvent
 
-	El objeto GradioApiEvent resultante deste cmdlet contiene todo lo que es necesario para que PowershAI controle el mecanismo y obtenga los datos.  
-	Es importante que usted conozca su estructura para que sepa como colectar los datos generados por la API.
-	Propiedades:
-	
-		- Status  
-		Indica el status del evento. 
-		Cuando este status for "complete", significa que la API ya terminó el procesamiento y todos los datos posibles ya fueron generados.  
-		Mientras for diferente disso, usted debe invocar Update-GradioApiResult para que él chque el status y atualize as informacoes. 
-		
-		- QueryUrl  
-		Valor interno que contiene el endpoint exato par a consulta dos resultados
-		
-		- data  
-		Un array contendo todos os dados de resposta gerado. Cada vez que você invoca Update-GradioApiResult, se houver dados, ele irá adicionar a este array.  
-		
-		- events  
-		Lista de eventos que fueron generados por el server. 
-		
-		- error  
-		Se hubo errores en la respuesta, esse campio conterá algum objeto, string, etc., descrevendo mais detalles.
-		
-		- LastQueryStatus  
-		Indica el status de la última consulta en la API.  
-		Se "normal", indica que la API fue consultada y retornó hasta el fim normalmente.
-		Se "HeartBeatExpired", indica que la consulta fue interrumpida debido al timeout de hearbeat configurado por el usuario en el cmdlet Update-GradioApiResult
-		
-		- req 
-		Dados de la requisicao hecha!
+    El objeto GradioApiEvent resultante de este cmdlet contiene todo lo necesario para que PowershAI controle el mecanismo y obtenga los datos.  
+    Es importante que conozcas su estructura para saber cómo recoger los datos generados por la API.  
+    Propiedades:  
+    
+        - Status  
+        Indica el estado del evento.  
+        Cuando este estado sea "complete", significa que la API ya ha terminado el procesamiento y todos los datos posibles ya han sido generados.  
+        Mientras sea diferente, debes invocar Update-GradioApiResult para que verifique el estado y actualice la información.  
+        
+        - QueryUrl  
+        Valor interno que contiene el endpoint exacto para la consulta de resultados.  
+        
+        - data  
+        Un array que contiene todos los datos de respuesta generados. Cada vez que invocas Update-GradioApiResult, si hay datos, los añadirá a este array.  
+        
+        - events  
+        Lista de eventos que han sido generados por el servidor.  
+        
+        - error  
+        Si hubo errores en la respuesta, este campo contendrá algún objeto, cadena, etc., describiendo más detalles.  
+        
+        - LastQueryStatus  
+        Indica el estado de la última consulta a la API.  
+        Si "normal", indica que la API fue consultada y devolvió hasta el final normalmente.  
+        Si "HeartBeatExpired", indica que la consulta fue interrumpida debido al timeout de heartbeat configurado por el usuario en el cmdlet Update-GradioApiResult.  
+        
+        - req  
+        ¡Datos de la solicitud realizada!  
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Send-GradioApi [[-AppUrl] <Object>] [[-ApiName] <Object>] [[-Params] <Object>] [[-SessionHash] <Object>] [[-EventId] <Object>] [[-token] <Object>] [<CommonParameters>]
+Send-GradioApi [[-AppUrl] <Object>] [[-ApiName] <Object>] [[-Params] <Object>] [[-SessionHash] <Object>] [[-EventId] <Object>] 
+[[-token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -150,7 +150,7 @@ Accept wildcard characters: false
 ```
 
 ### -EventId
-Se informado, não chamada a API, mas cria o objeto e usa esse valor como se fosse o retorno
+Si se proporciona, no llama a la API, sino que crea el objeto y usa este valor como si fuera la respuesta.
 
 ```yml
 Parameter Set: (All)
@@ -179,9 +179,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

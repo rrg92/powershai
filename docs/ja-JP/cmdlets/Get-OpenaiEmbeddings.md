@@ -8,21 +8,35 @@ powershai: true
 
 ## SYNOPSIS <!--!= @#Synop !-->
 
-Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
+### -dimensions
+
+```yml
+Parameter Set: (すべて)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: 
+```
+
 ### -model
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (すべて)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -36,20 +50,18 @@ Accept wildcard characters:
 ### -text
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (すべて)
 Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
 Position: 0
 Default Value: 
-Accept pipeline input: true (ByValue)
+Accept pipeline input: false
 Accept wildcard characters: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

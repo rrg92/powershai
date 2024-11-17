@@ -6,93 +6,91 @@ powershai: true
 
 # Get-ClaudeMessages
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 
-Obtener mensajes de Claude [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
-
-
-## SYNTAX <!--!= @#Syntax !-->
-
-```
 Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
+
+
+## SINTAXIS <!--!= @#Syntax !-->
+
+```
+Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] 
+<Object>] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
 ### -StreamCallback
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 4
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -max_tokens
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 2
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -messages
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 0
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -model
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 1
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 ### -temperature
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 3
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

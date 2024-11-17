@@ -7,40 +7,40 @@ powershai: true
 # Get-AiChat
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Sendet Nachrichten an einen LLM und gibt die Antwort zurück
+Sendet Nachrichten an ein LLM und gibt die Antwort zurück
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Dies ist die grundlegendste Chat-Form, die von PowershAI bereitgestellt wird.  
-Mit dieser Funktion können Sie eine Nachricht an einen LLM des aktuellen Providers senden.  
+Dies ist die grundlegendste Form des Chats, die von PowershAI angeboten wird.  
+Mit dieser Funktion können Sie eine Nachricht an ein LLM des aktuellen Anbieters senden.  
 
-Diese Funktion ist ein niedrigeres, standardisiertes Mittel für den Zugriff auf einen LLM, den PowershAI bereitstellt.  
-Sie verwaltet keinen Verlauf oder Kontext. Sie ist nützlich, um einfache Eingabeaufforderungen aufzurufen, die keine Mehrfachinteraktionen wie in einem Chat erfordern. 
-Obwohl sie das Funktionsaufrufen unterstützt, führt sie keinen Code aus und gibt nur die Antwort des Modells zurück.
+Diese Funktion ist eine niedrigere Ebene, standardisierte Art des Zugriffs auf ein LLM, die PowershAI bereitstellt.  
+Sie verwaltet keinen Verlauf oder Kontext. Sie ist nützlich, um einfache Prompts zu invokieren, die keine mehreren Interaktionen wie in einem Chat erfordern. 
+Obwohl sie das Functon Calling unterstützt, führt sie keinen Code aus und gibt lediglich die Antwort des Modells zurück.
 
 
 
 ** INFORMATIONEN FÜR ANBIETER
-	Der Anbieter muss die Chat-Funktion implementieren, damit diese Funktionalität verfügbar ist. 
-	Die Chat-Funktion muss ein Objekt mit der Antwort mit derselben Spezifikation wie die OpenAI-Funktion Chat Completion zurückgeben.
+	Der Anbieter muss die Funktion Chat implementieren, damit diese Funktionalität verfügbar ist. 
+	Die Funktion Chat muss ein Objekt mit der Antwort zurückgeben, das die gleiche Spezifikation wie OpenAI, Funktion Chat Completion, hat.
 	Die folgenden Links dienen als Grundlage:
 		https://platform.openai.com/docs/guides/chat-completions
 		https://platform.openai.com/docs/api-reference/chat/object (Rückgabe ohne Streaming)
 	Der Anbieter muss die Parameter dieser Funktion implementieren. 
-	Informationen zu Details und zur Zuordnung zu einem Anbieter finden Sie in der Dokumentation zu jedem Parameter;
+	Bitte beachten Sie die Dokumentation zu jedem Parameter für Details und wie sie auf einen Anbieter abgebildet werden;
 	
-	Wenn das Modell einen der angegebenen Parameter nicht unterstützt (d. h. keine entsprechende Funktionalität vorhanden ist oder auf äquivalente Weise implementiert werden kann), muss ein Fehler zurückgegeben werden.
+	Wenn das Modell einen der angegebenen Parameter nicht unterstützt (d.h. keine gleichwertige Funktionalität vorhanden ist oder gleichwertig implementiert werden kann), muss ein Fehler zurückgegeben werden.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
-<Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
+[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -prompt
-Die zu sendende Eingabeaufforderung. Muss im Format sein, das von der Funktion ConvertTo-OpenaiMessage beschrieben wird.
+Der Prompt, der gesendet werden soll. Muss im Format beschrieben werden, das von der Funktion ConvertTo-OpenaiMessage erwartet wird.
 
 ```yml
 Parameter Set: (All)
@@ -70,7 +70,7 @@ Accept wildcard characters: false
 ```
 
 ### -model
-Name des Modells. Wenn nicht angegeben, wird der Standard des Providers verwendet.
+Name des Modells. Wenn nicht angegeben, wird das Standardmodell des Anbieters verwendet.
 
 ```yml
 Parameter Set: (All)
@@ -85,7 +85,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-Maximale Anzahl der zurückzugebenden Token
+Maximale Anzahl von Tokens, die zurückgegeben werden sollen
 
 ```yml
 Parameter Set: (All)
@@ -101,9 +101,10 @@ Accept wildcard characters: false
 
 ### -ResponseFormat
 Format der Antwort 
-Die akzeptablen Formate und das Verhalten müssen mit denen von OpenAI übereinstimmen: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
+Die akzeptablen Formate und das Verhalten müssen dem von OpenAI folgen: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
 Abkürzungen:
-	"json" entspricht {"type": "json_object"}
+	"json"|"json_object", entspricht {"type": "json_object"}
+	Das Objekt muss ein Schema angeben, als wäre es direkt an die OpenAI-API im Feld response_format.json_schema übergeben worden.
 
 ```yml
 Parameter Set: (All)
@@ -119,9 +120,9 @@ Accept wildcard characters: false
 
 ### -Functions
 Liste der Tools, die aufgerufen werden sollen!
-Sie können Befehle wie Get-OpenaiTool* verwenden, um Powershell-Funktionen einfach in das gewünschte Format zu transformieren!
-Wenn das Modell die Funktion aufruft, muss die Antwort, sowohl im Stream als auch normal, auch dem Modell für das Funktionsaufrufen von OpenAI entsprechen.
-Dieser Parameter muss dem gleichen Schema wie das Funktionsaufrufen von OpenAI entsprechen: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+Sie können Befehle wie Get-OpenaiTool* verwenden, um PowerShell-Funktionen leicht in das erwartete Format zu transformieren!
+Wenn das Modell die Funktion aufruft, muss die Antwort, sowohl im Stream als auch normal, ebenfalls dem Tool Calling-Modell von OpenAI folgen.
+Dieser Parameter muss dem gleichen Schema des Function Calling von OpenAI folgen: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
 
 ```yml
 Parameter Set: (All)
@@ -136,8 +137,8 @@ Accept wildcard characters: false
 ```
 
 ### -RawParams
-Geben Sie direkte Parameter der API des Providers an.
-Dadurch werden die Werte überschrieben, die auf der Grundlage anderer Parameter berechnet und generiert wurden.
+Geben Sie direkte Parameter der API des Anbieters an.
+Dies überschreibt die Werte, die basierend auf den anderen Parametern berechnet und generiert wurden.
 
 ```yml
 Parameter Set: (All)
@@ -153,9 +154,9 @@ Accept wildcard characters: false
 
 ### -StreamCallback
 Aktiviert das Modell Stream 
-Sie müssen ein ScriptBlock angeben, das für jeden vom LLM generierten Text aufgerufen wird.
-Das Skript muss einen Parameter empfangen, der jeden Abschnitt im selben Streaming-Format darstellt, das zurückgegeben wird
-	Dieser Parameter ist ein Objekt, das die Eigenschaft choices enthält, die dem Schema entspricht, das vom Streaming von OpenAI zurückgegeben wird:
+Sie müssen einen ScriptBlock angeben, der für jeden vom LLM generierten Text aufgerufen wird.
+Das Skript muss einen Parameter empfangen, der jeden Abschnitt im gleichen Format darstellt, das zurückgegeben wird
+	Dieser Parameter ist ein Objekt, das die Eigenschaft choices enthält, die dem gleichen Schema entspricht, das von OpenAI im Streaming zurückgegeben wird:
 		https://platform.openai.com/docs/api-reference/chat/streaming
 
 ```yml
@@ -171,7 +172,7 @@ Accept wildcard characters: false
 ```
 
 ### -IncludeRawResp
-Die Antwort der API in einem Feld namens IncludeRawResp einschließen
+Die Antwort der API in einem Feld namens IncludeRawResp einfügen
 
 ```yml
 Parameter Set: (All)
@@ -186,9 +187,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI 
-_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->

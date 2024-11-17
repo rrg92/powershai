@@ -3,10 +3,15 @@
 #
 param()
 
-if(-not(Get-Module -ListAvailable platyPS)){
-	write-host "Instaling PLatyPs module";
-	$m = Install-Module platyPS -force -PassThru
-	write-host "	Installed: $($m.name) $($m.Version)"
+"platyPS","pester" | %{
+	$ModName = $_
+	
+	if(-not(Get-Module -ListAvailable $ModName)){
+		write-host "Instaling $ModName module";
+		$m = Install-Module $ModName -force -PassThru
+		write-host "	Installed: $($m.name) $($m.Version)"
+	}	
+	
 }
 
 & ./util/publish.ps1 @Args

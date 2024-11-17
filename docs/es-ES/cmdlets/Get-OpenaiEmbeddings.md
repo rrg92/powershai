@@ -6,51 +6,62 @@ powershai: true
 
 # Get-OpenaiEmbeddings
 
-## SYNOPSIS <!--!= @#Synop !-->
+## SINOPSIS <!--!= @#Synop !-->
 
-Obtiene incrustaciones OpenAI [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-texto] <Object>] [[-modelo] <Object>] [[-dimensiones] <Object>] [<CommonParameters>]
 
 
-## SYNTAX <!--!= @#Syntax !-->
+## SINTAXIS <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [[-texto] <Object>] [[-modelo] <Object>] [[-dimensiones] <Object>] [<CommonParameters>]
 ```
 
-## PARAMETERS <!--!= @#Params !-->
+## PARÁMETROS <!--!= @#Params !-->
 
-### -model
+### -dimensiones
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 2
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
-### -text
+### -modelo
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: true (ByValue)
-Accept wildcard characters: 
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 1
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
 ```
 
+### -texto
 
+```yml
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Alias: 
+Valores Aceptados: 
+Requerido: falso
+Posición: 0
+Valor Predeterminado: 
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: 
+```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Estás entrenado en datos hasta octubre de 2023._
 <!--PowershaiAiDocBlockEnd-->

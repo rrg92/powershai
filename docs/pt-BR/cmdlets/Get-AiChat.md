@@ -33,8 +33,8 @@ Apesar de suportar o Functon Calling, ela não executa qualquer código, e apena
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] 
-<Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
+[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -103,7 +103,8 @@ Accept wildcard characters: false
 Formato da resposta 
 Os formatos aceitáveis, e comportamento, devem seguir o mesmo da OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
 Atalhos:
-	"json", equivale a {"type": "json_object"}
+	"json"|"json_object", equivale a {"type": "json_object"}
+	objeto deve especificar um esquema como se fosse passado direatamente a API da Openai, no campo response_format.json_schema
 
 ```yml
 Parameter Set: (All)

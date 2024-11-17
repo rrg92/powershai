@@ -7,36 +7,37 @@ powershai: true
 # Invoke-PowerhsaiConsoleDraw
 
 ## SYNOPSIS <!--!= @#Synop !-->
-仮想テキストフレームを作成し、そのフレームの境界内に文字を書きます
+テキストの仮想フレームを作成し、そのフレームの境界内に文字を書き込みます。
 
 ## DESCRIPTION <!--!= @#Desc !-->
 コンソールに描画フレームを作成し、特定の領域のみが更新されます！
-複数行のテキストを送信でき、関数は描画を同じフレームに保持し、特定の領域のみが更新されているように見えます。
-必要な効果を得るには、この関数は他の書き込みを伴わずに繰り返し呼び出す必要があります！
+複数行のテキストを送信でき、関数は描画を同じフレーム内に保持し、まるで特定の領域のみが更新されているかのような印象を与えます。
+望ましい効果を得るために、この関数は他の書き込みなしで繰り返し呼び出す必要があります！
 
-この関数は、powershellの対話モードでのみ、コンソールウィンドウで実行している場合にのみ使用してください。
-これは、文字列の結果の進捗状況を正確に同じ領域に表示する場合に便利です。
-これは補助関数に過ぎません。
+この関数は、インタラクティブなPowerShellモードで、コンソールウィンドウで実行される場合にのみ使用する必要があります。
+文字列の結果の進行状況を同じエリアで正確に見る必要がある状況で役立ち、変動をよりよく比較できます。
+これは補助関数にすぎません。
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] [-PassThru] [<CommonParameters>]
+Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] 
+[-PassThru] [<CommonParameters>]
 ```
 
 ## EXAMPLES <!--!= @#Ex !-->
 
 ### EXAMPLE 1
 ```powershell
-次の例は、3秒ごとに3つのテキスト文字列を書き込みます。
+次の例では、2秒ごとに3つの文字列を書き込みます。
 ```
 
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Text
-書き込むテキスト。配列にすることもできます。WとHの制限を超えると、切り捨てられます
-スクリプトブロックの場合、パイプラインオブジェクトを渡してコードを呼び出します！
+書き込むテキスト。配列にすることもできます。WおよびHの制限を超えると切り捨てられます。
+スクリプトブロックの場合は、パイプラインオブジェクトを渡してコードを呼び出します！
 
 ```yml
 Parameter Set: (All)
@@ -111,7 +112,7 @@ Accept wildcard characters: false
 ```
 
 ### -PassThru
-オブジェクトを渡す
+オブジェクトを再渡します
 
 ```yml
 Parameter Set: (All)
@@ -126,8 +127,6 @@ Accept wildcard characters: false
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_PowershAIとAIを使用して自動翻訳された。_
+_あなたは2023年10月までのデータでトレーニングされています。_
 <!--PowershaiAiDocBlockEnd-->

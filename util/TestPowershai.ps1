@@ -85,6 +85,17 @@ try {
 		}
 		
 		write-host "	TEMPORARY TEST PASSED";
+		
+		
+		# Json test!
+		$ExpectedA = Get-Random -Min 1 -Max 100;
+		$ExpectedB = [Guid]::NewGuid().Guid;
+		$prompt = @(
+			"Return an array with 5 objects"
+			"Each object must contains two props: a and b. a must contain value $ExpectedA, b must contains value $ExpectedB"
+		)
+		$JsonResult = @(iat -Json -Lines $prompt);
+		write-host "JsonOutput:`n$JsonResult";
 	}
 	
 } catch {

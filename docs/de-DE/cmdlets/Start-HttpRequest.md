@@ -14,8 +14,8 @@ Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-c
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] 
-<Object>] [<CommonParameters>]
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] 
+[[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -23,7 +23,7 @@ Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-c
 ### -Encoding
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -37,7 +37,7 @@ Accept wildcard characters:
 ### -MaxConnections
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -51,7 +51,7 @@ Accept wildcard characters:
 ### -contentType
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -65,7 +65,7 @@ Accept wildcard characters:
 ### -data
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -79,7 +79,7 @@ Accept wildcard characters:
 ### -headers
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -93,7 +93,7 @@ Accept wildcard characters:
 ### -method
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -107,7 +107,7 @@ Accept wildcard characters:
 ### -url
 
 ```yml
-Parameter Set: (All)
+Parameter Set: (Alle)
 Type: Object
 Aliases: 
 Accepted Values: 
@@ -119,8 +119,6 @@ Accept wildcard characters:
 ```
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatisch übersetzt mit PowershAI und KI_
+_Sie sind auf Daten bis Oktober 2023 trainiert._
 <!--PowershaiAiDocBlockEnd-->
