@@ -8,6 +8,37 @@ function Script:Get-PowershaiWindowsInfo {
 		Add-Type '
 		using System;
 		using System.Runtime.InteropServices;
+		
+		[Flags]	
+		public enum DwmWindowAttribute : uint
+		{
+			NCRenderingEnabled = 1,
+			NCRenderingPolicy,
+			TransitionsForceDisabled,
+			AllowNCPaint,
+			CaptionButtonBounds,
+			NonClientRtlLayout,
+			ForceIconicRepresentation,
+			Flip3DPolicy,
+			ExtendedFrameBounds,
+			HasIconicBitmap,
+			DisallowPeek,
+			ExcludedFromPeek,
+			Cloak,
+			Cloaked,
+			FreezeRepresentation,
+			PassiveUpdateMode,
+			UseHostBackdropBrush,
+			UseImmersiveDarkMode = 20,
+			WindowCornerPreference = 33,
+			BorderColor,
+			CaptionColor,
+			TextColor,
+			VisibleFrameBorderThickness,
+			SystemBackdropType,
+			Last
+		}
+			
 		public class Window {
 			[DllImport("kernel32.dll")]
 			public static extern IntPtr GetConsoleWindow();
@@ -15,13 +46,26 @@ function Script:Get-PowershaiWindowsInfo {
 			[DllImport("user32.dll")]
 			[return: MarshalAs(UnmanagedType.Bool)]
 			public static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+			
 			[DllImport("user32.dll")]
 			[return: MarshalAs(UnmanagedType.Bool)]
 			public static extern bool MoveWindow(IntPtr handle, int x, int y, int width, int height, bool redraw);
+			
 			[DllImport("user32.dll")]
 			[return: MarshalAs(UnmanagedType.Bool)]
 			public static extern bool ShowWindow(IntPtr handle, int state);
+			
+			[DllImport("dwmapi.dll")]
+			public static extern int DwmSetWindowAttribute(IntPtr hwnd, DwmWindowAttribute attr, ref int attrValue, int attrSize);
+
+			public static void DisableTransitions(IntPtr Handle)
+			{
+				int value = 0x01;
+				DwmSetWindowAttribute(Handle, DwmWindowAttribute.TransitionsForceDisabled, ref value, Marshal.SizeOf(typeof(int)));
+			}
+	
 		}
+		
 		public struct RECT {
 			public int Left;   // x position of upper-left corner
 			public int Top;    // y position of upper-left corner
@@ -51,7 +95,7 @@ function Script:Get-PowershaiWindowsInfo {
 	
 	
 	$R   = New-Object RECT                                          # Define A Rectangle Object
-	[void][Window]::GetWindowRect($WinHandle,[ref]$R)                      # Get the Rectangle Object in $R (and Result flag)
+	[void][Window]::GetWindowRect($WinHandle,[ref]$R)               # Get the Rectangle Object in $R (and Result flag)
 	
 	
 	[PsCustomObject]@{
@@ -60,7 +104,10 @@ function Script:Get-PowershaiWindowsInfo {
 		height 	= $r.bottom - $r.top
 		left 	= $r.left 
 		top		= $r.top
-		hide 	= { [Window]::ShowWindow($WinHandle,0) }.GetNewClosure()
+		hide 	= { 
+			[Window]::DisableTransitions($WinHandle);
+			[Window]::ShowWindow($WinHandle,0) 
+		}.GetNewClosure()
 		show 	= { [Window]::ShowWindow($WinHandle,5) }.GetNewClosure()
 	}
 }
