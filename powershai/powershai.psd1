@@ -11,6 +11,9 @@
 	CmdletsToExport  	= "*"
 	AliasesToExport   	= "*"
 	HelpInfoURI 		= "https://github.com/rrg92/powershai"
+	FormatsToProcess 	= @(
+							"Powershai.format.ps1xml"
+						)
 	PrivateData 		= @{
 							PSData = @{
 								Tags = 'ai','openai','google','gemini','ollama','ia'

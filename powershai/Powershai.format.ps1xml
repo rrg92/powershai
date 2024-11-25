@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<!--
+https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/update-formatdata?view=powershell-7.4
+https://learn.microsoft.com/en-us/powershell/scripting/developer/format/defaultsettings-element-format?view=powershell-7.4
+-->
+<Configuration>
+	<ViewDefinitions>
+		
+		
+		<!-- Formato to AiModel -->
+		<View>
+			<Name>PowershaiAiCredential</Name>
+			<ViewSelectedBy>
+				<TypeName>PowershaiType:AiModel</TypeName>
+			</ViewSelectedBy>
+			
+			<TableControl>
+				<AutoSize />
+				<TableRowEntries>
+					<TableRowEntry>
+						<TableColumnItems>
+							<TableColumnItem>
+								<PropertyName>name</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>tools</PropertyName>
+							</TableColumnItem>
+						</TableColumnItems>
+					</TableRowEntry>
+				</TableRowEntries>
+				 
+			</TableControl>
+			
+		</View>
+		
+		<!-- Formato to AiCredentials -->
+		<View>
+			<Name>PowershaiAiCredential</Name>
+			<ViewSelectedBy>
+				<TypeName>PowershaiType:AiCredential</TypeName>
+			</ViewSelectedBy>
+			
+			<TableControl>
+				<AutoSize />
+				<TableRowEntries>
+					<TableRowEntry>
+						<TableColumnItems>
+							<TableColumnItem>
+								<PropertyName>name</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>description</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>default</PropertyName>
+							</TableColumnItem>
+						</TableColumnItems>
+					</TableRowEntry>
+				</TableRowEntries>
+				 
+			</TableControl>
+			
+		</View>
+
+	
+	
+	
+	</ViewDefinitions>
+</Configuration>
