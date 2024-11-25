@@ -597,11 +597,35 @@ function Get-GradioInfo {
 	if(IsType $AppUrl "GradioSession"){
 		$AppUrl = $AppUrl.AppUrl
 	}
+	
+	$LeftTries = 2;
+	
+	while($LeftTries){	
+		$InvokeParams = @{
+			url 	= "$AppUrl/info"
+		}
+	
+		try {
+			verbose "Trying: $AppUrl (left: $LeftTries)";
+			$result = InvokeGradioApi @InvokeParams
+			$result | Add-Member Noteproperty RealAppUrl $AppUrl
+			return $result;
+			break;
+		} catch [Net.WebException] {
+			$LeftTries--;
+			$e = $_.Exception;
 			
-	$InvokeParams = @{
-		url 	= "$AppUrl/info"
+			verbose "Error: $e";
+			
+			if($LeftTries -gt 0 -and $e.Response.StatusCode -eq 404){
+				$AppUrl += "/gradio_api";
+				continue;
+			}
+			
+			$Global:err = $e;
+			throw;
+		}
 	}
-	InvokeGradioApi @InvokeParams
 }
 
 <#
@@ -661,7 +685,7 @@ function New-GradioSession {
 		SessionId 		= [Guid]::NewGuid().Guid
 		
 		#Url da App Gradio
-		AppUrl 			= $AppUrl
+		AppUrl 			= $null
 		
 		#Lista de uploads feitos nesta sessão
 		uploads 		= @{}
@@ -698,6 +722,9 @@ function New-GradioSession {
 
 	verbose "Check app info...";
 	$Session.info = Get-GradioInfo $AppUrl;
+	
+	$AppUrl = $session.info.RealAppUrl
+	$Session.AppUrl = $AppUrl
 	
 	#Add to session list!
 	$GradioSessions = GetCurrentProviderData -Context GradioSessions ;
