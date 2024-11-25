@@ -1759,6 +1759,9 @@ function New-GradioSessionApiProxyFunction {
 			
 
 				
+			$Istype = Get-Command IsType;
+			$verbose = Get-Command verbose;
+				
 			$FuncScript = {
 				[CmdletBinding()]
 				param($FuncData)
@@ -1767,6 +1770,15 @@ function New-GradioSessionApiProxyFunction {
 				
 				if($FuncData.BoundParams.DebugData){
 					return $FuncData;
+				}
+				
+				
+				function IsType {
+					& $IsType @Args;
+				}
+				
+				function verbose {
+					& $verbose @Args;
 				}
 				
 				#objeto passado no pipeline!
