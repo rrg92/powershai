@@ -102,12 +102,19 @@ Set-Alias Show-OllamaModel Get-OllamaModel
 function ollama_GetEmbeddings {
 	param(
 		$text 
+		,$model
 		,[switch]$IncludeText
+		,$dimensions
 	)
 	
 	$text = @($text);
 	
-	$resp = Get-OllamaEmbeddings $text
+	if($dimensions){
+		throw "POWERSHAI_OLLAMA_DIMENSIONS_NOTSUPPORTED: Ollama dont support specify dimensions."
+	}
+	
+	verbose "Invoking native get embeddings..."
+	$resp = Get-OllamaEmbeddings $text -model $model
 	
 	$i = -1;
 	$resp.embeddings | %{
@@ -122,8 +129,6 @@ function ollama_GetEmbeddings {
 		
 		return [PsCustomObject]$emb
 	}
-	
-	
 }
 
 
@@ -147,11 +152,15 @@ return @{
 	
 	DefaultEmbeddingsModel = "nomic-embed-text:latest"
 	
-	EmbeddingsModels = "nomic-embed-.+"
+	EmbeddingsModels = @(
+		"nomic-embed-.+"
+	)
 	
 	info = @{
 		desc	= "Permite acesso aos modelos disponibilizados pelo Ollama"
 		url 	= "https://github.com/ollama/ollama"
 	}
+	
+	IsOpenaiCompatible = $true
 	
 }

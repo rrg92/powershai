@@ -2717,5 +2717,7 @@ return @{
 		url 	= "https://huggingface.co/"
 		
 	}
+	
+	IsOpenaiCompatible = $true
 }
 

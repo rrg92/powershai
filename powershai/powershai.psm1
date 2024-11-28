@@ -354,6 +354,9 @@ function Get-AiNearProvider {
 		#Usar um call stack específica.
 		#Este parâmetro é útil quando uma funcao que invocou quer que se considere a olhar a partir de um ponto específico!
 		$callstack
+		
+		,#ScriptBlock com o filtro. $_ aponta para o provider encontrado!
+		$filter = $null
 	)
 	
 	if(!$callstack){
@@ -364,18 +367,38 @@ function Get-AiNearProvider {
 		return $PROVIDER_CONTEXT.Peek();
 	}
 	
-	$NearProvider = $CallStack | ? { $_.ScriptName -like (JoinPath $POWERSHAI_PROVIDERS_DIR '*.ps1') } | select -first 1;
-	
-	if(!$NearProvider){
-		return;
+	verbose "Getting next provider..."
+	foreach($Frame in $CallStack){ 
+		
+		verbose "Frame: $($Frame.ScriptName)"
+		$IsProvider = $Frame.ScriptName -like (JoinPath $POWERSHAI_PROVIDERS_DIR '*.ps1') 
+		
+		verbose "IsProvider: $IsProvider";
+		if(!$IsProvider){
+			continue;
+		}
+		
+		$RelPath 		= $Frame.ScriptName.replace((JoinPath $POWERSHAI_PROVIDERS_DIR ''),'');
+		$Parts 			= $RelPath -split '[\\/]',2
+		$ProviderName 	= $Parts[0].replace(".ps1","");
+		$Provider 		= $PROVIDERS[$ProviderName]
+		
+		verbose "ProviderName: $ProviderName";
+		
+		
+		if($filter -is [scriptblock]){
+			$Provider = $PROVIDERS[$ProviderName]
+			
+			verbose "RunningFilter"
+			[bool]$Result = $Provider | ? $filter | %{} {} {$true}
+			verbose "	Result: $Result";
+			if(!$Result){
+				continue;
+			}
+		}
+		
+		return $Provider
 	}
-	
-
-	$RelPath 	= $NearProvider.ScriptName.replace((JoinPath $POWERSHAI_PROVIDERS_DIR ''),'');
-	$Parts 		= $RelPath -split '[\\/]',2
-	$ProviderName = $Parts[0].replace(".ps1","");
-	
-	return $PROVIDERS[$ProviderName];
 }
 
 <#
@@ -401,10 +424,14 @@ function Get-AiCurrentProvider {
 		
 		,#Stack alternativa a considerar! Veja mais em Get-AiNearProvider
 			$CallStack = $null
+			
+		,#Permite escolher  o provider com base em filtros
+			$FilterContext = $null
 	)
 	
 	if($ContextProvider){
-		$Provider = Get-AiNearProvider -CallStack $CallStack
+		verbose "Getting context provider";
+		$Provider = Get-AiNearProvider -CallStack $CallStack -filter $FilterContext
 		
 		if($Provider){
 			return $Provider;
@@ -412,6 +439,7 @@ function Get-AiCurrentProvider {
 	}
 	
 	if($PROVIDER_CONTEXT.count){
+		verbose "Getting locked provider";
 		return $PROVIDER_CONTEXT.Peek();
 	}
 	
@@ -718,11 +746,17 @@ function Get-AiModels {
 	$ProviderName = $Provider.name;
 	
 	$POWERSHAI_MODEL_CACHE.ModelList = $ModelList | %{  
+									
 									$POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$($_.name)"] = $_;
 									
-									if($_.tools -eq $null){
-										$ModelInfo = Get-AiModel -ProviderOnly -CheckTools $_.name
-										$_ | Add-member -Force noteproperty tools $ModelInfo.tools;
+									if(!$_.cached){
+										
+
+										$ModelMeta = Get-AiModel -MetaDataOnly $_.name
+										
+										$_ | Add-member -Force noteproperty tools $ModelMeta.tools;
+										$_ | Add-member -Force noteproperty embeddings $ModelMeta.embeddings;
+										$_ | Add-member -Force noteproperty cached $true
 									}
 
 									$_.name;
@@ -750,54 +784,52 @@ function Get-AiModel {
 		#Nome do model 
 			$ModelName
 			
-		,#Se informado, verifica se o modelo está na lista de supported tools do provider!
-		#Se sim, evita ir ao cache ou enviar requisição!
-			[switch]$CheckTools
-			
 		,#Checa somente no provider!
-			[switch]$ProviderOnly
+			[switch]$MetaDataOnly
 	)
 	
 	$provider = Get-AiCurrentProvider
 	$ProviderName = $provider.name;
 	
-	$SupportedTools = GetCurrentProviderData ToolsModels
+	$ToolsExpresion 	= GetCurrentProviderData ToolsModels
+	$EmbedExpression 	= GetCurrentProviderData EmbeddingsModels
 	
-	$FakeModel = @{tools = $true}
-	if($SupportedTools){
-		if($SupportedTools -eq "*"){
-			return $FakeModel;
+	function IsModelInExpression {
+		param($model, $expressions)
+		
+		if($expressions -eq "*"){
+			return $true;
 		}
 		
-		if($SupportedTools -eq "*none*"){
-			$FakeModel.tools = $false;
-			return $FakeModel;
+		if($expressions -eq "*none*"){
+			return $false;
 		}
 		
-		foreach($ToolReg in @($SupportedTools)){
-			
-			if($ToolReg -like 'reg:*'){
-				$RegExpr = $ToolReg -replace '^reg:','';
+		foreach($expression in @($expressions)){
+			if($expression -like "reg:*"){
+				$RegExpr = $expression -replace '^reg:','';
 				
-				if($ModelName -match $RegExpr){
-					return $FakeModel;
+				if($model -match $RegExpr){
+					return $true;
 				}
+				
 			}
-			elseif($ModelName -like $ToolReg){
-				return $FakeModel;
+			elseif($model -like $expression){
+				return $true;
 			}
 		}
 		
-		$FakeModel.tools = $False;
-		return $FakeModel;		
-	}
-	elseif($ProviderOnly){
-		$FakeModel.tools = $false;
-		return $FakeModel;
+		return $false;
 	}
 	
 	
-	$i = 2;
+	if($MetaDataOnly){
+		return @{
+			tools 		= (IsModelInExpression $ModelName $ToolsExpresion)
+			embeddings 	= (IsModelInExpression $ModelName $EmbedExpression)
+		}
+	}
+	
 	$CachedModel = $POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$ModelName"]
 	
 	if($CachedModel){
@@ -839,6 +871,9 @@ function Set-AiDefaultModel {
 			
 		,#Força definir o modelo, mesmo que não seja retornaod por Get-AiModels 
 			[switch]$Force
+			
+		,#Define embedding model!
+			[switch]$Embeddings
 	)
 	
 	$ElegibleModels = @(Get-AiModels | ? { $_.name -like $model+"*" })
@@ -872,7 +907,13 @@ function Set-AiDefaultModel {
 		write-warning "Modelo exato $model nao encontrado. Usando o único mais próximo: $model"
 	}
 	
-	SetCurrentProviderData DefaultModel $model;
+	$SetSlot = "DefaultModel"
+	
+	if($Embeddings){
+		$SetSlot = "DefaultEmbeddingsModel"
+	}
+	
+	SetCurrentProviderData $SetSlot $model;
 }
 
 
@@ -988,7 +1029,7 @@ function Get-AiChat {
 	}
 	
 	
-	$model = Get-AiModel $ModelName -CheckTools;
+	$model = Get-AiModel $ModelName
 	
 	if(!$model.tools){
 		verbose "Turning off functions due to unsuportted tool calling in model $ModelName";
@@ -1040,28 +1081,59 @@ function Get-AiEmbeddings {
 		,#Incluir o texto na resposta!
 		 [switch]$IncludeText
 		 
+		 
+		,#model 
+			$model = $null
+			
 		,#Max embeddings para processar de uma só veZ!
 			$BatchSize = 10
+			
+		,#Número de dimensoes 
+		 #Se null usará o default de cada provider!
+		 #Nem todo provider suporta definir. Se não suportado, um erro é disparado!
+			$dimensions = $null
 	)
 	
 	begin {
 		$AllText = @()
+		
+		if(!$model){
+			$DefaultModel = GetCurrentProviderData DefaultEmbeddingsModel
+			$model = $DefaultModel
+		}
+		
+		if(!$model){
+			throw "POWERSHAI_EMBEDDINGS_NOMODEL: Could not determine embedding model!";
+		}
+		
+		function ProcessEmbeddings {
+			param([switch]$All)
+			
+			if($AllText.count -gt $BatchSize -or $All){
+				$FuncParams = @{
+					text 		= $AllText
+					IncludeText = $IncludeText
+					model 		= $model
+					dimensions 	= $dimensions
+				}
+				
+				
+				Invoke-PowershaiProviderInterface "GetEmbeddings" -FuncParams $FuncParams;
+				
+				$Script:AllText = @()
+			}
+		}
+		
 	}
 	
 	process {
 		
 		$AllText += $text;
-		
-		if($AllText.count -gt $BatchSize){
-			$FuncParams = @{
-				text = $AllText
-				IncludeText = $IncludeText
-			}
-		
-			Invoke-PowershaiProviderInterface "GetEmbeddings" -FuncParams $FuncParams;
-			
-			$AllText = @()
-		}
+		ProcessEmbeddings
+	}
+	
+	end {
+		ProcessEmbeddings -All
 	}
 	
 	

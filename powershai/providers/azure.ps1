@@ -278,6 +278,8 @@ return @{
 	
 	#Assume every openai model support tools.
 	ToolsModels = "gpt-4*","o1-*"
+	
+	IsOpenaiCompatible = $true
 }
 
 

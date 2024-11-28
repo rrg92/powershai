@@ -27,6 +27,10 @@ https://learn.microsoft.com/en-us/powershell/scripting/developer/format/defaults
 							<TableColumnItem>
 								<PropertyName>tools</PropertyName>
 							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>embeddings</PropertyName>
+							</TableColumnItem>
 						</TableColumnItems>
 					</TableRowEntry>
 				</TableRowEntries>

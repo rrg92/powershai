@@ -88,6 +88,9 @@ Modelo default usado para obter embeddings
 * EmbeddingsModels  
 Nome de modelos (aceita regex), que suportam gerar embeddings.
 
+* IsOpenaiCompatible  
+Indica que o modelo é compatível coma OpenAI. Isso fará com que o provider openai possa determinar corretamente o provider ativo atual quando as funcoes que dependem do provider atual forem invocadas. Todo provider que reusa as funcoes da OpenAI deve definir essa key como true.
+
 
 # Interfaces
 

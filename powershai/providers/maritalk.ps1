@@ -436,5 +436,5 @@ return @{
 		'sabia-3'
 	)
 
-	
+	IsOpenaiCompatible = $true
 }

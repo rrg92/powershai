@@ -19,7 +19,24 @@
 	
 #>
 
-
+function GetNearestOpenaiProvider {
+	
+	$Provider = Get-AiCurrentProvider
+	
+	if($Provider.IsOpenaiCompatible){
+		return $provider;
+	}
+		
+	$Provider = Get-AiCurrentProvider -ContextProvider -FilterContext {
+		return $_.IsOpenaiCompatible;
+	}
+	
+	if(!$Provider){
+		$Provider = Get-AiProvider openai
+	}
+	
+	return $Provider;
+}
 
 <#
 	Esta função é usada como base para invocar a a API da OpenAI!
@@ -34,61 +51,66 @@ function InvokeOpenai {
 		,$Token 			= $null
 	)
 
-	$Provider = Get-AiCurrentProvider
+	$MaxTries = @(Get-AiProviders).count
+	
+	$Provider = GetNearestOpenaiProvider
+
 
 	verbose "InvokeOpenAI, current provider = $($Provider.name)"
 	$Token = GetCurrentOpenaiToken $Token
 	
-	
-    $headers = @{}
-	
-	if($Token){
-		 $headers["Authorization"] = "Bearer $token"
+	. Enter-AiProvider $Provider.name {
+		$headers = @{}
+		
+		if($Token){
+			 $headers["Authorization"] = "Bearer $token"
+		}
+
+		if($endpoint -match '^https?://'){
+			$url = $endpoint
+		} else {
+			$BaseUrl = GetCurrentProviderData BaseUrl
+			$url = "$BaseUrl/$endpoint"
+		}
+
+		$JsonParams = @{Depth = 10}
+		
+		verbose "InvokeOpenai: Converting body to json (depth: $($JsonParams.Depth))..."
+		$ReqBodyPrint = $body | ConvertTo-Json @JsonParams
+		verbose "ReqBody:`n$($ReqBodyPrint|out-string)"
+		
+		$ReqBody = $body | ConvertTo-Json @JsonParams -Compress
+		
+
+		$ReqParams = @{
+			data            = $ReqBody
+			url             = $url
+			method          = $method
+			Headers         = $headers
+			SseCallback 	= $StreamCallback
+		}
+
+		
+		
+		# Give chance to underline provider change request params if necessary!
+		$ReqChanger = GetCurrentProviderData ReqChanger;
+		
+		# ReqParams is parameters of Invoke-Http function, implement ib lib/http.ps1
+		# Providers developers must know how it works and know how openai provider will habndle that answer!
+		if($ReqChanger){
+			$MyParams 	= GetMyParams
+			$null 		= & $ReqChanger $ReqParams $MyParams
+		}
+
+		verbose "ReqParams:`n$($ReqParams|out-string)"
+		$RawResp 	= InvokeHttp @ReqParams
+		verbose "RawResp: `n$($RawResp|out-string)"
 	}
-
-	if($endpoint -match '^https?://'){
-		$url = $endpoint
-	} else {
-		$BaseUrl = GetCurrentProviderData BaseUrl
-		$url = "$BaseUrl/$endpoint"
-	}
-
-	$JsonParams = @{Depth = 10}
 	
-	verbose "InvokeOpenai: Converting body to json (depth: $($JsonParams.Depth))..."
-    $ReqBodyPrint = $body | ConvertTo-Json @JsonParams
-	verbose "ReqBody:`n$($ReqBodyPrint|out-string)"
-	
-	$ReqBody = $body | ConvertTo-Json @JsonParams -Compress
-	
-
-    $ReqParams = @{
-        data            = $ReqBody
-        url             = $url
-        method          = $method
-        Headers         = $headers
-		SseCallback 	= $StreamCallback
-    }
-
-	
-	
-	# Give chance to underline provider change request params if necessary!
-	$ReqChanger = GetCurrentProviderData ReqChanger;
-	
-	# ReqParams is parameters of Invoke-Http function, implement ib lib/http.ps1
-	# Providers developers must know how it works and know how openai provider will habndle that answer!
-	if($ReqChanger){
-		$MyParams 	= GetMyParams
-		$null 		= & $ReqChanger $ReqParams $MyParams
-	}
-
-	verbose "ReqParams:`n$($ReqParams|out-string)"
-    $RawResp 	= InvokeHttp @ReqParams
-	verbose "RawResp: `n$($RawResp|out-string)"
-
 	if($RawResp.stream){
 		return $RawResp;
 	}
+	
 
     return $RawResp.text | ConvertFrom-Json
 }
@@ -316,6 +338,7 @@ function Get-OpenAiTextCompletion {
 
 
 
+
 <#
 	Esta função chama o endpoint /chat/completions (https://platform.openai.com/docs/api-reference/chat/create)
 	Este endpoint permite você conversar com modelos mais avançados como o GPT-3 e o GPT-4 (veja a disponiblidadena doc)
@@ -395,7 +418,7 @@ function Get-OpenaiChat {
     )
 	
    
-	$Provider = Get-AiCurrentProvider;
+	$Provider = GetNearestOpenaiProvider
 	
 	# Lock current provider!
 	. WithAiProvider $Provider {
@@ -1200,6 +1223,41 @@ function Get-OpenaiEmbeddings {
 	InvokeOpenai -endpoint 'embeddings' -body $Body
 }
 
+function openai_GetEmbeddings {
+	param(
+		$text 
+		,[switch]$IncludeText
+		,$model
+		,$dimensions = $null
+	)
+	
+	$text = @($text);
+	
+	if(!$dimensions){
+		$dimensions  = 768
+	}
+	
+	$resp = Get-OpenaiEmbeddings $text -dimensions $dimensions
+	
+
+	
+	$i = -1;
+	$resp.embeddings | %{
+		$i++;
+		$emb = @{
+			embeddings = $_
+		}
+		
+		if($IncludeText){
+			$emb.text = $text[$i];
+		}
+		
+		return [PsCustomObject]$emb
+	}
+	
+	
+}
+
 
 #quebra o texto em tokens...
 function SplitOpenAiString {
@@ -1229,12 +1287,21 @@ return @{
 	
 	# defaults
 	DefaultModel 	= "gpt-4o-mini"
+	DefultEmbeddingsModel = "text-embedding-3-small"
 	info = @{
 		desc	= "OpenAI"
 		url 	= "https://openai.com/"
 	}
 
-	ToolsModels = "*"
+	ToolsModels = @(
+		"gpt-*"
+		"o1-*"
+	)
+	
+	EmbeddingsModels = @(
+		"text-embedding-*"
+	)
+	
 	CredentialEnvName = "OPENAI_API_KEY"
 	
 	
