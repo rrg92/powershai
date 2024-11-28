@@ -454,7 +454,7 @@ function Get-AiDefaultCredential {
 			if($EnvValue){
 				verbose "Found credential in environment variable $VarName";
 				$Sources += @{ 
-						credential 	= $EnvValue
+						credential 	= @{ credential = $EnvValue }
 						source 		= "environment" 
 						desc 		= "environment $VarName"
 					};

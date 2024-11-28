@@ -137,11 +137,7 @@ function GetCurrentOpenaiToken {
 	}
 	
 	if($Credential){
-		if($Credential.source -eq "environment"){
-			return $Credential.credential;
-		} else {
-			return $Credential.credential.GetCredential()
-		}
+		return $Credential.credential.credential;
 	} else {
 		write-warning "No default credential was found. Failback to deprecated method. Check if you have multiple creds and set a default credentials!"
 	}
