@@ -82,6 +82,12 @@ Nomes das variáveis de ambiente que podem conter credentials default!
 Array ou string.
 O formato do valor da credential é exclusivo de cada provider. A documentação deve deixar claro como definir.
 
+* DefaultEmbeddingsModel  
+Modelo default usado para obter embeddings
+
+* EmbeddingsModels  
+Nome de modelos (aceita regex), que suportam gerar embeddings.
+
 
 # Interfaces
 
@@ -123,3 +129,8 @@ Invocada quando o usuário está solicitando definir uma nova credencial (token,
 As credenciais são o mecanismo padrão do powershai para armazenar as informações sensíveis que o provider pode precisar para autenticação.  
 Todos os parâmetros definidos além do primeiro, que é AiCredential, serão incluídos na função AiCredential.  
 Sempre que o provider for trocado, a função será atualizada com os parâmetros!
+
+
+### GetEmbeddings  
+Invocada quando o usuário executa Get-AiEmbeddings, para obter os embeddings de um ou mais trechos de texto.  
+Consulte Get-AiEmbeddings para detalhes dos parâmetros que deve processar e resultado.

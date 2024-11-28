@@ -1015,7 +1015,57 @@ function NewAiInteraction {
 		}
 }
 
-
+function Get-AiEmbeddings {
+	<#
+		.SYNOPSIS
+			Obtém embeddings de um ou mais inputs de texto!
+			
+		.DESCRIPTION 
+			Este função obtém embeddings usando um modelo com suporte a embeddings!
+			
+			## PARA PROVIDERS
+				Providers que desejam export essa funcionalidade devem implementar a interface GetEmbeddings
+				Resultado esperado:
+					um array onde cada iem é um objeto contendo:
+						- embeddings: o embedding gerado.
+						- texto: o texto de origgem, se o parâmetro include text foi informado.
+						
+					deve ser gerado o embedding na mesma ordem do texto em que foi informado!
+	#>
+	param(
+		#Array de textos a serem gerados!
+		[Parameter(ValueFromPipeline)]
+		[string[]]$text
+		
+		,#Incluir o texto na resposta!
+		 [switch]$IncludeText
+		 
+		,#Max embeddings para processar de uma só veZ!
+			$BatchSize = 10
+	)
+	
+	begin {
+		$AllText = @()
+	}
+	
+	process {
+		
+		$AllText += $text;
+		
+		if($AllText.count -gt $BatchSize){
+			$FuncParams = @{
+				text = $AllText
+				IncludeText = $IncludeText
+			}
+		
+			Invoke-PowershaiProviderInterface "GetEmbeddings" -FuncParams $FuncParams;
+			
+			$AllText = @()
+		}
+	}
+	
+	
+}
 
 <#
 	.SYNOPSIS
