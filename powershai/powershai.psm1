@@ -208,6 +208,8 @@ function UpgradePowershaiSettingsStore {
 		$DefaultSettings.user = HashTableMerge $DefaultSettings.user $OldSettings
 		$OldSettings = @{};
 		$NewSettingsStore.settings.default = HashTableMerge $DefaultSettings $OldSettings
+	} else {
+		$NewSettingsStore = HashTableMerge $NewSettingsStore $OldSettings;
 	}
 	
 	if(!$IgnoreCurrent){
@@ -1443,21 +1445,21 @@ function Export-PowershaiSettings {
 	}
 	
 	write-verbose "ExportDir: $ExportDir";
-	$ExportFile = JoinPath $ExportDir "exportedsession.xml"
+	$ExportFile = JoinPath $ExportDir "exportedsession-v2.xml"
 	
 	$Check 		= [Guid]::NewGuid().Guid
 	
 	write-verbose "Hashing check: $Check";
 	$CheckHash 	= PowershaiHash $Check
 	
-	$ExportData = @{};
-	
-	foreach($KeyName in @($POWERSHAI_SETTINGS.keys) ){
-		$ExportData[$KeyName] = $POWERSHAI_SETTINGS[$KeyName];
-	}
+	$ExportData = HashTableMerge @{} (Get-PowershaiSettingsStore)
 	
 	if(!$Chats){
-		$ExportData.Remove("chats");
+		@($ExportData.settings.values) | %{
+			if($_.user -is [hashtable]){
+				$_.user.remove("chats");
+			}
+		}
 	}
 	
 	write-verbose "Serializaing..."
@@ -1474,7 +1476,6 @@ function Export-PowershaiSettings {
 	Set-Content -Path $ExportFile  -Value $Encrypted;
 	
 	write-host "Exported to: $ExportFile";
-	#$POWERSHAI_SETTINGS | Export-CliXml $ExportFile
 }
 
 <#
@@ -1496,7 +1497,8 @@ function Export-PowershaiSettings {
 		Se, por outro lado, um erro de formado invalido de arquivo for exibido, significa que houve alguma corrupção no proesso de import ou é um bug deste comando.  
 		Neste caso, você pode abrir uma issue no github relatando o problema.
 		
-		
+		A partir da versão 0.7.0, um novo arquivo será gerado, chamado exportsession-v2.xml.  
+		O arquivo antigo será mantido para que o usuário pode recuperar eventuais credenciais, se necessário.
 		
 	.EXAMPLE 
 		# Import padrão
@@ -1513,17 +1515,32 @@ function Export-PowershaiSettings {
 #>
 function Import-PowershaiSettings {
 	[CmdletBinding()]
-	param($ExportDir = $Env:POWERSHAI_EXPORT_DIR)
-	
+	param(
+		$ExportDir = $Env:POWERSHAI_EXPORT_DIR
+		
+		,#Força a importação da versão 1
+			[switch]$v1
+	)
 
 	if(!$ExportDir){
 		$ExportDir = JoinPath $Home .powershai;
 	}
 	
-	write-verbose "ExportDir: $ExportDir";
-	$ExportedFile = JoinPath $ExportDir "exportedsession.xml"
 	
-	if(-not(Test-Path $ExportedFile)){
+	
+	
+	write-verbose "ExportDir: $ExportDir";
+	$ExportedFileV1 = JoinPath $ExportDir "exportedsession.xml"
+	$ExportedFileV2 = JoinPath $ExportDir "exportedsession-v2.xml"
+	
+	$ExportedVersion = 2;
+	if((Test-Path $ExportedFileV2) -and !$v1){
+		$ExportedFile = $ExportedFileV2
+	}
+	elseif(Test-Path $ExportedFileV1){
+		$ExportedVersion = 1;
+		$ExportedFile = $ExportedFileV1
+	} else {
 		write-warning "Nothing to import at $ExportedFile";
 		return;
 	}
@@ -1549,9 +1566,7 @@ function Import-PowershaiSettings {
 	$CheckGuid  = $CheckParts[1]
 	$CheckExpected = $CheckParts[2];
 	$CurrentCheckGuid = PowershaiHash $CheckGuid
-	
-	
-		
+
 	if($CheckExpected -ne $CurrentCheckGuid){
 		write-verbose "Expected: $CheckExpected | Current = $CurrentCheckGuid | SavedGuid = $CheckGuid"
 		throw "POWERSHAI_IMPORTSESSION_INVALIDGUID: Failed decrypt. Check if your password is correct!";
