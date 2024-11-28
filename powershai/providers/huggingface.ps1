@@ -280,7 +280,13 @@ function Send-GradioApi {
 	
 	
 	verbose "Creating http request to query updates... url: $QueryUrl"
-	$headers = ResolveHfTokenHeader -token $token
+	$headers = @{}
+	$token = ResolveHuggingFaceToken -token $token
+	
+	if($token){
+		$headers = @{Authorization = $token}
+	}
+	
 	$ApiEvent | Add-Member Noteproperty update @{
 		url 	= $QueryUrl
 		http	= Start-HttpRequest -Url $QueryUrl -Headers $headers
@@ -618,7 +624,7 @@ function Get-GradioInfo {
 			
 			verbose "Error: $e";
 			
-			if($LeftTries -gt 0 -and $e.Response.StatusCode -eq 404){
+			if($LeftTries -gt 0 -and $e.Response.StatusCode -in (404,308,302) ){
 				$AppUrl += "/gradio_api";
 				continue;
 			}
@@ -2704,11 +2710,10 @@ Set-Alias Connect-HfSpaceGradio Connect-HuggingFaceSpaceGradio
 
 
 return @{
-	RequireToken 	= $false
-	TokenEnvName 	= "HF_API_TOKEN"
+	CredentialEnvName 	= "HF_API_TOKEN"
 	
 	info = @{
-		desc	= "Hugging Face"
+		desc	= "Hugging Face 🤗"
 		url 	= "https://huggingface.co/"
 		
 	}
