@@ -27,7 +27,7 @@ function InvokeGoogleApi {
 	}
 	
 	
-	$ApiKey = $Creds.credential.GetCredential()
+	$ApiKey = $Creds.credential.credential;
 
 	if(!$ApiKey){
 		throw "POWERSHAI_GOOGLE_NOAPIKEY: Must set credentials with Set-AiCredential";
@@ -79,51 +79,25 @@ function InvokeGoogleApi {
     return $RawResp.text | ConvertFrom-Json
 }
 
-<#
-	.SYNOPSIS
-		Define a API Key (o Token) da Api do Google.
-#>
-function Set-GoogleApiKey {
-	[CmdletBinding()]
-	param()
-	
-	$ErrorActionPreference = "Stop";
-	
-	write-host "Forneça o token no campo senha na tela em que se abrir";
-	
-	$Provider = Get-AiCurrentProvider
-	
-	
-	$TempToken = $creds.GetNetworkCredential().Password;
-	
-	write-host "Checando se o token é válido";
-	#try {
-	#	$result = InvokeOpenai 'models' -m 'GET' -token $TempToken
-	#} catch [System.Net.WebException] {
-	#	$resp = $_.exception.Response;
-	#	
-	#	if($resp.StatusCode -eq 401){
-	#		throw "INVALID_TOKEN: Token is not valid!"
-	#	}
-	#	
-	#	throw;
-	#}
-	#write-host -ForegroundColor green "	TOKEN ALTERADO!";
-	
-	SetCurrentProviderData Token $TempToken;
-	return;
-}
 
 function google_SetCredential {
 	param($AiCredential)
 	
-	$AiCredential.credential = Get-Credential "GOOGLE API KEY";
+	$Credential = Get-Credential "GOOGLE API KEY";
 	
-	Enter-AiCredential $AiCredential {
-		$null = Get-GoogleModels
+	$AiCredential.credential = $Credential.GetNetworkCredential().Password;
+	
+	try {
+		Enter-AiCredential $AiCredential {
+			$null = Get-GoogleModels
+		}
+	} catch {
+		verbose "Error: $_";
+		throw "INVALID_CREDENTIAL"
 	}
 	
 }
+Set-Alias Set-GoogleApiKey Set-AiCredential
 
 
 <#
