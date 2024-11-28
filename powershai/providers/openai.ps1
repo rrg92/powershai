@@ -39,6 +39,7 @@ function InvokeOpenai {
 	verbose "InvokeOpenAI, current provider = $($Provider.name)"
 	$Token = GetCurrentOpenaiToken $Token
 	
+	
     $headers = @{}
 	
 	if($Token){
@@ -96,28 +97,40 @@ function InvokeOpenai {
 function GetCurrentOpenaiToken {
 	param($OverrideToken)
 	
-	
 	if($OverrideToken){
 		return $OverrideToken;
 	}
+
 	
-	$TokenEnvName = GetCurrentProviderData TokenEnvName;
-	if($TokenEnvName){
-		verbose "Trying get token from environment var: $($TokenEnvName)"
-		$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
+	$Credential = Get-AiDefaultCredential -MigrateScript {
+		$Token = GetCurrentProviderData Token;
 		
-		if($Token){
-			verbose "	Token from evn $TokenEnvName";
-			return $Token;
+		$NewCred = NewAiCredential
+		$NewCred.name = "default"
+		$NewCred.credential = $Token;
+		
+		SetCurrentProviderData Token $null;
+		
+		return $NewCred;
+	}
+	
+	if($Credential){
+		if($Credential.source -eq "environment"){
+			return $Credential.credential;
+		} else {
+			return $Credential.credential.GetCredential()
 		}
+	} else {
+		write-warning "No default credential was found. Failback to deprecated method. Check if you have multiple creds and set a default credentials!"
 	}
 	
 	$Token = GetCurrentProviderData Token;
 	
 	if($Token){
-		return $Token;
+		write-warning "Using deprecated powershai tokens! To remove this warning message, set credential using Set-AiCredential. You can migrate using Convert-OpenaiToken2Credential"
+		return $token;
 	}
-	
+
 	
 	$TokenRequired = GetCurrentProviderData RequireToken;
 	if($TokenRequired){
@@ -125,7 +138,6 @@ function GetCurrentOpenaiToken {
 		throw "POWERSHAI_OPENAI_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
 	}
 }
-
 
 # Função interna e base para definir o token da Openai!
 function SetOpenaiTokenBase {
@@ -143,7 +155,7 @@ function SetOpenaiTokenBase {
 	
 	$ErrorActionPreference = "Stop";
 
-	# Elimina a chamada atual que é openai, para considerar apenas os callers, quepode ser sido a propria openai ou outros providers!
+	# Elimina a chamada atual que é openai, para considerar apenas os callers, que pode ser sido a propria openai ou outros providers!
 	$CurrentStack,$PrevStack = Get-PSCallStack
 	
 	$Provider = Get-AiCurrentProvider -Context -CallStack $PrevStack
@@ -178,17 +190,16 @@ function SetOpenaiTokenBase {
 	}
 	
 	
-	SetCurrentProviderData Token $TempToken;
-	
 	try {
 		$null = & $TestScript $TempToken $BackupToken
 	} catch {
-		SetCurrentProviderData Token $BackupToken;
 		throw "INVALID_TOKEN";
 	}
 	
 	if($SetData -is [scriptblock]){
 		$null = & $SetData $TempToken
+	} else {
+		SetCurrentProviderData Token $TempToken;
 	}
 }
 
@@ -196,6 +207,9 @@ function SetOpenaiTokenBase {
 # Faz um testes antes para certificar de que é acessível!
 function Set-OpenaiToken {
 	<#
+		.SYNOPSIS 
+			DEPRECIADO. Disponível apenas para compatibilidade e transição. Use Set-AiCredential. 
+			
 		.DESCRIPTION
 			Configura a api key para conectar com a openai. 
 			Para gerar uma API KEY, você deve ir no site da OpenAI, fazer o cadastro e gerar o token.  
@@ -204,8 +218,32 @@ function Set-OpenaiToken {
 	[CmdletBinding()]
 	param()
 	
-	SetOpenaiTokenBase "$ProviderName API TOKEN"
+	write-warning "Set-OpenaiToken is deprecated. Use Set-AiCredential";
+	
+	Set-AiCredential "OpenaiToken" -Force;
+	Set-AiDefaultCredential "OpenaiToken";
 }
+
+
+<#
+	.DESCRIPTION 
+		Define a API Token.  
+		Você deve informar uma API Token gerada no plataforma da OpenAI, em https://platform.openai.com
+		Antes de efetiar, o token será testado.
+#>
+function openai_SetCredential {
+	param(
+		$AiCredential
+	)
+	
+	SetOpenaiTokenBase -SetData {
+			param($token)
+			
+			$AiCredential.credential = $Token;
+		}
+}
+Set-Alias Set-OpenaiToken openai_SetCredential
+
 
 # Configura a Url base a ser usada!
 function Set-OpenaiBaseUrl {
@@ -229,10 +267,16 @@ function Get-OpenaiModels(){
 function openai_GetModels(){
 	param()
 	
-	$Models = Get-OpenaiModels
-	$Models | Add-Member -Type noteproperty -Name name -Value $null 
-	$Models | %{ $_.name = $_.id }
-	return $models;
+	$Provider = Get-AiCurrentProvider
+	
+	. WithAiProvider $Provider {
+	
+		$Models = Get-OpenaiModels
+		$Models | Add-Member -Type noteproperty -Name name -Value $null 
+		$Models | %{ $_.name = $_.id }
+		return $models;
+	
+	}
 }
 
 
@@ -256,7 +300,7 @@ function Get-OpenAiTextCompletion {
             ,$MaxTokens     = 200
     )
 	
-	write-warning "LEGACY! This endpoint is legacy. Use Chat Completion!"
+	write-warning "LEGACY! This endpoint is legacy. Use Chat Get-OpenaiChat"
 
     $FullPrompt = @($prompt) -Join "`n";
 
@@ -352,157 +396,161 @@ function Get-OpenaiChat {
 	
    
 	$Provider = Get-AiCurrentProvider;
-	if(!$model){
-		$DefaultModel = $Provider.DefaultModel;
-		
-		if(!$DefaultModel){
-			throw "POWERSHAI_NODEFAULT_MODEL: Must set default model using Set-AiDefaultModel"
-		}
-		
-		$model = $DefaultModel
-	}
-
-	[object[]]$Messages = @(ConvertTo-OpenaiMessage $prompt);
 	
-    $Body = @{
-        model       = $model
-        messages    = $Messages 
-        max_tokens  = $MaxTokens
-        temperature = $temperature 
-    }
-	
-	if($RawParams){
-		$RawParams.keys | %{ $Body[$_] = $RawParams[$_] }
-	}
-	
-	if($ResponseFormat){
-		$Body.response_format = $ResponseFormat
-	}
-	
-	if($Functions){
-		$Body.tools = $Functions
-		$Body.tool_choice = "auto";
-	}
-	
-	if($StreamCallback){
-		$body.stream = $true;
-		$body.stream_options = @{include_usage = $true};
-	}
-
-	
-	$StreamData = @{
-		#Todas as respostas enviadas!
-		answers = @()
-		
-		fullContent = ""
-		
-		FinishMessage = $null
-		
-		#Todas as functions calls
-		calls = @{
-			all = @()
-			funcs = @{}
-		}
-		
-		CurrentCall = $null
-	}
-	
-	# modo stream!
-	$StreamScript = $null
-	if($StreamCallback){
-		# #https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream
-		$StreamScript = {
-			param($data)
-		
-
-			$line 				= $data.line;
-			$StreamData.lines 	+= $line;
-			
-			# Ignore no json data receive events...
-			if(!$line -or $line -NotLike 'data: {*'){
-				return;
-			}
-			
-			
-			
-			$RawJson = $line.replace("data: ","");
-			$Answer = $RawJson | ConvertFrom-Json;
-			
-			if(!$Answer){
-				return;
-			}
-			
-			if(!$Answer.object){
-				return;
-			}
-			
-			$FinishReason 	= $Answer.choices[0].finish_reason;
-			$DeltaResp 		= $Answer.choices[0].delta;
+	# Lock current provider!
+	. WithAiProvider $Provider {
+			if(!$model){
+				$DefaultModel = $Provider.DefaultModel;
 				
-			$Role = $DeltaResp.role; #Parece vir somente no primeiro chunk...
-				
-			$StreamData.fullContent += $DeltaResp.content;
-				
-			if($FinishReason){
-				$StreamData.FinishMessage = $Answer
-			}
-				
-
-			foreach($ToolCall in $DeltaResp.tool_calls){
-				$CallId 		= $ToolCall.id;
-				$CallType 		= $ToolCall.type;
-				#verbose "Processing tool`n$($ToolCall|out-string)"
-				
-				
-				if($CallId){
-					$StreamData.calls.all += $ToolCall;
-					$StreamData.CurrentCall = $ToolCall;
-					continue;
+				if(!$DefaultModel){
+					throw "POWERSHAI_NODEFAULT_MODEL: Must set default model using Set-AiDefaultModel"
 				}
 				
-				$CurrentCall = $StreamData.CurrentCall;
+				$model = $DefaultModel
+			}
+
+			[object[]]$Messages = @(ConvertTo-OpenaiMessage $prompt);
 			
+			$Body = @{
+				model       = $model
+				messages    = $Messages 
+				max_tokens  = $MaxTokens
+				temperature = $temperature 
+			}
+			
+			if($RawParams){
+				$RawParams.keys | %{ $Body[$_] = $RawParams[$_] }
+			}
+			
+			if($ResponseFormat){
+				$Body.response_format = $ResponseFormat
+			}
+			
+			if($Functions){
+				$Body.tools = $Functions
+				$Body.tool_choice = "auto";
+			}
+			
+			if($StreamCallback){
+				$body.stream = $true;
+				$body.stream_options = @{include_usage = $true};
+			}
+
+			
+			$StreamData = @{
+				#Todas as respostas enviadas!
+				answers = @()
 				
-				if($CurrentCall.type -eq 'function' -and $ToolCall.function){
-					$CurrentCall.function.arguments += $ToolCall.function.arguments;
+				fullContent = ""
+				
+				FinishMessage = $null
+				
+				#Todas as functions calls
+				calls = @{
+					all = @()
+					funcs = @{}
+				}
+				
+				CurrentCall = $null
+			}
+			
+			# modo stream!
+			$StreamScript = $null
+			if($StreamCallback){
+				# #https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream
+				$StreamScript = {
+					param($data)
+				
+
+					$line 				= $data.line;
+					$StreamData.lines 	+= $line;
+					
+					# Ignore no json data receive events...
+					if(!$line -or $line -NotLike 'data: {*'){
+						return;
+					}
+					
+					
+					
+					$RawJson = $line.replace("data: ","");
+					$Answer = $RawJson | ConvertFrom-Json;
+					
+					if(!$Answer){
+						return;
+					}
+					
+					if(!$Answer.object){
+						return;
+					}
+					
+					$FinishReason 	= $Answer.choices[0].finish_reason;
+					$DeltaResp 		= $Answer.choices[0].delta;
+						
+					$Role = $DeltaResp.role; #Parece vir somente no primeiro chunk...
+						
+					$StreamData.fullContent += $DeltaResp.content;
+						
+					if($FinishReason){
+						$StreamData.FinishMessage = $Answer
+					}
+						
+
+					foreach($ToolCall in $DeltaResp.tool_calls){
+						$CallId 		= $ToolCall.id;
+						$CallType 		= $ToolCall.type;
+						#verbose "Processing tool`n$($ToolCall|out-string)"
+						
+						
+						if($CallId){
+							$StreamData.calls.all += $ToolCall;
+							$StreamData.CurrentCall = $ToolCall;
+							continue;
+						}
+						
+						$CurrentCall = $StreamData.CurrentCall;
+					
+						
+						if($CurrentCall.type -eq 'function' -and $ToolCall.function){
+							$CurrentCall.function.arguments += $ToolCall.function.arguments;
+						}
+					}
+						
+						
+					$StreamData.answers += $Answer
+					& $StreamCallback $Answer
+				}.GetNewClosure()
+			}
+			
+			verbose "Body:$($body|out-string)"
+			$Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
+			
+			if($Resp.stream){
+				#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
+				$MessageResponse = @{
+					role		 	= "assistant"
+					content 		= $StreamData.fullContent
+				}
+				
+				if($StreamData.calls.all){
+					$MessageResponse.tool_calls = $StreamData.calls.all;
+				}
+				
+				return @{
+					stream = @{
+						RawResp = $Resp
+						answers = $StreamData.answers
+						tools 	= $StreamData.calls.all
+					}
+					
+					message 		= $MessageResponse
+					finish_reason 	= $StreamData.FinishMessage.choices[0].finish_reason
+					usage 			= $StreamData.answers[-1].usage
+					model		 	= $StreamData.answers[-1].model
 				}
 			}
-				
-				
-			$StreamData.answers += $Answer
-			& $StreamCallback $Answer
-		}.GetNewClosure()
-	}
-	
-	verbose "Body:$($body|out-string)"
-    $Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
-	
-	if($Resp.stream){
-		#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
-		$MessageResponse = @{
-			role		 	= "assistant"
-			content 		= $StreamData.fullContent
-		}
-		
-		if($StreamData.calls.all){
-			$MessageResponse.tool_calls = $StreamData.calls.all;
-		}
-		
-		return @{
-			stream = @{
-				RawResp = $Resp
-				answers = $StreamData.answers
-				tools 	= $StreamData.calls.all
-			}
 			
-			message 		= $MessageResponse
-			finish_reason 	= $StreamData.FinishMessage.choices[0].finish_reason
-			usage 			= $StreamData.answers[-1].usage
-			model		 	= $StreamData.answers[-1].model
-		}
+			return $Resp;	
 	}
-	
-	return $Resp;
 }
 
 
@@ -596,6 +644,8 @@ function ConvertTo-OpenaiMessage {
 						type = "image_url"
 						image_url = @{ url = "data:$FileMime;base64,$File64" }
 					}
+					
+			
 				
 			continue;
 		} 
@@ -1166,28 +1216,27 @@ return @{
 	BaseUrl 		= "https://api.openai.com/v1"
 	
 
-	#Nome da variável de ambiente que contém o token.
+	#Nome da variável de ambiente que contém o token. Deprecated
 	TokenEnvName 	= "OPENAI_API_KEY"
+	
 	
 	# Função, comando, script que deve ser invocado para alterar a requisção.
 	# Será invocada antes de enviar a requisi~~aohttp
 	# Irá receber no primeiro parametro a requisicao e no segundo os parametros originais da InvokeOpenai
 	ReqChanger = $null
 	
-	###### Abaixo as keys padroes do PowershAI (todo provider deve exporta-las)
-	######
 	
-	# Modelo default para ser usado. Será usado quando o usuário não forncer um.
+	
+	# defaults
 	DefaultModel 	= "gpt-4o-mini"
-	
-	
-	# informacoes adicionais (key exigida pelo powershai)
 	info = @{
 		desc	= "OpenAI"
 		url 	= "https://openai.com/"
 	}
-	
-	#Assume every openai model support tools.
+
 	ToolsModels = "*"
+	CredentialEnvName = "OPENAI_API_KEY"
+	
+	
 }
 

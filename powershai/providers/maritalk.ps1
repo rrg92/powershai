@@ -10,14 +10,23 @@
 	)
 	
 	$Provider = Get-AiCurrentProvider
-	$TokenRequired = $true;
-
+	
+	$Creds = Get-AiDefaultCredential -MigrateScript {
+		$ApiKey = GetCurrentProviderData -Context Token;
+		
+		if($ApiKey){
+			SetCurrentProviderData Token $null;
+			$AiCredential = NewAiCredential
+			$AiCredential.name = "default"
+			$AiCredential.credential = $ApiKey;
+			return $AiCredential
+		}
+	}
+	
+	$Token = $Creds.credential.credential;
+	
 	if(!$Token){
-			$Token = GetCurrentProviderData Token;
-			
-			if(!$token){
-				throw "POWERSHAI_MARITALK_NOTOKEN: No token was defined and is required!";
-			}
+		throw "POWERSHAI_MARITALK_NOTOKEN: No token returned. Use Set-AiCredential";
 	}
 	
     $headers = @{}
@@ -346,9 +355,13 @@ function Get-MaritalkModels {
 Set-Alias maritalk_GetModels Get-MaritalkModels
 
 function maritalk_Chat {
-	$RawParams = $ProviderFuncRawData.params;
 	
-	openai_Chat @RawParams
+	$RawParams = $ProviderFuncRawData.params.RawParams;
+	
+	$RawParams['__maritalk_chat_completion'] = $true;
+	
+	$Params = $ProviderFuncRawData.params;
+	openai_Chat @Params
 }
 
 
@@ -381,6 +394,26 @@ function Set-MaritalkToken {
 }
 
 
+function MaritalkReqChanger {
+	param($Req, $OriginalParams)
+	
+	$data = $Req.data | ConvertFrom-Json
+	
+	if(!$data.__maritalk_chat_completion){
+		return;
+	}
+	
+	$messages = $data.messages;
+	$data.PSObject.Properties.Remove('__maritalk_chat_completion')
+	
+	foreach($m in $messages){
+		if($m.content -isnot [string]){
+			$m.content = @(@($m.content) | ?{ $_.text } | %{$_.text}) -Join "`n"
+		}
+	}
+	
+	$Req.data = $data | ConvertTo-Json -depth 10;
+}
 
 
 
@@ -395,6 +428,8 @@ return @{
 	DefaultModel 	= "sabia-3"
 	TokenEnvName 	= "MARITACA_API_KEY"
 	
+	# Req changer
+	ReqChanger = (Get-Command MaritalkReqChanger)
 	
 	#source: https://docs.maritaca.ai/pt/chamada-funcao
 	ToolsModels		= @(

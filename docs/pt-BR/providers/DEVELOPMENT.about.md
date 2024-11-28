@@ -39,6 +39,20 @@ O Powershell não tem um conceito native de interface da orientação a objeto, 
 
 Cada interface define suas regras, inputs e retornos que o provider deve trata. A seção abaixo sobre interfaces documenta todas as interfaces.  
 
+## Nome dos comandos 
+
+Os providers devem seguir um padrão no nome dos seus comandos.  
+Os comandos exportados do módulo devem ser: `Verbo`-`NomeProvider``NomeComando`.  
+* Verbo deve ser um dos verbos aprovados do powershell.
+* NomeProvider deve ser um nome válido do provider.  
+Os nomes validos para o provider são o proprio nome do arquivo (sem extensão), ou  "Ai"+ nome do arquivo, sem extensão.  
+* NomeComando é o nome comum a ser dado ao comando!
+
+Para comandos internos, o seguinte padrão deve ser adotado: `NomeProvider_NomeComando'.  
+note que este padrão é o mesmo das interfaces, portanto, você não deve usar interfaces.
+
+
+
 
 # Provider Keys  
 
@@ -62,6 +76,11 @@ URL para a documentação ou página principal sobre o provider.
 * ToolsModels
 Nome de modelos (aceita regex), que suportam function calling.  
 ESta lista serve como hint, caso um modelo esteja nesta, o powershai não precisa invocar Get-AiModels para determinar.
+
+* CredentialEnvName  
+Nomes das variáveis de ambiente que podem conter credentials default!
+Array ou string.
+O formato do valor da credential é exclusivo de cada provider. A documentação deve deixar claro como definir.
 
 
 # Interfaces
@@ -99,3 +118,8 @@ True se suporta o tool calling da openai.
 Caso contrário, assum eque não suporta!  
 Somente modelos cujo valor é true, poderão invocar uma ai tool.
 
+### SetCredential  
+Invocada quando o usuário está solicitando definir uma nova credencial (token, api key).  
+As credenciais são o mecanismo padrão do powershai para armazenar as informações sensíveis que o provider pode precisar para autenticação.  
+Todos os parâmetros definidos além do primeiro, que é AiCredential, serão incluídos na função AiCredential.  
+Sempre que o provider for trocado, a função será atualizada com os parâmetros!

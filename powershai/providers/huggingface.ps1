@@ -2424,8 +2424,8 @@ function huggingface_Chat {
 	
 	$OriginalParams = $PsBoundParameters;
 	$OriginalParams.messages = $PsBoundParameters.prompt;
-	$OriginalParams.remove("prompt");
-	$OriginalParams.remove("StreamCallback");
+	[void]$OriginalParams.remove("prompt");
+	[void]$OriginalParams.remove("StreamCallback");
 	
 	$Params = @{
 		model 					= $model

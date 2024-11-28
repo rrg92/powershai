@@ -12,35 +12,29 @@ function InvokeClaude {
 	)
 
 	$Provider 		= Get-AiCurrentProvider
-	$TokenRequired 	= GetCurrentProviderData RequireToken;
 
-	if(!$Token){
-		$TokenEnvName = GetCurrentProviderData TokenEnvName;
+	$Creds = Get-AiDefaultCredential -MigrateScript {
+		$ApiKey = GetCurrentProviderData -Context Token;
 		
-		if($TokenEnvName){
-			write-verbose "Trying get token from environment var: $($TokenEnvName)"
-			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
+		if($ApiKey){
+			SetCurrentProviderData Token $null;
+			$AiCredential = NewAiCredential
+			$AiCredential.name = "default"
+			$AiCredential.credential = $ApiKey;
+			return $AiCredential
 		}
-	}	
-	
-	if($TokenRequired -and !$Token){
-			$Token = GetCurrentProviderData Token;
-			
-			if(!$token){
-				throw "POWERSHAI_CLAUDE_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
-			}
 	}
+	
+	
+	$ApiKey = $Creds.credential.credential
 	
     $headers = @{
 		"anthropic-version" = "2023-06-01"
 	}
 	
-	if($TokenRequired){
-		 $headers["x-api-key"] = "$token"
-	}
-
-
 	
+	$headers["x-api-key"] = "$ApiKey"
+
 	if($endpoint -match '^https?://'){
 		$url = $endpoint
 	} else {
@@ -64,137 +58,19 @@ function InvokeClaude {
         url             = $url
         method          = $method
         Headers         = $headers
+		SseCallback		= $StreamCallback
     }
 
-	$StreamData = @{
-		#Todas as respostas enviadas!
-		answers = @()
-		
-		fullContent = ""
-		
-		FinishMessage = $null
-		
-		#Todas as functions calls
-		calls = @{
-			all = @()
-			funcs = @{}
-		}
-		
-		CurrentCall = $null
-		CurrentEvent = $null
-		MessageMeta = @{
-			stop_reason = $null
-			model = $null
-			id = $null
-			usage = @{
-				input_tokens = 0
-				output_tokens = 0
-			}
-		}
-	}
-				
-	if($StreamCallback){
-		$CurrentEvent = $null;
-		$ReqParams['SseCallBack'] = {
-			param($data)
-
-			$line = $data.line;
-			$StreamData.lines += $line;
-			
-			if(!$line){
-				return;
-			}
-			
-			if($line -match "event: (.+)"){
-				$StreamData.CurrentEvent = $matches[1];
-				return;
-			}
-			
-			$CurrentEvent = $StreamData.CurrentEvent
-			
-			if($CurrentEvent -eq "message_stop"){
-				return $false;
-			}
-
-			if($CurrentEvent -eq "content_block_delta"){
-				$RawJson = $line.replace("data: ","");
-				$Answer = $RawJson | ConvertFrom-Json;
-				$DeltaResp 		= $Answer.delta
-				
-				$StreamData.fullContent += $DeltaResp.text;
-				
-				$StreamData.answers += $Answer
-				
-				$StdAnswer = @{
-					choices = @(
-						@{
-							delta = @{content = $DeltaResp.text}
-						}
-					)
-				}
-				
-				& $StreamCallback $StdAnswer
-			}
-			
-			
-			if($CurrentEvent -eq "message_start"){
-				$RawJson = $line.replace("data: ","");
-				$Answer = $RawJson | ConvertFrom-Json;
-				$Message = $Answer.message;			
-
-
-				$StreamData.MessageMeta.usage.input_tokens	 = $Message.usage.input_tokens;
-				$StreamData.MessageMeta.usage.output_tokens	+= $Message.usage.output_tokens;	
-				$StreamData.MessageMeta.model	= $Message.model				
-			}
-			
-			if($CurrentEvent -eq "message_delta"){
-				$RawJson	= $line.replace("data: ","");
-				$Answer 	= $RawJson | ConvertFrom-Json;
-				$Usage	= $Answer.usage;		
-				$StreamData.MessageMeta.usage.output_tokens	+= $Usage.output_tokens				
-			}
-			
-		}
-	}
-
-
+	
 	write-verbose "ReqParams:`n$($ReqParams|out-string)"
     $RawResp 	= InvokeHttp @ReqParams
 	write-verbose "RawResp: `n$($RawResp|out-string)"
 	
 	if($RawResp.stream){
-		
-		#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
-		$MessageResponse = @{
-			role		 	= "assistant"
-			content 		= $StreamData.fullContent
-		}
-		
-		if($StreamData.calls.all){
-			$MessageResponse.tool_calls = $StreamData.calls.all;
-		}
-		
-		$Usage = @{
-			completion_tokens = $StreamData.MessageMeta.usage.output_tokens
-			prompt_tokens = $StreamData.MessageMeta.usage.input_tokens
-			total_tokens = $StreamData.MessageMeta.usage.output_tokens + $StreamData.MessageMeta.usage.input_tokens
-		}
-		
-		return @{
-			stream = @{
-				RawResp = $RawResp
-				answers = $StreamData.answers
-				tools 	= $StreamData.calls.all
-				meta = $StreamData.MessageMeta
-			}
-			
-			message = $MessageResponse
-			finish_reason = $StreamData.MessageMeta.stop_reason
-			usage = $Usage
-			model = $StreamData.MessageMeta.model
-		}
+		return $RawResp;
 	}
+	
+	
 
     return $RawResp.text | ConvertFrom-Json
 }
@@ -222,6 +98,68 @@ function Set-ClaudeToken {
 	return;
 }
 
+function ConvertTo-ClaudeMessage {
+	param($message)
+	
+	[object[]]$messages = @(ConvertTo-OpenaiMessage $messages)
+	
+	
+	[object[]]$ContentMessages = @()
+	$SystemMessage = @()
+	
+	$CallsIds = @{}
+	
+	:MsgLoop foreach($m in $messages){
+		
+		
+
+		switch($m.role){
+			
+			"system" {
+				$SystemMessage += $m.content;
+			}
+			
+			default {
+				$ClaudeMessage = HashTableMerge @{} $m;
+				
+				foreach($content in $ClaudeMessage.content){
+					$content = $_;
+					
+					if($content -is [string]){
+						continue;
+					}
+					
+					if($content.type -eq "image_url" -and $content.image_url.url -match 'data:(.+?);base64,(.+)'){
+						$MimeType	= $matches[1];
+						$Base64 	= $matches[2];
+						
+						$content.type = "image"
+						$content.source = @{
+							type = "base64"
+							media_type = $MimeType
+							data = $Base64
+						}
+						
+						$content.remove("image_url");
+					}
+				}
+				
+				$ContentMessages += $ClaudeMessage
+			}
+			
+		}
+
+		
+	}
+	
+	
+	return [PsCustomObject]@{
+		SystemMessage = ($SystemMessage -Join "`n")
+		messages = $ContentMessages
+	}
+	
+}
+
 function Get-ClaudeMessages {
 	[CmdletBinding()]
 	param(
@@ -230,46 +168,27 @@ function Get-ClaudeMessages {
 		,$max_tokens = 200
 		,$temperature = 0.5
 		,$StreamCallback = $null
+		,$RawParams = @{}
 	)
 	
 	
 	$Provider = Get-AiCurrentProvider
 	
 	#Note que reaproveitamos o convert to openai message do provider!
-	[object[]]$messages = @(ConvertTo-OpenaiMessage $messages)
+	$ClaudeMessages = @(ConvertTo-ClaudeMessage $messages)
 	
-	#Separa a mensagens de system!
-	$NewMessages = @()
-	$SystemMessage = "";
-	$PrevMessage = $null
-	foreach($m in $messages){
-		if($m.role -eq "system"){
-			$SystemMessage += $m.content;
-		} else {
-			$NewMessage = @{ role = $m.role; content = $m.content };
-			if($PrevMessage.role -eq $NewMessage.role){
-				$PrevMessage.content += $NewMessage.content;
-			} else {
-				$NewMessages +=  $NewMessage;
-			}
-			
-			$PrevMessage =  $NewMessage;
-		}
-	}
 	
-	[object[]]$FinalMessages = @(
-		$NewMessages
-	)
 	
-	$data = @{
-		messages 	= $FinalMessages 
+	$data = HashTableMerge @{
+		messages 	= @($ClaudeMessages.messages)
 		max_tokens	= $max_tokens
 		temperature	= $temperature
 		model		= $model
-		system 		= $SystemMessage
-	}
+		system 		= $ClaudeMessages.SystemMessage
+	} $RawParams
 	
-	InvokeClaude "messages" -method POST -body $data -StreamCallback $StreamCallback;
+	
+	InvokeClaude "messages"  -body $data -StreamCallback $StreamCallback
 }
 
 
@@ -292,80 +211,195 @@ function claude_Chat {
 	)
 	
 	$Params = @{
-		messages = $prompt
-		temperature = $temperature 
-		model = $model
-		max_tokens = $MaxTokens
-		StreamCallback = $StreamCallback
+		messages 		= $prompt
+		temperature 	= $temperature 
+		model 			= $model
+		max_tokens 		= $MaxTokens
+		RawParams		= $RawParams
 	}
 	
-	if($RawParams){
-		foreach($Key in @($RawParams.keys)){
-			$Params[$key] = $RawParams[$Key]
+	$StreamData = @{
+		#Todas as respostas enviadas!
+		answers = @()
+		LastOpenaiAnswer = $null
+		CurrentEvent = $null
+		ChunkId = [guid]::NewGuid().guid
+		MessageMeta = @{
+			stop_reason = $null
+			model = $null
+			id = $null
+			usage = @{
+				input_tokens = 0
+				output_tokens = 0
+			}
 		}
 	}
+	$CurrentEvent = $null;
 	
-	$result = Get-ClaudeMessages @Params
 	
-	if($result.stream){
-		return $result;
-	}
 	
-	$ResultText = $result.content.text;
+	function Convert-ClaudeToOpenaiAnswer {
+		param($Answer, $StreamData)
+		
+		
+		$Result = @{
+			id 		= [guid]::NewGuid().Guid
+			object 	= "chat.completion"
+			created = [int](((Get-Date) - (Get-Date "1970-01-01T00:00:00Z")).TotalSeconds)
+			service_tier = $null
+			system_fingerprint = $null
+			usage = @{
+				completion_tokens 	= $null 
+				prompt_tokens 		= $null 
+				total_tokens 		= $null
+			}
+			
+			logprobs = $null
+			choices = @()
+			model = $StreamData.MessageMeta.model
+		}
+		
+		$Result | Add-Member -Force ScriptMethod GetClaudeDetails {
+			@{
+				obj = $Answer
+			}
+		}.GetNewClosure()
+		
 	
-	#$ResultText = $result.answer;
-	#if($ResponseFormat -eq "json_object"){
-	#	if($ResultText -match '(?s)```json(.*?)```'){
-	#		$ResultText = $matches[1];
-	#	} else {
-	#		write-warning "Maritalk nao conseguiu retornar o JSON corretamente. A resposta será ajustada mas pode não ser no formato esperado!"
-	#		$ResultText = @{PowerShaiJsonResult = $ResultText} | ConvertTo-Json -Compress;
-	#	}
-	#	
-	#}
-	
-	if($ResponseFormat){
-		throw "POWERSHAI_CLAUDE_FORMAT_NOTSUPPORTED: ResponseFormat not suppoted yet!"
+			
+		$NewChoice = @{
+			index 			= $Result.choices.length
+			logprobs 		= $null
+			finish_reason 	= $FinishReason
+		}
+		
+		$Result.choices += $NewChoice;
+		
+		$Message = @{
+			role 		= "assistant"
+			refusal 	= $null
+			content 	= $Answer.delta.text
+		}
+			
+		if($StreamData){
+			$Result.object = "chat.completion.chunk"
+			$Result.id = $StreamData.ChunkId
+			$NewChoice.delta = $Message
+		} else {
+			$NewChoice.message = $Message
+		}
+		
+		return $Result;
 	}
 
 	
+	$StreamScript = $null			
+	if($StreamCallback){
+		$UserScriptCallback = $StreamCallback
+		$StreamScript  = {
+			param($data)
+
 	
-	#converte para o mesmo formato da OpenAI!
-	return @{
-		choices = @(
-			@{
-				finish_reason 	= $res.stop_reason
-				index 			= 0
-				logprobs 		= $null
-				message 		= @{
-									role = "assistant"
-									content = $ResultText
-								}
+			$line = @($data.line)[0];
+			$StreamData.lines += $line;
+			
+			if(!$line){
+				return;
 			}
-		)
-		
-		usage 	= @{
-					prompt_tokens 		= $result.usage.input_tokens
-					completion_tokens 	= $result.usage.output_tokens
-					total_tokens 		= $result.usage.input_tokens + $result.usage.output_tokens
-				}
-		model 	= $result.model
-		created = [int](((Get-Date) - (Get-Date "1970-01-01T00:00:00Z")).TotalSeconds)
-		object	= "chat.completion"
-		id 		= $result.id
-		system_fingerprint = $null
+
+			if($line -match "event: (.+)"){
+				$StreamData.CurrentEvent = $matches[1];
+				return;
+			}
+			
+			$CurrentEvent = $StreamData.CurrentEvent
+			
+			if($CurrentEvent -eq "message_stop"){
+				return $false;
+			}
+			
+			$Answer = $null
+			if($line -like "data: *"){
+				$RawJson = $line.replace("data: ","");
+				$Answer = $RawJson | ConvertFrom-Json;
+				$StreamData.answers += $Answer
+			}
+			
+			if($CurrentEvent -eq "message_start"){
+				$Message = $Answer.message;			
+				$StreamData.MessageMeta.usage.input_tokens	 = $Message.usage.input_tokens;
+				$StreamData.MessageMeta.usage.output_tokens	+= $Message.usage.output_tokens;	
+				$StreamData.MessageMeta.model	= $Message.model;
+				return;
+			}
+
+			if($CurrentEvent -eq "content_block_delta"){
+				$OpenaiAnswer = Convert-ClaudeToOpenaiAnswer $Answer $StreamData
+				$DeltaResp 		= $Answer.delta
+				$StreamData.fullContent += $DeltaResp.text;
+				$StreamData.LastOpenaiAnswer = $OpenaiAnswer;
+				
+				& $UserScriptCallback $OpenaiAnswer
+			}
+
+			if($CurrentEvent -eq "message_delta"){
+				$Usage	= $Answer.usage;		
+				$StreamData.MessageMeta.usage.output_tokens += $Usage.output_tokens			
+				$StreamData.LastOpenaiAnswer.usage.completion_tokens = $StreamData.MessageMeta.usage.output_tokens	
+			}
+		}
 	}
+
+	$resp = Get-ClaudeMessages @Params -StreamCallback $StreamScript
 	
+	if($resp.stream){
+		
+		if(!$StreamData.LastOpenaiAnswer){
+			throw "POWERSHAI_CLAUDE_CHAT_NOOPENAI: No openai message was returned. Probably a bug in claude for powershai!"
+		}
+		
+		$StreamData.LastOpenaiAnswer.stream =  @{
+				RawResp = $resp
+				answers = $StreamData.answers
+			}
+			
+		$StreamData.LastOpenaiAnswer.message = @{
+				role = "assistant"
+				content 	= $StreamData.fullContent
+				#tool_calls =  $null
+		}
+		
+		$OpenaiAnswer = $StreamData.LastOpenaiAnswer
+	} else {
+		$OpenaiAnswer = Convert-ClaudeToOpenaiAnswer $resp
+	}
+
+	return $OpenaiAnswer;
 	
 }
 
+
+function claude_GetModels() {
+	
+	return @(
+		@{ name = 'claude-3-5-sonnet-latest' }
+		@{ name = 'claude-3-5-sonnet-20241022' }
+		@{ name = 'claude-3-5-haiku-20241022' }
+		@{ name = 'claude-3-5-haiku-latest' }
+		@{ name = 'claude-3-opus-20240229' }
+		@{ name = 'claude-3-opus-latest' }
+		@{ name = 'claude-3-sonnet-20240229' }
+		@{ name = 'claude-3-haiku-20240307' }
+	) | %{ [PsCustomObject]$_ }
+	
+}
 
 
 return @{
 	RequireToken 	= $true
 	BaseUrl 		= "https://api.anthropic.com/v1"
-	DefaultModel 	= "claude-3-haiku-20240307"
-	TokenEnvName 	= "CLAUDE_API_KEY"
+	DefaultModel 	= "claude-3-5-haiku-latest"
+	CredentialEnvName 	= "CLAUDE_API_KEY"
 	
 	info = @{
 		desc	= "Anthropic Claude"

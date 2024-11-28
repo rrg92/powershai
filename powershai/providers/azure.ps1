@@ -30,21 +30,18 @@
 #>
 
 
-
-
 <#
-	.SYNOPSIS 
-		Configurar uma URL compatível com OpenAI do Azures
-	
 	.DESCRIPTION  
-	
+		Configura as credenciais para acesso ao LLMs disponíveis em assinaturas do Azure
+		Você deve fornecer, além do token, algumas informações adicionais requeridas pelo azure. Veja abaixo para entender.
+		
 		No Azure, basicamente, existem 2 tipos de URL que iremos usar:
 			- URLs específicas do serviço Azure OpenAI, que contém os modelos OpenAI 
 			- URLs compatíveis com OpenAI, para outros modelos open source, como llama, phi3, etc.
 	
 		O primeiro caso é o formato de URL disponibilizado quando se usa um serviço Azure OpenAI.  
 		Ele geralmente possui esse formato de URL:
-			https://<RESOURCE-NAME>.openai.azure.com/openai/deployments/DEPLOYMENET-NAME/chat/completions?api-version=API-VERSION
+			https://<RESOURCE-NAME>.openai.azure.com/openai/deployments/DEPLOYMENT-NAME/chat/completions?api-version=API-VERSION
 		Essas URLS dão acesso à API do Azure OpenAI, e são exclusivas para apenas estes deployments de serviços do tipo "Azure OpenAI".  
 		
 		
@@ -60,10 +57,7 @@
 		
 		Este cmdlet detecta automaticamente o formato e faz as configurações necessárioas.  
 		Ainda sim, é possível especificar estas informacoes separadamente, se precisar. Veja a documentação dos parâmetros para mais detalhes.
-		
-		
-		Este comando aceita ambos estes formatos e, conforme o formato, ele irá configurar as chamadas da OpenAI corretamente.  
-		apesar 
+		Este comando aceita ambos estes formatos e, conforme o formato, ele irá configurar as chamadas da OpenAI corretamente.
 	.LINK
 		# Aprenda mais como funciona a API e os modelos no Azure
 		https://learn.microsoft.com/en-us/azure/machine-learning/concept-model-catalog
@@ -72,27 +66,33 @@
 		# Sobre a API de Inferência
 		https://learn.microsoft.com/en-us/azure/machine-learning/reference-model-inference-api?view=azureml-api-2&tabs=pythonm
 #>
-function Set-AiAzureApiUrl {
-	[CmdLetBinding()]
+function azure_SetCredential {
 	param(
-		#Nome do resource onde foi criado. Esta informação pode ser obtida no portal 
+		$AiCredential
+		
+		,#Nome do resource onde foi criado. Esta informação pode ser obtida no portal 
 		#Ou, pode ser uma url. Dependendo do formato, serão extraído as informações necessárias.
 		#VOcê pode usar qualquer URL que foi gerada no portal ou no AI Studio e colar aqui que os elementos identificados serão extraídos.  
 		#Se um parâmetro obrigatório não for encontrado, um erro será retornado.
+		#Se não informado, usa o atual preivamente configurado!
 			[Alias('url')]
 			$ResourceName
 		
 		,#Nome do deployment (configurado no portal ou azure ai studio)
+		#Se não informado, usa o atual preivamente configurado!
 			$DeploymentName
 		
 		,#Versão da API a ser usada 
+		#Se não informado, usa o atual preivamente configurado!
 			$ApiVersion = "2024-06-01"
 			
-		,#Forçar definir um novo token!
-			[switch]$ChangeToken
+		,#Força mudar a API key
+			[switch]$ChangeApiKey
 	)
 	
 	$UrlType = "AzureOpenai"
+	
+	
 	
 	if($ResourceName -match '^https:'){
 		$ParsedUrl = [uri]$ResourceName
@@ -125,31 +125,36 @@ function Set-AiAzureApiUrl {
 			 }
 		}
 	}
+
+	$TempCred = NewAiCredential
+	$TempCred.credential = HashTableMerge $AiCredential.old.credential @{
+			ResourceName	= $ResourceName
+			DeploymentName 	= $DeploymentName
+			ApiVersion 		= $ApiVersion
+			UrlType 		= $UrlType
+			BaseUrl 		= $BaseUrl
+			ApiKey 			= $ApiKey
+		} -filter {
+			param($k)
+					
+			$k.new -ne $null
+		}
+		
+	$CredApiKey = $TempCred.credential.ApiKey;
 	
-	
-	$CurrentData = GetCurrentProviderData UrlData 
-	
-	SetCurrentProviderData -Context UrlData @{
-		ResourceName	= $ResourceName
-		DeploymentName 	= $DeploymentName
-		ApiVersion 		= $ApiVersion
-		UrlType 		= $UrlType
-		BaseUrl 		= $BaseUrl
+	if(!$CredApiKey -or $ChangeApiKey){
+		$Creds = Get-Credential "Azure Api key"
+		$TempCred.credential.ApiKey = $Creds.GetNetworkCredential().Password;
+	}
+
+	Enter-AiCredential $TempCred {
+		Get-OpenaiChat -prompt "Powershai Access Test! Just answer 'test ok'" -MaxTokens 100;
 	}
 	
-	$Token = GetCurrentOpenaiToken
+	$AiCredential.credential = $TempCred.credential;
 	
-	if(!$Token -or $ChangeToken){
-		Set-AiAzureApiKey;
-	}
-	
-	try {
-		$Result = Get-OpenaiChat -prompt "Powershai Access Test! Just answer 'test ok'" -MaxTokens 100;
-	} catch {
-		SetCurrentProviderData -Context UrlData $CurrentData
-		throw;
-	}
 }
+Set-Alias Set-OpenaiToken openai_SetCredential
 
 
 <#
@@ -165,43 +170,19 @@ function Get-AiAzureApiInfo {
 }
 
 
-<#
-	.SYNOPSIS 
-		Configurar a API key padrão para ser usada com o provider azure.
-#>
-function Set-AiAzureApiKey {
-	[CmdLetBinding()]
-	param()
-	
-	SetOpenaiTokenBase "AzureOpenai Api Key" -Test {
-		param($token)
-		
-		try {
-			$Result = Get-OpenaiChat -prompt "Powershai Access Test! Just answer 'test ok'" -MaxTokens 100;
-		} catch {
-			throw "POWERSHAI_AZUREOPENAI_TOKENTEST_FAILED: Token is invalid";
-		}
-	
-	}
-}
-
 # Used to change request!
 function OpenaiAzureChangeRequest {
 	param($Req, $OriginalParams)
 	
-	verbose "Chaning ApiRequest";
+	verbose "Changing ApiRequest";
 	
-	$UrlData 		= GetCurrentProviderData -Context UrlData;
-	$Token 			= GetCurrentOpenaiToken
-	$ResourceName 	= $UrlData.ResourceName;
-	$DeploymentName = $UrlData.DeploymentName
-	$ApiVersion 	= $UrlData.ApiVersion
-	$UrlType 		= $UrlData.UrlType;
-	$BaseUrl 		= $UrlData.BaseUrl;
-	
-	if(!$Token){
-		throw "POWERSHAI_AZUREOPENAI_NOTOKEN"
-	}
+	$Credential		= (Get-AiDefaultCredential).credential.credential
+	$ResourceName 	= $Credential.ResourceName;
+	$DeploymentName = $Credential.DeploymentName
+	$ApiVersion 	= $Credential.ApiVersion
+	$UrlType 		= $Credential.UrlType;
+	$BaseUrl 		= $Credential.BaseUrl;
+	$ApiKey 		= $Credential.ApiKey;
 	
 	if($UrlType -eq "AzureInferenceApi"){
 		$TokenHeader = "Authorization";
@@ -214,7 +195,7 @@ function OpenaiAzureChangeRequest {
 		$TokenHeader = "api-key";
 	}
 	
-	$Req.headers[$TokenHeader] = $Token
+	$Req.headers[$TokenHeader] = $ApiKey
 	
 	
 	$Endpoint = $OriginalParams.bound.endpoint;
@@ -285,7 +266,6 @@ function azure_Chat {
 return @{
 	
 	RequireToken 	= $false
-	DefaultModel 	= "gpt-4o-mini"
 	TokenEnvName 	= "AZURE_OPENAI_API_KEY"
 	
 	info = @{

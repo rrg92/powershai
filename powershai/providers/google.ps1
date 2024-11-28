@@ -13,36 +13,29 @@ function InvokeGoogleApi {
 
 	$Provider = Get-AiCurrentProvider
 	verbose "InvokeGoogleApi, current provider = $($Provider.name)"
-	$TokenRequired = GetCurrentProviderData RequireToken;
-
-	if(!$Token){
-		$TokenEnvName = GetCurrentProviderData TokenEnvName;
+	
+	$Creds = Get-AiDefaultCredential -MigrateScript {
+		$ApiKey = GetCurrentProviderData -Context Token;
 		
-		if($TokenEnvName){
-			verbose "Trying get token from environment var: $($TokenEnvName)"
-			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
-			if($Token){
-				verbose "	Token got from ENV VAR $TokenEnvName!";
-			}
-			
+		if($ApiKey){
+			SetCurrentProviderData Token $null;
+			$AiCredential = NewAiCredential
+			$AiCredential.name = "default"
+			$AiCredential.credential = $ApiKey;
+			return $AiCredential
 		}
-	}	
-	
-	if($TokenRequired -and !$Token){
-			$Token = GetCurrentProviderData Token;
-			
-			if(!$token){
-				throw "POWERSHAI_GOOGLE_NOTOKEN: No token was defined and is required! Provider = $($Provider.name)";
-			}
 	}
 	
-    $headers = @{}
 	
-	if($TokenRequired){
-		 $headers["x-goog-api-key"] = "$token"
+	$ApiKey = $Creds.credential.GetCredential()
+
+	if(!$ApiKey){
+		throw "POWERSHAI_GOOGLE_NOAPIKEY: Must set credentials with Set-AiCredential";
 	}
-
-
+	
+	$headers = @{
+			"x-goog-api-key" = "$ApiKey"
+	}
 	
 	if($endpoint -match '^https?://'){
 		$url = $endpoint
@@ -99,7 +92,7 @@ function Set-GoogleApiKey {
 	write-host "Forneça o token no campo senha na tela em que se abrir";
 	
 	$Provider = Get-AiCurrentProvider
-	$creds = Get-Credential "GOOGLE API KEY";
+	
 	
 	$TempToken = $creds.GetNetworkCredential().Password;
 	
@@ -121,6 +114,16 @@ function Set-GoogleApiKey {
 	return;
 }
 
+function google_SetCredential {
+	param($AiCredential)
+	
+	$AiCredential.credential = Get-Credential "GOOGLE API KEY";
+	
+	Enter-AiCredential $AiCredential {
+		$null = Get-GoogleModels
+	}
+	
+}
 
 
 <#
@@ -161,7 +164,6 @@ function Invoke-GoogleGenerateContent {
 	)
 	
 	
-	#Note que reaproveitamos o convert to openai message do provider!
 	$GoogleContent = @(ConvertTo-GoogleContentMessage $messages)
 	
 	$Config = @{}
@@ -288,10 +290,6 @@ function google_Chat {
 		
 		
 		$Result = @{
-			_raw = @{
-				obj = $Answer
-			}
-			
 			id 		= [guid]::NewGuid().Guid
 			object 	= "chat.completion"
 			created = [int](((Get-Date) - (Get-Date "1970-01-01T00:00:00Z")).TotalSeconds)
@@ -305,7 +303,14 @@ function google_Chat {
 			
 			logprobs = $null
 			choices = @()
+			model = $Answer.modelVersion
 		}
+		
+		$Result | Add-Member -Force ScriptMethod GetGoogleDetails {
+			@{
+				obj = $Answer
+			}
+		}.GetNewClosure()
 		
 		foreach($Candidate in $Answer.candidates){
 			
@@ -459,26 +464,24 @@ function google_Chat {
 	
 
 	if($resp.stream){
-		return @{
-			stream = @{
+		$OpenaiAnswer = $StreamData.OpenaiAnswer;
+		
+		$OpenaiAnswer.stream = @{
 				RawResp = $resp
 				answers = $StreamData.answers
 				tools 	= $StreamData.OpenaiAnswer.choices[0].delta.tool_calls
 			}
 			
-			message = @{ 
+		$OpenaiAnswer.message = @{ 
 				role = "assistant"
 				content 	= $StreamData.OpenaiAnswer.choices[0].delta.content
 				tool_calls =  $StreamData.OpenaiAnswer.choices[0].delta.tool_calls
 			}
-			finish_reason 	= $StreamData.OpenaiAnswer.choices[0].finish_reason
-			usage 			= $StreamData.OpenaiAnswer.usage
-			model 			= $StreamData.OpenaiAnswer.model
-		}
 	} else {
 		$OpenaiAnswer = Convert-GoogleAnswerToOpenaiAnswer $resp
-		return $OpenaiAnswer;
 	}
+	
+	return $OpenaiAnswer;
 }
 
 <#
@@ -593,20 +596,15 @@ function ConvertTo-GoogleContentMessage {
 	
 }
 
-
-Set-Alias -Name OpenAiChat -Value Get-OpenaiChat;
-Set-Alias -Name openai_Chat -Value Get-OpenaiChat;
-
-
-
-
-
 return @{
-	RequireToken 	= $true
-	ApiVersion 		= "v1"
-	BaseUrl 		= "https://generativelanguage.googleapis.com"
-	DefaultModel 	= "gemini-1.5-flash"
-	TokenEnvName 	= "GOOGLE_API_KEY"
+	RequireToken 		= $true
+	ApiVersion 			= "v1"
+	BaseUrl 			= "https://generativelanguage.googleapis.com"
+	DefaultModel 		= "gemini-1.5-flash"
+	CredentialEnvName 	= "GOOGLE_API_KEY"
+	
+	#Assume every openai model support tools.
+	ToolsModels = "*"
 	
 	info = @{
 		desc	= "Google Gemini"
