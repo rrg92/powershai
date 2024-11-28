@@ -1,12 +1,30 @@
 ﻿BeforeAll {
 	import-module ./powershai -force;
 	PesterGlobalSetup
-	Switch-PowershaiSetting _pester
+	Switch-PowershaiSetting _pester	
+	
+	$BackupEnvs = @{}
+	
+	# Clean environemnt credential vars!
+	Get-AiProviders | % {
+		Enter-AiProvider $_ {
+			Get-AiCredentialEnvironmentVars | %{
+				$EnvName = $_.name;
+				$BackupEnvs[$_.name] = $_.value;
+				Set-Item "Env:$EnvName" -Value $null
+			}
+		}
+	}
 }
 
 AfterAll {
 	PesterGlobalClean
 	Switch-PowershaiSetting default
+	
+	# Restore env!
+	@($BackupEnvs.keys) | %{
+		Set-Item "Env:$_" -Value $BackupEnvs[$_];
+	}
 }
 
 BeforeDiscovery {
@@ -42,6 +60,8 @@ Describe "AiCredential" -Tag "credential","basic" {
 			Mock -module powershai InvokeOpenai {
 				return;
 			}
+			
+			
 		}
 		
 		It "Clean Credentials" {
@@ -58,9 +78,9 @@ Describe "AiCredential" -Tag "credential","basic" {
 			$Creds[0].name | Should -Be "default";
 		}
 		
-		It "Create named credential" {
+		It "Create named credential and use as default" {
 			$CredName = "PesterCredTest"
-			Set-AiCredential $CredName ;
+			Set-AiCredential $CredName;
 			
 			$Cred = Get-AiDefaultCredential
 			$Cred.source | Should -Be "set:$CredName";

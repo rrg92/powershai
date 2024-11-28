@@ -9,17 +9,20 @@ BeforeAll {
 	
 	PesterGlobalSetup
 	
-	$Env:OPENAI_API_KEY = $null;
+	$BackupKey = $Env:OPENAI_API_KEY
+	$Env:OPENAI_API_KEY = $null
 }
 
 AfterAll {
-	$Env:OPENAI_API_KEY = $null;
+	$Env:OPENAI_API_KEY = $BackupKey
 	PesterGlobalClean
 	Switch-PowershaiSetting default
 }
 	
 
 Describe "OPENAI Basic Credentials Tests" -Tag "core:credential","provider:openai","basic"  {
+	
+	
 
 	It "Correct token set" {
 		Set-AiCredential "TestCred2"

@@ -405,6 +405,21 @@ RegArgCompletion Set-AiDefaultCredential Credential {
 	$Creds | ? {$_ -like "$word*"} | %{$_}
 }
 
+function Get-AiCredentialEnvironmentVars {
+	<#
+		.SYNOPSIS
+			Obtém a lista de environments vars usadas como fonte de credentials
+	#>
+	param()
+	
+	@(GetCurrentProviderData -Context CredentialEnvName) | ? {$_} | %{
+		[PsCustomObject]@{
+			name  = $_
+			value = @(Get-Item "Env:$_"  -EA SilentlyContinue).Value
+		}
+	}
+}
+
 function Get-AiDefaultCredential {
 	<#
 		.SYNOPSIS
