@@ -16,29 +16,26 @@
 #>	
 
 # Obtem o heder authorization para ser usado!
-function ResolveHfTokenHeader {
+function ResolveHuggingFaceToken {
 	param($token)
 	
-	if(!$token){
-		$TokenEnvName = GetCurrentProviderData -Context TokenEnvName;
+	if($token){
+		return $token;
+	}
+	
+	$Creds = Get-AiDefaultCredential -MigrateScript {
+		$ApiKey = GetCurrentProviderData -Context Token;
 		
-		if($TokenEnvName){
-			verbose "Trying get token from environment var: $($TokenEnvName)"
-			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
-		}
-		
-		if(!$Token){
-			verbose "Trying get token from provi"
-			$Token = GetCurrentProviderData -Context Token;
+		if($ApiKey){
+			SetCurrentProviderData Token $null;
+			$AiCredential = NewAiCredential
+			$AiCredential.name = "default"
+			$AiCredential.credential = $ApiKey;
+			return $AiCredential
 		}
 	}
 	
-	if($token -and $token -ne "public"){
-		 @{Authorization = "Bearer $token"}
-	} else {
-		verbose "No token added!";
-		return @{}
-	}	
+	return $Creds.credential.credential;	
 }
 
 <#
@@ -58,8 +55,12 @@ function Invoke-GradioHttp {
 	
 	$TokenRequired = $false;
 	
-	$headers = ResolveHfTokenHeader -token $token
+	$headers = @{}
+	$token = ResolveHuggingFaceToken -token $token
 	
+	if($token){
+		$headers["Authorization"] = $token
+	}
 	
 	$ReqParams = @{
 		url 			= $url
@@ -2115,18 +2116,7 @@ function InvokeHfApi {
 	$Provider = Get-AiCurrentProvider
 	verbose "current provider = $($Provider.name)"
 
-	if(!$Token){
-		$Token = GetCurrentProviderData -Context Token;
-	}
-
-	if(!$Token){
-		$TokenEnvName = GetCurrentProviderData -Context TokenEnvName;
-		
-		if($TokenEnvName){
-			write-verbose "Trying get token from environment var: $($TokenEnvName)"
-			$Token = (get-item "Env:$TokenEnvName"  -ErrorAction SilentlyContinue).Value
-		}
-	}	
+	$token = ResolveHuggingFaceToken;	
 	
 	$headers = @{}
 	if($Token){

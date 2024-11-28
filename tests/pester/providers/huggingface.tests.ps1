@@ -9,7 +9,7 @@ describe "HuggingFace Basic Tests" -Skip -Tag "provider:hugginface" {
 		}
 		
 		It "Get spaces" {
-			
+			$TestSpace = Get-HfSpace powershai/tests
 		}
 		
 		It "Get models" {

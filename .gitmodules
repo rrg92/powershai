@@ -1,0 +1,3 @@
+[submodule "huggingface/tests-gradio"]
+	path = huggingface/tests-gradio
+	url = https://huggingface.co/spaces/powershai/tests-gradio
