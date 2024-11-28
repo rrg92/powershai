@@ -486,10 +486,11 @@ function Get-AiDefaultCredential {
 	if($Sources.count -eq 0){
 		
 		if($MigrateScript){
-			write-warning "Migrating your current tokens to AiCredentials..."
-			
 			$NewCredentials = @(& $MigrateScript)
 			
+			if($NewCredentials.count){
+				write-warning "Migrating your current tokens to AiCredentials..."
+			}
 			
 			foreach($AiCred in $NewCredentials){
 				Set-AiCredential $AiCred;
@@ -503,7 +504,10 @@ function Get-AiDefaultCredential {
 				desc = "Migrated"
 			}
 			
-			write-warning "Migrated. Remeber export again to persist!";
+			if($NewCredentials.count){
+				write-warning "Migrated. Remeber export again to persist!";
+			}
+			
 		} else {
 			if($IgnoreNotExists){
 				return;
