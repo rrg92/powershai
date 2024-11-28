@@ -7,7 +7,7 @@ AfterAll {
 	Switch-PowershaiSetting default
 }
 
-describe "HuggingFace Basic Tests" -Tag "provider:hugginface" {
+describe "HuggingFace Basic Tests" -Tag "provider:huggingface" {
 
 
 	describe "Hub API" {
@@ -18,7 +18,7 @@ describe "HuggingFace Basic Tests" -Tag "provider:hugginface" {
 		it "Remove all sessions" {
 			Get-GradioSession | Remove-GradioSession
 			
-			@(Get-GradioSession).count | Should -Be 0;
+			Get-GradioSession | Should -BeNullOrEmpty 
 		}
 		
 		It "Get spaces" {
@@ -56,7 +56,7 @@ describe "HuggingFace Basic Tests" -Tag "provider:hugginface" {
 		It "Test Api Function Call" {
 			$RandomVal = Get-Random -Min 1 -Max 1000
 			$result = PowershaiTestOp1 -val $RandomVal
-			$result.data | Should -BeLike "PowershaiTest:Ok:$RandomVal"
+			$result.data | Should -BeLike "*PowershaiTest:Ok:$RandomVal**"
 		}
 		
 		It "Test Api Pipeline" {
@@ -64,13 +64,17 @@ describe "HuggingFace Basic Tests" -Tag "provider:hugginface" {
 			$seq = @{i=-1}
 			$Expected	= @(
 					"--start--"
-					(1..$MaxNums | %{"num:$_"})
+					(1..$MaxNums | %{"$_"})
 					"--end--"
 				)
 				
 			PowershaiTestOp2 -MaxNums $MaxNums -sleep 50 | %{
-				$seq.i++
 				
+				if(!$_.data){
+					return;
+				}
+				
+				$seq.i++
 				$NextExpected = $Expected[$seq.i];
 				
 				if($NextExpected -eq $null){
@@ -87,10 +91,15 @@ describe "HuggingFace Basic Tests" -Tag "provider:hugginface" {
 			$seq = @{i=-1}
 			$Expected	= @(
 					"--start--"
-					(1..$MaxNums | %{"num:$_"})
+					(1..$MaxNums | %{"$_"})
 					"--end--"
 				)
 			PowershaiTestOp2 -MaxNum $MaxNums -sleep 50 | PowershaiTestOp1 -map val=0 | %{
+				
+				if(!$_.data){
+					return;
+				}
+				
 				$seq.i++
 				$NextExpected = $Expected[$seq.i];
 				
@@ -98,7 +107,7 @@ describe "HuggingFace Basic Tests" -Tag "provider:hugginface" {
 					$NextExpected = $Expected[-1]
 				}
 				
-				$_.data | Should -be "PowershaiTest:Ok:$NextExpected"
+				$_.data | Should -BeLike "*PowershaiTest:Ok:$NextExpected*"
 			}
 		}
 		

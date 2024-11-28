@@ -14,4 +14,11 @@ param()
 	
 }
 
-& ./util/publish.ps1 @Args
+
+try {
+	& ./util/publish.ps1 @Args @PsBoundParameters
+} catch {
+	write-host "ERROR"
+	write-host $_.ScriptStackTrace;
+	throw;
+}

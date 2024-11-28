@@ -381,3 +381,91 @@ function ParseCommandHelp {
 	
 	
 }
+
+
+function HashTableMerge {
+	[CmdletBinding(PositionalBinding=$false)]
+	param(
+		[parameter(Position=1)]
+			$Target
+		
+		,[parameter(Position=2,ValueFromRemainingArguments)]
+			$SourceTables
+			
+		,$filter = $null
+	)
+	
+	$Me = $MyInvocation.MyCommand;
+	
+	$NewTable = @{}
+	
+	if(!$Target){
+		$Target = @{}
+	}
+	
+	if(!$SourceTables){
+		$SourceTables = @{}
+	}
+	
+	
+	
+	$TableList = @($Target)
+	$TableList += $SourceTables;
+	
+	foreach($SrcTable in $TableList){
+		
+		if($SrcTable -eq $null){
+			continue;
+		}
+		
+		if($SrcTable -isnot [hashtable]){
+			$type = "null";
+			
+			if($SrcTable){
+				$type = $SrcTable.getType().FullName;
+			}
+			
+			throw "POWERSHAI_MERGEHASH_ISNOT_HASHTABLE: $type";
+		}
+		
+		foreach($key in @($SrcTable.keys) ){
+			$KeyPath = $ParentKeyPath +"/"+ $key
+			
+			#Se as duas são com tipos diferentes, então sobrescreve
+			$SrcValue = $SrcTable[$key]
+			$NewValue = $NewTable[$key];
+			
+			
+			if($filter){
+				$FilterResult = & $filter @{
+						key 		= $key
+						new 		= $SrcValue 
+						current 	= $NewValue
+						path 		= $KeyPath 
+					}
+					
+				if(!$FilterResult){
+					continue;
+				}
+			}
+			
+			
+			# Se for um hashtable, recursivamente atualiza!
+			if($SrcValue -is [hashtable] -and $NewValue -is [hashtable]){
+				$ParentKeyPath = $KeyPath
+				$SrcValue = & $Me $NewValue $SrcValue  
+			}
+			
+			elseif($SrcValue -is [hashtable]){
+				# make copy!
+				$SrcValue = & $Me @{} $SrcValue
+			}
+			
+			#Em todos o caso, src substitui o valor!
+			$NewTable[$key] = $SrcValue;
+		}
+	}
+	
+	return $NewTable;
+}
+

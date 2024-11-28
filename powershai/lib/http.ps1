@@ -51,6 +51,9 @@ Function Start-HttpRequest {
 		,$headers 		= @{}
 		
 		,$MaxConnections = 50
+		
+		,#Max auto http redirect
+			$MaxRedirects = $null
 	)
 	$ErrorActionPreference = "Stop";
 
@@ -169,6 +172,14 @@ Function Start-HttpRequest {
 	$Web = [System.Net.WebRequest]::Create($url);
 	$Web.Method = $method;
 	$Web.ContentType = $contentType
+	
+	if($MaxRedirects -eq 0){
+		$Web.AllowAutoRedirect  = $false;
+	}
+	
+	if($MaxRedirects){
+		$Web.MaximumAutomaticRedirections  = $MaxRedirects
+	}
 	
 	$HttpRequest.WebRequest = $Web;
 	
@@ -453,6 +464,7 @@ function Get-HttpResponse {
 			[switch]$ForceEnd
 		
 		,[switch]$StreamsOnly
+
 		
 	)
 	
@@ -765,6 +777,9 @@ function Invoke-Http {
 		,#Timeout 
 		 #Max ms aguardando por uma resposta conexão antes de encerrar
 			$Timeout = $null
+			
+		,#MaxRedirects 
+			$MaxRedirects = 0
 	)
 	
 	$ErrorActionPreference = "Stop";
@@ -783,6 +798,7 @@ function Invoke-Http {
 		contentType 	= $contentType
 		encoding		= $encoding 
 		headers 		= $headers 
+		MaxRedirects = $MaxRedirects
 	}
 	
 	$HttpRequest = Start-HttpRequest @HttpReqParams
@@ -829,6 +845,18 @@ function Invoke-Http {
 			if($HttpResult.error){
 				throw $HttpResult.error
 			}
+			
+			if($HttpRequest.WebResponse.StatusCode -in (308,302) -and $MaxRedirects -ne $null){
+				
+				$e = New-PowershaiError "HTTP_REDIRECT" "Maximum redirects reached $MaxRedirects" -Prop @{
+					req = $HttpRequest
+					status = $HttpRequest.WebResponse.StatusCode
+					max = $MaxRedirects
+				}
+				
+				throw $e
+			}
+	
 			
 			$ResultData.text 	+= $HttpResult.text
 			$ResultData.status 	= $HttpRequest.WebResponse.StatusCode

@@ -9,6 +9,7 @@ param(
 	$tags  = @()
 	
 	,[switch]$only
+	,$PesterConfiguration = @{}
 )
 
 $ErrorActionPreference = "Stop";
@@ -18,6 +19,7 @@ $ErrorActionPreference = "Stop";
 
 
 CheckPowershaiRoot
+Get-module powershai | Remove-module;
 import-module ./powershai -force;
 
 [string[]]$DefaultTags = "basic";
@@ -35,9 +37,24 @@ if($tags -eq "PRODUCTION"){
 
 
 
-$Params = @{
-	tags = $TestTags
-}
 
 
-Invoke-Pester -Output Detailed @Params @Args;
+$Config = HashTableMerge @{
+	Run = @{
+		Path = @("./tests/pester")
+	}
+	
+	Output = @{
+		Verbosity = "Detailed"
+	}
+	
+	Filter = @{
+		Tag = $TestTags
+	}
+	
+} $PesterConfiguration
+
+
+$FinalConfig = New-PesterConfiguration -HashTable $Config
+
+Invoke-Pester -Configuration $FinalConfig

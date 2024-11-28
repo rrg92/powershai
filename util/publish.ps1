@@ -29,18 +29,16 @@ $TempDir = $POWERSHAI_PUBLISH_DATA.TempDir;
 
 if($Tests){
 	write-host "Starting tests..."
-	$Config = New-PesterConfiguration -HashTable @{
+	$Config = @{
 		Run = @{
 			'Throw' = $true
 		}
-		
-		Path = "./tests/pester"
 		
 		Output = @{
 			CIFormat = "GithubActions"
 		}
 	}
-	Invoke-Pester -Configuration $Config;
+	./tests/test.ps1 production -PesterConfiguration $Config;
 	
 	write-host "	Test run!";
 }

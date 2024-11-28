@@ -51,6 +51,7 @@ function Invoke-GradioHttp {
 		,$ContentType = "application/json"
 		,$StreamCallback = $null
 		,$token = $null
+		,$MaxRedirects = $null
 	)
 	
 	$TokenRequired = $false;
@@ -69,6 +70,7 @@ function Invoke-GradioHttp {
 		contentType 	= $ContentType
 		method 			= $method 
 		SseCallBack 	= $StreamCallback
+		MaxRedirects 	= $MaxRedirects 
 	}
 	
 	$resp = InvokeHttp @ReqParams;
@@ -614,22 +616,26 @@ function Get-GradioInfo {
 	
 		try {
 			verbose "Trying: $AppUrl (left: $LeftTries)";
-			$result = InvokeGradioApi @InvokeParams
+			$result = InvokeGradioApi @InvokeParams -MaxRedirects 0
 			$result | Add-Member Noteproperty RealAppUrl $AppUrl
 			return $result;
 			break;
-		} catch [Net.WebException] {
+		} catch {
 			$LeftTries--;
 			$e = $_.Exception;
 			
 			verbose "Error: $e";
 			
-			if($LeftTries -gt 0 -and $e.Response.StatusCode -in (404,308,302) ){
+			$MustRetry = $e.Response.StatusCode -in (404,308,302) `
+						-or $e.ErrorName -eq "HTTP_REDIRECT"
+			
+		
+
+			if($LeftTries -gt 0 -and $MustRetry){
 				$AppUrl += "/gradio_api";
 				continue;
 			}
 			
-			$Global:err = $e;
 			throw;
 		}
 	}
@@ -884,7 +890,9 @@ function Remove-GradioSession {
 			$Name = $Name.name
 		}
 		
-		$GradioSessions.Remove($Name);
+		if($GradioSessions -is [hashtable]){
+			$GradioSessions.Remove($Name);
+		}
 		
 		if($DefaultSession -eq  $name){
 			SetCurrentProviderData -Context DefaultGradioSession $null
@@ -1733,12 +1741,14 @@ function New-GradioSessionApiProxyFunction {
 					SrcParam 	= $Param
 					MustUpload  = $false
 					IsArray 	= $false
+					PsType 		= $null
 				}
 				$ParamMap[$PsParamName] = $MapData;
 			
 				verbose "Getting type"
 				$ParamType = Convert-GradioParamPowershell $Param
 				verbose "	ParamType: $ParamType"
+				
 
 				$MapData.IsArray = $ParamType.IsArray
 				$ElType = $ParamType.GetElementType()
@@ -1769,6 +1779,7 @@ function New-GradioSessionApiProxyFunction {
 					}
 				}
 				
+				$MapData.PsType = $ParamType;
 				$ParamDef = "[$ParamType]$ParamName = $ParamDefault"
 				
 				if($Param.label){
@@ -1806,6 +1817,7 @@ function New-GradioSessionApiProxyFunction {
 					return $FuncData;
 				}
 				
+				$SrcFunction = $FuncData.MyInvocation.MyCommand.name;
 				
 				function IsType {
 					& $IsType @Args;
@@ -1891,7 +1903,23 @@ function New-GradioSessionApiProxyFunction {
 					
 					if($ParamApiMapValues.Contains($ParamName)){
 						verbose "	Changing parameter value to defined in api map"
+						
+						$ParamPsType = $PsParam.PsType
 						$ParamValue = $ParamApiMapValues[$ParamName];
+						
+						if($ParamValue -ne $null){
+							$TypedValue  = $ParamValue -as $ParamPsType
+							if($TypedValue -eq $null){
+								$msg = "Parameter $($ParamName) value (map) cannot be converted to its type $($ParamPsType). Func:$SrcFunction"
+								$e = New-PowershaiError "POWERSHAI_HUGGINGFACE_PROXY_PARAMERRROR" $msg -Prop @{
+										SrcParam = $SrcParam
+										value = $ParamValue
+										SrcFunction = $SrcFunction
+									}
+								throw $e;
+							}
+						}
+						
 					}
 
 					
@@ -1986,6 +2014,7 @@ function New-GradioSessionApiProxyFunction {
 							Args 		= `$Args
 							Vars 		= Get-Variable
 							PipeObj   	= `$_
+							MyInvocation = `$MyInvocation
 						}
 					}
 					
