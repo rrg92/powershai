@@ -41,7 +41,7 @@ function GetNearestOpenaiProvider {
 <#
 	Esta função é usada como base para invocar a a API da OpenAI!
 #>
-function InvokeOpenai {
+function Invoke-OpenaiApi {
 	[CmdletBinding()]
     param(
 		$endpoint
@@ -114,7 +114,7 @@ function InvokeOpenai {
 
     return $RawResp.text | ConvertFrom-Json
 }
-
+Set-Alias InvokeOpenai Invoke-OpenaiApi
 
 function GetCurrentOpenaiToken {
 	param($OverrideToken)
@@ -471,6 +471,8 @@ function Get-OpenaiChat {
 				}
 				
 				CurrentCall = $null
+				
+				FullAnswer = $null
 			}
 			
 			# modo stream!
@@ -479,8 +481,7 @@ function Get-OpenaiChat {
 				# #https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream
 				$StreamScript = {
 					param($data)
-				
-
+					
 					$line 				= $data.line;
 					$StreamData.lines 	+= $line;
 					
@@ -488,8 +489,6 @@ function Get-OpenaiChat {
 					if(!$line -or $line -NotLike 'data: {*'){
 						return;
 					}
-					
-					
 					
 					$RawJson = $line.replace("data: ","");
 					$Answer = $RawJson | ConvertFrom-Json;
@@ -502,33 +501,33 @@ function Get-OpenaiChat {
 						return;
 					}
 					
-					$FinishReason 	= $Answer.choices[0].finish_reason;
-					$DeltaResp 		= $Answer.choices[0].delta;
-						
-					$Role = $DeltaResp.role; #Parece vir somente no primeiro chunk...
-						
-					$StreamData.fullContent += $DeltaResp.content;
-						
-					if($FinishReason){
-						$StreamData.FinishMessage = $Answer
+					
+					if($StreamData.FullAnswer){
+						$StreamData.FullAnswer.choices[0].delta.content += $Answer.choices[0].delta.content;
+						$StreamData.FullAnswer.choices[0].finish_reason = $Answer.choices[0].finish_reason
+					} else {
+						$StreamData.FullAnswer = $Answer
 					}
 						
-
-					foreach($ToolCall in $DeltaResp.tool_calls){
+					$CurrentDelta 	= $StreamData.FullAnswer.choices[0].delta;
+					$Tools 			= $Answer.choices[0].delta.tool_calls;
+					
+					if($Tools -and $StreamData.FullAnswer.choices[0].delta.tool_calls -eq $null){
+						$StreamData.FullAnswer.choices[0].delta.tool_calls | Add-Member -force Noteproperty tool_calls @()
+					}
+					
+					foreach($ToolCall in $Tools){
 						$CallId 		= $ToolCall.id;
 						$CallType 		= $ToolCall.type;
 						#verbose "Processing tool`n$($ToolCall|out-string)"
 						
-						
 						if($CallId){
-							$StreamData.calls.all += $ToolCall;
+							$CurrentDelta.tool_calls += $ToolCall;
 							$StreamData.CurrentCall = $ToolCall;
 							continue;
 						}
 						
 						$CurrentCall = $StreamData.CurrentCall;
-					
-						
 						if($CurrentCall.type -eq 'function' -and $ToolCall.function){
 							$CurrentCall.function.arguments += $ToolCall.function.arguments;
 						}
@@ -543,32 +542,24 @@ function Get-OpenaiChat {
 			verbose "Body:$($body|out-string)"
 			$Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
 			
+			
+			
 			if($Resp.stream){
-				#Isso imita a mensagem de resposta, para ficar igual ao resultado quando está sem Stream!
-				$MessageResponse = @{
-					role		 	= "assistant"
-					content 		= $StreamData.fullContent
+				$OpenaiAnswer = $StreamData.FullAnswer;
+				
+				$OpenaiAnswer.choices | %{
+					$_ | Add-Member -force noteproperty message $_.delta;
+					$_.psobject.properties.remove("delta");
 				}
 				
-				if($StreamData.calls.all){
-					$MessageResponse.tool_calls = $StreamData.calls.all;
+				$OpenaiAnswer | Add-Member -force noteproperty stream @{
+					RawResp = $Resp
 				}
-				
-				return @{
-					stream = @{
-						RawResp = $Resp
-						answers = $StreamData.answers
-						tools 	= $StreamData.calls.all
-					}
-					
-					message 		= $MessageResponse
-					finish_reason 	= $StreamData.FinishMessage.choices[0].finish_reason
-					usage 			= $StreamData.answers[-1].usage
-					model		 	= $StreamData.answers[-1].model
-				}
+			} else {
+				$OpenaiAnswer = $resp;
 			}
 			
-			return $Resp;	
+			return $OpenaiAnswer;	
 	}
 }
 

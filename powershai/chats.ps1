@@ -1350,10 +1350,10 @@ function Send-PowershaiChat {
 
 				foreach($interaction in $Ret.interactions){ 
 				
-					if($interaction.stream){
-						$Msg = $interaction.rawAnswer.message
-					} else {
-						$Msg = $interaction.rawAnswer.choices[0].message;
+					$Msg = $interaction.rawAnswer.choices[0].message;
+					
+					if(!$msg){
+						throw "POWERSHAI_CHAT_INVALIDRESULT: Model answer incorrect format. This can be a bug in provider."
 					}
 				
 					AddContext $Msg

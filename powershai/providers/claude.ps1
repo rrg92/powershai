@@ -75,28 +75,7 @@ function InvokeClaude {
     return $RawResp.text | ConvertFrom-Json
 }
 
-
-
-
-# Define o token a ser usado nas chamadas da OpenAI!
-# Faz um testes antes para certificar de que é acessível!
-function Set-ClaudeToken {
-	[CmdletBinding()]
-	param()
-	
-	$ErrorActionPreference = "Stop";
-	
-	write-host "Forneça o token no campo senha na tela em que se abrir";
-	
-	$Provider = Get-AiCurrentProvider
-	$ProviderName = $Provider.name.toUpper();
-	$creds = Get-Credential "$ProviderName API TOKEN";
-	
-	$TempToken = $creds.GetNetworkCredential().Password;
-	
-	SetCurrentProviderData Token $TempToken;
-	return;
-}
+Set-Alias Set-ClaudeToken Set-AiCredential
 
 function ConvertTo-ClaudeMessage {
 	param($message)
@@ -111,8 +90,6 @@ function ConvertTo-ClaudeMessage {
 	
 	:MsgLoop foreach($m in $messages){
 		
-		
-
 		switch($m.role){
 			
 			"system" {
@@ -120,11 +97,14 @@ function ConvertTo-ClaudeMessage {
 			}
 			
 			default {
-				$ClaudeMessage = HashTableMerge @{} $m;
+				$ClaudeMessage = @{
+					content = $m.content 
+					role = $m.role
+				}
 				
 				foreach($content in $ClaudeMessage.content){
 					$content = $_;
-					
+
 					if($content -is [string]){
 						continue;
 					}
@@ -334,10 +314,14 @@ function claude_Chat {
 			}
 
 			if($CurrentEvent -eq "content_block_delta"){
-				$OpenaiAnswer = Convert-ClaudeToOpenaiAnswer $Answer $StreamData
+				$OpenaiAnswer 	= Convert-ClaudeToOpenaiAnswer $Answer $StreamData
 				$DeltaResp 		= $Answer.delta
-				$StreamData.fullContent += $DeltaResp.text;
-				$StreamData.LastOpenaiAnswer = $OpenaiAnswer;
+				
+				if($StreamData.LastOpenaiAnswer){
+					$StreamData.LastOpenaiAnswer.choices[0].delta.content += $OpenaiAnswer.choices[0].delta.content
+				} else {
+					$StreamData.LastOpenaiAnswer = $OpenaiAnswer
+				}
 				
 				& $UserScriptCallback $OpenaiAnswer
 			}
@@ -346,6 +330,9 @@ function claude_Chat {
 				$Usage	= $Answer.usage;		
 				$StreamData.MessageMeta.usage.output_tokens += $Usage.output_tokens			
 				$StreamData.LastOpenaiAnswer.usage.completion_tokens = $StreamData.MessageMeta.usage.output_tokens	
+				
+				
+				
 			}
 		}
 	}
@@ -363,10 +350,9 @@ function claude_Chat {
 				answers = $StreamData.answers
 			}
 			
-		$StreamData.LastOpenaiAnswer.message = @{
-				role = "assistant"
-				content 	= $StreamData.fullContent
-				#tool_calls =  $null
+		$StreamData.LastOpenaiAnswer.choices | %{
+			$_.message = $_.delta 
+			$_.remove('delta');
 		}
 		
 		$OpenaiAnswer = $StreamData.LastOpenaiAnswer

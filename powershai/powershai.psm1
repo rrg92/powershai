@@ -197,6 +197,7 @@ function UpgradePowershaiSettingsStore {
 	param(
 		$OldSettings
 		,[switch]$IgnoreCurrent
+		,[switch]$ResetProviders
 	)
 	
 	$NewSettingsStore = HashTableMerge @{} $DEFAULT_SETTINGS_STORE
@@ -213,6 +214,11 @@ function UpgradePowershaiSettingsStore {
 	}
 	
 	if(!$IgnoreCurrent){
+		
+		if($CurrentStore.settings -isnot [hashtable]){
+			$CurrentStore.settings = @{}
+		}
+		
 		$NewSettingsStore = HashTableMerge $NewSettingsStore $CurrentStore
 	}
 	
@@ -220,10 +226,19 @@ function UpgradePowershaiSettingsStore {
 		$NewSettingsStore.current = "default";
 	}
 	
+	
+	if($ResetProviders){
+		
+		@($NewSettingsStore.settings.keys)| %{
+			$NewSettingsStore.settings[$_].providers = $null;
+		}
+	}
+	
 	UpdatePowershaiSettingsStore $NewSettingsStore;
 	$Global:POWERSHAI_SETTINGS = $null
 	
-	 Switch-PowershaiSetting $NewSettingsStore.current;
+
+	Switch-PowershaiSetting $NewSettingsStore.current;
 }
 
 
@@ -1040,7 +1055,13 @@ function Get-AiChat {
 	}
 	
 	$FuncParams['model'] = $ModelName
-	Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+	$resp = Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+	
+	# Validate answer!
+	#$IsValid = Test-AiChatAnswer $resp -throw;
+	
+	
+	return $resp;
 }
 
 # Representa cada interação feita com o modelo!
@@ -1324,11 +1345,7 @@ function Invoke-AiChatTools {
 		
 		& $emit "answer" $AiInteraction
 		
-		if($Answer.stream){
-			$ModelResponse = $Answer
-		} else {
-			$ModelResponse = $Answer.choices[0];
-		}
+		$ModelResponse = $Answer.choices[0];
 		
 		verbose "FinishReason: $($ModelResponse.finish_reason)"
 		
@@ -1698,7 +1715,7 @@ function Import-PowershaiSettings {
 	
 	$CurrentProvider = $POWERSHAI_SETTINGS.Provider;
 	
-	UpgradePowershaiSettingsStore $ExportedSettings -IgnoreCurrent
+	UpgradePowershaiSettingsStore $ExportedSettings -IgnoreCurrent -ResetProviders
 	
 	write-host "Session settings imported";
 	

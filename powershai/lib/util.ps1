@@ -15,7 +15,8 @@ Function verbose {
 
 # Aux function to set check custom types
 function IsType($obj, $name){
-	return $($Obj.psobject.TypeNames -contains "PowershaiType:$name");
+	return $Obj.psobject.TypeNames -contains "PowershaiType:$name" `
+	-or $Obj.psobject.TypeNames -contains "Deserialized.PowershaiType:$name"
 }
 
 # Aux function to set custom types
@@ -244,7 +245,13 @@ function HashTableMerge {
 			continue;
 		}
 		
-		if($SrcTable -isnot [hashtable]){
+		if($SrcTable -is [psobject] -and $SrcTable -isnot [hashtable]){
+			$ObjHash = @{}
+			$SrcTable.psobject.properties | %{ $ObjHash[$_.name] = $_.Value }
+			$SrcTable = $ObjHash;
+		}
+		
+		elseif($SrcTable -isnot [hashtable]){
 			$type = "null";
 			
 			if($SrcTable){
@@ -465,4 +472,187 @@ function PowershaiHash {
 	
 	$shaManaged = New-Object System.Security.Cryptography.SHA256Managed
 	[System.Convert]::ToBase64String($shaManaged.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($str)))
+}
+
+
+function Confirm-PowershaiObjectSchema {
+	<#
+		.SYNOPSIS 
+			Valida se um objeto segue um schema correto
+		
+		.DESCRIPTION
+			Este comando valida se a estrutura deum objeto, ou hashtable, segue um schema.  
+			O schema é definindo no parametro scehma, e possui a seguinte sintaxe:
+				@{	
+					#Definir cada key esperada no objeto!
+					Key1 = [string] 		# tipo de dado esperado!
+					Key2 = "val1","val2" 	# lista de valores esperados
+					
+					# Uma key que é um objeto! Cada item deve especificar as props do objeto esperado!
+					Key3 = @{
+								SubKey1 = [int] # Significa: Key3.SubKey1 deve ser int
+							}
+							
+					# Uma key que é um array!
+					Key4 = @{
+							'$schema' = "array" # a key especial $schema é uma metadado que define o schema!
+							
+							SubKey1 = [string] # Entao, cada subkey é tratado como 
+						}
+				}
+				
+			'$schema' deve seguir as mesmas especificacoes da OpenaAPI.
+			Se $schema for um type, é o meso que especificr $schema.type = "array".
+	#>
+	param($obj, $schema, $parent)
+	
+	$Me = $MyInvocation.MyCommand;
+	
+	$Options = $schema.'$schema';
+	
+	if($Options -is [type]){
+		$Options = @{
+			type = $Options
+		}
+	}
+	
+	if($parent){
+		$Validations 	= $parent.validations
+		$ParentPath 	= $parent.path;
+	} else {
+		$ParentPath 	= ""
+		$Validations 	= @{}
+	}
+	
+	$IsValid = $true;
+	$errors = @()
+	
+	$hashvals = @{}
+	
+	
+	
+	if($Options.type -is [array]){
+		
+		$n = -1;
+		
+		$ItemSchema = HashTableMerge @{} $schema;
+		$ItemSchema.remove('$schema');
+		
+		if($obj -is [array]){
+			
+			$obj | %{
+				$n++;
+				
+				$result = & $me $_ $ItemSchema @{
+						path = $ParentPath+"[$n]"
+						validations = $Validations
+					}
+					
+				if(!$result.valid){
+					$IsValid = $false;
+				}
+			}
+		} else {
+			$IsValid = $false;
+			$IsTypeValid = $false;
+			$Validations[$ParentPath] = [pscustomobject]@{
+				path 	= $ParentPath
+				valid 	= $false;
+				errors 	= "NotArray"
+			}
+		}
+		
+		$schema = @{};
+	}
+	elseif($obj -eq $null){
+		$hashvals = @{}
+	} 
+	elseif($obj -isnot [hashtable]){			
+		$obj.psobject.properties | %{ $hashvals[$_.name] = $_.value }
+	} else {
+		$hashvals = $obj
+	}
+	
+
+	foreach($key in @($schema.keys)){
+		$KeyPath = $ParentPath +"/"+ $key;
+		
+		if($key -eq '$schema'){
+			continue;
+		}
+		
+		$KeySchema = @{
+			type 	= [object]
+			values  = @()
+		}
+		
+		$KeySchemaValue = $schema[$key];
+		$KeyValue 		= $hashvals[$key];
+		
+		if($KeySchemaValue -is [type]){
+			$KeySchema.type = $KeySchemaValue
+		}
+		
+		if($KeySchemaValue -is [array]){
+			$KeySchema.values = $KeySchemaValue
+		}
+		
+		if($KeySchemaValue -is [hashtable]){
+			# recursive validation!
+			$result = & $Me $KeyValue $KeySchemaValue @{
+						path = $KeyPath
+						validations = $Validations
+					}
+					
+			$IsValidSchema = $result.valid;
+			$IsContentValid = $IsValidSchema;
+			$IsTypeValid	= $true;
+		} else {
+			$ExpectedType 	= $KeySchema.type;
+			$IsTypeValid 	= $KeyValue -is $ExpectedType;
+			
+			if(!$IsTypeValid){
+				
+				$CurrenType = "NULL";
+				if($KeyValue -ne $null){
+					$CurrenType = $KeyValue.getType().Name
+				}
+				
+				$errors 	+= @(
+								"InvalidType:$CurrenType"
+								"Expected:"+$ExpectedType.name
+							) -Join ","
+			}
+			
+			$IsContentValid = !$KeySchema.values -or $KeyValue -in @($KeySchema.values);
+			if(!$IsContentValid){
+				$errors += "InvalidContent:"+$KeyValue;
+			}
+			
+			$IsValidSchema = $IsTypeValid -and $IsContentValid;
+		}
+		
+		if(!$IsValidSchema){
+			$IsValid = $false;
+		}
+		
+		$Validations[$KeyPath] = [pscustomobject]@{
+				path 		= $KeyPath
+				name 		= $key
+				valid 		= $IsValidSchema
+				IsTypeValid = $IsTypeValid
+				ValueValid 	= $IsContentValid
+				errors 		= $errors
+			}
+	}
+	
+	$result = @{
+		valid = $IsValid
+	}
+	
+	if(!$ParentPath){
+		$result.validations = @($Validations.values)
+	}
+	
+	return [PsCustomObject]$result;
 }

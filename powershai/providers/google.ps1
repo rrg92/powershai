@@ -426,7 +426,6 @@ function google_Chat {
 	}
 	
 	try {
-		
 		$Resp = Invoke-GoogleGenerateContent @Params
 	} catch {
 		$_.Exception | Add-Member -Force Noteproperty GoogleProvider @{
@@ -446,11 +445,11 @@ function google_Chat {
 				tools 	= $StreamData.OpenaiAnswer.choices[0].delta.tool_calls
 			}
 			
-		$OpenaiAnswer.message = @{ 
-				role = "assistant"
-				content 	= $StreamData.OpenaiAnswer.choices[0].delta.content
-				tool_calls =  $StreamData.OpenaiAnswer.choices[0].delta.tool_calls
-			}
+		$OpenaiAnswer.choices | %{
+			$_.message = $_.delta 
+			$_.remove('delta');
+		}
+		
 	} else {
 		$OpenaiAnswer = Convert-GoogleAnswerToOpenaiAnswer $resp
 	}

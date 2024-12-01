@@ -14,6 +14,8 @@ param(
 
 $ErrorActionPreference = "Stop";
 
+import-module Pester;
+
 . "$(Get-Location)/util/UtilLib.ps1"
 . "./tests/pester/testlib.ps1"
 
@@ -21,6 +23,7 @@ $ErrorActionPreference = "Stop";
 CheckPowershaiRoot
 Get-module powershai | Remove-module;
 import-module ./powershai -force;
+
 
 [string[]]$DefaultTags = "basic";
 [string[]]$TestTags = @();
