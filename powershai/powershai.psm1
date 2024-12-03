@@ -204,6 +204,10 @@ function UpgradePowershaiSettingsStore {
 	$DefaultSettings = $NewSettingsStore.settings.default;
 	$CurrentStore = Get-PowershaiSettingsStore
 	
+	if(!$CurrentStore){
+		$CurrentStore = @{}
+	}
+	
 	# First version migration!
 	if($OldSettings -and $OldSettings.version -eq $null){
 		$DefaultSettings.user = HashTableMerge $DefaultSettings.user $OldSettings
