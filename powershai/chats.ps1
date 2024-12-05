@@ -88,11 +88,11 @@ function New-PowershaiParameters {
 		,# Controla o template usado ao injetar dados de contexto!
 		 # Este parâmetro é um scriptblock que deve retornar uma string com o contexto a ser injetado no prompt!
 		 # Os parâmetros do scriptblock são:
-		 #		FormattedObject 	- O objeto que representa o chat ativo, já formatado com o Formatter configurado
+		 #		FormattedObject 	- O objeto com os dados do contexto (Enviado via pipe), já formatado com o Formatter configurado
 		 #		CmdParams 			- Os parâmetros passados para Send-PowershaAIChat. É o mesmo objeto retorndo por GetMyParams
 		 #		Chat 				- O chat no qual os dados estão sendo enviados.
 		 # Se nulo, irá gerar um default. Verifique o cmdlet Send-PowershaiChat para detalhes
-			$ContextFormat = $null
+			$PromptBuilder = $null
 			
 		,#Controla como as Tools Calls são exibidas pelo comando Send-PowershaiChat
 		 #Valores possíveis:
@@ -219,7 +219,7 @@ function New-PowershaiChat {
 		$UserAllNames = $FullName.split(" ");
 		$UserFirstName = $UserAllNames[0];
 	} catch {
-		write-verbose "Cannot get logged username: $_"
+		verbose "Cannot get logged username: $_"
 	}
 	
 	$ApiParams = @{					}
@@ -709,7 +709,7 @@ function Format-PowershaiContext {
 			$ChatId = "."
 	)
 	
-	write-verbose "Getting ChatId..."
+	verbose "Getting ChatId..."
 	$Chat = Get-PowershaiChat -ChatId $ChatId
 	
 	if(!$func){
@@ -725,7 +725,7 @@ function Format-PowershaiContext {
 		$Func = $ShortCut
 	}
 	
-	write-verbose "FormatFunction: $func"
+	verbose "FormatFunction: $func"
 	
 	if(!$params){
 		$params =  $Chat.params.ContextFormatterParams
@@ -736,10 +736,10 @@ function Format-PowershaiContext {
 		$params = @{}
 	}
 	
-	write-verbose "FormatParams: $($params|out-string)";
+	verbose "FormatParams: $($params|out-string)";
 
 	
-	write-verbose "Invoking formatter..."
+	verbose "Invoking formatter...: $func"
 	& $func $obj @params
 }
 
@@ -898,12 +898,12 @@ function Send-PowershaiChat {
 		
 		
 		if($CallName -eq "io"){
-			write-verbose "Invoked vias io alias. Setting Object to true!";
+			verbose "Invoked vias io alias. Setting Object to true!";
 			$Object = $true;
 		}
 		
 		if($CallName -eq "iat"){
-			write-verbose "Invoked vias iat alias. Setting Temporary to true!";
+			verbose "Invoked vias iat alias. Setting Temporary to true!";
 			$Temporary = $true;
 		}
 		
@@ -920,10 +920,10 @@ function Send-PowershaiChat {
 		$ActiveChat = Get-PowershaiChat "." -NoError
 		
 		if(!$ActiveChat){
-			write-verbose "Creating new default chat..."
+			verbose "Creating new default chat..."
 			$NewChat = New-PowershaiChat -ChatId "default" -IfNotExists
 			
-			write-verbose "Setting active...";
+			verbose "Setting active...";
 			$ActiveChat = Get-PowershaiChat -SetActive $NewChat.id;
 		}
 		
@@ -937,7 +937,7 @@ function Send-PowershaiChat {
 			$prompt += "file: $sspath";
 		}
 		
-		$AllContext = @()
+		
 		$IsPipeline = $PSCmdlet.MyInvocation.ExpectingInput   
 		
 		$MainCmdlet = $PsCmdLet;
@@ -969,11 +969,11 @@ function Send-PowershaiChat {
 		}
 		
 		
+		# This is the default code used to build the final prompt to be sent to LLM!
+		$PromptBuilderScript = $CurrentChatParams.all.PromptBuilder;
 		
-		$ContextFormat = $CurrentChatParams.all.ContextFormat;
-		
-		if(!$ContextFormat){
-			$ContextFormat = {
+		if(!$PromptBuilderScript){
+			$PromptBuilderScript = {
 				param($Params)
 				
 				$ContextObject 	= $Params.FormattedObject;
@@ -1024,7 +1024,7 @@ function Send-PowershaiChat {
 					
 				
 				if($Object){
-					write-verbose "ObjectMode enabled. No writes...";
+					verbose "ObjectMode enabled. No writes...";
 					return;
 				}
 				
@@ -1128,7 +1128,7 @@ function Send-PowershaiChat {
 			$UserFirstName		= $Chat.UserInfo.AllNames[0];
 			$ChatContext 		= $Chat.context;
 			
-			write-verbose "Iniciando..."
+			verbose "Iniciando..."
 			
 			$ChatUserParams = $CurrentChatParams.all
 			$DirectParams 	= $CurrentChatParams.Direct;
@@ -1156,7 +1156,7 @@ function Send-PowershaiChat {
 						$RemovedCount = $removed.content.length;
 					}
 					
-					write-verbose "Removing Length: $removed $RemovedCount"
+					verbose "Removing Length: $removed $RemovedCount"
 					$ChatContext.size -= [int]$RemovedCount;
 				}
 				
@@ -1337,7 +1337,7 @@ function Send-PowershaiChat {
 					$ChatParams.Remove('Tools');
 				}
 				
-				write-verbose "Params: $($ChatParams|out-string)"
+				verbose "Params: $($ChatParams|out-string)"
 				
 				$Start = (Get-Date);
 				$Ret 	= Invoke-AiChatTools @ChatParams;
@@ -1476,38 +1476,38 @@ function Send-PowershaiChat {
 			}
 			
 			
-			$ContextPrompt = & $ContextFormat $ContextScriptParams
+			$ContextPrompt = & $PromptBuilderScript $ContextScriptParams
 			
-			write-verbose "Adding to context: $($Context|out-string)"
+			verbose "Adding to context: $($Context|out-string)"
 			ProcessPrompt $ContextPrompt
 		}
 	
 
 		$ContextFormatParams = @{
-			func = $FormatterFunc
-			params = $FormatterParams
-			ChatId = $ActiveChat.id
+			func 	= $FormatterFunc
+			params 	= $FormatterParams
+			ChatId 	= $ActiveChat.id
 		}
 		
-
+		verbose "finishing beging block... start processing pipeline input..."
+		[Collections.ArrayList]$AllContext = @()
 	}
 	
 	process {
-		
-		
 
-		
 		if($ForEach -and $IsPipeline){
 			# Convete o contexto para string!
 			$StrContext = Format-PowershaiContext -obj $context @ContextFormatParams;
 			ProcessContext $StrContext;
 		} else {
-			$AllContext += $context
+			$null = $AllContext.Add($context);
 		}
 	}
 	
 	
 	end {
+		verbose "start processing endblock!"
+		
 		if(!$IsPipeline){
 			ProcessPrompt $prompt
 			return;
@@ -1570,12 +1570,12 @@ function Clear-PowershaiChat {
 	$Chat = Get-PowershaiChat -ChatId $ChatId;
 	
 	if($context){
-		write-verbose "Clearing context..."
+		verbose "Clearing context..."
 		$Chat.context = NewChatContext
 	}
 	
 	if($history){
-		write-verbose "Clearing history"
+		verbose "Clearing history"
 		$Chat.history = @();
 	}
 	
