@@ -162,7 +162,7 @@ function Switch-PowershaiSetting {
 		$TargetProvider = $OldUserSetting.provider;
 	}
 	
-	if($TargetProvider -and (Test-Path "Function:Set-AiProvider")){
+	if($TargetProvider -and (Test-Path "Function:Set-AiProvider") -and $PROVIDERS[$TargetProvider]){
 		Set-AiProvider $TargetProvider;
 	}
 	
