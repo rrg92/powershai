@@ -656,3 +656,146 @@ function Confirm-PowershaiObjectSchema {
 	
 	return [PsCustomObject]$result;
 }
+
+
+
+function Enter-PowershaiRetry {
+	<#
+		.SYNOPSIS
+			Gerencia a execução de comandos com base no resultado
+			
+		.DESCRIPTION
+			Este cmdlet ajuda a executar comandos enquanto um determinado resultado não for alcançado.
+			Com isso, é possível, por exemplo, solicitar o LLM que gere um resultado novamente caso a resposta não seja a solicitada!
+	#>
+	[CmdletBinding()]
+	param(
+		#O scriptblock com o código a ser executado
+			$Code 
+		
+		,#Resultado esperado 
+		 #Pode ser uma string co o qual o resultado do código será comparado.
+		 #Pode ser um script block que será invocado!
+		 #Deve retornar um bool true para ser considerado como válido!
+		 #$_ aponta para o resultado atual!
+			$Expected 
+		
+		,#Máximo de retry
+			$Retries = 1
+			
+		,#Exibe o progresso das tentativas 
+			[switch]$ShowProgress
+			
+		,#Inclui exceptions no check!
+		 #Se não especifciado, se o codigo em -Code resultar em erro, o erro é disparado de volta para quem chamou.
+		 #Ao ser especificado, o erro é enviado como resultado para que o codigo -Expected decida o que fzer!
+			[switch]$CheckErrors
+			
+		,# Permite modificar o vlaor a ser usado no check. $_  apontará para o objeto resultante da execução!
+			$ModifyResult = $null
+	)
+	
+	function progress {
+		if($ShowProgress){
+			write-host @Args;
+		} else {
+			verbose @Args;
+		}
+	}
+	
+	if($Expected -is [ScriptBlock]){
+		$CheckScript = $Expected
+	} else {
+		$CheckScript = {
+			return $Expected
+		}
+	}
+	
+	$MustRetry 	= $true;
+	$CurrentTry = 0;
+	while($CurrentTry -lt $Retries){
+		$CurrentTry++;
+		
+		progress "Running code... Try: $($CurrentTry)";
+		$IsError = $false;
+		try {
+			$result = & $code 
+		} catch {
+			
+			if(!$CheckErrors){
+				throw;
+			}
+			
+			progress "Resulted in error";
+			$IsError = $true;
+			$result = $_
+		}
+		
+		progress "	Result:`n$result"
+		
+		[bool]$CheckResult = & {
+				
+				
+				if($ModifyResult -is [scriptblock]){
+					$result = $ModifyResult.InvokeWithContext($null,[psvariable]::new('_', $result)) | %{$_}
+				}
+			
+				$CheckScriptResult = $CheckScript.InvokeWithContext(	$null, [psvariable]::new('_', $result)) | %{$_};
+				verbose "CheckScriptResult: $CheckScriptResult";
+				
+				if($CheckScriptResult -is [bool]){
+					verbose "Result is bool!";
+					return $CheckScriptResult;
+				}
+				
+				
+				if($CheckScriptResult -is [type]){
+					verbose "Validating if is type $CheckScriptResult";
+					return $result -is $CheckScriptResult;
+				}
+				
+				if($CheckScriptResult -is [hashtable]){
+					verbose "result is hashtable. Validating as schema!";
+					
+					# Result must be a valid object!
+					# If text, assume JSON!
+					$ResultObject = $result;
+					
+					if($ResultObject -is [string]){
+						$ResultObject = $ResultObject | ConvertFrom-Json;
+					}
+					
+					$SchemaValidation = Confirm-PowershaiObjectSchema $ResultObject $CheckScriptResult
+					
+					return $SchemaValidation.valid;
+				}
+				
+				verbose "Performing simple eq comparison...";
+				return $result -eq $CheckScriptResult	
+			}
+		
+		progress "	CheckResult: $CheckResult";
+		
+		if($CheckResult){
+			write-output -NoEnumerate $result;
+			return;
+		}
+	}
+	
+	throw "POWERSHAI_RETRY_MAXREACHED";
+}
+
+
+function GetParamCallAlias {
+	param($ParamName)
+	
+	$ParentInvocation = Get-Variable -Scope 1 MyInvocation -Value;
+	$MyAliases =$ParentInvocation.MyCommand.Parameters[$ParamName].Aliases
+	$MyAliasesReg = $MyAliases -Join "|";
+		
+	$AliasFound = $ParentInvocation.Line -match "-\b($MyAliasesReg)\b"
+	
+	if($AliasFound){
+		return $matches[1];
+	}
+}
