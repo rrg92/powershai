@@ -986,6 +986,7 @@ function Get-AiChat {
 			Veja a documentação de cada parãmetro para detalhes e como mapear para um provider;
 			
 			Quando o modelo não suportar um dos parâmetros informados (isto pé, não houver funcionalidade equivalente,ou que possa ser implementanda de maneira equivalente) um erro deverá ser retornado.
+			Parâmetros que não são repassados ao provider terão uma descrição informando!
 #>
 	[CmdletBinding()]
 	param(
@@ -1019,7 +1020,7 @@ function Get-AiChat {
 		 #Isso irá sobrescrever os valores que foram calculados e gerados com base nos outros parâmetros.
 			$RawParams	= @{}
 		
-		,#Habilita o modelo Stream 
+		,#Habilita o modo Stream 
 		 #Você deve especificar um ScriptBlock que será invocado para cada texto gerado pelo LLM.
 		 #O script deve receber um parâmetro que representa cada trecho, no mesmo formato de streaming retornado
 		 #	Este parâmetro é um objeto que conterá a propridade choices, que é nom mesmo esquema retornado pelo streaming da OpenAI:
@@ -1028,10 +1029,27 @@ function Get-AiChat {
 			
 		,#Incluir a resposta da API em um campo chamado IncludeRawResp
 			[switch]$IncludeRawResp	
+			
+		
+		# Os parâmetro a seguir não são repassado aos provider!
+			
+		,# Valida a resposta e caso não esteja como esperado, tenta novamente!
+		 #Pode ser um string ou um scriptblock
+		 #Não é repassado ao provider!
+			[Alias('CheckLike','CheckRegex','CheckJson')]
+			$Check = $null
+		
+		,# Max tentativas se o Check falha
+		 # Não é repassado ao provider!
+			$Retries = 1
+			
+		,# Retorna somente o texto da resposta.
+		 # Não é repassado ao provider!
+			[switch]$AnswerOnly
 	)
 	
 	$Provider = Get-AiCurrentProvider
-	$FuncParams = $PsBoundParameters;
+	[hashtable]$FuncParams = $PsBoundParameters;
 	
 	if($ResponseFormat -in "json","json_object"){
 		$FuncParams.ResponseFormat = @{type = "json_object"}
@@ -1059,12 +1077,70 @@ function Get-AiChat {
 	}
 	
 	$FuncParams['model'] = $ModelName
-	$resp = Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+	$CheckOp = 'Check';
+	if($FuncParams.Contains('Check')){
+		$CheckOp = GetParamCallAlias "Check";
+	}
 	
-	# Validate answer!
-	#$IsValid = Test-AiChatAnswer $resp -throw;
+	switch($CheckOp){
+		
+		"Check" {
+			if($Check -eq "json"){
+				$Check = @{};
+				$CheckOp = "CheckJson";
+				continue;
+			}
+			elseif($Check -is [hashtable]){
+				$CheckOp = "CheckJson";
+			}
+			elseif($Check -is [string]){
+				$CheckOp = "CheckEq"
+			}
+		}
+		
+		"CheckJson" {
+			# use own check value...
+		}
+		
+		"CheckLike" {
+			$CheckValue = $Check;
+			$Check = {
+				$_ -like $CheckValue
+			}
+		}
+		
+		"CheckRegex" {
+			$CheckValue = $Check;
+			$Check = {
+				$_ -match $CheckValue
+			}
+		}
+		
+		"CheckEq" {
+			# usar o proprio vlor do check!
+		}
+		
+		default {
+			throw "POWERSHAI_AICHAT_UNSUPPORTED_RETRYCHECK: $CheckOp";
+		}
+	}
 	
+	[void]$FuncParams.remove('Check');
+	[void]$FuncParams.remove('Retries');
+	[void]$FuncParams.remove('AnswerOnly');
 	
+	if($Check){
+		$resp = Enter-PowershaiRetry {
+			Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+		} -Retries $Retries -Expected $Check -ModifyResult { $_.choices[0].message.content }
+	} else {
+		$resp = Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+	}
+	
+	if($AnswerOnly){
+		return $resp.choices[0].message.content;
+	}
+
 	return $resp;
 }
 
@@ -1254,7 +1330,7 @@ function Invoke-AiChatTools {
 	
 	# initliza message!
 	$Message 	= New-Object System.Collections.ArrayList
-	$Message.AddRange($prompt);
+	$Message.AddRange(@($prompt));
 	
 	$TotalPromptTokens 	= 0;
 	$TotalOutputTokens 	= 0;
@@ -1970,6 +2046,15 @@ set-alias aihelp Get-PowershaiHelp
 set-alias aid Get-PowershaiHelp
 set-alias ajudai Get-PowershaiHelp
 set-alias iajuda Get-PowershaiHelp
+
+
+
+
+
+
+
+
+############## Module Init steps!
 
 
 . "$PSScriptRoot/chats.ps1"
