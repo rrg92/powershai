@@ -504,9 +504,13 @@ function Get-OpenaiChat {
 					
 					if($StreamData.FullAnswer){
 						$StreamData.FullAnswer.choices[0].delta.content += $Answer.choices[0].delta.content;
-						$StreamData.FullAnswer.choices[0].finish_reason = $Answer.choices[0].finish_reason
+						
 					} else {
 						$StreamData.FullAnswer = $Answer
+					}
+					
+					if($Answer.choices[0].finish_reason){
+						$StreamData.FullAnswer.choices[0].finish_reason = $Answer.choices[0].finish_reason
 					}
 						
 					$CurrentDelta 	= $StreamData.FullAnswer.choices[0].delta;
@@ -762,13 +766,18 @@ function Get-OpenaiToolFromScript {
 		Assim, conseguimos acessar tanto a DOC da funcao, quanto manter um objeto que pode ser usado para executá-la.
 	#>
 	$GetFunctionsScript = {
+		$PSModuleAutoLoadingPreference = "None"
+		
 		verbose "Running $FilePath"
 		. $FilePath
+		
+		verbose "	Done!"
 		
 		$AllFunctions = @{}
 		
 		#Obtem todas as funcoes definidas no arquivo.
 		#For each function get a object 
+		
 		Get-Command | ? {$_.scriptblock.file -eq $FilePath} | %{
 			verbose "Function: $($_.name)"
 			
@@ -780,6 +789,7 @@ function Get-OpenaiToolFromScript {
 				}
 		}
 		
+		verbose "done!";
 		return $AllFunctions;
 	}
 
