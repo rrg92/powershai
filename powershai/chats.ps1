@@ -1142,10 +1142,6 @@ function Send-PowershaiChat {
 			
 			function AddContext($msg) {
 
-				if($Snub){
-					return;
-				}
-					
 				while($ChatContext.size -ge $MaxContextSize -and $ChatContext.messages){
 					$removed,$LeftMessages = $ChatContext.messages;
 					
@@ -1156,7 +1152,7 @@ function Send-PowershaiChat {
 						$RemovedCount = $removed.content.length;
 					}
 					
-					verbose "Removing Length: $removed $RemovedCount"
+					verbose "-- CHAT REMOVED DUE MAX CONTEXT SIZE: $removed $RemovedCount"
 					$ChatContext.size -= [int]$RemovedCount;
 				}
 				
@@ -1205,7 +1201,6 @@ function Send-PowershaiChat {
 				if($ShowFullSend){
 					write-host -ForegroundColor green "YouSending:`n$($Msg|out-string)"
 				}
-				
 	
 				if(!$Snub){
 					$Msg | %{ AddContext $_ };
@@ -1467,7 +1462,7 @@ function Send-PowershaiChat {
 			}
 			
 			
-			
+
 			$ContextScriptParams = @{
 				FormattedObject = $Context
 				CmdParams 		= $MyParameters
@@ -1506,6 +1501,7 @@ function Send-PowershaiChat {
 	
 	
 	end {
+		
 		verbose "start processing endblock!"
 		
 		if(!$IsPipeline){
