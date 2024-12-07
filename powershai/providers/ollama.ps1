@@ -1,4 +1,4 @@
-<#
+﻿<#
 	Base para invocar a API do ollama (parte da api que nao é compativel com a openai)
 #>
 function Invoke-OllamaApi {
@@ -129,6 +129,43 @@ function ollama_GetEmbeddings {
 		
 		return [PsCustomObject]$emb
 	}
+}
+
+
+function ollama_FormatPrompt {
+	param($model)
+	
+	$ModelEmoji = "";
+	
+	
+	if($model -like "llama*"){
+		$ModelEmoji = "🦙"
+	}
+	
+	if($model -like "smollm*"){
+		$ModelEmoji = "🤗"
+	}
+	
+	if($model -like "gemma*"){
+		$ModelEmoji = "💎"
+	}
+	
+	if($model -like "aya*"){
+		$ModelEmoji = "🍃"
+	}
+	
+	if($model -like "phi*"){
+		$ModelEmoji = "🟦"
+	}
+	
+	if($model -like "qwen*"){
+		$ModelEmoji = "🟣"
+	}
+	
+	
+	
+	return "⚪$($ModelEmoji) $($model)";
+	
 }
 
 
