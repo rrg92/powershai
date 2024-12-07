@@ -1,6 +1,5 @@
 ﻿# Compativel com openai!
-Set-Alias groq_GetModels openai_GetModels
-Set-Alias groq_Chat openai_Chat		
+Set-Alias groq_GetModels openai_GetModels	
 Set-Alias Set-GroqToken Set-AiCredential
 
 
@@ -23,6 +22,29 @@ function groq_FormatPrompt {
 	}
 	
 	return "🅾️$($ModelEmoji) $($model): ";
+}
+
+function groq_Chat {
+	$RawParams = $ProviderFuncRawData.params;
+	
+	$prompt = $RawParams.prompt
+	
+	# Remove refusal from messages!
+	[object[]]$OpenaiMessages = @(ConvertTo-OpenaiMessage $prompt);
+	
+	[Collections.ArrayList]$GroqMessages = @()
+	foreach($m in $OpenaiMessages){
+		$GroqMessage = HashTableMerge @{} $m;
+		
+		if($GroqMessage.contains("refusal")){
+			$GroqMessage.remove("refusal");
+		}
+		
+		[void]$GroqMessages.Add($GroqMessage)
+	}
+	
+	$RawParams.prompt = @($GroqMessages)
+	openai_Chat @RawParams
 }
 
 return @{
