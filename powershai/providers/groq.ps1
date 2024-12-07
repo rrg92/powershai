@@ -3,11 +3,23 @@ Set-Alias groq_GetModels openai_GetModels
 Set-Alias groq_Chat openai_Chat		
 Set-Alias Set-GroqToken Set-AiCredential
 
+
+function groq_FormatPrompt {
+	param($model)
+	
+	if($model -like "llama*"){
+		return "🟠🦙 $($model):"
+	} else {
+		return "🟠 $($model):"
+	}
+	
+}
+
 return @{
 
 
 	BaseUrl 			= "https://api.groq.com/openai/v1"
-	DefaultModel		= "llama-3.1-70b-versatile"
+	DefaultModel		= "llama-3.2-70b-versatile"
 	CredentialEnvName 	= "GROQ_API_KEY"
 	
 	info = @{
