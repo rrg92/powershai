@@ -7,12 +7,22 @@ Set-Alias Set-GroqToken Set-AiCredential
 function groq_FormatPrompt {
 	param($model)
 	
+	$ModelEmoji = "";
+	
+	
 	if($model -like "llama*"){
-		return "🟠🦙 $($model):"
-	} else {
-		return "🟠 $($model):"
+		$ModelEmoji = "🦙"
 	}
 	
+	if($model -like "gemma*"){
+		$ModelEmoji = "💎"
+	}
+	
+	if($model -like "mixtral*"){
+		$ModelEmoji = "🟠"
+	}
+	
+	return "🅾️$($ModelEmoji) $($model)";
 }
 
 return @{
