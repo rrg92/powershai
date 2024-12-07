@@ -22,7 +22,7 @@ function groq_FormatPrompt {
 		$ModelEmoji = "🟠"
 	}
 	
-	return "🅾️$($ModelEmoji) $($model)";
+	return "🅾️$($ModelEmoji) $($model): ";
 }
 
 return @{

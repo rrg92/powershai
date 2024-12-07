@@ -151,7 +151,7 @@ function ollama_FormatPrompt {
 	}
 	
 	if($model -like "aya*"){
-		$ModelEmoji = "🍃"
+		$ModelEmoji = "❄️"
 	}
 	
 	if($model -like "phi*"){
@@ -164,7 +164,7 @@ function ollama_FormatPrompt {
 	
 	
 	
-	return "⚪$($ModelEmoji) $($model)";
+	return "⚪$($ModelEmoji) $($model): ";
 	
 }
 

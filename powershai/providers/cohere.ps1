@@ -258,6 +258,19 @@ function cohere_Chat {
 }
 
 
+function cohere_FormatPrompt {
+	param($model)
+	
+	$ModelEmoji = "🟣";
+	
+	
+	if($model -like "c4ai-aya*"){
+		$ModelEmoji = "❄️"
+	}
+	
+	return "🟠$($ModelEmoji) $($model): ";
+}
+
 
 return @{
 	BaseUrl 			= "https://api.cohere.com/v2"
