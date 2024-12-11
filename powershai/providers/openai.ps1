@@ -501,36 +501,50 @@ function Get-OpenaiChat {
 						return;
 					}
 					
+					$Tools 	= $Answer.choices[0].delta.tool_calls;
 					
 					if($StreamData.FullAnswer){
 						$StreamData.FullAnswer.choices[0].delta.content += $Answer.choices[0].delta.content;
 						
 					} else {
 						$StreamData.FullAnswer = $Answer
+						if($Tools){
+							$StreamData.CurrentCall = $Tools[-1]
+						}
+						
+						$Tools = @() # dont need process again, already added!
 					}
 					
 					if($Answer.choices[0].finish_reason){
 						$StreamData.FullAnswer.choices[0].finish_reason = $Answer.choices[0].finish_reason
 					}
 						
-					$CurrentDelta 	= $StreamData.FullAnswer.choices[0].delta;
-					$Tools 			= $Answer.choices[0].delta.tool_calls;
 					
-					if($Tools -and $StreamData.FullAnswer.choices[0].delta.tool_calls -eq $null){
-						$StreamData.FullAnswer.choices[0].delta.tool_calls | Add-Member -force Noteproperty tool_calls @()
+					$FinalMessage 	= $StreamData.FullAnswer.choices[0].delta;
+					
+					
+					## PRocess tools!
+					# If model sent tool call, but tool_calls property dont exists yet , add it!
+					if($Tools -and $FinalMessage.tool_calls -eq $null){
+						$FinalMessage | Add-Member -force Noteproperty tool_calls @()
 					}
+					
 					
 					foreach($ToolCall in $Tools){
 						$CallId 		= $ToolCall.id;
 						$CallType 		= $ToolCall.type;
 						#verbose "Processing tool`n$($ToolCall|out-string)"
 						
+						# Openai sent each tool in chunks, so, next tool will be sent without id.
+						# THen, weed need way to get "current" sending tool arguments chunk data...
+						# Whenever a call id is sent, then model sents a new tool call. Next chunks will be related to that...
 						if($CallId){
-							$CurrentDelta.tool_calls += $ToolCall;
-							$StreamData.CurrentCall = $ToolCall;
-							continue;
+							$FinalMessage.tool_calls 	+= $ToolCall;
+							$StreamData.CurrentCall 	= $ToolCall;
+							continue; # tool call contains all messagem including arguments. Dont need add more nothing. Must go next!
 						}
 						
+						# If have function property, model sent something!
 						$CurrentCall = $StreamData.CurrentCall;
 						if($CurrentCall.type -eq 'function' -and $ToolCall.function){
 							$CurrentCall.function.arguments += $ToolCall.function.arguments;

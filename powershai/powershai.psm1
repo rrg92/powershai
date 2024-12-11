@@ -1460,91 +1460,80 @@ function Invoke-AiChatTools {
 					
 				verbose "Processing tool call $ToolCallId"
 				
-				try {
-					if($CallType -ne 'function'){
-						throw "POWERSHAI_CHATTOOLS_INVALID_LLM_CALLTYPE: Tool type $CallType not supported"
-					}
-					
-					$FuncCall = $ToolCall.function
-					
-					#Get the called function name!
-					$FuncName = $FuncCall.name
-					verbose "	FuncName: $FuncName"
+				if($CallType -ne 'function'){
+					throw "POWERSHAI_CHATTOOLS_INVALID_LLM_CALLTYPE: Tool type $CallType not supported"
+				}
+				
+				$FuncCall = $ToolCall.function
+				
+				#Get the called function name!
+				$FuncName = $FuncCall.name
+				verbose "	FuncName: $FuncName"
 
-					# acha a tool na lista!
-					$FunctionInfo = $FunctionMap[$FuncName]
-					
-					if(!$FunctionInfo){
-						throw "POWERSHAI_CHATTOOLS_NOFUNCTIONMAP: Function $FuncName was invoked, but no function map found. This can be PowershAI bug or LLM incorrect call!"
+				# acha a tool na lista!
+				$FunctionInfo = $FunctionMap[$FuncName]
+				
+				if(!$FunctionInfo){
+					throw "POWERSHAI_CHATTOOLS_NOFUNCTIONMAP: Function $FuncName was invoked, but no function map found. This can be PowershAI bug or LLM incorrect call!"
+				}
+				
+				$SrcToolbox = $FunctionInfo.SrcBox;
+				$NoSplatArgs = $false;
+				if($SrcToolbox.map){
+					try {
+						$MapResult = (& $SrcToolbox.map $FuncName $SrcToolbox)
+						$TheFunc = $MapResult.Func
+						$NoSplatArgs = $MapResult.NoSplatArgs;
+					} catch {
+						write-warning "POWERSHAI_CHATTOOLS_PSMAP_ERROR: ChatTools failed get command name for tool $FuncName"
+						throw
 					}
-					
-					$SrcToolbox = $FunctionInfo.SrcBox;
-					$NoSplatArgs = $false;
-					if($SrcToolbox.map){
-						try {
-							$MapResult = (& $SrcToolbox.map $FuncName $SrcToolbox)
-							$TheFunc = $MapResult.Func
-							$NoSplatArgs = $MapResult.NoSplatArgs;
-						} catch {
-							write-warning "POWERSHAI_CHATTOOLS_PSMAP_ERROR: ChatTools failed get command name for tool $FuncName"
-							throw
-						}
-					} else {
-						$TheFunc = $FuncName
-					}
-					
-					if(!$TheFunc){
-						throw "POWERSHAI_CHATTOOLS_NOFUNCTION: No function name was returned by map of $FuncName. This can be a bug of Powershai or LLM wrong call."
-					}
-					
-					#Here wil have all that we need1
-					$FuncArgsRaw =  $FuncCall.arguments
-					verbose "	Arguments: $FuncArgsRaw";
-					
-					#We assuming model sending something that can be converted...
-					$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
-					
-					
-					#Then, we can call the function!
-					$ArgsHash = @{};
-					$funcArgs.psobject.properties | %{ $ArgsHash[$_.Name] = $_.Value  };
-					
-					$CurrentToolResult = @{ 
-						hash 	= $ArgsHash
-						obj 	= $funcArgs 
-						name 	= $FuncName
-						id 		= $ToolCallId
-						resp 	= $FuncResp
-					}
-					
-					$AiInteraction.toolResults += $CurrentToolResult
-					
-					& $emit "func" $AiInteraction $CurrentToolResult
-					
-					verbose "Calling function $FuncName ($FuncInfo)"
-					
-					if($NoSplatArgs){
-						$ArgsHash = @($ArgsHash)
-					}
-					
+				} else {
+					$TheFunc = $FuncName
+				}
+				
+				if(!$TheFunc){
+					throw "POWERSHAI_CHATTOOLS_NOFUNCTION: No function name was returned by map of $FuncName. This can be a bug of Powershai or LLM wrong call."
+				}
+				
+				#Here wil have all that we need1
+				$FuncArgsRaw =  $FuncCall.arguments
+				verbose "	Arguments: $FuncArgsRaw";
+				
+				#We assuming model sending something that can be converted...
+				$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
+				
+				
+				#Then, we can call the function!
+				$ArgsHash = @{};
+				$funcArgs.psobject.properties | %{ $ArgsHash[$_.Name] = $_.Value  };
+				
+				$CurrentToolResult = @{ 
+					hash 	= $ArgsHash
+					obj 	= $funcArgs 
+					name 	= $FuncName
+					id 		= $ToolCallId
+					resp 	= $FuncResp
+				}
+				
+				$AiInteraction.toolResults += $CurrentToolResult
+				
+				& $emit "func" $AiInteraction $CurrentToolResult
+				
+				verbose "Calling function $FuncName ($FuncInfo)"
+				
+				if($NoSplatArgs){
+					$ArgsHash = @($ArgsHash)
+				}
+				
+				$FuncError = $null;
+				try {
 					$FuncResult = & $TheFunc @ArgsHash 
-					
-					if($FuncResult -eq $null){
-						$FuncResult = @{};
-					}
-					
-					$FuncResp.content = (Format-PowershaiContext $FuncResult)
-					& $emit "funcresult" $AiInteraction $CurrentToolResult $FuncResult
-					
-					
-					
-					# TODO: Add formatter!
-					
-					
-					$FuncSeqErrors = 0;
 				} catch {
-					$err = $_;
-					
+					$FuncError = $_;
+				}
+				
+				if($FuncError){
 					& $emit "error" $AiInteraction
 					
 					#Add curent error to this object to caller debug...
@@ -1554,10 +1543,10 @@ function Invoke-AiChatTools {
 					write-warning "Processing answer of model resulted in error. Id = $ToolCallId";
 					write-warning "FuncName:$FuncName, Request:$ReqsCount"
 					write-warning ("ERROR:")
-					write-warning $err
-					write-warning $err.ScriptStackTrace
+					write-warning $FuncError
+					write-warning $FuncError.ScriptStackTrace
 					
-					$FuncResp.content = "ERROR:"+$err;
+					$FuncResult = "ERROR:"+$FuncError;
 					
 					#Resets the seq errorS!
 					$FuncSeqErrors++;
@@ -1567,8 +1556,19 @@ function Invoke-AiChatTools {
 						write-warning "Stopping due to max consecutive errors";
 						break Main;
 					}
+				} else {
+					if($FuncResult -eq $null){
+						$FuncResult = @{};
+					}
+					
+					$FuncResp.content = (Format-PowershaiContext $FuncResult)
+					& $emit "funcresult" $AiInteraction $CurrentToolResult $FuncResult
+
+					# TODO: Add formatter!
+
+					$FuncSeqErrors = 0;	
 				}
-				
+
 				& $emit "exec" $AiInteraction
 				
 				# Add tool and its answer!

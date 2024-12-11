@@ -79,7 +79,7 @@ function New-PowershaiParameters {
 		,#System Message que é garantida ser enviada sempre, independente do histórico e clenaup do chat!
 			$SystemMessageFixed = $null
 			
-		,#Parãmetros a serem passados diretamente para a API que invoca o modelo.  
+		,#Parâmetros a serem passados diretamente para a API que invoca o modelo.  
 		 #O provider deve implementar o suporte a esse.  
 		 #Para usá-lo você deve saber os detalhes de implementação do provider e como a API dele funciona!
 			$RawParams = @{}
@@ -198,6 +198,11 @@ function New-PowershaiChat {
 	
 	# Create chat!
 	$Chats = $POWERSHAI_SETTINGS.chats;
+	
+	if(!$Chats -isnot [hashtable]){
+		$Chats = @{};
+		$POWERSHAI_SETTINGS.chats = $Chats;
+	}
 	
 	$ChatSlot = $Chats[$ChatId];
 	
@@ -1212,7 +1217,7 @@ function Send-PowershaiChat {
 				}
 				
 
-				
+	
 				#Generate functions!
 				if($Chat.Tools.compiled -eq $null){
 					$Chat.Tools.compiled  = @{
@@ -1229,9 +1234,9 @@ function Send-PowershaiChat {
 					$Chat.Tools.compiled
 				)
 				
-				if($Chat.params.SystemMessageFixed){
+				if($ChatUserParams.SystemMessageFixed){
 					#Envia essa system message sempre!
-					$FullPrompt = @("s: " + $Chat.params.SystemMessageFixed) + @($FullPrompt)
+					$FullPrompt = @("s: " + $ChatUserParams.SystemMessageFixed) + @($FullPrompt)
 				}
 				
 				#obtem os parametros que são 
@@ -1266,10 +1271,10 @@ function Send-PowershaiChat {
 										return;
 									}
 									
-									if($Chat.params.PrintToolCalls -like "Name*"){
+									if($ChatUserParams.PrintToolCalls -like "Name*"){
 										write-host -ForegroundColor Blue "$funcName{" -NoNewLine
 									
-										if($Chat.params.PrintToolCalls -eq "NameArgs"){
+										if($ChatUserParams.PrintToolCalls -eq "NameArgs"){
 												write-host ""
 												write-host "Args:"
 												$ToolArgs = $interaction.toolResults[-1].obj;
@@ -1291,7 +1296,7 @@ function Send-PowershaiChat {
 										return;
 									}
 									
-									if($Chat.params.PrintToolsResults){
+									if($ChatUserParams.PrintToolsResults){
 										write-host "Result:"
 										write-host $LastResult
 									}
@@ -1306,7 +1311,7 @@ function Send-PowershaiChat {
 										return;
 									}
 									
-									if($Chat.params.PrintToolCalls -like "Name*"){
+									if($ChatUserParams.PrintToolCalls -like "Name*"){
 										write-host -ForegroundColor Blue "}"
 										write-host ""
 									}
@@ -1343,8 +1348,9 @@ function Send-PowershaiChat {
 					WriteModelAnswer "FlushLine";
 				}
 
-				foreach($interaction in $Ret.interactions){ 
 				
+				foreach($interaction in $Ret.interactions){ 
+					
 					$Msg = $interaction.rawAnswer.choices[0].message;
 					
 					if(!$msg){
@@ -1685,6 +1691,10 @@ function  Add-PowershaiChatTool {
 	if($Global){
 		$Tools = $POWERSHAI_SETTINGS.UserTools
 		$scope = "global"
+	}
+	
+	if(!$names){
+		throw "POWERSHAI_AITOOLS_NOTOOL: Must inform some tool -names parameter";
 	}
 	
 	
