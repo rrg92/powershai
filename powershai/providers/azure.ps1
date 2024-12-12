@@ -142,13 +142,15 @@ function azure_SetCredential {
 		
 	$CredApiKey = $TempCred.credential.ApiKey;
 	
+	verbose "TempCredInfo:`n$($TempCred.credential|out-string)"
+	
 	if(!$CredApiKey -or $ChangeApiKey){
 		$Creds = Get-Credential "Azure Api key"
 		$TempCred.credential.ApiKey = $Creds.GetNetworkCredential().Password;
 	}
 
 	Enter-AiCredential $TempCred {
-		Get-OpenaiChat -prompt "Powershai Access Test! Just answer 'test ok'" -MaxTokens 100;
+		$null = Get-AiModels
 	}
 	
 	$AiCredential.credential = $TempCred.credential;
@@ -260,6 +262,8 @@ function azure_Chat {
 		$RawParams.Remove('Functions');
 	}
 	
+	$RawParams.model = "-";
+	
 	openai_Chat @RawParams
 }
 
@@ -274,7 +278,7 @@ return @{
 	}
 	
 	# Req changer
-	ReqChanger = (Get-Command OpenaiAzureChangeRequest)
+	ReqChanger 	= (Get-Command OpenaiAzureChangeRequest)
 	
 	#Assume every openai model support tools.
 	ToolsModels = "gpt-4*","o1-*"

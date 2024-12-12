@@ -59,6 +59,8 @@ function Invoke-OpenaiApi {
 	verbose "InvokeOpenAI, current provider = $($Provider.name)"
 	$Token = GetCurrentOpenaiToken $Token
 	
+	$MyParams = GetMyParams
+	
 	. Enter-AiProvider $Provider.name {
 		$headers = @{}
 		
@@ -98,7 +100,6 @@ function Invoke-OpenaiApi {
 		# ReqParams is parameters of Invoke-Http function, implement ib lib/http.ps1
 		# Providers developers must know how it works and know how openai provider will habndle that answer!
 		if($ReqChanger){
-			$MyParams 	= GetMyParams
 			$null 		= & $ReqChanger $ReqParams $MyParams
 		}
 
@@ -421,11 +422,16 @@ function Get-OpenaiChat {
 			if(!$model){
 				$DefaultModel = $Provider.DefaultModel;
 				
-				if(!$DefaultModel){
-					throw "POWERSHAI_NODEFAULT_MODEL: Must set default model using Set-AiDefaultModel"
+				# check if model is correct
+				
+				if($DefaultModel){
+					$model = $DefaultModel
 				}
 				
-				$model = $DefaultModel
+				if(!$model){
+					throw "POWERSHAI_OPENAI_DEFAULT_MODEL: Must set default model using Set-AiDefaultModel"
+				}
+				
 			}
 
 			[object[]]$Messages = @(ConvertTo-OpenaiMessage $prompt);
