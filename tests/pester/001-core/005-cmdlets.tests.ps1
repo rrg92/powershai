@@ -28,6 +28,10 @@ Describe "Get-AiChat" -Tags "get-aichat" {
 			return $CustomMessaege
 		}
 		
+		Mock -module powershai Get-AiModel {
+			return @{ tools = $false }
+		}
+		
 	}
 	
 	

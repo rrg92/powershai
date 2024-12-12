@@ -609,7 +609,15 @@ function Confirm-PowershaiObjectSchema {
 			$IsTypeValid	= $true;
 		} else {
 			$ExpectedType 	= $KeySchema.type;
-			$IsTypeValid 	= $KeyValue -is $ExpectedType;
+			$ExpectedTypes 	= @($ExpectedType)
+			
+			if($ExpectedType -eq [int]){
+					$ExpectedTypes += [int64];
+			}
+			
+			[bool]$IsTypeValid = @( $ExpectedTypes | ?{ $KeyValue -is $_ }).count
+			
+			
 			
 			if(!$IsTypeValid){
 				
@@ -620,7 +628,7 @@ function Confirm-PowershaiObjectSchema {
 				
 				$errors 	+= @(
 								"InvalidType:$CurrenType"
-								"Expected:"+$ExpectedType.name
+								"Expected:"+(@($ExpectedType|%{$_.name}) -Join ",")
 							) -Join ","
 			}
 			
@@ -711,6 +719,8 @@ function Enter-PowershaiRetry {
 		}
 	}
 	
+	$CheckDetails = @{}
+	
 	$MustRetry 	= $true;
 	$CurrentTry = 0;
 	while($CurrentTry -lt $Retries){
@@ -743,6 +753,8 @@ function Enter-PowershaiRetry {
 				$CheckScriptResult = $CheckScript.InvokeWithContext(	$null, [psvariable]::new('_', $result)) | %{$_};
 				verbose "CheckScriptResult: $CheckScriptResult";
 				
+				$CheckDetails.CheckScriptResult = $CheckScriptResult;
+				
 				if($CheckScriptResult -is [bool]){
 					verbose "Result is bool!";
 					return $CheckScriptResult;
@@ -767,6 +779,7 @@ function Enter-PowershaiRetry {
 					
 					$SchemaValidation = Confirm-PowershaiObjectSchema $ResultObject $CheckScriptResult
 					
+					$CheckDetails.SchemaValidation = $SchemaValidation;
 					return $SchemaValidation.valid;
 				}
 				
@@ -782,7 +795,12 @@ function Enter-PowershaiRetry {
 		}
 	}
 	
-	throw "POWERSHAI_RETRY_MAXREACHED";
+	
+	$error = New-PowershaiError POWERSHAI_RETRY_MAXREACHED -Props @{
+		details = $CheckDetails
+	}
+	
+	throw $error;
 }
 
 
