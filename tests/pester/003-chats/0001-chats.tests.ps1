@@ -27,45 +27,48 @@
 	
 	
 	foreach($provider in (Get-AiProviders) ){
-		$data = Get-AiProvider $provider.name
-		
-		
-		
-		$default = $data.DefaultModel;
-		
-
-		$Override = $ProviderOverride[$provider.name];
-		
-		if($Override.enabled -eq $false){
-			write-warning "Provider $($provider.name) removed from test due override!"
-			continue;
-		}
-		
-		if($Override.default){
-			$default = $Override.default;
-		}
-		
-		if(!$default){
-			write-warning "Provider $($provider.name) removed from test due not default!"
-			continue;
-		}
-		
 		try {
-			Enter-AiProvider $provider.name {
-				$Cred = Get-AiDefaultCredential
-				if(!$Cred.credential){
-					throw "NOCREDENTIAL";
-				}
+			$data = Get-AiProvider $provider.name
+
+			$default = $data.DefaultModel;
+			
+
+			$Override = $ProviderOverride[$provider.name];
+			
+			if($Override.enabled -eq $false){
+				write-warning "Provider $($provider.name) removed from test due override!"
+				continue;
 			}
+			
+			if($Override.model){
+				$default = $Override.model;
+			}
+			
+			if(!$default){
+				write-warning "Provider $($provider.name) removed from test due not default model!"
+				continue;
+			}
+			
+			try {
+				Enter-AiProvider $provider.name {
+					$Cred = Get-AiDefaultCredential
+					if(!$Cred.credential){
+						throw "NOCREDENTIAL";
+					}
+				}
+			} catch {
+				write-warning "Provider $($provider.name) removed due no credential set! Result: $_"
+				continue;
+			}
+			
+			$ModelInfo = Enter-AiProvider $provider.name {
+				Get-AiModel $default
+			}
+		
 		} catch {
-			write-warning "Provider $($provider.name) removed due no credential set! Result: $_"
+			write-warning "Provider $($provider.name) failed: $_";
 			continue;
 		}
-		
-		$ModelInfo = Enter-AiProvider $provider.name {
-			Get-AiModel $default
-		}
-		
 		
 		$TestModels += @{
 			provider 	= $provider.name
@@ -82,7 +85,6 @@
 AfterAll {
 	Switch-PowershaiSetting default
 }
-
 
 # TODO: SAVE settings in memory toe asy restore!
 Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
@@ -108,7 +110,7 @@ Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 			Set-AiDefaultModel $model;
 			$AllModels | ? { $_.name -like $model } | Should -Not -BeNullOrEmpty
 		}
-		
+
 		Context "Chats" {
 			It "Garante chat default" {
 				New-PowershaiChat -ChatId "default" -IfNotExists

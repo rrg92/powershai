@@ -10,6 +10,7 @@ param(
 	
 	,[switch]$only
 	,$PesterConfiguration = @{}
+	,$ExcludeFiles = @()
 )
 
 $ErrorActionPreference = "Stop";
@@ -45,6 +46,7 @@ if($tags -eq "PRODUCTION"){
 $Config = HashTableMerge @{
 	Run = @{
 		Path = @("./tests/pester")
+		ExcludePath = $ExcludeFiles
 	}
 	
 	Output = @{
