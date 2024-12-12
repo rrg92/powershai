@@ -531,7 +531,7 @@ function Confirm-PowershaiObjectSchema {
 	
 	
 	
-	if($Options.type -is [array]){
+	if($Options.type -eq [array]){
 		
 		$n = -1;
 		
