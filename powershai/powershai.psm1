@@ -935,6 +935,38 @@ function Set-AiDefaultModel {
 	SetCurrentProviderData $SetSlot $model;
 }
 
+function  Reset-AiDefaultModel {
+	<#
+		.SYNOPSIS
+			Remove o modelo default do provider atual, que foi definido com Set-AiDefaultModel!
+		
+		.DESCRIPTION
+			Remove o modelo default definido com Set-AiDefaultModel. Note que ao fazer isso, o modelo default passa a ser o modelo definido pelo provider.
+	#>
+
+	[CmdletBinding(SupportsShouldProcess, ConfirmImpact = "High")]
+	param(
+		[switch]
+		$Embeddings
+	)
+	
+	$SetSlot = "DefaultModel"
+	$provider = Get-AiCurrentProvider
+	
+	if($Embeddings){
+		$SetSlot = "DefaultEmbeddingsModel"
+	}
+	
+	$CurrentValue = GetCurrentProviderData $SetSlot;
+	
+	if(!$PsCmdlet.ShouldProcess("$($provider.name)/$CurrentValue","Unset default model")){
+		return;
+	}
+		
+	
+	SetCurrentProviderData $SetSlot $null;
+}
+
 
 # Lista os ids de models para o arg completion!
 function GetModelsId {
@@ -1045,7 +1077,7 @@ function Get-AiChat {
 			
 		,# Retorna somente o texto da resposta.
 		 # Não é repassado ao provider!
-			[switch]$AnswerOnly
+			[switch]$ContentOnly
 	)
 	
 	$Provider = Get-AiCurrentProvider
@@ -1105,14 +1137,14 @@ function Get-AiChat {
 		"CheckLike" {
 			$CheckValue = $Check;
 			$Check = {
-				$_ -like $CheckValue
+				$_.choices[0].message.content -like $CheckValue
 			}
 		}
 		
 		"CheckRegex" {
 			$CheckValue = $Check;
 			$Check = {
-				$_ -match $CheckValue
+				$_.choices[0].message.content -match $CheckValue
 			}
 		}
 		
@@ -1127,17 +1159,25 @@ function Get-AiChat {
 	
 	[void]$FuncParams.remove('Check');
 	[void]$FuncParams.remove('Retries');
-	[void]$FuncParams.remove('AnswerOnly');
+	[void]$FuncParams.remove('ContentOnly');
+	
+
 	
 	if($Check){
+		if($Check -is [scriptblock]){
+			$CheckModify = $null
+		} else {
+			$CheckModify = { $_.choices[0].message.content }
+		}
+
 		$resp = Enter-PowershaiRetry {
 			Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
-		} -Retries $Retries -Expected $Check -ModifyResult { $_.choices[0].message.content }
+		} -Retries $Retries -Expected $Check -ModifyResult $CheckModify
 	} else {
 		$resp = Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
 	}
 	
-	if($AnswerOnly){
+	if($ContentOnly){
 		return $resp.choices[0].message.content;
 	}
 
