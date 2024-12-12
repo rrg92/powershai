@@ -92,6 +92,8 @@ $DEFAULT_SETTINGS_STORE = @{
 				chats = @{}
 				
 				OriginalPrompt = $null
+				
+				ProviderStack = $null
 			}
 		}
 	}
@@ -420,6 +422,8 @@ function Get-AiNearProvider {
 	}
 }
 
+
+function Get-AiCurrentProvider {
 <#
 	.SYNOPSIS
 		Obtém o provider ativo 
@@ -435,7 +439,6 @@ function Get-AiNearProvider {
 		O parâmetro -ContextProvider retorna o provider atual onde o script está rodando.  
 		Se estiver rodando em um script de um provider, ele vai retornar aquele provider, ao invés do provider definido com Set-AiProvider.
 #>
-function Get-AiCurrentProvider {
 	param(
 		#Se habilitado, usa o provider de contexto, isto é, se o código está rodando em um arquivo no diretorio de um provider, assume este provider.
 		#Caso contrario, obtem o provider habilitado atualmente.
@@ -470,6 +473,33 @@ function Get-AiCurrentProvider {
 
 
 function Enter-AiProvider {
+<#
+	.SYNOPSIS
+		Executa um código sob um provider específico
+		
+	.DESCRIPTION 
+		Com este cmdlet, você pode execuar códigos que usam um provider específico.
+		Isso permite que você garanta que um determinado provider será retornado pelas funcoes que dependem de um provider. 
+		
+		Por exemplo:
+			Set-AiProvider openai 
+			Enter-AiProvider ollama { Get-AiCurrentProvider } # Retorna ollama
+			Get-AiCurrentProvider # retorna openai 
+			
+		Com isso, você pode forçar a execução de um trecho de código sob um provider especifico. 
+		Você pode combinar város Enter-AiProviders aninhados;
+		
+			Set-AiProvider openai 
+			Get-AiCurrentProvider # retorna openai 
+			Enter-AiProvider ollama { 
+				Get-AiCurrentProvider # Retorna ollama
+				Enter-AiProvider groq {
+					Get-AiCurrentProvider # Retorna groq
+				}
+				
+				Get-AiCurrentProvider # Retorna ollama
+			}
+#>
 	param(
 		$Provider
 		,$code
@@ -489,6 +519,72 @@ function Enter-AiProvider {
 }
 Set-Alias WithAiProvider Enter-AiProvider
 
+function InitProviderStack {
+	param()
+	
+	if($POWERSHAI_SETTINGS.ProviderStack -eq $null){
+		$POWERSHAI_SETTINGS.ProviderStack = New-Object Collections.Stack;
+	}
+}
+
+function Push-AiProvider {
+<#
+	.SYNOPSIS
+		Adiciona o provider atual na stack
+#>
+	param(
+		#Adiciona e muda para o novo provider!
+		$SwitchTo = $null
+	)
+	
+	InitProviderStack
+	$Stack = $POWERSHAI_SETTINGS.ProviderStack;
+	
+	$Provider = Get-AiCurrentProvider;
+	
+	$Stack.push($Provider.name);
+	
+	if($SwitchTo){
+		Set-AiProvider $SwitchTo;
+	}
+}
+
+function Pop-AiProvider {
+<#
+	.SYNOPSIS
+		Remove o provider atual da stack, fazendo o switch de volta!
+#>
+	param(
+		# Não faz o switch
+		[switch]$NoSwitch
+	)
+	
+	InitProviderStack
+	$Stack = $POWERSHAI_SETTINGS.ProviderStack;
+	$StackHead = $Stack.pop();
+	
+	if(!$NoSwitch){
+		try {
+			Set-AiProvider $StackHead;
+		} catch {
+			$Stack.push($StackHead);
+			throw;
+		}
+	}
+}
+
+function Get-AiStackedProviders {
+<#
+	.SYNOPSIS
+		Retorna a stack de providers criadas com Push-AiProvider
+#>
+	param()
+	
+	InitProviderStack
+	$Stack = $POWERSHAI_SETTINGS.ProviderStack;
+	
+	@($Stack) 
+}
 
 
 
