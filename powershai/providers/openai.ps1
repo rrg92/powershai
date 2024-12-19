@@ -734,8 +734,8 @@ function ConvertTo-OpenaiMessage {
 <#
 
 	.DESCRIPTION
-		Função auxiliar para converter um script .ps1 em um formato de schema esperado pela OpenAI.
-		Basicamente, o que essa fução faz é ler um arquivo .ps1 (ou string) juntamente com sua help doc.  
+		Função auxiliar para converter um script .ps1, ou scriptblock, em um formato de schema esperado pela OpenAI.
+		Basicamente, o que essa fução faz é executar o script e obter o help de todos os comandos definidos.
 		Então, ele retorna um objeto no formato especifiado pela OpenAI para que o modelo possa invocar!
 		
 		Retorna um hashtable contendo as seguintes keys:
@@ -750,32 +750,40 @@ function ConvertTo-OpenaiMessage {
 function Get-OpenaiToolFromScript {
 	[CmdLetBinding()]
 	param(
-		$ScriptPath
+		#Arquivo .ps1 ou scriptblock!
+		#O script será carregado em seu proprio escopo (como se fosse um modulo).
+		#Logo, você pode não conseguir acessar certas variáveis dependneod do escopo.
+		#Utilize -Vars para especificar quais variáveis precisa disponibilizar no script!
+		$Script
+		
+		,#Especifique variáveis e seus valores para serem disponibilizadas no escopo do script!
+		$Vars = @{}
 	)
+	
+	
+	# Copia todas as variaveis, antes de criar no escoop local!
+	$VarValues = $Vars
 	
 	verbose "Converting script $ScriptPath to OpenaAI toools...";
 	
-	#Defs is : @{ FuncName = @{}, FuncName2 ..., FuncName3... }
-	$FunctionDefs = @{};
-	
-	$ResolvedPath 	= Resolve-Path $ScriptPath -EA SilentlyContinue;
-	
-	if(!$ResolvedPath){
-		throw "POWERSHAI_OPENAI_sCRIPT2OPENAI_NOTFOUND: File not found $ScriptPath";
-	}
-	
-
 	# func é um file?
 	# existing path!
-	$IsPs1 			= $ScriptPath -match '\.ps1$';
+	$IsPs1 = $Script -is [string] -and $Script -match '\.ps1$';
 	
-	if(!$IsPs1 -or !$ResolvedPath){
-		throw "POWERSHAI_OPENAI_SCRIPT2OPENAI_ISNOTSCRIPT: $ScriptPath"
+	if($IsPs1){
+		$ResolvedPath 	= Resolve-Path $ScriptPath -EA SilentlyContinue;
+		$SrcScript 		= $ResolvedPath
+		verbose "Loading functions tools from file $ResolvedPath"
 	}
+	elseif($Script -is [scriptblock]){
+		$SrcScript = $Script
+	}
+	else {
+		throw "POWERSHAI_OPENAI_SCRIPT2OPENAI_ISNOTSCRIPT: Script must be scriptblock or ps1 file. Script = $Script"
+	}
+
 	
-	[string]$FilePath = $ResolvedPath
-	verbose "Loading function from file $FilePath"
-	
+
 	<#
 		Aqui é onde fazemos uma mágica interessante... 
 		Usamos um scriptblock para carregar o arquivo.
@@ -785,20 +793,32 @@ function Get-OpenaiToolFromScript {
 		do PowerShell.
 		Assim, conseguimos acessar tanto a DOC da funcao, quanto manter um objeto que pode ser usado para executá-la.
 	#>
-	$GetFunctionsScript = {
+	
+	
+	$ScriptModule = New-Module -Function * -Cmdlet * -ScriptBlock {
+		param($ModData)
+
 		$PSModuleAutoLoadingPreference = "None"
 		
-		verbose "Running $FilePath"
-		. $FilePath
 		
-		verbose "	Done!"
+		# Set as variáveis!
+		foreach($Var in $ModData.Vars.GetEnumerator()){
+			Set-Variable -name $Var.key -value $Var.value;
+		}
 		
-		$AllFunctions = @{}
 		
-		#Obtem todas as funcoes definidas no arquivo.
-		#For each function get a object 
+		. ([scriptblock]::create($ModData.SrcScript))1
 		
-		Get-Command | ? {$_.scriptblock.file -eq $FilePath} | %{
+	} -ArgumentList @{
+		SrcScript = $SrcScript
+		Vars = $VarValues
+	}
+	
+	import-module -force $ScriptModule 
+	
+	$AllFunctions = @{}
+	try {
+		Get-Command -mo $ScriptModule.name | %{
 			verbose "Function: $($_.name)"
 			
 			$help = get-help $_.name;
@@ -807,18 +827,15 @@ function Get-OpenaiToolFromScript {
 					func = $_
 					help = get-help $_.Name
 				}
-		}
-		
-		verbose "done!";
-		return $AllFunctions;
+		}	
+	} finally {
+		$ScriptModule | remove-module;
 	}
 
-	$FunctionDefs = & $GetFunctionsScript
+	$FunctionDefs = $AllFunctions
 	
 	[object[]]$AllTools = @();
-	
-	
-	
+
 	#for each function!
 	foreach($KeyName in @($FunctionDefs.keys) ){
 		$Def = $FunctionDefs[$KeyName];
@@ -948,10 +965,17 @@ function Get-OpenaiToolFromCommand {
 	$ToolData = @{}
 	
 	
-	foreach($function in $functions){
+	foreach($function in @($functions)){
 	
-	
-		$Command = Get-Command -EA SilentlyContinue $function;
+		if($function -is [Management.Automation.CommandInfo]){
+			$Command = $function
+		} else {
+			$Command = Get-Command -EA SilentlyContinue $function;
+		}
+		
+		if(!$Command){
+			throw "POWERSHAI_OPENAI_TOOLFROMCOMMAND_NOTFOUND: $function"
+		}
 		
 	
 		if($Command.CommandType -eq "Application"){
@@ -967,6 +991,7 @@ function Get-OpenaiToolFromCommand {
 				) -Join "`n"			
 			}
 		} else {
+			verbose "Getting help for function $function";
 			$CommandHelp = Get-Help $function;
 		}
 		

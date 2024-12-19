@@ -1697,9 +1697,14 @@ function Invoke-AiChatTools {
 						$FuncResult = @{};
 					}
 					
-					$FuncResp.content = (Format-PowershaiContext $FuncResult)
-					& $emit "funcresult" $AiInteraction $CurrentToolResult $FuncResult
-
+					
+					$FuncResp.content = $FuncResult
+					& $emit "funcresult" $AiInteraction $CurrentToolResult $FuncResp
+					
+					if($FuncResp.content -isnot [string]){
+						$FuncResp.content = $FuncResp.content | out-string;
+					}
+					
 					# TODO: Add formatter!
 
 					$FuncSeqErrors = 0;	

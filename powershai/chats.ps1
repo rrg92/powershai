@@ -1287,7 +1287,10 @@ function Send-PowershaiChat {
 								}
 								
 								funcresult = {
-									param($interaction)
+									param($interaction, $currentool, $FuncResp)
+									
+									# format using same formatter!
+									$FuncResp.content = Format-PowershaiContext $FuncResp.content;
 									
 									$LastResult = $funcName = $interaction.toolResults[-1].resp.content;
 									
