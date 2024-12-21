@@ -771,8 +771,8 @@ function Get-OpenaiToolFromScript {
 	$IsPs1 = $Script -is [string] -and $Script -match '\.ps1$';
 	
 	if($IsPs1){
-		$ResolvedPath 	= Resolve-Path $ScriptPath -EA SilentlyContinue;
-		$SrcScript 		= $ResolvedPath
+		$ResolvedPath 	= Resolve-Path $Script -EA SilentlyContinue;
+		$SrcScript 		= [string]$ResolvedPath
 		verbose "Loading functions tools from file $ResolvedPath"
 	}
 	elseif($Script -is [scriptblock]){
@@ -806,8 +806,12 @@ function Get-OpenaiToolFromScript {
 			Set-Variable -name $Var.key -value $Var.value;
 		}
 		
+		if($ModData.SrcScript -like "*.ps1"){
+			. $ModData.SrcScript
+		} else {
+			. ([scriptblock]::create($ModData.SrcScript))
+		}
 		
-		. ([scriptblock]::create($ModData.SrcScript))1
 		
 	} -ArgumentList @{
 		SrcScript = $SrcScript

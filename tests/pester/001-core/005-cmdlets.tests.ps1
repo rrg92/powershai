@@ -228,33 +228,6 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 			
 		}
 		
-		Describe "No Args" {
-			BeforeAll {
-				$Tools.Clear();
-				$null = $Tools.Add(@{
-					id = "call_pestertest"
-					type = "function"
-					function = @{
-						name = "Test1"
-						arguments = '{}'
-					}
-				})
-				
-				$resp 	= Invoke-AiChatTools "teste" -tools $OpenaiTools
-			}
-			
-			It "Max 2 interactions: user prompt and tool call result" {
-				$resp.interactions.count | Should -Be 2
-			}
-			
-			It "Last interaction: last sent must be the function call result" {
-				$resp.interactions[-1].sent.prompt[-1].content | Should -be "ToolResult:$CallToken"
-			}
-			
-			It "Must return the final model answer" {
-				$resp.answer.choices[0].message.content | Should -Be $CallToken;
-			}
-		}
 		
 		Describe "Check Args" {
 			BeforeAll {
@@ -285,14 +258,14 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 				 $FirstMessage = $resp.interactions[0]
 				 $Functions = $FirstMessage.sent.Functions
 				 
-				 $Functions | %{ $_.function.name } | Should -Be "Test1","Test2"
-				 $Functions | %{ $_.function.description.trim() } | Should -Be "Test 1","Test 2"
+				 $Functions | %{ $_.function.name } | Sort-Object | Should -Be "Test1","Test2"
+				 $Functions | %{ $_.function.description.trim() } | Sort-Object | Should -Be "Test 1","Test 2"
 			}
 			
 			It "Functions OpenAPI args" {
 				 $FirstMessage 	= $resp.interactions[0]
-				 $Function 	= $FirstMessage.sent.Functions[-1].function
-				 
+				 $Function 	= $FirstMessage.sent.Functions | ? { $_.function.name -eq "Test2" } | select -first 1 -expand function
+
 				 $Function.parameters.type | Should -Be "object"
 				 
 				 $Function.parameters.properties.obj.type | Should -Be "string"
@@ -308,10 +281,121 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 		}
 		
 
+		
+		Describe "No Args" {
+			BeforeAll {
+				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
+				$Tools.Clear();
+				$null = $Tools.Add(@{
+					id = "call_pestertest"
+					type = "function"
+					function = @{
+						name = "Test1"
+						arguments = '{}'
+					}
+				})
+				
+				$resp 	= Invoke-AiChatTools "teste" -tools $OpenaiTools
+			}
+			
+			It "Max 2 interactions: user prompt and tool call result" {
+				$resp.interactions.count | Should -Be 2
+			}
+			
+			It "Last interaction: last sent must be the function call result" {
+				$resp.interactions[-1].sent.prompt[-1].content | Should -be "ToolResult:$CallToken"
+			}
+			
+			It "Must return the final model answer" {
+				$resp.answer.choices[0].message.content | Should -Be $CallToken;
+			}
+			
+			It "Inexistent function" {
+				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
+				$Tools[0].function = @{
+					name 		= "InexistenteTool"
+					arguments 	= @()
+				}
+				
+				{ Invoke-AiChatTools "teste" -tools $OpenaiTools -MaxInteractions 2 } | Should -Throw
+			}
+		}
+		
+		
+		Describe "Muliple Scripts" {
+			BeforeAll {
+				
+				$ToolsScriptBlock = {
+					param($data)
+					
+					function Test1 {
+						<#
+							.SYNOPSIS 
+								Test 1
+						#>
+						param()		
+
+						return "123";
+					}
+				}
+				
+				[string]$ToolsScriptFile = Resolve-Path "$PsScriptRoot/TestToolScript.ps1"
+				
+				
+				$ScriptBlockTools 	= Get-OpenaiToolFromScript $ToolsScriptBlock
+				$ScriptFileTools	= Get-OpenaiToolFromScript $ToolsScriptFile
+				
+
+				
+				$Tools.Clear();
+				$null = $Tools.Add(@{
+					id 			= "call_pestertest"
+					type 		= "function"
+					function 	= @{
+								name = "Test1"
+								arguments = '{}'
+					}
+				})
+				
+				
+			}
+			
+			It "Invoke ScriptBlock Tool" {
+				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
+				$Tools[0].function.name = "Test1";
+				$resp 	= Invoke-AiChatTools "teste" -tools $ScriptBlockTools,$ScriptFileTools -MaxInteractions 2
+				
+				
+				$CallMsg 	= $resp.interactions[-1].sent.prompt[1]
+				$CallResult = $resp.interactions[-1].sent.prompt[2]
+				
+				$CallMsg.tool_calls.function.name | Should -Be "Test1"
+			}
+			
+			It "Invoke ScriptFile Tool" {
+				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
+				$Tools[0].function = @{
+					name 		= "ScriptFileTool1"
+					arguments 	= (@{ data = "teste" } | ConvertTo-Json -Compress)
+				}
+				
+				$resp 	= Invoke-AiChatTools "teste" -tools $ScriptBlockTools,$ScriptFileTools -MaxInteractions 2
+				
+				
+				$CallMsg 	= $resp.interactions[-1].sent.prompt[1]
+				$CallResult = $resp.interactions[-1].sent.prompt[2]
+				$CallMsg.tool_calls.function.name | Should -Be "ScriptFileTool1"
+				$CallResult.content | Should -Be "FromScript:teste"
+			}
+			
+			
+			
+		}
+
 	}
 	
 
-	
+
 	
 	Context "Get-OpenaiToolFromCommand" {
 		BeforeAll {
