@@ -317,6 +317,44 @@ function RegArgCompletion {
 	}
 }
 
+function GetParams($FunctionName){
+	
+	$c = Get-Command $FunctionName;
+	$ParamsAst = $Command.ScriptBlock.Ast.Parameters;
+	
+	if(!$ParamsAst){
+		$ParamsAst = $c.ScriptBlock.Ast.Body.ParamBlock.Parameters;
+	}
+	
+	$CommandHelp = get-help $c;
+	
+	$Global:HelpIndex = @{}
+	
+	$CommandHelp.parameters.parameter | %{ 
+		$AllText = $_.description | %{
+			
+			$_.text -split '\r?\n' | ?{$_ -and $_.trim()} | %{ $_.trim() }		
+		}
+	
+		$HelpIndex[$_.name] = $AllText 
+	
+	}
+	
+	foreach($param in $ParamsAst){
+		$ParamName = $param.name.toString() -replace '^\$','';
+		[PsCustomObject]@{
+			name = $ParamName
+			definition = $param.toString()
+			help = $HelpIndex[$ParamName]
+			source  = $c
+		}
+		
+	}
+	
+}
+
+
+
 #Thanks from: https://www.powershellgallery.com/packages/DRTools/4.0.2.3/Content/Functions%5CInvoke-AESEncryption.ps1
 function Invoke-AESEncryption {
     [CmdletBinding()]
@@ -413,54 +451,143 @@ function Invoke-AESEncryption {
 }
 
 
+# Stronger Version!
+function Invoke-AESEncryptionV2 {
+    [CmdletBinding()]
+    Param
+    ( 
+        [ValidateSet('Encrypt', 'Decrypt')]
+        [String]$Mode,
+        [String]$Key,
+        [String]$Text
+		,[switch]$DebugData
+    )
+	
+	# Helper function to generate a secure random byte array
+	function Generate-RandomBytes($size) {
+		$randomBytes = New-Object byte[] $size
+		[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($randomBytes)
+		return $randomBytes
+	}
 
-function GetParams($FunctionName){
+
+
+	$shaManaged 			= New-Object System.Security.Cryptography.SHA256Managed
+	$aesManaged 			= New-Object System.Security.Cryptography.AesManaged
+	$aesManaged.Mode 		= [System.Security.Cryptography.CipherMode]::CBC
+	$aesManaged.Padding 	= [System.Security.Cryptography.PaddingMode]::Zeros
+	$aesManaged.BlockSize 	= 128
+
+
+	$EncryptedResult = $null;
 	
-	$c = Get-Command $FunctionName;
-	$ParamsAst = $Command.ScriptBlock.Ast.Parameters;
+	try {
+		switch ($Mode) {
+			'Encrypt' {
+				
+				# Key derivation
+				$SaltBytes		= Generate-RandomBytes 16
+				$keyDerivation 	= New-Object System.Security.Cryptography.Rfc2898DeriveBytes($Key, $SaltBytes, 10000)
+				$EncryptKey		= $keyDerivation.GetBytes(32) # 32 bytes = 256bits!
 	
-	if(!$ParamsAst){
-		$ParamsAst = $c.ScriptBlock.Ast.Body.ParamBlock.Parameters;
-	}
-	
-	$CommandHelp = get-help $c;
-	
-	$Global:HelpIndex = @{}
-	
-	$CommandHelp.parameters.parameter | %{ 
-		$AllText = $_.description | %{
+				$plainBytes 			= [System.Text.Encoding]::UTF8.GetBytes($Text)
+				
+				# keys and encrytpr!
+				$aesManaged.KeySize 	= $EncryptKey.length*8
+				$aesManaged.Key 		= $EncryptKey
+				$aesManaged.GenerateIV()
+				$encryptor = $aesManaged.CreateEncryptor()
+
+				
+				# encrypt data!
+				$DataEncrypted 		= $encryptor.TransformFinalBlock($plainBytes, 0, $plainBytes.Length)
+				$encryptedBytes 	= $SaltBytes + $aesManaged.IV + $DataEncrypted
+				$EncryptedResult 	= [System.Convert]::ToBase64String($encryptedBytes)
+				
+				#PWSHAICV2: SALT(16bytes) + IV(16bytes) +  DATA
+				$result = [PsCustomObject]@{
+					salt 	= $SaltBytes
+					iv 		= $aesManaged.IV
+					enc 	= $DataEncrypted
+					plain 	= $plainBytes
+					full  	= $EncryptedResult
+					key 	= $EncryptKey
+				}
+				
+				$result | Add-Member -Force ScriptMethod ToString  { $d = $this.full; return "PWSHAICV2:$d" }
+				
+				if($DebugData){
+					return $result;
+				}
+				
+				return ''+$result;
+			}
+
+			'Decrypt' {
+				
+				if($Text -match 'PWSHAICV2:(.+)'){
+					$Text = $matches[1];
+				} else {
+					return $null;
+				}
 			
-			$_.text -split '\r?\n' | ?{$_ -and $_.trim()} | %{ $_.trim() }		
+				$EncryptedBytes = [System.Convert]::FromBase64String($Text)
+				$SaltBytes 		= $EncryptedBytes[0..15]
+				$aesManaged.IV 	= $EncryptedBytes[16..31]
+				$EncryptedLast	= $EncryptedBytes.length - 1;
+				$EncryptedData 	= $encryptedBytes[32..$EncryptedLast]
+				
+				$keyDerivation 			= New-Object System.Security.Cryptography.Rfc2898DeriveBytes($Key, $SaltBytes, 10000)
+				$DecryptKey				= $keyDerivation.GetBytes(32) # 32 bytes = 256bits!
+				$aesManaged.KeySize 	= $DecryptKey.length*8
+				$aesManaged.Key 		= $DecryptKey
+				
+				
+				$decryptor 		= $aesManaged.CreateDecryptor()
+				$DecryptedBytes = $decryptor.TransformFinalBlock($EncryptedData, 0, $EncryptedData.Length)
+
+				$DecryptedData = [System.Text.Encoding]::UTF8.GetString($DecryptedBytes).Trim([char]0);
+
+				$result =  [PsCustomObject]@{
+					salt 	= $SaltBytes
+					iv 		= $aesManaged.IV
+					enc 	= $EncryptedData
+					plain 	= $DecryptedBytes
+					data  	= $DecryptedData
+					key 	= $DecryptKey
+				}
+				
+				if($DebugData){
+					return $result;
+				}
+				
+				return $result.data;
+			}
 		}
-	
-		$HelpIndex[$_.name] = $AllText 
-	
+
+	} finally {
+		$shaManaged.Dispose()
+		$aesManaged.Dispose()
 	}
-	
-	foreach($param in $ParamsAst){
-		$ParamName = $param.name.toString() -replace '^\$','';
-		[PsCustomObject]@{
-			name = $ParamName
-			definition = $param.toString()
-			help = $HelpIndex[$ParamName]
-			source  = $c
-		}
-		
-	}
-	
 }
 
 
 function PowerShaiEncrypt {
 	param($str, $password)
 	
-	Invoke-AESEncryption -Mode Encrypt -text $str -key $password
+	Invoke-AESEncryptionV2 -Mode Encrypt -text $str -key $password
 }
 
 function PowerShaiDecrypt {
 	param($str, $password)
 	
-	Invoke-AESEncryption -Mode Decrypt -text $str -key $password
+	$cmd = "Invoke-AESEncryption"
+	
+	if($str -like "PWSHAICV2:*"){
+		$cmd = "Invoke-AESEncryptionV2"
+	}
+	
+	& $Cmd -Mode Decrypt -text $str -key $password
 }
 
 function PowershaiHash {

@@ -1760,47 +1760,48 @@ function Invoke-AiChatTools {
 	}
 }
 
-<#
-	.SYNOPSIS 
-		Exporta as configurações da sessão atual para um arquivo, criptografado por uma senha
-		
-	.DESCRIPTION
-		Este cmdlet é útil para salvar configurações, como os Tokens, de maneira segura.  
-		Ele solicia uma senha e usa ela para criar um hash e criptografar os dados de configuração da sessão em AES256.  
-		
-		As configurações exportadas são todas aquelas definidas na variável $POWERSHAI_SETTINGS.  
-		Essa variável é uma hashtable contendo todos os dados configurados pelos providers, o que inclui os tokens.  
-		
-		Por padrão, os chats não são exportados devido a quantidade de dados envolvidos, o que pode deixar o arquivo muito grande!
-		
-		O arquivo exportado é salvo em um diretório criado automaticamente, por padrão, na home do usuário ($HOME).  
-		Os objetos são exportados via Serialization, que é o mesmo método usado por Export-CliXml.  
-		
-		Os dados são exportados em um formato próprio que pode ser importado apenas com Import-PowershaiSettings e informando a mesma senha.  
-		
-		Uma vez que o PowershAI não faz um export automático, é recomendo invocar esse comando comando sempre que houver alteração de configuração, como a inclusão de novos tokens.  
-		
-		O diretório de export pode ser qualquer caminho válido, incluindo cloud drives como OneDrive,Dropbox, etc.  
-	
-		Este comando foi criado com o intuito de ser interativo, isto é, precisa da entrada do usuário em teclado.
-		
-	.EXAMPLE 
-		# Exportando as configurações padrões!
-		> Export-PowershaiSettings 
-		
-		
-		
-	.EXAMPLE 
-		# Exporta tudo, incluindo os chats!
-		> Export-PowershaiSettings -Chat  
-	
-	.EXAMPLE
-		# Exportando para o OneDrive
-		> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
-		> Export-PowershaiSettings
-			
-#>
+
 function Export-PowershaiSettings {
+	<#
+		.SYNOPSIS 
+			Exporta as configurações da sessão atual para um arquivo, criptografado por uma senha
+			
+		.DESCRIPTION
+			Este cmdlet é útil para salvar configurações, como os Tokens, de maneira segura.  
+			Ele solicia uma senha e usa ela para criar um hash e criptografar os dados de configuração da sessão em AES256.  
+			
+			As configurações exportadas são todas aquelas definidas na variável $POWERSHAI_SETTINGS.  
+			Essa variável é uma hashtable contendo todos os dados configurados pelos providers, o que inclui os tokens.  
+			
+			Por padrão, os chats não são exportados devido a quantidade de dados envolvidos, o que pode deixar o arquivo muito grande!
+			
+			O arquivo exportado é salvo em um diretório criado automaticamente, por padrão, na home do usuário ($HOME).  
+			Os objetos são exportados via Serialization, que é o mesmo método usado por Export-CliXml.  
+			
+			Os dados são exportados em um formato próprio que pode ser importado apenas com Import-PowershaiSettings e informando a mesma senha.  
+			
+			Uma vez que o PowershAI não faz um export automático, é recomendo invocar esse comando comando sempre que houver alteração de configuração, como a inclusão de novos tokens.  
+			
+			O diretório de export pode ser qualquer caminho válido, incluindo cloud drives como OneDrive,Dropbox, etc.  
+		
+			Este comando foi criado com o intuito de ser interativo, isto é, precisa da entrada do usuário em teclado.
+			
+		.EXAMPLE 
+			# Exportando as configurações padrões!
+			> Export-PowershaiSettings 
+			
+			
+			
+		.EXAMPLE 
+			# Exporta tudo, incluindo os chats!
+			> Export-PowershaiSettings -Chat  
+		
+		.EXAMPLE
+			# Exportando para o OneDrive
+			> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
+			> Export-PowershaiSettings
+				
+	#>
 	[CmdletBinding()]
 	param(
 		#Diretório de export 
@@ -1841,6 +1842,18 @@ function Export-PowershaiSettings {
 		}
 	}
 	
+	# Remove all settings starting with "_"
+	@($ExportData.settings.keys) | %{
+		if($_ -like "_*"){
+			verbose "Removing temporary setting $_";
+			$ExportData.settings.remove($_)
+			
+			if($ExportData.current -eq $_){
+				$ExportData.current = "default"
+			}
+		}
+	}
+	
 	write-verbose "Serializaing..."
 	$Serialized =  [System.Management.Automation.PSSerializer]::Serialize($ExportData);
 	$Decrypted = @(
@@ -1857,42 +1870,43 @@ function Export-PowershaiSettings {
 	write-host "Exported to: $ExportFile";
 }
 
-<#
-	.SYNOPSIS 
-		Importa uma configuração exportada com Export-PowershaiSettings
-		
-	.DESCRIPTION
-		Este cmdlet é o pair do Export-PowershaiSettings, e como o nome indica, ele importa os dados que foram exportados.  
-		Você deve garantir que a mesma senha e o mesmo arquivo são passados.  
-		
-		IMPORTANTE: Este comando sobscreverá todos os dados configurados na sessão. Só execute ele se tiver certeza absoluta que nenhum dado configurado previamente pode ser perdido.
-		Por exemplo, alguma API Token nova gerada recentemente.
-		
-		Se você estivesse especifciado um caminho de export diferente do padrão, usando a variável POWERSHAI_EXPORT_DIR, deve usa ro mesmo aqui.
-		
-		O processo de import valida alguns headers para garantir que o dado foi descriptografado corretamente.  
-		Se a senha informanda estiver incorreta, os hashs não vão ser iguais, e ele irá disparar o erro de senha incorreta.
-		
-		Se, por outro lado, um erro de formado invalido de arquivo for exibido, significa que houve alguma corrupção no proesso de import ou é um bug deste comando.  
-		Neste caso, você pode abrir uma issue no github relatando o problema.
-		
-		A partir da versão 0.7.0, um novo arquivo será gerado, chamado exportsession-v2.xml.  
-		O arquivo antigo será mantido para que o usuário pode recuperar eventuais credenciais, se necessário.
-		
-	.EXAMPLE 
-		# Import padrão
-		> Import-PowershaiSettings
-		
-		
-	
-	.EXAMPLE
-		# Importando do OneDrive
-		> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
-		> Import-PowershaiSettings
-		
-		Importa as configurações que foram exportadas para um diretório alternativo (one drive).
-#>
+
 function Import-PowershaiSettings {
+	<#
+		.SYNOPSIS 
+			Importa uma configuração exportada com Export-PowershaiSettings
+			
+		.DESCRIPTION
+			Este cmdlet é o pair do Export-PowershaiSettings, e como o nome indica, ele importa os dados que foram exportados.  
+			Você deve garantir que a mesma senha e o mesmo arquivo são passados.  
+			
+			IMPORTANTE: Este comando sobscreverá todos os dados configurados na sessão. Só execute ele se tiver certeza absoluta que nenhum dado configurado previamente pode ser perdido.
+			Por exemplo, alguma API Token nova gerada recentemente.
+			
+			Se você estivesse especifciado um caminho de export diferente do padrão, usando a variável POWERSHAI_EXPORT_DIR, deve usa ro mesmo aqui.
+			
+			O processo de import valida alguns headers para garantir que o dado foi descriptografado corretamente.  
+			Se a senha informanda estiver incorreta, os hashs não vão ser iguais, e ele irá disparar o erro de senha incorreta.
+			
+			Se, por outro lado, um erro de formado invalido de arquivo for exibido, significa que houve alguma corrupção no proesso de import ou é um bug deste comando.  
+			Neste caso, você pode abrir uma issue no github relatando o problema.
+			
+			A partir da versão 0.7.0, um novo arquivo será gerado, chamado exportsession-v2.xml.  
+			O arquivo antigo será mantido para que o usuário pode recuperar eventuais credenciais, se necessário.
+			
+		.EXAMPLE 
+			# Import padrão
+			> Import-PowershaiSettings
+			
+			
+		
+		.EXAMPLE
+			# Importando do OneDrive
+			> $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
+			> Import-PowershaiSettings
+			
+			Importa as configurações que foram exportadas para um diretório alternativo (one drive).
+	#>
 	[CmdletBinding()]
 	param(
 		$ExportDir = $Env:POWERSHAI_EXPORT_DIR
@@ -2208,7 +2222,25 @@ set-alias ajudai Get-PowershaiHelp
 set-alias iajuda Get-PowershaiHelp
 
 
-
+function Get-PowershaiSettingsSize {
+	param($setting)
+	
+	function Len(){
+		param($o)
+		
+		[System.Management.Automation.PSSerializer]::Serialize($o).Length
+	}
+	
+	$Current = $POWERSHAI_SETTINGS_V2
+	
+	if($setting){
+		$setting.split(".") | %{
+			$Current = $Current.$_
+		}
+	}
+	
+	$Current.GetEnumerator() | %{ [PsCustomObject]@{ key = $_.key; length = (len $_.value) } }
+}
 
 
 

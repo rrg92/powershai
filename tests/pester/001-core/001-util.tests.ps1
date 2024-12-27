@@ -203,6 +203,23 @@ Describe "Util Commands" -Tag "basic","utils" {
 		}
 		
 	}
+
+
+	Context "Encryption V2" {
+		
+		It "Simple Encrypt/Decrypt" {
+			[string]$SecretData = @(1..5000|%{[Guid]::NewGuid().Guid}) -Join "`n"
+			[string]$RandomKey = [Guid]::NewGuid();
+			
+			$encrypted = Invoke-AESEncryptionV2 -Mode Encrypt -Key $RandomKey -Text $SecretData
+			$decrypted = Invoke-AESEncryptionV2 -Mode Decrypt -Key $RandomKey -Text $encrypted
+			
+			$decrypted | Should -Be $SecretData;
+		}
+		
+		
+	}
+
 }
 
 
