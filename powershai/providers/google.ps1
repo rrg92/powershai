@@ -9,6 +9,7 @@ function InvokeGoogleApi {
 		,$method = 'POST'
 		,$StreamCallback = $null
 		,$Token = $null
+		,$JsonDepth = 15
 	)
 
 	$Provider = Get-AiCurrentProvider
@@ -44,7 +45,7 @@ function InvokeGoogleApi {
 		$url = "$BaseUrl/$endpoint"
 	}
 
-	$JsonParams = @{Depth = 10}
+	$JsonParams = @{Depth = $JsonDepth}
 	
 	verbose "InvokeGoogleApi: Converting body to json (depth: $($JsonParams.Depth))... $($body|out-string)"
     $ReqBodyPrint = $body | ConvertTo-Json @JsonParams
@@ -544,7 +545,11 @@ function ConvertTo-GoogleContentMessage {
 			}
 			
 			"system" {
-				$SystemMessage += $MsgContent;
+				if($MsgContent.text){
+					$SystemMessage += $MsgContent.text;
+				} else {
+					$SystemMessage += $MsgContent;
+				}
 				continue MsgLoop;
 			}
 			

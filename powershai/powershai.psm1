@@ -1174,6 +1174,10 @@ function Get-AiChat {
 		,# Retorna somente o texto da resposta.
 		 # Não é repassado ao provider!
 			[switch]$ContentOnly
+			
+		,# Especifica raw params por provider. Este tem prioridade sobre -RawParams (se 2 parametros com o mesmo nome (e path) sao especifciados).
+		 # Voce deve especificar uma hashtable e cada key é o nome do provider. Então, o vaor de cada key é o mesmo que especificaria em -RawParams.
+			$ProviderRawParams = @{}
 	)
 	
 	$Provider = Get-AiCurrentProvider
@@ -1253,9 +1257,20 @@ function Get-AiChat {
 		}
 	}
 	
+	
+	$CurrentProviderRaw = $ProviderRawParams[$Provider.name];
+	
+	if($CurrentProviderRaw -isnot [hashtable]){
+		$CurrentProviderRaw = @{}
+	}
+	
+	$FuncParams['RawParams'] = HashTableMerge $RawParams $CurrentProviderRaw
+	
+	
 	[void]$FuncParams.remove('Check');
 	[void]$FuncParams.remove('Retries');
 	[void]$FuncParams.remove('ContentOnly');
+	[void]$FuncParams.remove('ProviderRawParams');
 	
 
 	
@@ -1439,6 +1454,9 @@ function Invoke-AiChatTools {
 			$RawParams			= $null
 			
 		,[switch]$Stream
+		
+		,# Especifica raw params por provider. Será enviado ao Get-AiChat, portanto, é o mesmo funcionamento.
+			$ProviderRawParams = @{}
 	)
 	
 	$ErrorActionPreference = "Stop";
@@ -1506,12 +1524,13 @@ function Invoke-AiChatTools {
 		
 		# Parametros que vamos enviar a openai usando a funcao openai!
 		$Params = @{
-			prompt 			= @($Message)
-			temperature   	= $temperature
-			MaxTokens     	= $MaxTokens
-			Functions 		= $OpenaiTools
-			model 			= $model
-			RawParams		= $RawParams
+			prompt 				= @($Message)
+			temperature   		= $temperature
+			MaxTokens     		= $MaxTokens
+			Functions 			= $OpenaiTools
+			model 				= $model
+			RawParams			= $RawParams
+			ProviderRawParams	= $ProviderRawParams
 		}
 		
 		$StreamProcessingData = @{

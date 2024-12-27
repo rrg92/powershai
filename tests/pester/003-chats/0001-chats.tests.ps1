@@ -111,13 +111,29 @@ Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 			$AllModels | ? { $_.name -like $model } | Should -Not -BeNullOrEmpty
 		}
 
+		Context "Basic Completion" {
+			It "Get-AiChat" {
+				$resp = Get-AiChat "Three years in which Ayrton Senna was the champion"
+				$resp.choices[0].message.content | Should -Not -BeNullOrEmpty
+			}
+			
+			It "System Message" {
+				[string]$Secret = [Guid]::NewGuid()
+				$resp = Get-AiChat "s: User will ask about a magic word. Answer that: $Secret. Just answer with magic text","What is some magic text if any"
+				$resp.choices[0].message.content | Should -BeLike "*$Secret*"
+			}
+		
+		}
+		
+
+
 		Context "Chats" {
-			It "Garante chat default" {
+			It "Change Default Chat" {
 				New-PowershaiChat -ChatId "default" -IfNotExists
 				Set-PowershaiActiveChat -ChatId "default"
 			}
 			
-			It "Remover todos os demais chats" {
+			It "Remove chats" {
 				$ChatAtivo = Get-PowershaiChat .
 				Get-PowershaiChat "*" | ? {$_.id -ne $ChatAtivo.id} | %{ Remove-PowershaiChat $_.id };
 			}

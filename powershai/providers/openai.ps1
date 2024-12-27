@@ -49,6 +49,7 @@ function Invoke-OpenaiApi {
 		,$method 			= 'POST'
 		,$StreamCallback 	= $null
 		,$Token 			= $null
+		,$JsonDepth 		= 15
 	)
 
 	$MaxTries = @(Get-AiProviders).count
@@ -75,7 +76,7 @@ function Invoke-OpenaiApi {
 			$url = "$BaseUrl/$endpoint"
 		}
 
-		$JsonParams = @{Depth = 10}
+		$JsonParams = @{Depth = $JsonDepth}
 		
 		verbose "InvokeOpenai: Converting body to json (depth: $($JsonParams.Depth))..."
 		$ReqBodyPrint = $body | ConvertTo-Json @JsonParams
@@ -397,7 +398,7 @@ function Get-OpenaiChat {
          $prompt
         ,$temperature   = 0.6
         ,$model         = $null
-        ,$MaxTokens     = 1000
+        ,$MaxTokens     = $null
 		,$ResponseFormat = $null
 		
 		,#Function list, as acceptable by Openai
@@ -439,8 +440,11 @@ function Get-OpenaiChat {
 			$Body = @{
 				model       = $model
 				messages    = $Messages 
-				max_tokens  = $MaxTokens
 				temperature = $temperature 
+			}
+			
+			if($MaxTokens){
+				$Body.max_completion_tokens = $MaxTokens
 			}
 			
 			if($RawParams){
@@ -723,6 +727,8 @@ function ConvertTo-OpenaiMessage {
 }
 
 
+
+
 <#	
 	Cmdlets Get-OpenaiTool*  
 	Comandos com este prefixo transformam um objeto de entrada em um OpenaiTool.  
@@ -731,23 +737,252 @@ function ConvertTo-OpenaiMessage {
 	A doc desse comando esclarece melhor como ele utiliza esses objetos! 
 #>
 
-<#
-
-	.DESCRIPTION
-		Função auxiliar para converter um script .ps1, ou scriptblock, em um formato de schema esperado pela OpenAI.
-		Basicamente, o que essa fução faz é executar o script e obter o help de todos os comandos definidos.
-		Então, ele retorna um objeto no formato especifiado pela OpenAI para que o modelo possa invocar!
+function ConvertTo-OpenaiTool {
+	<#
+		.SYNOPSIS 
+			Converter um comando powershell (function, etc.) para OpenAI tool
+	#>
+	param(
+		#Nome da funcao, ou objeto cmmand (resultado get Get-Command)
+			$function
 		
-		Retorna um hashtable contendo as seguintes keys:
-			functions - A lista de funções, com seu codigo lido do arquivo.  
-						Quando o modelo invocar, você pode executar diretamente daqui.
-						
-			tools - Lista de tools, para ser enviando na chamada da OpenAI.
+		,#Descrição adicional 
+			$UserDescription
 			
-		Você pode documentar suas funções e parâmetros seguindo o Comment Based Help do PowerShell:
-		https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4
-#>
+		,#filter specific parameters to add 
+			$Parameters = "*"
+			
+		,#Help do comando (resultado de get-help)
+		 #Você deve informar um help alternativo caso queria montar um help customizado ou manualmente queira obter o help devido aos casos de escopo.
+			$Help = $null
+			
+		,#Especifique um esquema customizado para cada parâmetro de function 
+		 #ESte JSON schema será mescaldo no esquema gerado originalmente, tendo prioridade, por exemplo: se o custom tiver a key description, e no orignal, o do custom é usado.
+		 #A mescla é feita recursivamente, ou seja, propriedades que são objetos são mescaldas também.
+		 #Especifique uma key para cada parâmetro.
+			$JsonSchema = $null
+		
+	)
+	
+	if($function -is [Management.Automation.CommandInfo]){
+		$Command = $function
+	} else {
+		$Command = Get-Command -EA SilentlyContinue $function;
+	}
+		
+	if(!$Command){
+		throw "POWERSHAI_COMMMAND2OPENAPI_COMMAND_NOTFOUND: $function"
+	}
+	
+	if($Help){
+		$CommandHelp = $Help
+	}
+	elseif($Command.CommandType -eq "Application"){
+		$AppFriendName = $function.replace(".exe","");
+		$CommandHelp = @{
+			name 		= $AppFriendName
+			Synopsis 	= @(
+				"Executable application"
+				"FullPath: $($Command.source)"
+				($Command.FileVersionInfo | select ProductVersion,ProductName,FileVersion,CompanyName  |out-string)
+			) -Join "`n"			
+		}
+	} 
+	else {
+		verbose "Getting help for function $function";
+		$CommandHelp = Get-Help $function;
+	}
+		
+	$ErrorSlot = @()
+
+	$OpenAiFunction = @{
+			name 		= $null 
+			description = $nul 
+			parameters 	= @{}
+		}
+			
+	$OpenAiTool = @{
+		type 		= "function"
+		'function' 	= $OpenAiFunction
+	}
+
+	$OpenAiFunction.name 		= $CommandHelp.name;
+	
+	if(!$OpenAiFunction.name){
+		throw New-PowershaiError "POWERSHAI_OPENAI_CONVERT2TOOL" "Cannot determine tool name" -Props @{
+				command = $command 
+				CommandHelp = $CommandHelp
+			}
+	}
+	
+	$description 				= ( @($CommandHelp.Synopsis) + @($CommandHelp.description|%{$_.text})) -join "`n"
+		
+	if($description.length -gt 1024){
+		$description = $description.substring(1,1024);
+	}
+		
+	$OpenaiFunction.description = $description
+		
+	if($UserDescription){
+		$OpenAiFunction.description += "`n" + $UserDescription
+	}
+			
+	# get all parameters!
+	$FuncParams = $CommandHelp.parameters.parameter;
+			
+	$FuncParamSchema = @{}
+	$FuncParamRootSchema = @{
+		type 					= "object"
+		properties 				= $FuncParamSchema
+		required 				= @()
+	}
+	
+	$OpenaiFunction.parameters = $FuncParamRootSchema
+		
+	if(!$FuncParams){
+		$OpenaiFunction.remove("parameters");
+		return $OpenAiTool;
+	}
+		
+	$ParametersMeta = $Command.Parameters
+	
+	
+	# Get schema for a specific .net type!
+	function GetTypeSchema {
+		param($Type)
+		
+		$me = $MyInvocation.MyCommand;
+		
+		$ParamSchema = @{
+			type 				= $null
+			description 		= $null
+		}
+		
+		if($Type -is [array]){
+			# if array, use the first object to generate info!
+			$ParamSchema.type	 	= "array"
+			$ElType 				= $ParamSchema.getElementType();
+			$ParamSchema.items	 	= & $me $ElType
+		}
+		elseif($Type -eq [int]){
+			$ParamSchema.type = "number"
+		}
+		elseif($Type -eq [System.Management.Automation.SwitchParameter]){
+			$ParamSchema.type = "boolean"
+		}
+		elseif($Type -eq [datetime]){
+			$ParamSchema.type 	= "string"
+			$ParamSchema.format = "date-time"
+		}
+		else {
+			$ParamSchema.type 	= "string"
+		}
+		
+		#If parameter type is enum!
+		if($Type.IsEnum){
+			$PossibleValues = $Type.GetEnumNames();
+			$ParamSchema.enum = $PossibleValues
+		}
+		
+		return $ParamSchema;
+	}
+		
+	# Lets iterates over all parameters to build OpenAPI Schema!
+	foreach($param in $FuncParams){
+		$ParamHelp 			= $param; 
+		$ParamName 			= $ParamHelp.name;
+		
+		verbose "Processing parameter $ParamName";
+		
+		if($parameters -ne "*" -and $ParamName -notin @($parameters)){
+			continue;
+		}
+		
+		
+		$ParamType = $ParamHelp.type;
+		$ParamDesc = @($ParamHelp.description|%{$_.text}) -Join "`n"
+		
+		#Get parameter metadata from commad object!
+		if($ParametersMeta){
+			$ParamMeta  = $ParametersMeta[$ParamName]
+		} else {
+			$ParamMeta = $null
+		}
+		
+		
+		verbose "	Type = $ParamType"
+
+		# Convert type to acceptable JSON SCHEMA types!
+		try {
+			$ParamRealType 					= [type]$ParamType.name
+			$ParamSchema 					= GetTypeSchema $ParamRealType
+			$FuncParamSchema[$ParamName] 	= $ParamSchema
+			$ParamSchema.description 		= $ParamDesc
+			
+			#Overrides schema based on some parama attributes!	
+			#If have validateset, then assume it as more restricite (if param is enum and have validateset, just validateset attribues are passed).
+			if($ParamMeta){
+				$AttrValidateSet 	= $ParamMeta.Attributes | ? { $_ -is [ValidateSet] }
+				$ParamAttr 			= $ParamMeta.Attributes | ? { $_ -is [Management.Automation.ParameterAttribute] }
+				
+				#If validateset specified, then override type enum (validateset is checked before)
+				if($AttrValidateSet){
+					$ParamSchema.enum = $AttrValidateSet.ValidValues
+				}
+				
+				if($ParamAttr.Mandatory){
+					$FuncParamRootSchema.required += $ParamName
+				}
+			}
+		} catch {
+			write-warning "Cannot determined type of param $ParamName! TypeName = $($ParamType.name)"
+		}
+	}
+	
+	# Do schema!
+	if($JsonSchema){
+		$OpenAiTool.function = HashTableMerge $OpenaiTool.function $JsonSchema
+	}
+
+
+	return $OpenAiTool;
+}
+
+function New-OpenaiToolCallId {
+	<#
+		.DESCRIPTION 
+			Gerar um novo id para openai tool call!
+	#>
+	param()
+	
+	$RandomId = (@(
+		([char]'A')..([char]'Z')
+		([char]'a')..([char]'z')
+		([char]'0')..([char]'9')
+	) | Get-Random -Count 24 | %{ [char]$_ }) -Join ""
+	
+	return "call_$RandomId"
+}
+
+
+
 function Get-OpenaiToolFromScript {
+	<#
+
+		.DESCRIPTION
+			Função auxiliar para converter um script .ps1, ou scriptblock, em um formato de schema esperado pela OpenAI.
+			Basicamente, o que essa fução faz é executar o script e obter o help de todos os comandos definidos.
+			Então, ele retorna um objeto no formato especifiado pela OpenAI para que o modelo possa invocar!
+			
+			Retorna um hashtable contendo as seguintes keys:
+				functions - A lista de funções, com seu codigo lido do arquivo.  
+							Quando o modelo invocar, você pode executar diretamente daqui.
+							
+				tools - Lista de tools, para ser enviando na chamada da OpenAI.
+				
+			Você pode documentar suas funções e parâmetros seguindo o Comment Based Help do PowerShell:
+			https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4
+	#>
 	[CmdLetBinding()]
 	param(
 		#Arquivo .ps1 ou scriptblock!
@@ -758,6 +993,10 @@ function Get-OpenaiToolFromScript {
 		
 		,#Especifique variáveis e seus valores para serem disponibilizadas no escopo do script!
 		$Vars = @{}
+		
+		,#Especifique um json schema customizado para cada funcao retronada pelo script.
+		 #Você deve especificar uma key com o nome de cada comando. O valor é uma outra hashtable onde cada key é o nome do parâmetro e o valor é o json schema desse parâmetro
+			$JsonSchema = @{}
 	)
 	
 	
@@ -825,11 +1064,12 @@ function Get-OpenaiToolFromScript {
 		Get-Command -mo $ScriptModule.name | %{
 			verbose "Function: $($_.name)"
 			
-			$help = get-help $_.name;
+			$FullCommandName 	= $ScriptModule.name+"\"+$_.name;
+			$help 				= get-help $FullCommandName;
 			
 			$AllFunctions[$_.name] = @{
 					func = $_
-					help = get-help $_.Name
+					help = $help
 				}
 		}	
 	} finally {
@@ -843,80 +1083,27 @@ function Get-OpenaiToolFromScript {
 	#for each function!
 	foreach($KeyName in @($FunctionDefs.keys) ){
 		$Def = $FunctionDefs[$KeyName];
-
+		
+		
 		$FuncName 	= $KeyName
 		$FuncDef 	= $Def
 		$FuncHelp 	= $Def.help;
 		$FuncCmd 	= $Def.func;
 		
+		$FuncCustomSchema = $JsonSchema[$KeyName];
+		$CustomSchema = $null
+		
+		if($FuncCustomSchema){
+			$CustomSchema = @{
+				parameters = @{
+					properties = $FuncCustomSchema
+				}
+			}
+		}
+		
 		verbose "Creating Tool for Function $FuncName"
 		
-		$OpenAiFunction = @{
-					name = $null 
-					description = $null
-				}
-		
-		$OpenAiTool = @{
-			type 		= "function"
-			'function' 	= $OpenAiFunction
-		}
-		
-		$AllTools += $OpenAiTool;
-		
-		
-		$OpenAiFunction.name 		= $FuncHelp.name;
-		$description 				= ( @($FuncHelp.Synopsis) + @($FuncHelp.description|%{$_.text})) -join "`n"
-		
-		if($description.length -gt 1024){
-			$description = $description.substring(1,1024);
-		}
-		
-		$OpenaiFunction.description = $description;
-		
-		# get all parameters!
-		$FuncParams = $FuncHelp.parameters.parameter;
-		
-		$FuncParamSchema = @{}
-
-		
-		if($FuncParams){
-			$OpenaiFunction.parameters = @{
-				type 		= "object"
-				properties 	= $FuncParamSchema
-				required 	= @()
-			}
-		} else {
-			continue;
-		}
-		
-		foreach($param in $FuncParams){
-			$ParamHelp = $param; 
-			
-			$ParamName = $ParamHelp.name;
-			$ParamType = $ParamHelp.type;
-			$ParamDesc = @($ParamHelp.description|%{$_.text}) -Join "`n"
-			
-			$ParamSchema = @{
-					type 		= "string"
-					description = $ParamDesc
-					
-					#enum?
-					#items:@{type}
-			}
-			
-			$FuncParamSchema[$ParamName] = $ParamSchema
-			
-			#Get the typename!
-			try {
-				$ParamRealType = [type]$ParamType.name
-				if($ParamRealType -eq [int]){
-					$ParamSchema.type = "number"
-				}
-			} catch{
-				write-warning "Cannot determined type of param $ParamName! TypeName = $($ParamType.name)"
-			}
-		}
-		
+		$AllTools += ConvertTo-OpenaiTool $FuncCmd -Help $FuncHelp -JsonSchema $CustomSchema
 	}
 	
 	
@@ -934,43 +1121,40 @@ function Get-OpenaiToolFromScript {
 	}
 }
 
-<#
-	.DESCRIPTION 
-		Gerar um novo id para openai tool call!
-#>
-function New-OpenaiToolCallId {
-	param()
-	
-	$RandomId = (@(
-		([char]'A')..([char]'Z')
-		([char]'a')..([char]'z')
-		([char]'0')..([char]'9')
-	) | Get-Random -Count 24 | %{ [char]$_ }) -Join ""
-	
-	return "call_$RandomId"
-}
 
-<#
-	.DESCRIPTION 
-		Converte comandos do powershell para OpenaiTool.
-#>
+
 function Get-OpenaiToolFromCommand {
+	<#
+		.DESCRIPTION 
+			Converte comandos do powershell para OpenaiTool.
+	#>
 	[CmdletBinding()]
 	param(
-		$functions
-		,$parameters = "*"
-		,$UserDescription = $null
+		#Lista de comandos 
+			$functions
+		
+		,#Filtrar quais parametros serão adicionados
+			$parameters = "*"
+			
+		,#Descricao customizada adicional 
+			$UserDescription = $null
+			
+		,#Define uma esquema customizado. Especifique uma hashtable , onde cada key é o nome do parâmetro da funcao e o valor é o JSON schema. 
+		 #O Json schema definido irá ser mescaldo no esquema do parâmetro. As configurações definidas neste parâmetro tem prioridade
+		 #Voce pode especificar um json schema para cada funcao em -functions, bastando especificar um array com o mesmo tamanho. O schema no mesmo offset é usado.
+			[hashtable[]]$JsonSchema = @()
 	)
 	
-	$ToolList = @();
-	$ConvertErrors = @()
-	$Applications = @{};
+	$ToolList 		= @();
+	$ConvertErrors 	= @()
+	$Applications 	= @{};
 	
 	$ToolData = @{}
 	
-	
+	$i = -1;
 	foreach($function in @($functions)){
-	
+		$i++;
+		
 		if($function -is [Management.Automation.CommandInfo]){
 			$Command = $function
 		} else {
@@ -983,135 +1167,24 @@ function Get-OpenaiToolFromCommand {
 		
 	
 		if($Command.CommandType -eq "Application"){
-			
 			$AppFriendName = $function.replace(".exe","");
 			$Applications[$AppFriendName] = $Command;
-			$CommandHelp = @{
-				name = $AppFriendName
-				Synopsis = @(
-					"Executable application"
-					"FullPath: $($Command.source)"
-					($Command.FileVersionInfo | select ProductVersion,ProductName,FileVersion,CompanyName  |out-string)
-				) -Join "`n"			
-			}
-		} else {
-			verbose "Getting help for function $function";
-			$CommandHelp = Get-Help $function;
 		}
 		
 		$ErrorSlot = @()
 
-		$OpenAiFunction = @{
-					name = $null 
-					description = $nul 
-					parameters = @{}
+		$MySchema = $JsonSchema[$i]
+		
+		$CustomSchema = $null
+		if($MySchema){
+			$CustomSchema = @{
+				parameters = @{
+					properties = $MySchema
 				}
-			
-		$OpenAiTool = @{
-			type 		= "function"
-			'function' 	= $OpenAiFunction
-		}
-		
-		$ToolList += $OpenAiTool;
-
-		$OpenAiFunction.name 		= $CommandHelp.name;
-		$description 				= ( @($CommandHelp.Synopsis) + @($CommandHelp.description|%{$_.text})) -join "`n"
-		
-		if($description.length -gt 1024){
-			$description = $description.substring(1,1024);
-		}
-		
-		$OpenaiFunction.description = $description
-		
-		if($UserDescription){
-			$OpenAiFunction.description += "`n" + $UserDescription
-		}
-			
-		# get all parameters!
-		$FuncParams = $CommandHelp.parameters.parameter;
-			
-		$FuncParamSchema = @{}
-		$OpenaiFunction.parameters = @{
-			type 		= "object"
-			properties 	= $FuncParamSchema
-			required 	= @()
-		}
-		
-		if(!$FuncParams){
-			continue;
-		}
-		
-		$ParametersMeta = $Command.Parameters
-		
-		foreach($param in $FuncParams){
-			$ParamHelp = $param; 
-			$ParamName = $ParamHelp.name;
-			
-
-			verbose "Processing parameter $ParamName";
-			
-			if($parameters -ne "*" -and $ParamName -notin @($parameters)){
-				continue;
-			}
-			
-			
-			$ParamType = $ParamHelp.type;
-			$ParamDesc = @($ParamHelp.description|%{$_.text}) -Join "`n"
-			
-			#Obtem o metadatado do parametro!
-			if($ParametersMeta){
-				$ParamMeta  = $ParametersMeta[$ParamName]
-			} else {
-				$ParamMeta = $null
-			}
-			
-			
-			verbose "	Type = $ParamType"
-			
-			$ParamSchema = @{
-					type 		= "string"
-					description = $ParamDesc
-			}
-			
-			$FuncParamSchema[$ParamName] = $ParamSchema
-			
-			#Get the typename!
-			try {
-				$ParamRealType = [type]$ParamType.name
-				
-				if($ParamRealType -eq [int]){
-					$ParamSchema.type = "number"
-				}
-				
-				if($ParamRealType -eq [System.Management.Automation.SwitchParameter]){
-					$ParamSchema.type = "boolean"
-				}
-				
-				# Enum {}
-				$EnumList = @();
-				
-				if($ParamRealType.IsEnum){
-					$PossibleValues = $ParamRealType.GetEnumNames();
-					$EnumList += $PossibleValues
-				}
-				
-				if($ParamMeta){
-					$AttrValidateSet = $ParamMeta.Attributes | ? { $_ -is [ValidateSet] }
-					
-					if($AttrValidateSet){
-						$EnumList += $AttrValidateSet.ValidValues
-					}
-				}
-				
-				if($EnumList){
-					$ParamSchema.enum = $EnumList
-				}
-				
-			} catch{
-				write-warning "Cannot determined type of param $ParamName! TypeName = $($ParamType.name)"
 			}
 		}
-				
+		
+		$ToolList += ConvertTo-OpenaiTool $Command -CustomSchema $CustomSchema;	
 	}
 
 	return @{
@@ -1124,8 +1197,8 @@ function Get-OpenaiToolFromCommand {
 		map = {
 			param($ToolName, $me)
 			
-			$FuncName = $ToolName;
-			$App = $me.apps[$ToolName];
+			$FuncName 	= $ToolName;
+			$App 		= $me.apps[$ToolName];
 			
 			if($App){
 				$FuncName = $App.Name;

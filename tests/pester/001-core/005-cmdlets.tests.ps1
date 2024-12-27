@@ -1,7 +1,8 @@
 BeforeAll {
 	import-module ./powershai -force;
 }
-	
+
+
 Describe "Get-AiChat" -Tags "get-aichat" {
 	
 	BeforeAll {
@@ -172,6 +173,99 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 		}
 		
 	}
+
+	Context "ConvertTo-OpenaiTool " -Tags "ConvertTo-OpenaiTool" {
+		BeforeAll {
+			function PesterTestTool1 {
+				<#
+					.SYNOPSIS 
+						Test Tool 1
+				#>
+				param(
+					#Param1
+					[Parameter(Mandatory)]
+						$p1
+					
+					,#Param2	
+						[int]$p2
+						
+					,#Param3
+						$p3
+				)
+			}
+				
+			$Cmd 	= Get-Command PesterTestTool1
+			$Help 	= Get-Help PesterTestTool1 
+			$Tool 	= ConvertTo-OpenaiTool $Cmd -Help $Help
+		}
+		
+		It "Tool basic info: name,description,type" {
+			$tool.type | Should -Be "Function"
+			$tool.function.description | Should -BeLike "*Test Tool 1*"
+			$tool.function.name | Should -BeLike "PesterTestTool1"
+			
+		}
+		
+		Context "Tool parameters"  {
+			BeforeAll {
+				$ParamList = $tool.function.parameters.properties;
+			}
+			
+			It  "Type = Object" {
+				$tool.function.parameters.type | Should -Be object
+			}
+			
+			It "Required parameters"  {
+				$tool.function.parameters.required | Sort-Object |Should -Be @('p1')
+			}
+			
+			Context "Params Tests" -ForEach @(
+				@{ ParamName = "p1"; ParamDescription = "Param1"; ParamType="string" }
+				@{ ParamName = "p2"; ParamDescription = "Param2"; ParamType="number" }
+				@{ ParamName = "p3"; ParamDescription = "Param3"; ParamType="string" }
+			){
+				Context "Param $ParamName" {
+					It "description" {
+						$ParamList[$ParamName].description | Should -be $ParamDescription
+						$ParamList[$ParamName].type | Should -be $ParamType
+					}
+				}	
+			}
+
+		}
+	
+		Context "Custom Schema" {
+			
+			BeforeAll {
+				
+				$Cmd 	= Get-Command PesterTestTool1
+				$Help 	= Get-Help PesterTestTool1 
+				
+				
+				$Tool 	= ConvertTo-OpenaiTool $Cmd -Help $Help -JsonSchema @{
+						parameters = @{
+							properties = @{
+								p3 = @{
+									properties = @{
+										a = @{ description = "p3.a" }
+									}
+								}
+							}	
+						}
+					}
+				
+			}
+			
+			It "Param Custom Schema"  {
+				$p3 = $Tool.function.parameters.properties.p3;
+				
+				$p3.properties.a.description | Should -Be "p3.a"
+			}
+			
+		}
+
+	}
+	
 	
 	Context "Get-OpenaiToolFromScript, ScriptBlock" {
 		BeforeAll {
@@ -222,6 +316,14 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 			$OpenaiTools 	= Get-OpenaiToolFromScript $ToolsScript -Vars @{
 					CallToken 		= $CallToken
 					CustomMessage 	= $CustomMessage
+				} -JsonSchema @{
+					Test2 = @{
+						obj = @{
+							properties = @{
+								b1 = @{ type = "int" }
+							}
+						}
+					}
 				}
 			
 		
@@ -262,20 +364,29 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 				 $Functions | %{ $_.function.description.trim() } | Sort-Object | Should -Be "Test 1","Test 2"
 			}
 			
-			It "Functions OpenAPI args" {
-				 $FirstMessage 	= $resp.interactions[0]
-				 $Function 	= $FirstMessage.sent.Functions | ? { $_.function.name -eq "Test2" } | select -first 1 -expand function
-
-				 $Function.parameters.type | Should -Be "object"
+			Context "Functions OpenAPI args" {
+				 BeforeAll {
+					$FirstMessage 	= $resp.interactions[0]
+					$Function 	= ($FirstMessage.sent.Functions | ? { $_.function.name -eq "Test2" } | select -first 1).function
+				 }
 				 
-				 $Function.parameters.properties.obj.type | Should -Be "string"
-				 $Function.parameters.properties.obj.description | Should -Be "Param1"
+				 It "Default Basic Schema" {
+					 $Function.parameters.type | Should -Be "object"
+					 
+					 $Function.parameters.properties.obj.type | Should -Be "string"
+					 $Function.parameters.properties.obj.description | Should -Be "Param1"
+					
+					 
+					 $Function.parameters.properties.Param2.type | Should -Be "string"
+					 $Function.parameters.properties.Param2.description | Should -Be "Param2"
+					 
+					 $Function.parameters.properties.Param3.type | Should -Be "number"
+					 $Function.parameters.properties.Param3.description | Should -Be "Param3"
+				 }
 				 
-				 $Function.parameters.properties.Param2.type | Should -Be "string"
-				 $Function.parameters.properties.Param2.description | Should -Be "Param2"
-				 
-				 $Function.parameters.properties.Param3.type | Should -Be "number"
-				 $Function.parameters.properties.Param3.description | Should -Be "Param3"
+				 It "Custom Schema" {
+					 $Function.parameters.properties.obj.properties.b1.type | Should -Be "int"
+				 }
 			}
 			
 		}
@@ -395,8 +506,6 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 	}
 	
 
-
-	
 	Context "Get-OpenaiToolFromCommand" {
 		BeforeAll {
 			$Tools.Clear();
