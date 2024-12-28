@@ -1,7 +1,7 @@
 ﻿<#
 	Esta função é usada como base para invocar a a API da OpenAI!
 #>
-function InvokeGoogleApi {
+function Invoke-GoogleApi {
 	[CmdletBinding()]
     param(
 		$endpoint
@@ -79,7 +79,7 @@ function InvokeGoogleApi {
 
     return $RawResp.text | ConvertFrom-Json
 }
-
+Set-Alias InvokeGoogleApi Invoke-GoogleApi
 
 function google_SetCredential {
 	param($AiCredential)
