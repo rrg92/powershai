@@ -24,7 +24,38 @@ Neste caso, a funcao Get-AiNearProvider retornará o provider y, pois ele é o m
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiNearProvider [<CommonParameters>]
+Get-AiNearProvider [[-callstack] <Object>] [[-filter] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
+
+### -callstack
+Usar um call stack específica.
+Este parâmetro é útil quando uma funcao que invocou quer que se considere a olhar a partir de um ponto específico!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 1
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -filter
+ScriptBlock com o filtro. $_ aponta para o provider encontrado!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```

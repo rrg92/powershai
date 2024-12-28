@@ -13,8 +13,7 @@ Stream: https://ai.google.dev/api/generate-content#method:-models.streamgenerate
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] 
-<Object>] [<CommonParameters>]
+Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->

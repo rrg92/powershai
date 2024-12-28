@@ -16,7 +16,7 @@ Comandos como Send-PowershaAIChat, Get-AiChat, esperam um modelo, e se não for 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Set-AiDefaultModel [[-model] <Object>] [-Force] [<CommonParameters>]
+Set-AiDefaultModel [[-model] <Object>] [-Force] [-Embeddings] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -39,6 +39,21 @@ Accept wildcard characters: false
 
 ### -Force
 Força definir o modelo, mesmo que não seja retornaod por Get-AiModels
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Embeddings
+Define embedding model!
 
 ```yml
 Parameter Set: (All)

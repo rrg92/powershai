@@ -10,16 +10,31 @@ powershai: true
 Cria um nova Exception cusotmizada para o PowershaAI
 
 ## DESCRIPTION <!--!= @#Desc !-->
-FAciltia a criação de exceptions customizadas!
-É usada internamente pelos providers para criar exceptions com propriedades e tipos que podem ser restados posteriormente.
+FAciltia a criaÃ§Ã£o de exceptions customizadas!
+Ã‰ usada internamente pelos providers para criar exceptions com propriedades e tipos que podem ser restados posteriormente.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-New-PowershaiError [[-Message] <Object>] [[-Props] <Object>] [[-Type] <Object>] [[-Parent] <Object>] [<CommonParameters>]
+New-PowershaiError [[-Name] <Object>] [[-Message] <Object>] [[-Props] <Object>] [[-Type] <Object>] [[-Parent] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
+
+### -Name
+Unique erro identification
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 1
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
 
 ### -Message
 A mensagem da exception!
@@ -30,7 +45,7 @@ Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 1
+Position: 2
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
@@ -45,7 +60,7 @@ Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 2
+Position: 3
 Default Value: @{}
 Accept pipeline input: false
 Accept wildcard characters: false
@@ -60,7 +75,7 @@ Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 3
+Position: 4
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
@@ -75,7 +90,7 @@ Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 4
+Position: 5
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false

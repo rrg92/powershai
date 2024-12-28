@@ -10,8 +10,8 @@ powershai: true
 
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Função auxiliar para converter um script .ps1 em um formato de schema esperado pela OpenAI.
-Basicamente, o que essa fução faz é ler um arquivo .ps1 (ou string) juntamente com sua help doc.  
+Função auxiliar para converter um script .ps1, ou scriptblock, em um formato de schema esperado pela OpenAI.
+Basicamente, o que essa fução faz é executar o script e obter o help de todos os comandos definidos.
 Então, ele retorna um objeto no formato especifiado pela OpenAI para que o modelo possa invocar!
 
 Retorna um hashtable contendo as seguintes keys:
@@ -26,12 +26,16 @@ https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/ab
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiToolFromScript [[-ScriptPath] <Object>] [<CommonParameters>]
+Get-OpenaiToolFromScript [[-Script] <Object>] [[-Vars] <Object>] [[-JsonSchema] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -ScriptPath
+### -Script
+Arquivo .ps1 ou scriptblock!
+O script será carregado em seu proprio escopo (como se fosse um modulo).
+Logo, você pode não conseguir acessar certas variáveis dependneod do escopo.
+Utilize -Vars para especificar quais variáveis precisa disponibilizar no script!
 
 ```yml
 Parameter Set: (All)
@@ -41,6 +45,37 @@ Accepted Values:
 Required: false
 Position: 1
 Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Vars
+Especifique variáveis e seus valores para serem disponibilizadas no escopo do script!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -JsonSchema
+Especifique um json schema customizado para cada funcao retronada pelo script.
+Você deve especificar uma key com o nome de cada comando. O valor é uma outra hashtable onde cada key é o nome do parâmetro e o valor é o json schema desse parâmetro
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 3
+Default Value: @{}
 Accept pipeline input: false
 Accept wildcard characters: false
 ```

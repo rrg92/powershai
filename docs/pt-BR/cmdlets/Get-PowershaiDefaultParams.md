@@ -7,13 +7,13 @@ powershai: true
 # Get-PowershaiDefaultParams
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Obtém uma referência para variável que define os default parameters
+ObtÃ©m uma referÃªncia para variÃ¡vel que define os default parameters
 
 ## DESCRIPTION <!--!= @#Desc !-->
-No Powershell, módulos tem seu próprio escopo de variáveis.  
-Portanto, ao tentar definir essa variável fora do escopo correto, não afetará os comandos dos módulos.  
-Este comando permite que o usuário tenha acesso a variável que controla o default parameter dos comandos do módulo.  
-Na maior parte, isso vai ser usado para debug, mas, eventualmente, um usuário pode querer definir parâmetros default.
+No Powershell, mÃ³dulos tem seu prÃ³prio escopo de variÃ¡veis.  
+Portanto, ao tentar definir essa variÃ¡vel fora do escopo correto, nÃ£o afetarÃ¡ os comandos dos mÃ³dulos.  
+Este comando permite que o usuÃ¡rio tenha acesso a variÃ¡vel que controla o default parameter dos comandos do mÃ³dulo.  
+Na maior parte, isso vai ser usado para debug, mas, eventualmente, um usuÃ¡rio pode querer definir parÃ¢metros default.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -25,7 +25,7 @@ Get-PowershaiDefaultParams [<CommonParameters>]
 
 ### EXAMPLE 1
 ```powershell
-O exemplo abaixo mostra como definir a variável de ebug default do comanod Invoke-Http.
+O exemplo abaixo mostra como definir a variÃ¡vel de ebug default do comanod Invoke-Http.
 ```
 
 

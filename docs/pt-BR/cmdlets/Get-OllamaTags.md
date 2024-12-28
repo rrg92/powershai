@@ -7,9 +7,7 @@ powershai: true
 # Get-OllamaTags
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
 Get-OllamaTags [<CommonParameters>]
-
 
 ## SYNTAX <!--!= @#Syntax !-->
 

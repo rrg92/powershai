@@ -7,85 +7,127 @@ powershai: true
 # Get-ClaudeMessages
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
 Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
-
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] 
-<Object>] [<CommonParameters>]
+Get-ClaudeMessages [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -StreamCallback
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 4
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 4
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -max_tokens
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 2
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 2
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -messages
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 0
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 0
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -model
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 1
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 1
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -temperature
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 3
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 3
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```

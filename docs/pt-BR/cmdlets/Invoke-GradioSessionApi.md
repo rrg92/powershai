@@ -35,8 +35,7 @@ Existem duas opcoes da sessao que afetam a call (podem ser alteradas com Set-Gra
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] 
-[<CommonParameters>]
+Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->

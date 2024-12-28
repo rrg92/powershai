@@ -7,9 +7,7 @@ powershai: true
 # Get-MaritalkModels
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Get-MaritalkModels 
-
+Get-MaritalkModels
 
 ## SYNTAX <!--!= @#Syntax !-->
 

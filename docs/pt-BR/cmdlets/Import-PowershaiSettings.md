@@ -24,10 +24,13 @@ Se a senha informanda estiver incorreta, os hashs não vão ser iguais, e ele ir
 Se, por outro lado, um erro de formado invalido de arquivo for exibido, significa que houve alguma corrupção no proesso de import ou é um bug deste comando.  
 Neste caso, você pode abrir uma issue no github relatando o problema.
 
+A partir da versão 0.7.0, um novo arquivo será gerado, chamado exportsession-v2.xml.  
+O arquivo antigo será mantido para que o usuário pode recuperar eventuais credenciais, se necessário.
+
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Import-PowershaiSettings [[-ExportDir] <Object>] [<CommonParameters>]
+Import-PowershaiSettings [[-ExportDir] <Object>] [-v1] [<CommonParameters>]
 ```
 
 ## EXAMPLES <!--!= @#Ex !-->
@@ -56,6 +59,21 @@ Accepted Values:
 Required: false
 Position: 1
 Default Value: $Env:POWERSHAI_EXPORT_DIR
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -v1
+Força a importação da versão 1
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
 Accept pipeline input: false
 Accept wildcard characters: false
 ```

@@ -21,8 +21,7 @@ Ela é útil para usar em situações em que você quer ver o progresso de um re
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] 
-[-PassThru] [<CommonParameters>]
+Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] [-PassThru] [<CommonParameters>]
 ```
 
 ## EXAMPLES <!--!= @#Ex !-->

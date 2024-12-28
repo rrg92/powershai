@@ -7,9 +7,7 @@ powershai: true
 # Set-MaritalkToken
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
 Set-MaritalkToken [<CommonParameters>]
-
 
 ## SYNTAX <!--!= @#Syntax !-->
 

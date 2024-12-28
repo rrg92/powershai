@@ -7,56 +7,81 @@ powershai: true
 # Get-OpenaiEmbeddings
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
 Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
-
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -dimensions
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 2
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 2
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -model
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 1
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 1
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -text
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 0
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 0
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```

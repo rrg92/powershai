@@ -15,8 +15,8 @@ Executa chamadas HTTP para o Gradio e já adiciona os headers comuns, como auten
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] 
-[[-token] <Object>] [<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [[-MaxRedirects] <Object>] 
+[<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -100,6 +100,20 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 6
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -MaxRedirects
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 7
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false

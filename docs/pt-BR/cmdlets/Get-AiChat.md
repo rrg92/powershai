@@ -29,12 +29,13 @@ Apesar de suportar o Functon Calling, ela não executa qualquer código, e apena
 	Veja a documentação de cada parãmetro para detalhes e como mapear para um provider;
 	
 	Quando o modelo não suportar um dos parâmetros informados (isto pé, não houver funcionalidade equivalente,ou que possa ser implementanda de maneira equivalente) um erro deverá ser retornado.
+	Parâmetros que não são repassados ao provider terão uma descrição informando!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
-[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] 
+[[-StreamCallback] <Object>] [-IncludeRawResp] [[-Check] <Object>] [[-Retries] <Object>] [-ContentOnly] [[-ProviderRawParams] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -153,7 +154,7 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-Habilita o modelo Stream 
+Habilita o modo Stream 
 Você deve especificar um ScriptBlock que será invocado para cada texto gerado pelo LLM.
 O script deve receber um parâmetro que representa cada trecho, no mesmo formato de streaming retornado
 	Este parâmetro é um objeto que conterá a propridade choices, que é nom mesmo esquema retornado pelo streaming da OpenAI:
@@ -173,6 +174,7 @@ Accept wildcard characters: false
 
 ### -IncludeRawResp
 Incluir a resposta da API em um campo chamado IncludeRawResp
+ Os parâmetro a seguir não são repassado aos provider!
 
 ```yml
 Parameter Set: (All)
@@ -182,6 +184,71 @@ Accepted Values:
 Required: false
 Position: named
 Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Check
+Valida a resposta e caso não esteja como esperado, tenta novamente!
+Pode ser um string ou um scriptblock
+Não é repassado ao provider!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: CheckLike,CheckRegex,CheckJson
+Accepted Values: 
+Required: false
+Position: 9
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Retries
+Max tentativas se o Check falha
+Não é repassado ao provider!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 10
+Default Value: 1
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -ContentOnly
+Retorna somente o texto da resposta.
+Não é repassado ao provider!
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -ProviderRawParams
+Especifica raw params por provider. Este tem prioridade sobre -RawParams (se 2 parametros com o mesmo nome (e path) sao especifciados).
+Voce deve especificar uma hashtable e cada key é o nome do provider. Então, o vaor de cada key é o mesmo que especificaria em -RawParams.
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 11
+Default Value: @{}
 Accept pipeline input: false
 Accept wildcard characters: false
 ```

@@ -23,7 +23,7 @@ Se estiver rodando em um script de um provider, ele vai retornar aquele provider
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiCurrentProvider [-ContextProvider] [<CommonParameters>]
+Get-AiCurrentProvider [-ContextProvider] [[-CallStack] <Object>] [[-FilterContext] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -40,6 +40,36 @@ Accepted Values:
 Required: false
 Position: named
 Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -CallStack
+Stack alternativa a considerar! Veja mais em Get-AiNearProvider
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 1
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -FilterContext
+Permite escolher  o provider com base em filtros
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```

@@ -355,9 +355,17 @@ function GetParams($FunctionName){
 
 
 
-#Thanks from: https://www.powershellgallery.com/packages/DRTools/4.0.2.3/Content/Functions%5CInvoke-AESEncryption.ps1
+
 function Invoke-AESEncryption {
-    [CmdletBinding()]
+    <#
+		.SYNOPSIS 
+			CRiptografa/Descruptografa string usando AES
+			
+		.DESCRIPTION 
+			Adaptado deste link: https://www.powershellgallery.com/packages/DRTools/4.0.2.3/Content/Functions%5CInvoke-AESEncryption.ps1
+			Obrigado!
+	#>
+	[CmdletBinding()]
     [OutputType([string])]
     Param
     ( 
@@ -453,7 +461,11 @@ function Invoke-AESEncryption {
 
 # Stronger Version!
 function Invoke-AESEncryptionV2 {
-    [CmdletBinding()]
+    <#
+		.SYNOPSIS 
+			CRiptografa/Descruptografa string usando AES com derivação de chaves e salt!
+	#>
+	[CmdletBinding()]
     Param
     ( 
         [ValidateSet('Encrypt', 'Decrypt')]

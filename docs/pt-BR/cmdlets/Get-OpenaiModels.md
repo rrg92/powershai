@@ -7,9 +7,7 @@ powershai: true
 # Get-OpenaiModels
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Get-OpenaiModels 
-
+Get OpenAI Models
 
 ## SYNTAX <!--!= @#Syntax !-->
 

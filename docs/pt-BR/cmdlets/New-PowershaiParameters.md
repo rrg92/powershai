@@ -16,10 +16,9 @@ O usuário pode usar um get-help New-PowershaiParameters para obter a doc dos pa
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] 
-<Boolean>] [[-ShowTokenStats] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] 
-[[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>] 
-[[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
+New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] <Boolean>] [[-ShowTokenStats] <Object>] 
+[[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] <Object>] 
+[[-PrintToolsResults] <Object>] [[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-PromptBuilder] <Object>] [[-PrintToolCalls] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -200,7 +199,8 @@ Accept wildcard characters: false
 ```
 
 ### -ShowArgs
-Se true, exibe os argumenots das funcoes quando o Tool Calling é ativado para executar alguma funcao
+Se true, exibe os argumenots das funcoes quando o Tool Calling é ativado para executar alguma funcao 
+DEPRECIADO. Será removido em breve. Use -PrintToolCalls
 
 ```yml
 Parameter Set: (All)
@@ -245,7 +245,7 @@ Accept wildcard characters: false
 ```
 
 ### -RawParams
-Parãmetros a serem passados diretamente para a API que invoca o modelo.  
+Parâmetros a serem passados diretamente para a API que invoca o modelo.  
 O provider deve implementar o suporte a esse.  
 Para usá-lo você deve saber os detalhes de implementação do provider e como a API dele funciona!
 
@@ -261,11 +261,11 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -ContextFormat
+### -PromptBuilder
 Controla o template usado ao injetar dados de contexto!
 Este parâmetro é um scriptblock que deve retornar uma string com o contexto a ser injetado no prompt!
 Os parâmetros do scriptblock são:
-	FormattedObject 	- O objeto que representa o chat ativo, já formatado com o Formatter configurado
+	FormattedObject 	- O objeto com os dados do contexto (Enviado via pipe), já formatado com o Formatter configurado
 	CmdParams 			- Os parâmetros passados para Send-PowershaAIChat. É o mesmo objeto retorndo por GetMyParams
 	Chat 				- O chat no qual os dados estão sendo enviados.
 Se nulo, irá gerar um default. Verifique o cmdlet Send-PowershaiChat para detalhes
@@ -277,6 +277,25 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 16
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -PrintToolCalls
+Controla como as Tools Calls são exibidas pelo comando Send-PowershaiChat
+Valores possíveis:
+	No			- não exibe nada relacionado ao tool calls.
+	NameOnly 	- Exibe apenas o nome no formato FunctionaName{...} , em uma linha própria.
+	NameArgs	- Exibe o nome e os argumentos!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 17
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false

@@ -7,99 +7,150 @@ powershai: true
 # Invoke-MaritalkApi
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
 Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
-
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] 
-[-OpenAI] [<CommonParameters>]
+Invoke-MaritalkApi [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -OpenAI
+Parameter Set: (All)
+Type: switch
+Aliases:
+Accepted Values:
+Required: false
+Position: Named
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: switch
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: Named
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -StreamCallback
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 4
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 4
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -Token
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 3
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 3
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -body
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 1
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 1
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -endpoint
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 0
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 0
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -method
+Parameter Set: (All)
+Type: Object
+Aliases:
+Accepted Values:
+Required: false
+Position: 2
+Default Value:
+Accept pipeline input: false
+Accept wildcard characters:
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: 
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 2
-Default Value: 
+Position: named
+Default Value: None
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
