@@ -1,10 +1,10 @@
 ﻿# Changelog
 
-## [Unreleased]
+## [Unreleased] <!--AiDoc:Translator:IgnoreLine-->
 
 ## [v0.7.0]
 
-### Fixed
+### Fixed <!--AiDoc:Translator:IgnoreLine-->
 - Corrigidos erros do provider Hugging Face devido a redirecionamentos.
 - Corrigida a instalação de módulos para testes usando Docker Compose.
 - Corrigidos problemas de desempenho na conversão de ferramentas devido a um possível grande número de comandos em uma sessão. Agora usa módulos dinâmicos. Veja `ConvertTo-OpenaiTool`.
@@ -12,7 +12,7 @@
 - Corrigidos pequenos bugs no PowerShell Core para Linux.
 - **OPENAI PROVIDER**: Resolvido código de exceção causado pela ausência de um modelo padrão.
 
-### Added
+### Added <!--AiDoc:Translator:IgnoreLine-->
 - **NOVO PROVIDER**: Bem-vindo Azure 🎉
 - **NOVO PROVIDER**: Bem-vindo Cohere 🎉
 - Adicionado o recurso `AI Credentials` — uma nova maneira padrão para os usuários definirem credenciais, permitindo que os provedores solicitem dados de credenciais dos usuários.
@@ -32,7 +32,7 @@
 - **OPENAI PROVIDER**: Adicionado um novo cmdlet para gerar chamadas de ferramentas: `ConvertTo-OpenaiTool`, suportando ferramentas definidas em blocos de script.
 - **OLLAMA PROVIDER**: Novo cmdlet `Get-OllamaEmbeddings` para retornar embeddings usando Ollama.
 
-### Changed
+### Changed <!--AiDoc:Translator:IgnoreLine-->
 - **BREAKING CHANGE**: O parâmetro do Chat `ContextFormatter` foi renomeado para `PromptBuilder`.
 - Alterado a exibição padrão (formats.ps1xml) de alguns cmdlets como `Get-AiModels`.
 - Melhoria no log detalhado ao remover o histórico antigo devido a `MaxContextSize` em chats.
@@ -49,13 +49,13 @@
 
 ## [v0.6.6] - 2024-11-25
 
-### Fixed
+### Fixed <!--AiDoc:Translator:IgnoreLine-->
 - Corrigido bug na função `New-GradioSessionApiProxyFunction`, relacionado a algumas funções internas.
 - Adicionado suporte ao Gradio 5, que é necessário devio alterações no endpoints da API
 
 ## [v0.6.5] - 2024-11-14
 
-### Added
+### Added <!--AiDoc:Translator:IgnoreLine-->
 - Suporte para imagens em `Send-PowershaiChat` para os providers OpenAI e Google.
 - Um comando experimental, `Invoke-AiScreenshots`, que adiciona suporte para tirar screenshots e analisá-las!
 - Suporte para chamada de ferramentas no provider Google.
@@ -63,13 +63,13 @@
 - Suporte ao TAB para Set-AiProvider. 
 - Adicionado suporte básico para saída estruturada ao parâmetro `ResponseFormat` do cmdlet `Get-AiChat`. Isso permite passar um hashtable descrevendo o esquema OpenAPI do resultado.
 
-### Changed
+### Changed <!--AiDoc:Translator:IgnoreLine-->
 - **BREAKING CHANGE**: A propriedade `content` das mensagens OpenAI agora é enviada como um array para se alinhar às especificações para outros tipos de mídia. Isso requer a atualização de scripts que dependem do formato de string única anterior e de versões antigas de provedores que não suportam essa sintaxe.
 - Parâmetro `RawParams` de `Get-AiChat` foi corrigido. Agora você pode passar parâmetros da API para o provider em questão para ter estrito controle sobre o resultado
 - Atualizações de DOC: Novos documentos traduzidos com AiDoc e atualizações. Pequena correção em AiDoc.ps1 para não traduzir alguns comandos de sintaxe markdown.
 
 
-### Fixed
+### Fixed <!--AiDoc:Translator:IgnoreLine-->
 - Fix #13. As configurações de segurança foram alteradas e o tratamento de maiúsculas e minúsculas foi aprimorado. Isso não estava sendo validado, o que resultava em um erro.
 
 [v0.6.6]: https://github.com/rrg92/powershai/releases/tag/v0.6.6
