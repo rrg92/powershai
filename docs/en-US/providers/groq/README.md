@@ -1,18 +1,21 @@
 ﻿# GROQ Provider
 
-Groq is a service that offers various LLMs running on a technology called LPU, created by them.
+Groq is a service that offers several LLMs that run on a technology called LPU, created by them.
 The response is very fast!
-Learn more at https://groq.com/
+Learn more at https://groq.com/ and https://console.groq.com/docs/quickstart
 
 Their API is compatible with OpenAI, so the steps are very similar.
 
-# Initial configurations
+# Quick Start
 
-* Use Set-AiProvider groq
-* Use Set-OpenaiToken to configure the token! 
+Groq is 100% compatible with OpenAI, so you need to configure a few things:
 
+* Enable the provider in the session: `Set-AiProvider groq`
+* Enter the authentication token with `Set-GroqToken`
+* Use Set-OpenaiToken to configure the token!
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI
+_
 <!--PowershaiAiDocBlockEnd-->

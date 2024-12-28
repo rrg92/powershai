@@ -7,9 +7,7 @@ powershai: true
 # Get-MaritalkModels
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Get-MaritalkModels 
-
+Get-MaritalkModels
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -20,8 +18,7 @@ Get-MaritalkModels [<CommonParameters>]
 ## PARAMETERS <!--!= @#Params !-->
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI
+_
 <!--PowershaiAiDocBlockEnd-->

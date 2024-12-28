@@ -1,51 +1,7 @@
-﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
-powershai: true
----
-
-# Get-OpenaiToolFromScript
-
-## SYNOPSIS <!--!= @#Synop !-->
-
-
-## DESCRIPTION <!--!= @#Desc !-->
-Helper function to convert a .ps1 script to a schema format expected by OpenAI.
-Essentially, this function does is read a .ps1 file (or string) along with its help doc.  
-Then, it returns an object in the format specified by OpenAI so the model can invoke it!
-
-Returns a hashtable containing the following keys:
-	functions - The list of functions, with their code read from the file.  
-				When the model invokes, you can execute directly from here.
-				
-	tools - List of tools, to be sent in the OpenAI call.
-	
-You can document your functions and parameters following the PowerShell Comment Based Help:
-https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4
-
-## SYNTAX <!--!= @#Syntax !-->
-
-```
-Get-OpenaiToolFromScript [[-ScriptPath] <Object>] [<CommonParameters>]
-```
-
-## PARAMETERS <!--!= @#Params !-->
-
-### -ScriptPath
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
-```
+﻿---external help file: powershai-help.xmlschema: 2.0.0powershai: true---# Get-OpenaiToolFromScript## SYNOPSIS <!--!= @#Synop !-->## DESCRIPTION <!--!= @#Desc !-->Helper function to convert a .ps1 script or scriptblock into a schema format expected by OpenAI.Basically, what this function does is execute the script and get the help of all defined commands.Then, it returns an object in the format specified by OpenAI so that the model can invoke it!Returns a hashtable containing the following keys:functions - The list of functions, with their code read from the file.When the model invokes, you can execute directly from here.tools - List of tools, to be sent in the OpenAI call.You can document your functions and parameters following the PowerShell Comment Based Help:https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_comment_based_help?view=powershell-7.4## SYNTAX <!--!= @#Syntax !-->```Get-OpenaiToolFromScript [[-Script] <Object>] [[-Vars] <Object>] [[-JsonSchema] <Object>] [<CommonParameters>]```## PARAMETERS <!--!= @#Params !-->### -Script.ps1 file or scriptblock!The script will be loaded in its own scope (as if it were a module).Therefore, you may not be able to access certain variables depending on the scope.Use -Vars to specify which variables you need to make available in the script!```ymlParameter Set: (All)Type: ObjectAliases: Accepted Values: Required: falsePosition: 1Default Value: Accept pipeline input: falseAccept wildcard characters: false```### -VarsSpecify variables and their values to be made available in the script's scope!```ymlParameter Set: (All)Type: ObjectAliases: Accepted Values: Required: falsePosition: 2Default Value: @{}Accept pipeline input: falseAccept wildcard characters: false```### -JsonSchemaSpecify a custom json schema for each function returned by the script.You must specify a key with the name of each command. The value is another hashtable where each key is the parameter name and the value is the json schema of that parameter```ymlParameter Set: (All)Type: ObjectAliases: Accepted Values: Required: falsePosition: 3Default Value: @{}Accept pipeline input: falseAccept wildcard characters: false```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI
+_
 <!--PowershaiAiDocBlockEnd-->

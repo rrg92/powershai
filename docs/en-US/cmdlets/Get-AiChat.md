@@ -10,37 +10,40 @@ powershai: true
 Sends messages to an LLM and returns the response
 
 ## DESCRIPTION <!--!= @#Desc !-->
-This is the most basic form of Chat promoted by PowershAI.  
+This is the most basic Chat method provided by PowershAI.  
 With this function, you can send a message to an LLM from the current provider.  
 
-This function is a lower-level, standardized way to access an LLM that PowershAI provides.  
-It does not manage history or context. It is useful for invoking simple prompts that do not require multiple interactions like in a Chat. 
-Although it supports Function Calling, it does not execute any code and only returns the model's response.
+This function is a lower-level, standardized way to access an LLM that powershai provides.  
+It does not manage history or context. It is useful for invoking simple prompts that do not require multiple interactions as in a Chat. 
+Although it supports Function Calling, it does not execute any code, and only returns the model's response.
 
 
 
-** PROVIDER INFORMATION
-	The provider must implement the Chat function for this functionality to be available. 
-	The chat function must return an object with the response that follows the same specification as OpenAI's Chat Completion.
-	The following links serve as a basis:
-		https://platform.openai.com/docs/guides/chat-completions
-		https://platform.openai.com/docs/api-reference/chat/object (non-streaming response)
-	The provider must implement the parameters of this function. 
-	See the documentation for each parameter for details and how to map to a provider;
-	
-	When the model does not support one of the provided parameters (that is, there is no equivalent functionality, or it cannot be implemented in an equivalent way), an error must be returned.
+** INFORMATION FOR PROVIDERS
+
+The provider must implement the Chat function for this functionality to be available. 
+The chat function must return an object with the response with the same specification as the OpenAI, Chat Completion function.
+The following links serve as a basis:
+
+https://platform.openai.com/docs/guides/chat-completions
+https://platform.openai.com/docs/api-reference/chat/object (return without streaming)
+The provider must implement the parameters of this function. 
+See the documentation for each parameter for details and how to map to a provider;
+
+When the model does not support one of the informed parameters (that is, there is no equivalent functionality, or that can be implemented in an equivalent way) an error should be returned.
+Parameters that are not passed to the provider will have a description informing!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
-[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [-IncludeRawResp] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] 
+[[-StreamCallback] <Object>] [-IncludeRawResp] [[-Check] <Object>] [[-Retries] <Object>] [-ContentOnly] [[-ProviderRawParams] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -prompt
-The prompt to be sent. It must be in the format described by the ConvertTo-OpenaiMessage function
+The prompt to be sent. Must be in the format described by the ConvertTo-OpenaiMessage function
 
 ```yml
 Parameter Set: (All)
@@ -85,7 +88,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-Maximum number of tokens to be returned
+Maximum tokens to be returned
 
 ```yml
 Parameter Set: (All)
@@ -100,11 +103,12 @@ Accept wildcard characters: false
 ```
 
 ### -ResponseFormat
-Response format 
-The acceptable formats and behavior must follow the same as OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
+Response format
+Acceptable formats, and behavior, should follow the same as OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
 Shortcuts:
-	"json"|"json_object", equivalent to {"type": "json_object"}
-	object must specify a schema as if it were passed directly to the OpenAI API, in the response_format.json_schema field
+
+"json"|"json_object", is equivalent to {"type": "json_object"}
+object must specify a schema as if it were passed directly to the Openai API, in the response_format.json_schema field
 
 ```yml
 Parameter Set: (All)
@@ -119,10 +123,10 @@ Accept wildcard characters: false
 ```
 
 ### -Functions
-List of tools that must be invoked!
-You can use commands like Get-OpenaiTool*, to easily transform PowerShell functions into the expected format!
+List of tools that should be invoked!
+You can use commands like Get-OpenaiTool*, to easily transform powershell functions into the expected format!
 If the model invokes the function, the response, both in stream and normal, must also follow the OpenAI tool calling model.
-This parameter must follow the same schema as OpenAI's Function Calling: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+This parameter must follow the same schema as the OpenAI Function Calling: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
 
 ```yml
 Parameter Set: (All)
@@ -153,11 +157,11 @@ Accept wildcard characters: false
 ```
 
 ### -StreamCallback
-Enables the Stream model 
+Enables Stream mode
 You must specify a ScriptBlock that will be invoked for each text generated by the LLM.
-The script must receive a parameter that represents each piece, in the same streaming format returned
-	This parameter is an object that will contain the property choices, which is in the same schema returned by OpenAI's streaming:
-		https://platform.openai.com/docs/api-reference/chat/streaming
+The script must receive a parameter that represents each segment, in the same streaming format returned
+This parameter is an object that will contain the choices property, which is in the same schema returned by OpenAI streaming:
+https://platform.openai.com/docs/api-reference/chat/streaming
 
 ```yml
 Parameter Set: (All)
@@ -173,6 +177,7 @@ Accept wildcard characters: false
 
 ### -IncludeRawResp
 Include the API response in a field called IncludeRawResp
+The following parameter is not passed to the provider!
 
 ```yml
 Parameter Set: (All)
@@ -186,7 +191,73 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -Check
+Validates the response and if it is not as expected, tries again!
+Can be a string or a scriptblock
+It is not passed to the provider!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: CheckLike,CheckRegex,CheckJson
+Accepted Values: 
+Required: false
+Position: 9
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Retries
+Max attempts if Check fails
+It is not passed to the provider!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 10
+Default Value: 1
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -ContentOnly
+Returns only the text of the response.
+It is not passed to the provider!
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -ProviderRawParams
+Specifies raw params per provider. This takes precedence over -RawParams (if 2 parameters with the same name (and path) are specified).
+You must specify a hashtable and each key is the provider name. Then, the value of each key is the same as you would specify in -RawParams.
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 11
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI._
+_Automatically translated using PowershAI and AI
+_
 <!--PowershaiAiDocBlockEnd-->

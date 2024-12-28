@@ -7,9 +7,7 @@ powershai: true
 # Get-OpenaiModels
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Get OpenAI Models 
-
+Get OpenAI Models
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -20,8 +18,7 @@ Get-OpenaiModels [<CommonParameters>]
 ## PARAMETERS <!--!= @#Params !-->
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI
+_
 <!--PowershaiAiDocBlockEnd-->

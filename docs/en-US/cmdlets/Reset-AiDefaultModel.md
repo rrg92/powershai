@@ -1,0 +1,7 @@
+﻿{"external help file":"powershai-help.xml","schema":"2.0.0","powershai":true,"# Reset-AiDefaultModel":"## SYNOPSIS \u003c!--!= @#Synop !--\u003e\nRemove the current provider's default model, which was defined with Set-AiDefaultModel!\n\n## DESCRIPTION \u003c!--!= @#Desc !--\u003e\nRemove the default model defined with Set-AiDefaultModel. Note that by doing this, the default model becomes the model defined by the provider.\n\n## SYNTAX \u003c!--!= @#Syntax !--\u003e\n\n```\nReset-AiDefaultModel [-Embeddings] [-WhatIf] [-Confirm] [\u003cCommonParameters\u003e]\n```\n\n## PARAMETERS \u003c!--!= @#Params !--\u003e\n\n### -Embeddings\n\n```yml\nParameter Set: (All)\nType: SwitchParameter\nAliases: \nAccepted Values: \nRequired: false\nPosition: named\nDefault Value: False\nAccept pipeline input: false\nAccept wildcard characters: false\n```\n\n### -WhatIf\n\n```yml\nParameter Set: (All)\nType: SwitchParameter\nAliases: wi\nAccepted Values: \nRequired: false\nPosition: named\nDefault Value: \nAccept pipeline input: false\nAccept wildcard characters: false\n```\n\n### -Confirm\n\n```yml\nParameter Set: (All)\nType: SwitchParameter\nAliases: cf\nAccepted Values: \nRequired: false\nPosition: named\nDefault Value: \nAccept pipeline input: false\nAccept wildcard characters: false\n```"}
+
+
+<!--PowershaiAiDocBlockStart-->
+_Automatically translated using PowershAI and AI
+_
+<!--PowershaiAiDocBlockEnd-->

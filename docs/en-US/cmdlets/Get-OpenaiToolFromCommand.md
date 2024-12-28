@@ -1,68 +1,7 @@
-﻿---
-external help file: powershai-help.xml
-schema: 2.0.0
-powershai: true
----
-
-# Get-OpenaiToolFromCommand
-
-## SYNOPSIS <!--!= @#Synop !-->
-
-
-## DESCRIPTION <!--!= @#Desc !-->
-Converts PowerShell commands to OpenaiTool.
-
-## SYNTAX <!--!= @#Syntax !-->
-
-```
-Get-OpenaiToolFromCommand [[-functions] <Object>] [[-parameters] <Object>] [[-UserDescription] <Object>] [<CommonParameters>]
-```
-
-## PARAMETERS <!--!= @#Params !-->
-
-### -functions
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
-```
-
-### -parameters
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: *
-Accept pipeline input: false
-Accept wildcard characters: false
-```
-
-### -UserDescription
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
-```
+﻿---external help file: powershai-help.xmlschema: 2.0.0powershai: true---# Get-OpenaiToolFromCommand## SYNOPSIS <!--!= @#Synop !-->Converts powershell commands to OpenaiTool.## DESCRIPTION <!--!= @#Desc !-->Converts powershell commands to OpenaiTool.## SYNTAX <!--!= @#Syntax !-->```Get-OpenaiToolFromCommand [[-functions] <Object>] [[-parameters] <Object>] [[-UserDescription] <Object>] [[-JsonSchema] <Hashtable[]>] [<CommonParameters>]```## PARAMETERS <!--!= @#Params !-->### -functionsList of commands```ymlParameter Set: (All)Type: ObjectAliases: Accepted Values: Required: falsePosition: 1Default Value: Accept pipeline input: falseAccept wildcard characters: false```### -parametersFilter which parameters will be added```ymlParameter Set: (All)Type: ObjectAliases: Accepted Values: Required: falsePosition: 2Default Value: *Accept pipeline input: falseAccept wildcard characters: false```### -UserDescriptionAdditional custom description```ymlParameter Set: (All)Type: ObjectAliases: Accepted Values: Required: falsePosition: 3Default Value: Accept pipeline input: falseAccept wildcard characters: false```### -JsonSchemaDefines a custom schema. Specify a hashtable, where each key is the name of the function parameter and the value is the JSON schema.The defined Json schema will be merged into the parameter schema. The settings defined in this parameter have priorityYou can specify a json schema for each function in -functions, just specify an array with the same size. The schema at the same offset is used.```ymlParameter Set: (All)Type: Hashtable[]Aliases: Accepted Values: Required: falsePosition: 4Default Value: @()Accept pipeline input: falseAccept wildcard characters: false```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI_
+_Automatically translated using PowershAI and AI
+_
 <!--PowershaiAiDocBlockEnd-->
