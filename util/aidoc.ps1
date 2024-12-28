@@ -1,4 +1,4 @@
-<#
+﻿<#
 	.DESCRIPTION
 		Uma pequeno dilema meu: Um produto ou serviço só muito bom, se ele consegue suprir as demandas dos próprios criadores!
 		E, baseado nisso, temos o script AI DOC!
@@ -376,7 +376,8 @@ foreach($SrcFile in $SourceFiles){
 
 		
 		$system = @(
-			"Traduza o texto do usuário para a linguagem de código $($TargetLang). Retorne APENAS o texto traduzido."
+			"Você é um tradutor de textos em markdown!"
+			"Traduzir o texto do usuário de $SourceLang para $TargetLang"
 			"Manter o conteúdo original entre <!--! -->. Traduzir comentários de código, nomes de funções de exemplo. Não traduzir nomes de comandos do PowershAI."
 			"Não altere ou complemente partes, foque apenas na tradução do texto."
 			"Não traduzir esses trechos:
@@ -397,7 +398,18 @@ foreach($SrcFile in $SourceFiles){
 		)
 		
 		write-host "	Invoking AI..."
-		$result 	= Get-AiChat -prompt $prompt -MaxTokens $MaxTokens
+		$result 	= Get-AiChat -prompt $prompt -MaxTokens $MaxTokens -ResponseFormat @{
+				schema = @{
+					type = "object"
+					properties = @{
+						translation = @{
+							type = "string"
+							description = "Translated text to $($TargetLang)"
+						}
+					}
+
+				}
+			}
 		$airesult 	= $result.choices[0]
 		$usage 		= $result.usage;
 		write-host "	Usage: Input = $($usage.prompt_tokens), Output = $($usage.completion_tokens)"
@@ -405,7 +417,11 @@ foreach($SrcFile in $SourceFiles){
 			throw "STOP_REASON: $($airesult.finish_reason)"
 		}
 		
-		$translated = $result.choices[0].message.content;
+		$JsonContent = $result.choices[0].message.content;
+		
+		$json = $JsonContent | ConvertFrom-Json
+		
+		$translated = $json.translation
 		write-host "	Translated: $($translated.length) chars"
 		$Control.text 			+= $translated
 		$Control.InputTokens 	+= $usage.prompt_tokens
@@ -415,21 +431,27 @@ foreach($SrcFile in $SourceFiles){
 	}
 	
 	try {
-		if($FileContent.length -gt $BlockSize){
-			$FileLines = $FileContent -split "`r?`n"
-			foreach($line in $FileLines){
-				$LineLen 	= $Line.length;
-				$EstTotal 	= $Control.TotalChars + $LineLen;
-				
-				if($EstTotal -ge $BlockSize){
-					$null = Translate
-				}
-				
-				$Control.buffer += $line;
-				$Control.TotalChars += $LineLen;
+		$FileLines = $FileContent -split "\r?\n"
+		$LineGuids = @();
+		foreach($line in $FileLines){
+			
+			
+			if($line -like '*<!--AiDoc:Translator:IgnoreLine-->*'){
+				[string]$Guid = [Guid]::NewGuid();
+				$LineGuids += @{ guid = $Guid; line = $line};
+				$line = $Guid;
 			}
-		} else {
-			$Control.buffer = $FileContent;
+			
+			
+			$LineLen 	= $Line.length;
+			$EstTotal 	= $Control.TotalChars + $LineLen;
+			
+			if($EstTotal -ge $BlockSize){
+				$null = Translate
+			}
+			
+			$Control.buffer += $line;
+			$Control.TotalChars += $LineLen;
 		}
 		
 		Translate
@@ -442,6 +464,12 @@ foreach($SrcFile in $SourceFiles){
 	}
 	
 	$Translated 	= $Control.text
+	
+	#Restore guids!
+	foreach($guids in $LineGuids){
+		$Translated = $Translated.replace($guids.guid,$guids.line);
+	}
+	
 	$InputTokens 	= $Control.InputTokens
 	$OutputTokens 	= $Control.OutputTokens
 	$Model 			= $Control.LastModel
