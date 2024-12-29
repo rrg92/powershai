@@ -1150,7 +1150,7 @@ function Send-PowershaiChat {
 				while($ChatContext.size -ge $MaxContextSize -and $ChatContext.messages){
 					$removed,$LeftMessages = $ChatContext.messages;
 					
-					$ChatContext.messages = $LeftMessages;
+					$ChatContext.messages = @($LeftMessages);
 					
 					$RemovedCount = $removed.length;
 					if($removed.content){
@@ -1161,7 +1161,7 @@ function Send-PowershaiChat {
 					$ChatContext.size -= [int]$RemovedCount;
 				}
 				
-				$ChatContext.messages += @($msg);
+				$ChatContext.messages = [object[]]@($ChatContext.messages) + @($msg);
 
 				if($msg.content){
 					$ChatContext.size += $msg.content.length;
