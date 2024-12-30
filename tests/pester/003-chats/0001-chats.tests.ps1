@@ -292,6 +292,14 @@ Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 					Assert-MockCalled PesterProcessTool -Times 1
 				}
 				
+				It "Tool1 result" {
+					[string]$ToolExpectedResult = [Guid]::NewGuid();
+					Mock PesterProcessTool  {return $ToolExpectedResult} -Parameter { $data.name -eq "TestTool1" }
+					$resp = ia -Lines "Call tool TestTool1 and return the result";
+					$resp | Should -BeLike "*$ToolExpectedResult*"
+					Assert-MockCalled -Module powershai write-warning -Times 0
+				}
+				
 				Context "Option PrintToolCalls" {
 				
 					It "None" {

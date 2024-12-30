@@ -530,7 +530,7 @@ $PARAM_LIST = @();
 RegArgCompletion Set-PowershaiChatParameter parameter {
 	param($cmd,$param,$word,$ast,$fake)
 	 
-	Get-PowershaiChatParameter -ChatId . | ? {$_.name -like "$word*"} | %{$_.Name};
+	(Get-PowershaiChatParameter -ChatId .) | ? {$_.name -like "$word*"} | %{$_.name};
 }
 
 
@@ -1161,7 +1161,7 @@ function Send-PowershaiChat {
 					$ChatContext.size -= [int]$RemovedCount;
 				}
 				
-				$ChatContext.messages = [object[]]@($ChatContext.messages) + @($msg);
+				$ChatContext.messages = [object[]]@($ChatContext.messages) + @($msg) | ? {$_};
 
 				if($msg.content){
 					$ChatContext.size += $msg.content.length;
@@ -1287,9 +1287,10 @@ function Send-PowershaiChat {
 								}
 								
 								funcresult = {
-									param($interaction, $currentool, $FuncResp)
+									param($interaction, $evt)
 									
 									# format using same formatter!
+									$FuncResp = $evt.params.ToolResult.resp
 									$FuncResp.content = Format-PowershaiContext $FuncResp.content;
 									
 									$LastResult = $funcName = $interaction.toolResults[-1].resp.content;
@@ -1498,7 +1499,7 @@ function Send-PowershaiChat {
 	}
 	
 	process {
-
+		
 		if($ForEach -and $IsPipeline){
 			# Convete o contexto para string!
 			$StrContext = Format-PowershaiContext -obj $context @ContextFormatParams;

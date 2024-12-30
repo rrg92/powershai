@@ -1492,7 +1492,7 @@ function Invoke-AiChatTools {
 	$AllInteractions = @();
 	
 	$emit = {
-		param($evtName, $interaction)
+		param($evtName, $interaction, $params)
 		
 		$evtScript = $on[$evtName];
 		
@@ -1501,7 +1501,7 @@ function Invoke-AiChatTools {
 		}
 		
 		try {
-			$null = & $evtScript $interaction @{event=$evtName}
+			$null = & $evtScript $interaction @{event=$evtName; params = $params}
 		} catch {
 			write-warning "EventCallBackError: $evtName";
 			write-warning $_
@@ -1673,7 +1673,9 @@ function Invoke-AiChatTools {
 				
 				$AiInteraction.toolResults += $CurrentToolResult
 				
-				& $emit "func" $AiInteraction $CurrentToolResult
+				& $emit "func" $AiInteraction @{
+					ToolResult = $CurrentToolResult
+				}
 				
 				verbose "Calling function $FuncName ($FuncInfo)"
 				
@@ -1718,7 +1720,9 @@ function Invoke-AiChatTools {
 					
 					
 					$FuncResp.content = $FuncResult
-					& $emit "funcresult" $AiInteraction $CurrentToolResult $FuncResp
+					& $emit "funcresult" $AiInteraction @{
+						ToolResult 	= $CurrentToolResult
+					}
 					
 					if($FuncResp.content -isnot [string]){
 						$FuncResp.content = $FuncResp.content | out-string;
