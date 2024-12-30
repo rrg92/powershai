@@ -28,6 +28,16 @@ function groq_Chat {
 	$RawParams = $ProviderFuncRawData.params;
 	
 	$prompt = $RawParams.prompt
+	$model 	= $RawParams.model;
+	
+	if(!$model){
+		$model = GetCurrentProviderData DefaultModel
+	}
+	
+	
+	if(!$model){
+		throw "POWERSHAI_GROQ_NOMODEL: Must inform a model. Can set default model with Set-AiDefaultModel. List available with Get-AiModels"
+	}
 	
 	# Remove refusal from messages!
 	[object[]]$OpenaiMessages = @(ConvertTo-OpenaiMessage $prompt);
@@ -43,15 +53,39 @@ function groq_Chat {
 		[void]$GroqMessages.Add($GroqMessage)
 	}
 	
-	$RawParams.prompt = @($GroqMessages)
-	openai_Chat @RawParams
+	$RawParams.prompt 	= @($GroqMessages)
+	$RawParams.model 	= $model
+	
+	try {
+		openai_Chat @RawParams
+	} catch  {
+		$ex = $_.Exception;
+		if($ex.ErrorName -ne "POWERSHAI_OPENAI_ERROR"){
+			throw;
+		}
+		
+		$GroqError = $ex.HttpResponseText
+		$GroqResponseType = $ex.HttpResponse.ContentType;
+		
+		if($GroqResponseType -eq "application/json"){
+			$GroqError = ($GroqError | ConvertFrom-Json).error
+			
+			$err = New-PowershaiError "POWERSHAI_GROQ_ERROR" "$($GroqError.code):$($GroqError.message)" -Prop @{
+				error = $GroqError
+			}
+			
+			throw $err;
+		}
+		
+		throw;
+	}
 }
 
 return @{
 
 
 	BaseUrl 			= "https://api.groq.com/openai/v1"
-	DefaultModel		= "llama-3.2-70b-versatile"
+	DefaultModel		= "llama-3.3-70b-versatile"
 	CredentialEnvName 	= "GROQ_API_KEY"
 	
 	info = @{
@@ -62,15 +96,9 @@ return @{
 	#source: https://console.groq.com/docs/tool-use
 	ToolsModels		= @(
 		'gemma2-9b-it'
-		'llama-3.1-405b-reasoning'
-		'llama-3.1-70b-versatile'
-		'llama-3.1-8b-instant'
-		'llama3-70b-8192'
-		'llama3-8b-8192'
 		'mixtral-8x7b-32768'
 		'gemma-7b-it'
-		'llama3-groq-70b-8192-tool-use-preview'
-		'llama3-groq-8b-8192-tool-use-preview'
+		'llama-3*'
 	)
 
 

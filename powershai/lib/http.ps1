@@ -464,8 +464,6 @@ function Get-HttpResponse {
 			[switch]$ForceEnd
 		
 		,[switch]$StreamsOnly
-
-		
 	)
 	
 	function WaitAsync {
@@ -555,19 +553,38 @@ function Get-HttpResponse {
 				$ErrorResp = $_.Exception.Response;
 				$HttpRequest.WebResponse = $ErrorResp;
 				
-				if($ErrorResp.StatusCode -ne "BadRequest"){
-					throw;
+				$ErrorDetails = @{}
+				$PassError = $_.exception;
+				$PassError | Add-Member -Force Noteproperty PowershaiDetails $ErrorDetails
+				
+				if($ErrorResp.ContentLength){
+					verbose "Response Error contains length... Trying read...";
+					
+					try {
+						verbose "Getting response stream..."
+						$ErrorResponseStream = $ErrorResp.GetResponseStream();
+						
+						verbose "Creating error response reader..."
+						$ErrorIO = New-Object System.IO.StreamReader($ErrorResponseStream);
+						
+						verbose "Reading the error response!"
+						$ErrorText = $ErrorIO.ReadToEnd();
+						$ErrorDetails.ResponseError = @{
+							text 		= $ErrorText 
+							response 	= $ErrorResp
+						}
+					} catch {
+						write-warning "failed process response error!";
+						$ErrorDetails.ResponseErrorException = @{
+								exception 		= $_
+								stream 			= $ErrorResponseStream
+								reader 			= $ErrorIO
+							}
+					}
 				}
 				
-				verbose "Processing response error..."
-				$ErrorResponseStream = $ErrorResp.GetResponseStream();
-				
-				verbose "Creating error response reader..."
-				$ErrorIO = New-Object System.IO.StreamReader($ErrorResponseStream);
-				verbose "Reading error response..."
-				$ErrorText = $ErrorIO.ReadToEnd();
-				$HttpRequest.Completed = $true;
-				throw $ErrorText;
+				$HttpRequest.Completed 	= $true;
+				throw;
 			}
 			
 			verbose "  Response: charset: $($HttpResp.CharacterSet) encoding: $($HttpResp.ContentEncoding) ContentType: $($HttpResp.ContentType)"

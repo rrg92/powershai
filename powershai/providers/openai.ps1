@@ -105,7 +105,25 @@ function Invoke-OpenaiApi {
 		}
 
 		verbose "ReqParams:`n$($ReqParams|out-string)"
-		$RawResp 	= InvokeHttp @ReqParams
+		try {
+			$RawResp 	= InvokeHttp @ReqParams
+		} catch [System.Net.WebException] {
+			$ex = $_.exception;
+			
+			if($ex.PowershaiDetails){
+				$ResponseError = $ex.PowershaiDetails.ResponseError.text;
+				
+				if($ResponseError){
+					$err = New-PowershaiError "POWERSHAI_OPENAI_ERROR" "Provider: $($Provider.name) | Error: $ResponseError" -Prop @{
+						HttpResponseText 	= $ResponseError
+						HttpResponse		= $ex.PowershaiDetails.ResponseError.Response
+					}
+ 					throw $err
+				}
+			}
+			
+			throw;
+		}
 		verbose "RawResp: `n$($RawResp|out-string)"
 	}
 	
@@ -420,8 +438,10 @@ function Get-OpenaiChat {
 	
 	# Lock current provider!
 	. WithAiProvider $Provider {
+			$CurrentProvider = Get-AiCurrentProvider;
+			
 			if(!$model){
-				$DefaultModel = $Provider.DefaultModel;
+				$DefaultModel = GetCurrentProviderData DefaultModel
 				
 				# check if model is correct
 				
@@ -443,9 +463,17 @@ function Get-OpenaiChat {
 				temperature = $temperature 
 			}
 			
-			if($MaxTokens){
-				$Body.max_completion_tokens = $MaxTokens
+			$MaxTokensApiName = "max_tokens"
+			
+			if($CurrentProvider.name -eq "openai"){
+				$MaxTokensApiName = "max_completion_tokens";
 			}
+			
+			if($MaxTokens){
+				$Body[$MaxTokensApiName] = $MaxTokens
+			}
+			
+			
 			
 			if($RawParams){
 				$RawParams.keys | %{ $Body[$_] = $RawParams[$_] }
