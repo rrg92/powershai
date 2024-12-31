@@ -169,8 +169,6 @@ Mas, à medida que estes comandos são modificados, ou novos são adicionados, �
 Para criar um teste, você deve usar a [sintaxe do módulo Pester 5](https://pester.dev/docs/quick-start).  
 O diretório em que o script de teste irá procurar é o `tests/pester`, logo você deve colocar os arquivos lá.  
 Somente serão carregados arquivos com a extensão `.tests.ps1`.  
-A organização da estrutura de testes é documentada via Markdown diretamente nesse subdiretório.  
-Consulte o diretório para mais informações de como e onde você pode definir ou alterar testes.
 
 
 

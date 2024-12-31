@@ -169,8 +169,6 @@ However, as these commands are modified, or new ones are added, it is mandatory 
 To create a test, you should use the [Pester module 5 syntax](https://pester.dev/docs/quick-start).
 The directory where the test script will look is `tests/pester`, so you should put the files there.
 Only files with the `.tests.ps1` extension will be loaded.
-The organization of the test structure is documented via Markdown directly in this subdirectory.
-Consult the directory for more information on how and where you can define or change tests.
 
 
 
