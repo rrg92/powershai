@@ -8,8 +8,10 @@ Após ler este arquivo, você será capaz de:
 - Entender o que é um provider do PowershAI na prática
 - Criar uma conta gratuita no provider Groq
 - Definir as credenciais de autenticação de um provider
-- 
 - Conversar com o modelo LLM Llama3.3, via provider Groq 
+- Entender e usar os comandos `Get-AiChat` e `ia` (`Send-PowershaiChat`)
+- Exportar e importar configurações de forma segura, como as api keys
+- Adicionar novas habilidades ao LLM através de funcões powershell (Tool Calling)
 
 ---
 

@@ -195,13 +195,11 @@ if(!$KeepProvider){
 $CurrentProvider = Get-AiCurrentProvider
 
 write-host "Generating fixed translations..."
-$WaterResult = Get-AiChat -prompt @(
+$WaterResult = Get-AiChat -ContentOnly -prompt @(
 	"s: Traduzir para $TargetLang. Rertornar somente o texto traduzido"	
 	"Traduzido automaticamente usando o PowershAI e IA"
 )
-$WatermarkText = $WaterResult.choices[0].message.content
-
-$WatermarkText = @($WatermarkText) -Join ""
+$WatermarkText = $WaterResult.trim();
 
 $NewMap = @{}
 $TranslationMap.psobject.properties | %{
