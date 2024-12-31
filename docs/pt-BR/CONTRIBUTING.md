@@ -61,17 +61,17 @@ Ao clonar o projeto, você verá vários diretórios e arquivos, explicados resu
 
 ## powershai 
 
-O diretório `powershai` é o módulo em si, isto é, o código-fonte do PowershAI.  
+O diretório [powershai] é o módulo em si, isto é, o código-fonte do PowershAI.  
 Assim como qualquer módulo PowerShell, ele contém um arquivo .psm1 e um arquivo .psd1.  
-O arquivo `powershai.psm1` é o root do módulo, isto é, é o arquivo que é executado quando você executa um `Import-Module powershai`.  
-O arquivo `powershai.psd1` é o module manifest, que contém metadados importantes sobre o módulo, como versão, dependências e copyright.
+O arquivo [powershai.psm1] é o root do módulo, isto é, é o arquivo que é executado quando você executa um `Import-Module powershai`.  
+O arquivo [powershai.psd1] é o module manifest, que contém metadados importantes sobre o módulo, como versão, dependências e copyright.
 
-Os demais arquivos são carregados pelo `powershai.psm1`, automaticamente ou conforme certos comandos são executados.
-No início, todo o código-fonte do PowershAI estava no arquivo `powershai.psm1`, mas, conforme ele vai crescendo, fica melhor para o desenvolvimento ir separando em arquivos menores, agrupado por funcionalidades. À medida que novas versões são lançadas, novas estruturas e arquivos podem surgir para melhor organização. 
+Os demais arquivos são carregados pelo [powershai.psm1], automaticamente ou conforme certos comandos são executados.
+No início, todo o código-fonte do PowershAI estava no arquivo [powershai.psm1], mas, conforme ele vai crescendo, fica melhor para o desenvolvimento ir separando em arquivos menores, agrupado por funcionalidades. À medida que novas versões são lançadas, novas estruturas e arquivos podem surgir para melhor organização. 
 
 A seguir um breve resumo dos arquivos e/ou diretórios mais importantes:
 
-- [lib]  
+- [lib](/powershai/lib)  
 Contém diversos scripts auxiliares com funções genéricas e utilidades que serão usadas por outros componentes do PowershAI.
 
 - [chats.ps1](/powershai/chats.ps1)  
@@ -258,7 +258,7 @@ O PowershAI segue o semantic versioning (ou um subset dele).
 A versão atual é controlada da seguinte maneira:
 
 1. Via tag do git no formato vX.Y.Z
-2. arquivo [powershai.psd1](/powershai/powershai.psd1s)
+2. arquivo [powershai.psd1]
 
 Quando uma nova versão é criada, uma tag deverá ser atribuída ao último commit daquela versão.  
 Todos os commits feitos desde a última tag, é considerado parte dessa versão.  
@@ -272,3 +272,8 @@ Atualmente, o PowershAI encontra-se em versão `0.`, pois algumas coisas podem m
 Mas, cada vez mais estamos tornando ele mais estável e a tendência é que as próximas seja muito mais compatíveis.  
 
 A versão `1.0.0` será publicadas oficialmente quando houverem testes suficientes por uma parte da comunidade.
+
+
+[powershai]: /powershai/powershai
+[powershai.psm1]: /powershai/powershai.psm1
+[powershai.psd1]: /powershai/powershai.psd1

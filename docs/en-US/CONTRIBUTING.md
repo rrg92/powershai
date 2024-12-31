@@ -61,17 +61,17 @@ When you clone the project, you will see several directories and files, briefly 
 
 ## powershai
 
-The `powershai` directory is the module itself, that is, the PowershAI source code.
+The [powershai] directory is the module itself, that is, the PowershAI source code.
 Like any PowerShell module, it contains a .psm1 file and a .psd1 file.
-The `powershai.psm1` file is the root of the module, that is, it is the file that is executed when you run `Import-Module powershai`.
-The `powershai.psd1` file is the module manifest, which contains important metadata about the module, such as version, dependencies, and copyright.
+The [powershai.psm1] file is the root of the module, that is, it is the file that is executed when you run `Import-Module powershai`.
+The [powershai.psd1] file is the module manifest, which contains important metadata about the module, such as version, dependencies, and copyright.
 
-The other files are loaded by `powershai.psm1`, automatically or as certain commands are executed.
-Initially, all the PowershAI source code was in the `powershai.psm1` file, but as it grows, it becomes better for development to separate it into smaller files, grouped by functionality. As new versions are released, new structures and files may emerge for better organization.
+The other files are loaded by [powershai.psm1], automatically or as certain commands are executed.
+Initially, all the PowershAI source code was in the [powershai.psm1] file, but as it grows, it becomes better for development to separate it into smaller files, grouped by functionality. As new versions are released, new structures and files may emerge for better organization.
 
 Here is a brief summary of the most important files and/or directories:
 
-- [lib]
+- [lib](/powershai/lib)
 Contains several auxiliary scripts with generic functions and utilities that will be used by other PowershAI components.
 
 - [chats.ps1](/powershai/chats.ps1)
@@ -162,11 +162,117 @@ Passing the production test is one of the prerequisites for your modifications t
 ### Defining tests
 
 You should also define and adjust the tests for the modifications you make.
-One of the goals we have for PowershAI is that all commands have a unit test defined, in addition to the tests that validate more complex features.
+One of the goals we have for PowershAI is that all commands have a unit test defined, in addition to tests that validate more complex features.
 Since PowershAI started without tests, it is likely that there are still many commands without tests.
-But, as these commands are modified, or new ones are added, it is mandatory that the tests are defined and adjusted.
+However, as these commands are modified, or new ones are added, it is mandatory that the tests are defined and adjusted.
 
-To create a test, you must use the [Pester module 5 syntax](https://pester.dev/docs/quick-start).
+To create a test, you should use the [Pester module 5 syntax](https://pester.dev/docs/quick-start).
 The directory where the test script will look is `tests/pester`, so you should put the files there.
-Only files with the extension `.tests.ps1` will be loaded.
-The organization of the test structure is documented via
+Only files with the `.tests.ps1` extension will be loaded.
+The organization of the test structure is documented via Markdown directly in this subdirectory.
+Consult the directory for more information on how and where you can define or change tests.
+
+
+
+## docs
+
+The `docs` directory contains all the PowershAI documentation. Each subdirectory is specific to a language and should be identified by the BCP 47 code (aa-BB format).
+You can create Markdown files directly in the desired language directory and start editing in that language.
+
+Some included files will only be accessible in this Git repository, but some will be used to assemble documentation accessible via the PowerShell `Get-Help` command.
+The PowershAI publication process will generate the necessary files with all the documentation, according to languages. Thus, the user will be able to use the `Get-Help` command, which will determine the correct documentation according to the language and location of the machine where PowershAI is running.
+
+For this to work correctly, the `docs/` directory has a minimum organization that must be followed so that the automatic process works and, at the same time, it is possible to have minimum documentation accessible directly here through the Git repository.
+
+### `docs` Directory Rules
+The `docs` directory has some simple rules to better organize and allow the creation of PowerShell help files:
+
+#### Use .md (Markdown) or .about.md extension
+You should create the documentation using Markdown files (`.md` extension).
+Files with the `.about.md` extension will be converted into a PowerShell help topic. For example, the `CHATS.about.md` file will become the `powershai_CHATS` help topic.
+Each subdirectory in which a `.about.md` file is found, the directory name is prefixed to the help topic. `README.md` is considered the help topic of the directory itself.
+For example, a file in `docs/en-US/providers/openai/README.md` will become the `powershai_providers_openai` help topic.
+The `docs/en-US/providers/openai/INTERNALS.about.md` file will become the `powershai_providers_openai_internals` help topic.
+
+#### `docs/lang/cmdlets` Directory
+This directory contains a Markdown file for each cmdlet that needs to be documented.
+The content of these files must follow the format accepted by PlatyPS.
+You can use the auxiliary script `util\Cmdlets2Markdown.ps1` to generate the Markdown files from the documentation done via comments.
+
+#### `docs/lang/providers` Directory
+Contains a subdirectory for each provider, and within this subdirectory all the documentation pertinent to the provider should be documented.
+Documentation about providers that is not specific to a provider should be in the root `docs/lang/providers`.
+
+#### `docs/lang/examples` Directory
+This directory contains examples of using PowershAI.
+The file names should follow the pattern `NNNN-short-title-separated-by-hyphens.md`, where NNNN is a number from 0000 to 9999, always with leading zeros.
+
+### Translation
+
+The translation of the documentation can be done in two ways: manually or with AI using PowershAI itself.
+To translate with PowershAI, you can use the `util\aidoc.ps1` script. This script was created to allow the documentation of PowershAI to be quickly made available in other languages.
+
+#### Manual Translation
+
+Manual translation is very simple: copy the file from the language you want to translate from to the same path in the directory of the language you will translate to.
+Then edit the file, make the revisions, and commit.
+
+Manually translated files will not be translated by the automatic process described below.
+
+#### Automatic Translation
+The automatic translation process is as follows:
+- You write the documentation in the original language, generating the Markdown file according to the rules above.
+- Import the PowershAI module into the session and make sure the credentials are configured correctly.
+- You use the `util\aidoc.ps1` script, passing the source language you are writing in and the desired target language. I recommend using Google Gemini.
+- The script will generate the files. You can review them. If everything is okay, then do a Git commit. If not, remove the unwanted files or use `git restore` or `git clean`.
+
+
+The `AiDoc.ps1` script maintains a control file in each directory called `AiTranslations.json`. This file is used to control which files have been automatically translated into each language, and with it, `AiDoc.ps1` can determine when a source file has been changed, avoiding translations of files that have not been changed.
+
+Also, if you manually edit one of the files in the destination directory, that file will no longer be automatically translated to avoid overwriting a review you have made. Therefore, if you change the files, however minimal the change, this may prevent automatic translation from occurring. If you want the translation to be done anyway, delete the destination file or use the `-Force` parameter of `AiDoc.ps1`.
+
+
+Here are some usage examples:
+
+```powershell
+Import-Module -force ./powershai # Import powershai (using the module itself in the current directory to use the latest implemented features!)
+Set-AiProvider google # Uses Google as the provider
+Set-AiCredential # Configures the credentials of the Google provider (you only need to do this once)
+
+# Example: Simple translation
+util\aidoc.ps1 -SrcLang pt-BR -TargetLang en-US
+
+# Example: Filtering specific files
+util\aidoc.ps1 -SrcLang pt-BR -TargetLang en-US -FileFilter CHANGELOG.md
+
+# Example: Translate to all available languages
+gci docs | %{ util\aidoc.ps1 -SrcLang pt-BR -TargetLang $_.name }
+```
+
+
+# Versioning in PowershAI
+
+PowershAI follows semantic versioning (or a subset of it).
+
+The current version is controlled as follows:
+
+1. Via Git tag in the format vX.Y.Z
+2. [powershai.psd1](/powershai/powershai.psd1s) file
+
+When a new version is created, a tag should be assigned to the last commit of that version.
+All commits made since the last tag are considered part of that version.
+
+In the [powershai.psd1] file, you must keep the version consistent with what was defined in the tag.
+If it is incorrect, the automatic build will fail.
+
+A PowershAI maintainer is responsible for approving and/or executing the new version workflow.
+
+Currently, PowershAI is in version `0.`, as some things may change.
+However, we are increasingly making it more stable, and the trend is that future versions will be much more compatible.
+
+Version `1.0.0` will be officially released when there are sufficient tests by a portion of the community.
+
+[powershai]: /powershai/powershai
+[powershai.psm1]: /powershai/powershai.psm1
+[powershai.psd1]: /powershai/powershai.psd1
+
