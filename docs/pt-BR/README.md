@@ -6,35 +6,90 @@ PowershAI (Powershell + AI) é um modulo que adiciona acesso a IA através do Po
 
 # DETALHES  <!--! @#Long --> 
 
-O PowershAI é um módulo que adiciona recursos de IA a sua sessão do Powershell.  
-O objetivo é facilitar e encapsular chamadas e tratamentos complexos paras as APIs dos principais serviços de IA existentes.  
+PowershAI (PowerShell + AI) é um módulo que integra serviços de Inteligência Artificial diretamente no PowerShell.  
+Você pode invocar os comandos tanto em scripts quanto na linha de comando.  
 
-O PowershAI define um conjunto de padrões que permitem que o usuário converse com LLMs, direto do prompt, ou que use o resultado de comandos como contexto em um prompt.  
-E, através de um conjunto padronizado de funções, diferentes provedores podem ser usados: Por exemplo, você pode conversar com o GPT-4o ou o Gemini Flash usando exatamente o mesmo código.  
+Existem vários comandos que permitem conversas com LLMs, invocar spaces do Hugging Face, Gradio, etc.  
+Você pode conversar com o GPT-4o-mini, gemini flash, llama 3.3, etc, usando seus próprios tokens destes serviço.  
+Isso é, você não paga nada pra usar o PowershAI, além dos custos que você já teria normlamente ao usar esses serviços pagos ou rodando localmente.
 
-Além dessa padroinização, o PowershAI também expoe as funcoes internas e específicas para conexão com os diferentes provedores de serviços de IA.  
-Com isso, você pode customizar e criar scrips que utilizem recursos específicos dessas APIs.  
+Este módulo é ideal para integrar comandos powershell com seus LLM favoritos, testar chamadas, pocs, etc.  
+É ideal para quem já está acostumado com o PowerShell e quer trazer a IA pro seus scripts de uma maneira mais simples e fácil!
 
-A arquitetura do PowershAI define o conceito de "provider" que são arquivos que implementam todos os detalhes necessários para conversar com suas respectivas APIs.  
-Novos providers podem ser adicionados, com novas funcionalidades, a medida que se torem disponíoveis.  
+> [!IMPORTANT]
+> Este não é um módulo oficial OpenAI, Google, Microsoft ou de qualquer outro provider listado aqui!
+> Este projeto é uma iniciativa pessoal e, com o objetivo de ser mantido pela própria comunidade open source.
 
-No final, você tem diversas opções de começar a usar IA nos seus scripts. 
+Os seguintes exemplos mostram como você pode usar o PowershAI.
 
-Exemplos de providers famosos que já estão implementandos completa ou parcialmente:
+## Por onde começar 
 
-- OpenAI 
-- Hugging Face 
-- Gemini 
-- Ollama
-- Maritalk (LLM brasileiro)
+A [doc de exemplos](examples/) contém diversos exemplos práticos de como usar.  
+Comece pelo [exemplo 0001], e vá um a um, para, gradualmente, aprender a usar o PowershAI do básico ao avançado.
 
-Para começar a usar o PowershAI é bem simples: 
+Aqui estão alguns exemplos simples e rápidos para você entender o que o PowershAI é capaz:
 
 ```powershell 
-# Instale o modulo!
-Install-Module -Scope CurrentUser powershai 
+import-module powershai 
 
-# Importe!
+#  Interpretando os Logs do Windows usando O GPT da OpenaI
+Set-AiProvider openai 
+Set-AiCredential 
+Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Algum evento importante?"
+
+# Descrevendo serviços do Windows usando o Google Gemini
+Set-AiProvider google
+Set-AiCredential
+Get-Service | ia "Faça um resumo de quais serviços não são nativos do Windows e podem representar um risco"
+
+# Explicando commits do githuib usando o Sabia, LLM brasileiro da Maritaca AI 
+Set-AiProvider maritalk
+Set-AiCredential # configura um token para Maritaca.AI (LLM brasileiro)
+git log --oneline | ia "Faça um resumo desses commits feitos"
+```
+
+
+### Instalação
+
+Toda a funcionalidade está no diretório `powershai`, que é um módulo PowerShell.  
+A opção mais simples de instalação é com o comando `Install-Module`:
+
+```powershell
+Install-Module powershai -Scope CurrentUser
+```
+
+Após instalar, basta importar na sua sessão:
+
+```powershell
+import-module powershai
+
+# Veja os comandos disponiveis
+Get-Command -mo powershai
+```
+
+Você também pode clonar esse projeto diretamente e importar o diretório powershai:
+
+```powershell
+cd CAMINHO
+
+# Clona
+git clone ...
+
+#Importar a partir do caminho específico!
+Import-Module .\powershai
+```
+
+### Próximos passos 
+
+Após instalar o PowershAI, você já pode começar a usá-lo.  
+Para começar a usar, você deve escolher um provider e configurar as autenticações para ele.  
+
+Um provider é o que conecta o powershai com alguma API de um modelo. Há vários implementados.  
+Veja o [exemplo 0001] para entender como usar providers.  
+Veja a [doc de providers](providers/) para aprender mais sobre a arquitura e funcionamento.
+
+Aqui está um script simples para listar providers:
+```powershell 
 import-module powershai
 
 # Lista de providers 
@@ -48,7 +103,7 @@ Get-Help about_NomeProvider
 Get-Help about_huggingface
 ```
 
-## Obtendo Ajuda  
+### Obtendo Ajuda  
 
 Apesar do esforço para documentar o PowershAI ao máximo, muito provavelmente não iremos conseguir a tempo criar toda a documentação necessária para esclarecer as dúdivas, ou mesmo falar de todos os comandos disponíveis.  Por isso, é importante que você saiba fazer um básico disso sozinho. 
 
@@ -63,6 +118,12 @@ Por fim, você pode explorar o código-fonte do PowershAI, procurando por coment
 
 Nós iremos atualizando a documentação a medida que novas versões são lançadas.
 Encourajamos você a contribuir para o PowershAI, submetendo Pull Requsts ou issues com melhorias na documentação caso encontre algo que possa ser melhor explicado, ou que ainda não foi explicado.  
+
+
+## Arquitetua Básica do PowershAI 
+
+Esta seção fornece um overview geral do PowershAI.  
+Recomendo a leitura após você já ter seguido pelo menos o [exemplo 0001], para que fique mais familiar com o uso. 
 
 
 ## Estrutura de comandos  
@@ -81,8 +142,9 @@ Também, os alias definidos pelos providers devem sempre conter mais de 5 caract
 Você pode encontrar a documentação destes comandos na [doc de comandos globais](cmdlets/).  
 Você podem pode usar o comando Get-PowershaiGlobalCommands para obter a lista!
 
-## Documentação dos Providers  
+### Providers  
 
+Providers são scripts que conectam o powershai aos mais variados fornecedores de IA ao redor do mundo.  
 A [documentação de providers](providers) é o local oficial para obter ajuda sobre o funcionamento de cada provider.  
 Essa documentação também pode ser acessada através do comando `Get-Help` do powershell.  
 
@@ -90,12 +152,12 @@ A documentação de providers é sempre disponibilizada via help `about_Powersha
 O tópico `about_Powershai_NomeProvider` é o ponto de partida e deve sempre conter as informações inicais para os primeiros usos, bem como as explicações para o correto uso dos demais tópicos.  
 
 
-## Chats  
+### Chats  
 
 Os Chats são o principal ponto de partida e permitem que você converse com os vários LLM disponibilizados pelos providers.  
 Veja o documento [chats](CHATS.about.md) para mais detalhes. A seguir, uma introdução rápida aos chats.
 
-### Conversando com o modelo
+#### Conversando com o modelo
 
 Uma vez que a configuração inicial do provider está feita, você pode iniciar a conversa!  
 A maneira mais fácil de iniciar a conversa é usando o comando `Send-PowershaiChat` ou o alias `ia`:
@@ -127,7 +189,7 @@ No exemplo anterior, ela será chamada apenas 1x, com todos os 10 números.
 A vantagem de usar esse método é reduzir o contexto, mas pode demorar mais tempo, pois mais requisições serão feitas.  
 Testes conforme suas necessidades!
 
-### Modo objeto  
+#### Modo objeto  
 
 Por padrão, o comando `ia` não retorna nada. Mas você pode alterar esse comportamento usando o parâmetro `-Object`.  
 Quando este parâmetro é ativado, ele pede ao LLM que gere o resultado em JSON e escreve o retorno de volta no pipeline.  
@@ -141,10 +203,10 @@ ia -Obj "5 numeros aleatorios, com seu valor escrito por extenso"
 io "5 numeros aleatorios, com seu valor escrito por extenso"
 ```  
 
-**IMPORTANTE: Note que nem todo provider pode suportar este modo, pois o modelo precisa ser capaz de suportar JSON! Caso receba erros, confirme se o mesmo comando funciona com um modelo da OpenAI. VocÇe pode abrir uma issue também**
+**IMPORTANTE: Note que nem todo provider pode suportar este modo, pois o modelo precisa ser capaz de suportar JSON! Caso receba erros, confirme se o mesmo comando funciona com um modelo da OpenAI. Você pode abrir uma issue também**
 
 
-## Salvando configurações  
+### Salvando configurações  
 
 O PowershAI permite ajustar uma série de configurações, como parâmetros de chats, tokens de autenticação, etc.  
 Sempre que você altera uma configuração, esta configuração é salva apenas na memória da sua sessão do Powershell.  
@@ -158,7 +220,7 @@ Você pode importar usando `Import-PowershaiSettings`. Você terá que fornecer 
 
 Note que esta senha não é armazenada em local nenhum, então, você é o responsável por memorizá-la ou guardar em um cofre de sua escolha.
 
-## Custos  
+### Custos  
 
 É importante lembrar que alguns providers podem cobrar pelos serviços usados.  
 O PowershAI não faz nenhum gerenciamento de custo.  Ele pode injetar dados em prompts, parâmetros, etc.  
@@ -248,3 +310,7 @@ $e.ErrorRecord.ScriptStackTrace # Isso ajua a encontrar a linha exada onde a exc
 
 - Inteligência Artificial
 - IA
+
+
+
+[exemplo 0001]: examples/0001.md

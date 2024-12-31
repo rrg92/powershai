@@ -7,14 +7,21 @@
 
 # PowershAI
 
-* [english](/docs/en-US/START-README.md)
-* [Français](/docs/fr-FR/START-README.md)
-* [日本語](/docs/ja-JP/START-README.md)
-* [العربية](/docs/ar-SA/START-README.md)
-* [Deutsch](/docs/de-DE/START-README.md)
-* [español](/docs/es-ES/START-README.md)
-* [עברית](/docs/he-IL/START-README.md)
-* [italiano](/docs/it-IT/START-README.md)
+* [english](/docs/en-US/README.md)
+* [Français](/docs/fr-FR/README.md)
+* [日本語](/docs/ja-JP/README.md)
+* [العربية](/docs/ar-SA/README.md)
+* [Deutsch](/docs/de-DE/README.md)
+* [español](/docs/es-ES/README.md)
+* [עברית](/docs/he-IL/README.md)
+* [italiano](/docs/it-IT/README.md)
+
+
+```powershell 
+Install-Module -Scope CurrentUser powershai 
+```
+
+
 
 PowershAI (PowerShell + AI) é um módulo que integra serviços de Inteligência Artificial diretamente no PowerShell.  
 Você pode invocar os comandos tanto em scripts quanto na linha de comando.  
@@ -31,71 +38,9 @@ Este módulo é ideal para integrar comandos powershell com seus LLM favoritos, 
 > Este projeto é uma iniciativa pessoal e, com o objetivo de ser mantido pela própria comunidade open source.
 
 
-Os seguintes exemplos mostram como você pode o Powershai em situações comuns:
-
-## Analisando logs do Windows 
-```powershell 
-import-module powershai 
-
-Set-OpenaiToken # configura um token para OpenAI (precisa fazer isso apenas 1x)
-Set-AiProvider openai 
-
- Get-WinEvent -LogName Application,System -MaxEvents 500 | ia "Algum evento importante?"
-```
-
-## Descrição de serviços 
-```powershell 
-import-module powershai 
-
-Set-GoogleApiKey # configura um token para o Google Gemini (precisa fazer isso apenas 1x)
-Set-AiProvider google
-
-Get-Service | ia "Faça um resumo de quais serviços não são nativos do Windows e podem representar um risco"
-```
-
-## Explicação commits do git 
-```powershell 
-import-module powershai 
-
-Set-MaritalkToken # configura um token para Maritaca.AI (LLM brasileiro)
-Set-AiProvider maritalk
-
-git log --oneline | ia "Faça um resumo desses commits feitos"
-```
 
 
-Os exemplos acima são apenas uma pequena demonstração de como é fácil começar a usar IA no seu Powershell e integrar com praticamente qualquer comando!
-[Explore mais na documentação completa](/docs/pt-BR)
 
-## Instalação
-
-Toda a funcionalidade está no diretório `powershai`, que é um módulo PowerShell.  
-A opção mais simples de instalação é com o comando `Install-Module`:
-
-```powershell
-Install-Module -Name powershai -Scope CurrentUser
-```
-
-Após instalar, basta importar na sua sessão:
-
-```powershell
-import-module powershai
-
-# Veja os comandos disponiveis
-Get-Command -mo powershai
-```
-
-Você também pode clonar esse projeto diretamente e importar o diretório powershai:
-
-```powershell
-cd CAMINHO
-
-# Clona
-git clone ...
-
-#Importar a partir do caminho específico!
-Import-Module .\powershai
-```
 
 ## Explore e Contribua
 

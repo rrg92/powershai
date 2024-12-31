@@ -203,7 +203,7 @@ Documentation about providers that is not specific to a provider should be in th
 
 #### `docs/lang/examples` Directory
 This directory contains examples of using PowershAI.
-The file names should follow the pattern `NNNN-short-title-separated-by-hyphens.md`, where NNNN is a number from 0000 to 9999, always with leading zeros.
+The file names should follow the pattern `NNNN.md`, where NNNN is a number from 0000 to 9999, always with leading zeros.
 
 ### Translation
 

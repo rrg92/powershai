@@ -203,7 +203,7 @@ Documentação sobre providers, que não é específica de um provider, deve fic
 
 #### Diretório docs/`lang`/examples
 Este diretório contém os exemplos de uso do PowershAI.  
-O nome dos arquivos deve seguir o padrão `NNNN-breve-titulo-separado-por-hifen.md`, onde NNNN é um número de 0000 a 9999, sempre com os zeros à esquerda.
+O nome dos arquivos deve seguir o padrão `NNNN.md`, onde NNNN é um número de 0000 a 9999, sempre com os zeros à esquerda.
 
 ### Tradução  
 

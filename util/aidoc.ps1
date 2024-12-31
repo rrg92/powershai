@@ -222,11 +222,11 @@ function SaveTranslationMap {
 }
 
 
-$StartReadme = Get-Item ./README.md;
-
-if($SourceLang -eq 'pt-BR'){
-	$SourceFiles += $StartReadme;
-}
+#$StartReadme = Get-Item ./README.md;
+#
+#if($SourceLang -eq 'pt-BR'){
+#	$SourceFiles += $StartReadme;
+#}
 
 
 foreach($SrcFile in $SourceFiles){
@@ -239,13 +239,7 @@ foreach($SrcFile in $SourceFiles){
 	$DebugData.files += $SrcFileInfo;
 	
 	
-	if($SrcFile -eq $StartReadme){
-		$SrcRelPath 				= 'START-README.md'
-		$SrcFileInfo.IsStartReadme 	= $true;
-	} else {
-		$SrcRelPath = $SrcFile.FullName.replace($SourcePath,'')
-		
-	}
+	$SrcRelPath = $SrcFile.FullName.replace($SourcePath,'')
 	
 	if($SrcRelPath[0] -in '\','/'){
 		$SrcRelPath = $SrcRelPath -replace '^.',''
