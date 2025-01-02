@@ -132,7 +132,7 @@ param(
 		[switch]$Force
 		
 	,#Max tokens returned. Target model must support 
-		$MaxTokens = 8192
+		$MaxTokens = 4000
 	
 	,#Filter files
 		$FileFilter = $null
@@ -228,8 +228,13 @@ function SaveTranslationMap {
 #	$SourceFiles += $StartReadme;
 #}
 
-
+$TotalFiles = @($SourceFiles).count
+$CurrentFilenum = 0;
 foreach($SrcFile in $SourceFiles){
+	$CurrentFileNum++;
+	
+
+	
 	
 	$SrcFileInfo = @{
 		SrcFile 	= $SrcFile 
@@ -240,6 +245,9 @@ foreach($SrcFile in $SourceFiles){
 	
 	
 	$SrcRelPath = $SrcFile.FullName.replace($SourcePath,'')
+	
+	$PercentComplete = $CurrentFileNum/$TotalFiles;
+	write-progress -Activity "Processing $TotalFiles file" -Status "$SrcFile ($CUrrentFileNum)" -PercentComplete $PercentComplete;
 	
 	if($SrcRelPath[0] -in '\','/'){
 		$SrcRelPath = $SrcRelPath -replace '^.',''
@@ -366,19 +374,14 @@ foreach($SrcFile in $SourceFiles){
 		
 		$Initial = @()
 
-		
 		$system = @(
-			"Você é um tradutor de textos em markdown!"
-			"Traduzir o texto do usuário de $SourceLang para $TargetLang"
-			"Manter o conteúdo original entre <!--! -->. Traduzir comentários de código, nomes de funções de exemplo. Não traduzir nomes de comandos do PowershAI."
-			"Não altere ou complemente partes, foque apenas na tradução do texto."
-			"Não traduzir esses trechos:
-				[!IMPORTANT],[!INFO],[!WARNING],[!TIP],[!CAUTION],[!NOTE]
-				
-				Isso é parte da syntax markdown e deve ser mantido como está.
-			"
-			
-		)
+			"You are a markdown translator"
+			"Translate from lang $SourceLang para to lang $TargetLang"
+			"Keep original content bewtween <!--! and -->"
+			"Translate code comments. Dont translate powershell command names"
+			"Dont change or add some text. Just do translation of origal content. Keep tabs, spaces and line breaks as original."
+			"Dont translate that markdown git tags:[!IMPORTANT],[!INFO],[!WARNING],[!TIP],[!CAUTION],[!NOTE]"
+		) -Join "`n"
 		
 		
 		
@@ -390,18 +393,22 @@ foreach($SrcFile in $SourceFiles){
 		)
 		
 		write-host "	Invoking AI..."
-		$result 	= Get-AiChat -prompt $prompt -MaxTokens $MaxTokens -ResponseFormat @{
+		$result 	= Get-AiChat -prompt $prompt -MaxTokens $MaxTokens <#-ResponseFormat @{
 				schema = @{
 					type = "object"
 					properties = @{
 						translation = @{
-							type = "string"
-							description = "Translated text to $($TargetLang)"
+							type = "array"
+							description = "markdown lines Translated text to $($TargetLang)"
+							items = @{
+								type = "string"
+							}
 						}
 					}
 
 				}
-			}
+			}#>
+			
 		$airesult 	= $result.choices[0]
 		$usage 		= $result.usage;
 		write-host "	Usage: Input = $($usage.prompt_tokens), Output = $($usage.completion_tokens)"
@@ -409,11 +416,12 @@ foreach($SrcFile in $SourceFiles){
 			throw "STOP_REASON: $($airesult.finish_reason)"
 		}
 		
-		$JsonContent = $result.choices[0].message.content;
+		$translated = $result.choices[0].message.content
+		#$JsonContent = $result.choices[0].message.content;
+		#$json = $JsonContent | ConvertFrom-Json
+		#$translated = @($json.translation) -Join "`n"
 		
-		$json = $JsonContent | ConvertFrom-Json
 		
-		$translated = $json.translation
 		write-host "	Translated: $($translated.length) chars"
 		$Control.text 			+= $translated
 		$Control.InputTokens 	+= $usage.prompt_tokens
@@ -529,9 +537,12 @@ foreach($SrcFile in $SourceFiles){
 }
 
 
+write-host "`n"
+write-host "== Summary == "
 
+$errs = @($DebugData.files | ? { $_.error })
 
-
+write-host "	Total = $($DebugData.files.count), Errors = $($errs.count)"
 
 
 
