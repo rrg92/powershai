@@ -25,7 +25,7 @@ Les exemples suivants montrent comment vous pouvez utiliser PowershAI.
 ## Par où commencer 
 
 La [doc d'exemples](examples/) contient divers exemples pratiques sur la façon de l'utiliser.  
-Commencez par [l'exemple 0001], et avancez un à un, pour apprendre progressivement à utiliser PowershAI du basique à l'avancé.
+Commencez par l'[exemple 0001], et avancez un à un, pour apprendre progressivement à utiliser PowershAI du basique à l'avancé.
 
 Voici quelques exemples simples et rapides pour vous faire comprendre ce que PowershAI est capable de faire :
 
@@ -318,7 +318,7 @@ $e.ErrorRecord.ScriptStackTrace # Cela aide à trouver la ligne exacte où l'exc
 
 
 
-[l'exemple 0001]: examples/0001.md
+[exemple 0001]: examples/0001.md
 
 
 <!--PowershaiAiDocBlockStart-->
