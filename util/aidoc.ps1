@@ -132,7 +132,7 @@ param(
 		[switch]$Force
 		
 	,#Max tokens returned. Target model must support 
-		$MaxTokens = 32000
+		$MaxTokens = 8192
 	
 	,#Filter files
 		$FileFilter = $null
