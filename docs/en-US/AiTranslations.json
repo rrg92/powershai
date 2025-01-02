@@ -54,13 +54,13 @@
                                       "OutputTokens":  1079
                                   },
     "cmdlets/Invoke-AiChatTools.md":  {
-                                          "SrcHash":  "2FAFB83851FCB792C7693FE1860C2B734535277D5BD606775DA79AFB03A1A3F1",
-                                          "Provider":  "openai",
-                                          "InputTokens":  1451,
+                                          "SrcHash":  "4FD67034B4AB7A4F4B1313576B401CE631E790FB888AE1C198E8A723DFD5646A",
+                                          "Provider":  "google",
+                                          "InputTokens":  1750,
                                           "SrcLang":  "pt-BR",
-                                          "TargetHash":  "17A816B9EEF2018510F3D2D69C936C0935C90F8E1855576D500D8D2AFA216125",
-                                          "Model":  "gpt-4o-mini-2024-07-18",
-                                          "OutputTokens":  1290
+                                          "TargetHash":  "B75B29CE21BB1CA2A791C4AFC952EF505EE236232B7C329CC546EB19AE66A3F3",
+                                          "Model":  "gemini-1.5-flash",
+                                          "OutputTokens":  1664
                                       },
     "providers/azure/README.md":  {
                                       "SrcHash":  "C19453370C7FF59F3FCD8F5A0AA97D4AC606F6069F47E257FFAC557FDE62B557",
@@ -1072,13 +1072,13 @@
                                         "OutputTokens":  698
                                     },
     "README.md":  {
-                      "SrcHash":  "87E52B372A65D6604900F2086A708323BB14563E7F8A73CCBA7C2606C420C907",
+                      "SrcHash":  "454B8453F8577BDDCEF2DE09E685B1D1621E379B5B35A57E54B0A6A7CBDE1C96",
                       "Provider":  "google",
-                      "InputTokens":  3681,
+                      "InputTokens":  3771,
                       "SrcLang":  "pt-BR",
-                      "TargetHash":  "507AB3FBE2FA3074740A65AB26D8001F110EC55EEDC7EC51A4B781A06B0D44F2",
+                      "TargetHash":  "504E5AB3FC2A134BF9B563E2E43BB914481844A6C6AC406F9B8F7BDDD26560D6",
                       "Model":  "gemini-1.5-flash",
-                      "OutputTokens":  3630
+                      "OutputTokens":  3718
                   },
     "cmdlets/Get-AiAzureApiInfo.md":  {
                                           "SrcHash":  "FD20166D9D22B2A587845A8DA29B7F760F468BF94AFCA347CCFA8409D6C11590",

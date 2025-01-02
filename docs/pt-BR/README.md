@@ -240,6 +240,15 @@ Note que isso pode deixar o arquivo maior, além de aumentar o tempo de export/i
 Essa funcionalidade foi criada originalmente com o intuito de evitar ter que ficar gerando Api Key toda vez que precisasse usar o PowershAI. Com ela, você gera 1 vez suas api keys em cada provider, e exporta a medida que atualiza. Como está protegido por senha, você pode deixar salvo tranquilamente em um arquivo no seu computador.  
 Use a ajuda no comando para obter mais informacoes de como usá-lo.
 
+#  NOTES 
+
+## Outros Projetos com PowerShell
+
+Aqui estão alguns outros projetos interessantes que integram PowerShell com IA:
+
+- [PSAI](https://github.com/dfinke/PSAI)
+- [PSOpenAI](https://github.com/mkht/PSOpenAI)
+- [dbatools.ai](https://github.com/potatoqualitee/dbatools.ai)
 
 # EXEMPLOS <!--! @#Ex -->
 

@@ -491,7 +491,6 @@ foreach($SrcFile in $SourceFiles){
 		# check if file is auto updated!
 		# aCalculate hash!
 		$TargetNewHash = Get-FileHash $TargetFilePath	
-		
 		$SrcFileInfo.TargetNewHash = $TargetNewHash;
 		
 		write-host "	Creating new map..."
