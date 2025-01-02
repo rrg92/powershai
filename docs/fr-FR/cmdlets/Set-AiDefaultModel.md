@@ -10,20 +10,20 @@ powershai: true
 Configurer le LLM par défaut du fournisseur actuel
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Les utilisateurs peuvent configurer le LLM par défaut, qui sera utilisé lorsqu'un LLM est requis.  
-Les commandes comme Send-PowershaAIChat, Get-AiChat, attendent un modèle, et s'il n'est pas fourni, il utilise celui qui a été défini avec cette commande.
+Les utilisateurs peuvent configurer le LLM par défaut, qui sera utilisé lorsqu'un LLM est nécessaire.  
+Des commandes comme Send-PowershaAIChat, Get-AiChat, attendent un modèle, et s'il n'est pas spécifié, il utilise celui qui a été défini avec cette commande.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Set-AiDefaultModel [[-model] <Object>] [-Force] [<CommonParameters>]
+Set-AiDefaultModel [[-model] <Object>] [-Force] [-Embeddings] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -model
 ID du modèle, tel que retourné par Get-AiModels
-Vous pouvez utiliser la tabulation pour compléter la ligne de commande.
+Vous pouvez utiliser la touche tab pour compléter la ligne de commande.
 
 ```yml
 Parameter Set: (All)
@@ -52,10 +52,22 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -Embeddings
+Définit le modèle d'embedding !
 
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

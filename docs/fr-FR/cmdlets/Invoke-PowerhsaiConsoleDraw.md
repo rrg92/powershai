@@ -10,19 +10,18 @@ powershai: true
 Crée un cadre virtuel de texte et écrit des caractères à l'intérieur des limites de ce cadre
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Crée un cadre de dessin dans la console, qui est mis à jour dans une seule région spécifique !
-Vous pouvez envoyer plusieurs lignes de texte et la fonction s'occupera de maintenir le dessin dans le même cadre, donnant l'impression que seule une région est mise à jour.
-Pour l'effet désiré, cette fonction doit être invoquée de manière répétée, sans autres écritures entre les invocations !
+Crée un cadre de dessin dans la console, qui est mis à jour uniquement dans une région spécifique !
+Vous pouvez envoyer plusieurs lignes de texte et la fonction s'occupera de garder le dessin dans le même cadre, donnant l'impression qu'une seule région est mise à jour.
+Pour l'effet désiré, cette fonction doit être invoquée plusieurs fois, sans autres écritures entre les invocations !
 
-Cette fonction ne doit être utilisée qu'en mode interactif de PowerShell, exécutée dans une fenêtre de console.
-Elle est utile dans les situations où vous souhaitez voir le progrès d'un résultat sous forme de chaîne exactement dans la même zone, permettant de mieux comparer les variations.
-C'est seulement une fonction auxiliaire.
+Cette fonction ne doit être utilisée qu'en mode interactif de powershell, s'exécutant dans une fenêtre de console.
+Elle est utile dans les situations où vous souhaitez voir la progression d'un résultat en chaîne exactement dans la même zone, permettant une meilleure comparaison des variations.
+C'est simplement une fonction auxiliaire.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] 
-[-PassThru] [<CommonParameters>]
+Invoke-PowerhsaiConsoleDraw [[-Text] <Object>] [[-w] <Object>] [[-h] <Object>] [[-BlankChar] <Object>] [[-PipeObj] <Object>] [-PassThru] [<CommonParameters>]
 ```
 
 ## EXAMPLES <!--!= @#Ex !-->
@@ -112,7 +111,7 @@ Accept wildcard characters: false
 ```
 
 ### -PassThru
-Repasse l'objet
+Repasser l'objet
 
 ```yml
 Parameter Set: (All)
@@ -128,5 +127,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et de l'IA._
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

@@ -10,16 +10,15 @@ powershai: true
 Crée un nouvel objet qui représente les paramètres d'un PowershaiChat
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Crée un objet par défaut contenant tous les paramètres possibles qui peuvent être utilisés dans le chat !  
+Crée un objet standard contenant tous les paramètres possibles qui peuvent être utilisés dans le chat !
 L'utilisateur peut utiliser un get-help New-PowershaiParameters pour obtenir la documentation des paramètres.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] 
-<Boolean>] [[-ShowTokenStats] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] 
-[[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>] 
-[[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-ContextFormat] <Object>] [<CommonParameters>]
+New-PowershaiParameters [[-stream] <Object>] [[-Json] <Boolean>] [[-model] <String>] [[-MaxTokens] <Int32>] [[-ShowFullSend] <Boolean>] [[-ShowTokenStats] <Object>] [[-MaxInteractions] <Object>] 
+[[-MaxSeqErrors] <Object>] [[-MaxContextSize] <Object>] [[-ContextFormatterFunc] <Object>] [[-ContextFormatterParams] <Object>] [[-ShowArgs] <Object>] [[-PrintToolsResults] <Object>] 
+[[-SystemMessageFixed] <Object>] [[-RawParams] <Object>] [[-PromptBuilder] <Object>] [[-PrintToolCalls] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -40,8 +39,8 @@ Accept wildcard characters: false
 ```
 
 ### -Json
-Active le mode JSON. Dans ce mode, le modèle est contraint de retourner une réponse au format JSON.  
-Lorsqu'il est activé, les messages générés via stream ne sont pas affichés au fur et à mesure de leur production, et seul le résultat final est retourné.
+Active le mode JSON. Dans ce mode, le modèle est contraint de renvoyer une réponse avec JSON.  
+Lorsqu'il est activé, les messages générés via le stream ne sont pas affichés au fur et à mesure de leur production, et seul le résultat final est renvoyé.
 
 ```yml
 Parameter Set: (All)
@@ -57,7 +56,7 @@ Accept wildcard characters: false
 
 ### -model
 Nom du modèle à utiliser  
-S'il est nul, utilise le modèle défini avec Set-AiDefaultModel
+Si null, utilise le modèle défini avec Set-AiDefaultModel
 
 ```yml
 Parameter Set: (All)
@@ -72,7 +71,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxTokens
-Nombre maximum de tokens à retourner par le modèle
+Maximum de tokens à renvoyer par le modèle
 
 ```yml
 Parameter Set: (All)
@@ -87,7 +86,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowFullSend
-Affiche l'intégralité de l'invite qui est envoyée au LLM
+Affiche l'intégralité du prompt qui est envoyé au LLM
 
 ```yml
 Parameter Set: (All)
@@ -102,7 +101,7 @@ Accept wildcard characters: false
 ```
 
 ### -ShowTokenStats
-À la fin de chaque message, affiche les statistiques de consommation, en tokens, retournées par l'API
+À la fin de chaque message, affiche les statistiques de consommation, en tokens, renvoyées par l'API
 
 ```yml
 Parameter Set: (All)
@@ -117,11 +116,10 @@ Accept wildcard characters: false
 ```
 
 ### -MaxInteractions
-Nombre maximum d'interactions à effectuer à la fois  
+Maximum d'interactions à effectuer d'un seul coup  
 Chaque fois qu'un message est envoyé, le modèle exécute 1 itération (envoie le message et reçoit une réponse).  
-Si le modèle demande un appel de fonction, la réponse générée sera renvoyée au modèle. Cela compte comme une autre interaction.  
-Ce paramètre contrôle le nombre maximum d'interactions qui peuvent exister à chaque appel.  
-Cela aide à prévenir des boucles infinies inattendues.
+Si le modèle demande un appel de fonction, la réponse générée sera renvoyée au modèle. Cela compte comme une autre interaction.  Esse parâmetro controla o máximo de interações que podem existir em cada chamada.  
+Isso ajuda a prevenir loops infinitos inesperados.
 
 ```yml
 Parameter Set: (All)
@@ -136,8 +134,8 @@ Accept wildcard characters: false
 ```
 
 ### -MaxSeqErrors
-Nombre maximum d'erreurs consécutives générées par Tool Calling.  
-Lors de l'utilisation de l'appel d'outil, ce paramètre limite combien d'outils consécutifs ayant entraîné une erreur peuvent être appelés.  
+Maximum d'erreurs en séquence généré par Tool Calling.  
+En utilisant tool calling, ce paramètre limite combien d'outils sans séquence qui ont échoué peuvent être appelés.  
 L'erreur considérée est l'exception déclenchée par le script ou la commande configurée.
 
 ```yml
@@ -155,7 +153,7 @@ Accept wildcard characters: false
 ### -MaxContextSize
 Taille maximale du contexte, en caractères  
 À l'avenir, ce sera en tokens  
-Contrôle la quantité de messages dans le contexte actuel du chat. Lorsque ce nombre est dépassé, Powershai nettoie automatiquement les messages les plus anciens.
+Contrôle la quantité de messages dans le contexte actuel du chat. Lorsque ce nombre est dépassé, le Powershai nettoie automatiquement les messages les plus anciens.
 
 ```yml
 Parameter Set: (All)
@@ -170,7 +168,7 @@ Accept wildcard characters: false
 ```
 
 ### -ContextFormatterFunc
-Fonction utilisée pour formater les objets passés via pipeline
+Fonction utilisée pour le formatage des objets passés via pipeline
 
 ```yml
 Parameter Set: (All)
@@ -200,7 +198,8 @@ Accept wildcard characters: false
 ```
 
 ### -ShowArgs
-Si vrai, affiche les arguments des fonctions lorsque l'appel d'outil est activé pour exécuter une fonction
+Si vrai, affiche les arguments des fonctions lorsque le Tool Calling est activé pour exécuter une fonction  
+DÉPRÉCIÉ. Sera supprimé bientôt. Utilisez -PrintToolCalls
 
 ```yml
 Parameter Set: (All)
@@ -215,7 +214,7 @@ Accept wildcard characters: false
 ```
 
 ### -PrintToolsResults
-Affiche les résultats des outils lorsqu'ils sont exécutés par PowershAI en réponse à l'appel d'outil du modèle
+Affiche les résultats des outils lorsqu'ils sont exécutés par le PowershAI en réponse à l'appel d'outil du modèle
 
 ```yml
 Parameter Set: (All)
@@ -230,7 +229,7 @@ Accept wildcard characters: false
 ```
 
 ### -SystemMessageFixed
-Message système qui est garanti d'être toujours envoyé, indépendamment de l'historique et du nettoyage du chat !
+Message système qui est garanti d'être envoyé à chaque fois, indépendamment de l'historique et du nettoyage du chat !
 
 ```yml
 Parameter Set: (All)
@@ -258,17 +257,17 @@ Required: false
 Position: 15
 Default Value: @{}
 Accept pipeline input: false
-Accept wildcard characters: false
+```Accept wildcard characters: false
 ```
 
-### -ContextFormat
-Contrôle le modèle utilisé lors de l'injection de données de contexte !  
-Ce paramètre est un scriptblock qui doit retourner une chaîne avec le contexte à injecter dans l'invite !  
-Les paramètres du scriptblock sont :  
-	FormattedObject 	- L'objet qui représente le chat actif, déjà formaté avec le Formatter configuré  
-	CmdParams 			- Les paramètres passés à Send-PowershaAIChat. C'est le même objet retourné par GetMyParams  
-	Chat 				- Le chat dans lequel les données sont envoyées.  
-S'il est nul, un modèle par défaut sera généré. Vérifiez le cmdlet Send-PowershaiChat pour plus de détails
+### -PromptBuilder
+Contrôle le modèle utilisé pour injecter des données de contexte !
+Ce paramètre est un scriptblock qui doit retourner une chaîne avec le contexte à injecter dans le prompt !
+Les paramètres du scriptblock sont :
+	FormattedObject 	- L'objet avec les données du contexte (envoyé via pipe), déjà formaté avec le Formatter configuré
+	CmdParams 			- Les paramètres passés à Send-PowershaAIChat. C'est le même objet retourné par GetMyParams
+	Chat 				- Le chat dans lequel les données sont envoyées.
+S'il est nul, un défaut sera généré. Vérifiez le cmdlet Send-PowershaiChat pour plus de détails
 
 ```yml
 Parameter Set: (All)
@@ -282,7 +281,26 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -PrintToolCalls
+Contrôle comment les appels d'outils sont affichés par la commande Send-PowershaiChat
+Valeurs possibles :
+	Aucun			- n'affiche rien lié aux appels d'outils.
+	NomSeulement 	- N'affiche que le nom au format FunctionaName{...}, sur une ligne propre.
+	NomArguments	- Affiche le nom et les arguments !
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 17
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et de l'IA._
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

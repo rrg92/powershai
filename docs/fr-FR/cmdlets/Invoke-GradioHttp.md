@@ -15,8 +15,7 @@ Exécute des appels HTTP vers Gradio et ajoute déjà les en-têtes communs, tel
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] 
-[[-token] <Object>] [<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [[-MaxRedirects] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -105,7 +104,21 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -MaxRedirects
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 7
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et de l'IA._
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

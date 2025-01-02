@@ -13,9 +13,8 @@ https://huggingface.co/docs/hub/en/api
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] 
-[[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] 
-[<CommonParameters>]
+Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] [[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] 
+[[-RawParams] <Object>] [-Public] [[-Token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -200,11 +199,10 @@ Accepted Values:
 Required: false
 Position: 9
 Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
+Accept pipeline input: falseAccept wildcard characters: faux
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et de l'IA._
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

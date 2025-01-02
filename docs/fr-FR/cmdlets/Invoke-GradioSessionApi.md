@@ -11,19 +11,19 @@ Crée un nouvel appel à un point de terminaison dans la session actuelle.
 
 ## DESCRIPTION <!--!= @#Desc !-->
 Effectue un appel en utilisant l'API de Gradio, à un point de terminaison spécifique et en passant les paramètres souhaités.  
-Cet appel générera un GradioApiEvent (voir Send-GradioApi), qui sera enregistré en interne dans les configurations de la session.  
+Cet appel générera un GradioApiEvent (voir Send-GradioApi), qui sera sauvegardé en interne dans les configurations de la session.  
 Cet objet contient tout ce qui est nécessaire pour obtenir le résultat de l'API.  
 
 Le cmdlet renverra un objet de type SessionApiEvent contenant les propriétés suivantes :
-	id - Identifiant interne de l'événement généré.
+	id - Id interne de l'événement généré.
 	event - L'événement interne généré. Peut être utilisé directement avec les cmdlets qui manipulent des événements.
 	
-Les sessions ont une limite de Calls définies.
+Les sessions ont une limite d'appels définie.
 L'objectif est d'empêcher de créer des appels indéfinis de manière à perdre le contrôle.
 
 Il existe deux options de session qui affectent l'appel (peuvent être modifiées avec Set-GradioSession) :
 	- MaxCalls 
-	Contrôle le maximum d'appels qui peuvent être créés
+	Contrôle le maximum d'appels pouvant être créés
 	
 	- MaxCallsPolicy 
 	Contrôle ce qu'il faut faire lorsque le maximum est atteint.
@@ -35,14 +35,13 @@ Il existe deux options de session qui affectent l'appel (peuvent être modifiée
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] 
-[<CommonParameters>]
+Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -ApiName
-Nom du point de terminaison (sans la barre initiale)
+Nom du point de terminaison (sans le slash initial)
 
 ```yml
 Parameter Set: (All)
@@ -57,9 +56,9 @@ Accept wildcard characters: false
 ```
 
 ### -Params
-Liste de paramètres 
+Liste des paramètres 
 S'il s'agit d'un tableau, passe directement à l'API de Gradio 
-S'il s'agit d'une table de hachage, construit le tableau en fonction de la position des paramètres retournés par /info
+S'il s'agit d'une hashtable, construit le tableau en fonction de la position des paramètres retournés par /info
 
 ```yml
 Parameter Set: (All)
@@ -120,5 +119,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et de l'IA._
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

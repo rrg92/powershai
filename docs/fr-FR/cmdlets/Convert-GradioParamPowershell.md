@@ -7,48 +7,63 @@ powershai: true
 # Convert-GradioParamPowershell
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Convertir-GradioParamPowershell [[-Param] <Object>] [[-value] <Object>]
-
+Convert-GradioParamPowershell [[-Param] <Object>] [[-value] <Object>]
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Convert-GradioParamPowershell [[-Param] <Object>] [[-value] <Object>] [<CommonParameters>]
+Convert-GradioParamPowershell [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Param
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias :
+Valeurs acceptées :
+Requis : faux
+Position : 0
+Valeur par défaut :
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques :
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : 
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : nommé
+Valeur par défaut : Aucun
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : faux
 ```
 
 ### -value
+Ensemble de paramètres : (Tous)
+Type : Objet
+Alias :
+Valeurs acceptées :
+Requis : faux
+Position : 1
+Valeur par défaut :
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques :
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Ensemble de paramètres : (Tous)
+Type : 
+Alias : 
+Valeurs acceptées : 
+Requis : faux
+Position : nommé
+Valeur par défaut : Aucun
+Accepter l'entrée de pipeline : faux
+Accepter les caractères génériques : faux
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

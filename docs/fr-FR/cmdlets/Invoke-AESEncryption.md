@@ -7,84 +7,83 @@ powershai: true
 # Invoke-AESEncryption
 
 ## SYNOPSIS <!--!= @#Synop !-->
+Crypte/Décrypte une chaîne en utilisant AES
 
-Invoke-AESEncryption -Mode <string> -Key <string> -Text <string> [<CommonParameters>]
-
-Invoke-AESEncryption -Mode <string> -Key <string> -Path <string> [<CommonParameters>]
-
+## DESCRIPTION <!--!= @#Desc !-->
+Adapté de ce lien : https://www.powershellgallery.com/packages/DRTools/4.0.2.3/Content/Functions%5CInvoke-AESEncryption.ps1
+Merci !
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ### CryptFile
 ```
-Invoke-AESEncryption -Mode {Encrypt | Decrypt} -Key <string> -Path <string> [<CommonParameters>]
+Invoke-AESEncryption -Mode <String> -Key <String> -Path <String> [<CommonParameters>]
 ```
 
 ### CryptText
 ```
-Invoke-AESEncryption -Mode {Encrypt | Decrypt} -Key <string> -Text <string> [<CommonParameters>]
+Invoke-AESEncryption -Mode <String> -Key <String> -Text <String> [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
-
-### -Key
-
-```yml
-Parameter Set: (All)
-Type: string
-Aliases: 
-Accepted Values: 
-Required: true
-Position: Named
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
-```
 
 ### -Mode
 
 ```yml
 Parameter Set: (All)
-Type: string
+Type: String
 Aliases: 
 Accepted Values: 
 Required: true
-Position: Named
+Position: named
 Default Value: 
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
-### -Path
+### -Key
 
 ```yml
-Parameter Set: CryptFile
-Type: string
+Parameter Set: (All)
+Type: String
 Aliases: 
 Accepted Values: 
 Required: true
-Position: Named
+Position: named
 Default Value: 
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
 ### -Text
 
 ```yml
 Parameter Set: CryptText
-Type: string
+Type: String
 Aliases: 
 Accepted Values: 
 Required: true
-Position: Named
+Position: named
 Default Value: 
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
+```
+
+### -Path
+
+```yml
+Parameter Set: CryptFile
+Type: String
+Aliases: 
+Accepted Values: 
+Required: true
+Position: named
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et IA. 
-_
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->

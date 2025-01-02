@@ -17,14 +17,13 @@ Il retourne l'événement lui-même afin qu'il puisse être utilisé avec d'autr
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
-[<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-Identifiant de l'événement, retourné par Invoke-GradioSessionApi ou l'objet retourné lui-même.
+Id de l'événement, retourné par Invoke-GradioSessionApi ou l'objet retourné lui-même.
 
 ```yml
 Parameter Set: (All)
@@ -39,7 +38,7 @@ Accept wildcard characters: false
 ```
 
 ### -NoOutput
-Ne pas renvoyer le résultat dans la sortie !
+Ne pas renvoyer le résultat à la sortie !
 
 ```yml
 Parameter Set: (All)
@@ -69,7 +68,7 @@ Accept wildcard characters: false
 ```
 
 ### -session
-Identifiant de la session
+Id de la session
 
 ```yml
 Parameter Set: (All)
@@ -84,7 +83,7 @@ Accept wildcard characters: false
 ```
 
 ### -History
-Ajoute les événements à l'historique des événements de l'objet GradioApiEvent spécifié dans -Id
+Ajoute les événements à l'historique des événements de l'objet GradioApiEvent spécifié par -Id
 
 ```yml
 Parameter Set: (All)
@@ -100,5 +99,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traduit automatiquement à l'aide de PowershAI et de l'IA._
+_Traduit automatiquement en utilisant PowershAI et IA._
 <!--PowershaiAiDocBlockEnd-->
