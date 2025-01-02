@@ -7,33 +7,40 @@ powershai: true
 # Get-OpenAiAnswerCost
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Obtener el costo de las respuestas de OpenAI.
+Obtiene el costo de las respuestas de OpenAI.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenAiAnswerCost [[-answers] <Object>] [<CommonParameters>]
+Get-OpenAiAnswerCost [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -answers
+Conjunto de parámetros: (Todos)
+Tipo: Objeto
+Alias:
+Valores aceptados:
+Requerido: falso
+Posición: 0
+Valor predeterminado:
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín:
 
 ```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

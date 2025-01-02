@@ -7,15 +7,14 @@ powershai: true
 # Invoke-HuggingFaceHub
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Invoca la API de Hugging Hub.
+Invoca a la API de Hugging Hub.
 https://huggingface.co/docs/hub/en/api
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] 
-[[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] 
-[<CommonParameters>]
+Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] [[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] 
+[[-RawParams] <Object>] [-Public] [[-Token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -175,7 +174,7 @@ Accept wildcard characters: false
 ```
 
 ### -Public
-Ignora el token actual y lista solamente recursos públicos
+Ignora el token actual y lista solo recursos públicos
 
 ```yml
 Parameter Set: (All)
@@ -200,11 +199,10 @@ Accepted Values:
 Required: false
 Position: 9
 Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
+Accept pipeline input: falseAcceptar caracteres comodín: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

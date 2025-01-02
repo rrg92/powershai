@@ -7,9 +7,7 @@ powershai: true
 # Get-OllamaTags
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Obtener etiquetas de Ollama [<CommonParameters>]
-
+Get-OllamaTags [<CommonParameters>]
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -20,9 +18,6 @@ Get-OllamaTags [<CommonParameters>]
 ## PARAMETERS <!--!= @#Params !-->
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

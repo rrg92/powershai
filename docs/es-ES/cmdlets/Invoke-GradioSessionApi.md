@@ -11,15 +11,15 @@ Crea una nueva llamada a un endpoint en la sesión actual.
 
 ## DESCRIPTION <!--!= @#Desc !-->
 Realiza una llamada utilizando la API de Gradio, en un endpoint específico y pasando los parámetros deseados.  
-Esta llamada generará un GradioApiEvent (vea Send-GradioApi), que se guardará internamente en las configuraciones de la sesión.  
-Este objeto contiene todo lo que se necesita para obtener el resultado de la API.  
+Esta llamada generará un GradioApiEvent (ver Send-GradioApi), que se guardará internamente en las configuraciones de la sesión.  
+Este objeto contiene todo lo necesario para obtener el resultado de la API.  
 
 El cmdlet devolverá un objeto del tipo SessionApiEvent que contiene las siguientes propiedades:
 	id - Id interno del evento generado.
 	event - El evento interno generado. Puede ser utilizado directamente con los cmdlets que manipulan eventos.
 	
 Las sesiones tienen un límite de llamadas definidas.
-El objetivo es impedir crear llamadas indefinidas de manera que se pierda el control.
+El objetivo es evitar crear llamadas indefinidas de manera que se pierda el control.
 
 Existen dos opciones de la sesión que afectan la llamada (pueden ser alteradas con Set-GradioSession):
 	- MaxCalls 
@@ -30,13 +30,12 @@ Existen dos opciones de la sesión que afectan la llamada (pueden ser alteradas 
 	Valores posibles:
 		- Error 	= resulta en error!
 		- Remove 	= elimina la más antigua 
-		- Warning 	= Muestra una advertencia, pero permite sobrepasar el límite.
+		- Warning 	= Muestra una advertencia, pero permite superar el límite.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] 
-[<CommonParameters>]
+Invoke-GradioSessionApi [[-ApiName] <Object>] [[-Params] <Object>] [[-EventId] <Object>] [[-session] <Object>] [[-Token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -58,8 +57,8 @@ Accept wildcard characters: false
 
 ### -Params
 Lista de parámetros 
-Si es un array, pasa directamente a la Api de Gradio 
-Si es una hashtable, monta el array con base en la posición de los parámetros retornados por /info
+Si es un array, se pasa directamente a la API de Gradio 
+Si es una hashtable, se monta el array con base en la posición de los parámetros devueltos por /info
 
 ```yml
 Parameter Set: (All)
@@ -74,7 +73,7 @@ Accept wildcard characters: false
 ```
 
 ### -EventId
-SI especificado, crea con un id de evento ya existente (puede haber sido generado fuera del módulo).
+SI se especifica, crea con un evento id ya existente (puede haber sido generado fuera del módulo).
 
 ```yml
 Parameter Set: (All)
@@ -120,5 +119,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

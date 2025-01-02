@@ -7,8 +7,7 @@ powershai: true
 # Set-MaritalkToken
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Establece el token de Maritalk.
+Set-MaritalkToken [<CommonParameters>]
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -19,9 +18,6 @@ Set-MaritalkToken [<CommonParameters>]
 ## PARAMETERS <!--!= @#Params !-->
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

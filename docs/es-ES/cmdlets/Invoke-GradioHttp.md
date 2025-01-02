@@ -10,13 +10,12 @@ powershai: true
 
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Realiza llamadas HTTP a Gradio y ya agrega los encabezados comunes, como autenticación, etc.
+Ejecuta llamadas HTTP a Gradio y ya añade los encabezados comunes, como autenticación, etc.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] 
-[[-token] <Object>] [<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [[-MaxRedirects] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -105,7 +104,21 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -MaxRedirects
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 7
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

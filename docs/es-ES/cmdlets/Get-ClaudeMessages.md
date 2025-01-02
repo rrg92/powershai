@@ -6,91 +6,133 @@ powershai: true
 
 # Get-ClaudeMessages
 
-## SINOPSIS <!--!= @#Synop !-->
-
+## SYNOPSIS <!--!= @#Synop !-->
 Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] <Object>] [<CommonParameters>]
 
-
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-ClaudeMessages [[-messages] <Object>] [[-model] <Object>] [[-max_tokens] <Object>] [[-temperature] <Object>] [[-StreamCallback] 
-<Object>] [<CommonParameters>]
+Get-ClaudeMessages [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
 ### -StreamCallback
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 4
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -max_tokens
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 2
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -messages
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 0
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -model
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 1
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -temperature
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 3
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: falso
+Aceptar caracteres comodín: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

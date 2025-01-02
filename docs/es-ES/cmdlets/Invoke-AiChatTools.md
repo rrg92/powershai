@@ -7,29 +7,29 @@ powershai: true
 # Invoke-AiChatTools
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Envía un mensaje a un LLM, con soporte para la llamada a herramientas, y ejecuta las herramientas solicitadas por el modelo como comandos de powershell.
+Envía un mensaje a un LLM, con soporte para Tool Calling, y ejecuta las herramientas solicitadas por el modelo como comandos powershell.
 
 ## DESCRIPTION <!--!= @#Desc !-->
 Esta es una función auxiliar para ayudar a hacer el procesamiento de herramientas más fácil con powershell.
-¡Él se encarga del procesamiento de las "Tools", ejecutando cuando el modelo lo solicita!
+¡Él maneja el procesamiento de las "Tools", ejecutando cuando el modelo lo solicita!
 
-Debes pasar las herramientas en un formato específico, documentado en el tema about_Powershai_Chats.
-Este formato mapea correctamente funciones y comandos de powershell al esquema aceptable por OpenAI (OpenAPI Schema).
+Debes pasar las herramientas en un formato específico, documentando en el tema about_Powershai_Chats
+Este formato mapea correctamente funciones y comandos powershell para el esquema aceptable por OpenAI (OpenAPI Schema).  
 
-Este comando encapsula toda la lógica que identifica cuando el modelo quiere invocar la función, la ejecución de esas funciones y el envío de esa respuesta de vuelta al modelo.
+Este comando encapsula toda la lógica que identifica cuando el modelo quiere invocar la función, la ejecución de estas funciones, y el envío de esa respuesta de vuelta al modelo.  
 Él permanece en este bucle hasta que el modelo deje de decidir invocar más funciones, o que el límite de interacciones (sí, aquí llamamos interacciones y no iteraciones) con el modelo haya finalizado.
 
-El concepto de interacción es simple: Cada vez que la función envía un prompt al modelo, cuenta como una integración.
+El concepto de interacción es simple: Cada vez que la función envía un prompt al modelo, cuenta como una integración.  
 A continuación se muestra un flujo típico que puede ocurrir:
+	
 
-Puedes obtener más detalles del funcionamiento consultando el tema about_Powershai_Chats.
+Puedes obtener más detalles del funcionamiento consultando el tema about_Powershai_Chats
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] 
-<Object>] [[-MaxSeqErrors] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] 
-[-Stream] [<CommonParameters>]
+Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-temperature] <Object>] [[-model] 
+<Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [[-ProviderRawParams] <Object>] [[-AiChatParams] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -49,10 +49,10 @@ Accept wildcard characters: false
 ```
 
 ### -Tools
-Array de herramientas, conforme explicado en la doc de este comando.
-Utiliza los resultados de Get-OpenaiTool* para generar los valores posibles.
+Array de herramientas, conforme explicado en la doc de este comando
+Usa los resultados de Get-OpenaiTool* para generar los valores posibles.  
 Puedes pasar un array de objetos del tipo OpenaiTool.
-Si una misma función está definida en más de 1 herramienta, ¡la primera encontrada en el orden definido será utilizada!
+¡Si una misma función está definida en más de 1 herramienta, la primera encontrada en el orden definido será usada!
 
 ```yml
 Parameter Set: (All)
@@ -110,8 +110,7 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -MaxSeqErrors
-Cantidad máxima de errores consecutivos que tu función puede generar antes de que se cierre.
+### -MaxSeqErrorsQuantidade máximo de errores consecutivos que su función puede generar antes de que se cierre.
 
 ```yml
 Parameter Set: (All)
@@ -154,16 +153,16 @@ Accept wildcard characters: false
 ```
 
 ### -on
-Manejador de eventos.
-Cada clave es un evento que será disparado en algún momento por este comando.
+Manejador de eventos
+¡Cada key es un evento que será disparado en algún momento por este comando!
 eventos:
-respuesta: disparado después de obtener la respuesta del modelo (o cuando una respuesta está disponible al usar stream).
+answer: disparado después de obtener la respuesta del modelo (o cuando una respuesta queda disponible al usar stream).
 func: disparado antes de iniciar la ejecución de una herramienta solicitada por el modelo.
-	eje: disparado después de que el modelo ejecute la función.
-	error: disparado cuando la función ejecutada genera un error.
-	stream: disparado cuando se ha enviado una respuesta (por el stream) y -DifferentStreamEvent.
-	beforeAnswer: Disparado después de todas las respuestas. Utilizado cuando se usa en stream.
-	afterAnswer: Disparado antes de iniciar las respuestas. Utilizado cuando se usa en stream.
+	exec: disparado después de que el modelo ejecute la función.
+	error: disparado cuando la función ejecutada genera un error
+	stream: disparado cuando se ha enviado una respuesta (por el stream) y -DifferentStreamEvent
+	beforeAnswer: Disparado después de todas las respuestas. ¡Útil cuando se usa en stream!
+	afterAnswer: Disparado antes de iniciar las respuestas. ¡Útil cuando se usa en stream!
 
 ```yml
 Parameter Set: (All)
@@ -221,7 +220,37 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -ProviderRawParams
+Especifica raw params por proveedor. Se enviará a Get-AiChat, por lo tanto, tiene el mismo funcionamiento.
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 11
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -AiChatParams
+Sobrescribir los parámetros de Get-AiChat
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 12
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

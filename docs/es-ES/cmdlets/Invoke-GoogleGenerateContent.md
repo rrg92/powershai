@@ -6,90 +6,89 @@ powershai: true
 
 # Invoke-GoogleGenerateContent
 
-## SINOPSIS <!--!= @#Synop !-->
+## SYNOPSIS <!--!= @#Synop !-->
 Endpoint: https://ai.google.dev/api/generate-content
 Stream: https://ai.google.dev/api/generate-content#method:-models.streamgeneratecontent
 
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] 
-<Object>] [<CommonParameters>]
+Invoke-GoogleGenerateContent [[-messages] <Object>] [[-model] <Object>] [[-StreamCallback] <Object>] [[-RawParams] <Object>] [[-Tools] <Object>] [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
 ### -messages
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 1
-Valor Predeterminado: @()
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: falso
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 1
+Default Value: @()
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -model
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 2
-Valor Predeterminado: gemini-1.5-flash
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: falso
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
+Default Value: gemini-1.5-flash
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -StreamCallback
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 3
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: falso
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 3
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -RawParams
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 4
-Valor Predeterminado: @{}
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: falso
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 4
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 ### -Tools
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 5
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: falso
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 5
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

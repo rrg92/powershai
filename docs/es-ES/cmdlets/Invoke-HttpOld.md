@@ -1,4 +1,5 @@
-﻿---
+﻿```markdown
+---
 external help file: powershai-help.xml
 schema: 2.0.0
 powershai: true
@@ -6,133 +7,202 @@ powershai: true
 
 # Invoke-HttpOld
 
-## SINOPSIS <!--!= @#Synop !-->
-
+## SYNOPSIS <!--!= @#Synop !-->
 Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-SseCallBack] <Object>] [[-DebugVarPrefix] <Object>] [<CommonParameters>]
 
-
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HttpOld [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] 
-<Object>] [[-SseCallBack] <Object>] [[-DebugVarPrefix] <Object>] [<CommonParameters>]
+Invoke-HttpOld [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
 ### -DebugVarPrefix
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 7
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 7
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín: false
 ```
 
 ### -Encoding
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 4
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 4
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín: false
 ```
 
 ### -SseCallBack
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 6
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 6
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín: false
 ```
 
 ### -contentType
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 3
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 3
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín: false
 ```
 
 ### -data
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 1
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 1
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín: false
 ```
 
 ### -headers
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 5
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 5
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín: false
 ```
 
 ### -method
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 2
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 2
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín: false
 ```
 
 ### -url
+Conjunto de parámetros: (Todos)
+Tipo: Object
+Alias:
+Valores aceptados:
+Requerido: false
+Posición: 0
+Valor predeterminado:
+Aceptar entrada por canalización: false
+Aceptar caracteres comodín:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
+Conjunto de parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
+```Valores Aceitos: 
 Requerido: falso
-Posición: 0
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Posição: nomeado
+Valor Padrão: Nenhum
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

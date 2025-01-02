@@ -6,105 +6,156 @@ powershai: true
 
 # Invoke-MaritalkApi
 
-## SINOPSIS <!--!= @#Synop !-->
-
+## SYNOPSIS <!--!= @#Synop !-->
 Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] [-OpenAI] [<CommonParameters>]
 
-
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-MaritalkApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-Token] <Object>] [[-StreamCallback] <Object>] 
-[-OpenAI] [<CommonParameters>]
+Invoke-MaritalkApi [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
 ### -OpenAI
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: interruptor
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: Nombrado
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -StreamCallback
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 4
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -Token
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 3
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -body
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 1
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -endpoint
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 0
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: falso
 ```
 
 ### -method
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: falso
 Posición: 2
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: falso
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de canalización: falso
+Aceptar caracteres comodín: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

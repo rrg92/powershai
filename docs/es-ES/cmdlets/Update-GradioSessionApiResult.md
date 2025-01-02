@@ -12,19 +12,18 @@ Actualiza el retorno de una llamada generada como Invoke-GradioSessionApi
 ## DESCRIPTION <!--!= @#Desc !-->
 Este cmdlet sigue el mismo principio que sus equivalentes en Send-GradioApi y Update-GradioApiResult.
 Sin embargo, funciona solo para los eventos generados en una sesión específica.
-Devuelve el propio evento para que pueda ser utilizado con otros cmdlets que dependan del evento actualizado.
+Devuelve el propio evento para que pueda ser utilizado con otros cmdlets que dependan del evento actualizado!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] 
-[<CommonParameters>]
+Update-GradioSessionApiResult [[-Id] <Object>] [-NoOutput] [[-MaxHeartBeats] <Object>] [[-session] <Object>] [-History] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -Id
-Id del evento, devuelto por Invoke-GradioSessionApi o el propio objeto devuelto.
+Id del evento, retornado por Invoke-GradioSessionApi o el propio objeto retornado.
 
 ```yml
 Parameter Set: (All)
@@ -39,7 +38,7 @@ Accept wildcard characters: false
 ```
 
 ### -NoOutput
-¡No devolver el resultado al output!
+¡No devolver el resultado de nuevo a la salida!
 
 ```yml
 Parameter Set: (All)
@@ -54,7 +53,7 @@ Accept wildcard characters: false
 ```
 
 ### -MaxHeartBeats
-Máximos latidos consecutivos.
+Max latidos consecutivos.
 
 ```yml
 Parameter Set: (All)
@@ -100,5 +99,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

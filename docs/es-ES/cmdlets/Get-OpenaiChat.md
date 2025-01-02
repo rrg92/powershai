@@ -6,147 +6,223 @@ powershai: true
 
 # Get-OpenaiChat
 
-## SINOPSIS <!--!= @#Synop !-->
-
+## SYNOPSIS <!--!= @#Synop !-->
 Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
 
-
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] 
-[[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] [[-endpoint] <Object>] [<CommonParameters>]
+Get-OpenaiChat [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
 ### -Functions
+Conjunto de Parámetro: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 5
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 5
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Conjunto de Parámetro: (Todos)
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -MaxTokens
+Conjunto de Parámetro: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 3
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 3
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Conjunto de Parámetro: (Todos)
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -RawParams
+Conjunto de Parámetro: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 6
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 6
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Conjunto de Parámetro: (Todos)
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -ResponseFormat
+Conjunto de Parámetro: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 4
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 4
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Conjunto de Parámetro: (Todos)
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -StreamCallback
+Conjunto de Parámetro: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 7
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 7
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Conjunto de Parámetro: (Todos)
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -endpoint
+Conjunto de Parámetro: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 8
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 8
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Conjunto de Parámetro: (Todos)
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -model
+Conjunto de Parámetro: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 2
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 2
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Conjunto de Parámetro: (Todos)
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -prompt
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de Parámetro: (Todos)
 Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 0
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:```yml
+Conjunto de Parámetros: (Todos)
+Tipo: 
 Alias: 
-Valores Aceptados: 
+Valores Aceitos: 
 Requerido: falso
-Posición: 0
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Posição: nomeado
+Valor Padrão: Nenhum
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
-### -temperature
+### -temperatura
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Alias:
+Valores Aceitos:
+Requerido: falso
+Posição: 1
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
 Conjunto de Parámetros: (Todos)
-Tipo: Object
+Tipo: 
 Alias: 
-Valores Aceptados: 
+Valores Aceitos: 
 Requerido: falso
-Posición: 1
-Valor Predeterminado: 
-Aceptar entrada de tubería: falso
-Aceptar caracteres comodín: 
+Posição: nomeado
+Valor Padrão: Nenhum
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

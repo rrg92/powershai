@@ -6,33 +6,41 @@ powershai: true
 
 # ConvertTo-GoogleToolFunction
 
-## SINOPSIS <!--!= @#Synop !-->
-
+## SYNOPSIS <!--!= @#Synop !-->
 ConvertTo-GoogleToolFunction [[-OpenaiTool] <Object>]
 
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-ConvertTo-GoogleToolFunction [[-OpenaiTool] <Object>] [<CommonParameters>]
+ConvertTo-GoogleToolFunction [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
 ### -OpenaiTool
+Conjunto de Parámetros: (Todos)
+Tipo: Objeto
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 0
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
 Conjunto de Parámetros: (Todos)
-Tipo: Objeto
-Alias: 
-Valores Aceptados: 
-Requerido: falso
-Posición: 0
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Tipo: 
+Aliases: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: Ninguno
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

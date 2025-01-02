@@ -7,14 +7,13 @@ powershai: true
 # Invoke-HuggingFaceInferenceApi
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Invoca la API de Inferencia de Hugging Face
+Invoca a la API de Inferencia de Hugging Face
 https://huggingface.co/docs/hub/en/api
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] 
-[<CommonParameters>]
+Invoke-HuggingFaceInferenceApi [[-model] <Object>] [[-params] <Object>] [-Public] [-OpenaiChatCompletion] [[-StreamCallback] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -62,8 +61,8 @@ Accept wildcard characters: false
 ```
 
 ### -OpenaiChatCompletion
-Forzar el uso del endpoint de finalización de chat 
-Params debe ser tratado como el mismo params de la API de OpenAI (Ver el cmdlet Get-OpenaiChat).
+Forzar el uso del endpoint de chat completion 
+Params deberá ser tratado como el mismo params de la API de Openai (Ver el cmdlet Get-OpenaiChat).
 Más info: https://huggingface.co/blog/tgi-messages-api
 ¡Solo funciona con modelos que tienen una plantilla de chat!
 
@@ -96,5 +95,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

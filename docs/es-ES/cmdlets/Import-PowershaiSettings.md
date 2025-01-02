@@ -7,42 +7,45 @@ powershai: true
 # Import-PowershaiSettings
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Importa uma configuração exportada com Export-PowershaiSettings
+Importa una configuración exportada con Export-PowershaiSettings
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Este cmdlet é o par do Export-PowershaiSettings, e como o nome indica, ele importa os dados que foram exportados.  
-Você deve garantir que a mesma senha e o mesmo arquivo são passados.  
+Este cmdlet es el par de Export-PowershaiSettings, y como el nombre indica, importa los datos que han sido exportados.  
+Debes asegurarte de que se pase la misma contraseña y el mismo archivo.  
 
-IMPORTANTE: Este comando sobrescreverá todos os dados configurados na sessão. Só execute ele se tiver certeza absoluta que nenhum dado configurado previamente pode ser perdido.
-Por exemplo, alguma API Token nova gerada recentemente.
+IMPORTANTE: Este comando sobrescribirá todos los datos configurados en la sesión. Solo ejecútalo si estás absolutamente seguro de que no se pueden perder datos configurados previamente.  
+Por ejemplo, algún nuevo API Token generado recientemente.
 
-Se você estivesse especificado um caminho de export diferente do padrão, usando a variável POWERSHAI_EXPORT_DIR, deve usar o mesmo aqui.
+Si has especificado un camino de exportación diferente del predeterminado, usando la variable POWERSHAI_EXPORT_DIR, debes usarlo aquí también.
 
-O processo de import valida alguns headers para garantir que o dado foi descriptografado corretamente.  
-Se a senha informada estiver incorreta, os hashs não vão ser iguais, e ele irá disparar o erro de senha incorreta.
+El proceso de importación valida algunos encabezados para garantizar que los datos se han descifrado correctamente.  
+Si la contraseña proporcionada es incorrecta, los hashes no serán iguales y se disparará el error de contraseña incorrecta.
 
-Se, por outro lado, um erro de formato inválido de arquivo for exibido, significa que houve alguma corrupção no proesso de import ou é um bug deste comando.  
-Neste caso, você pode abrir uma issue no github relatando o problema.
+Si, por otro lado, se muestra un error de formato de archivo inválido, significa que hubo alguna corrupción en el proceso de importación o es un bug de este comando.  
+En este caso, puedes abrir un issue en GitHub reportando el problema.
+
+A partir de la versión 0.7.0, se generará un nuevo archivo, llamado exportsession-v2.xml.  
+El archivo antiguo se mantendrá para que el usuario pueda recuperar eventuales credenciales, si es necesario.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Import-PowershaiSettings [[-ExportDir] <Object>] [<CommonParameters>]
+Import-PowershaiSettings [[-ExportDir] <Object>] [-v1] [<CommonParameters>]
 ```
 
 ## EXAMPLES <!--!= @#Ex !-->
 
-### Import padrão
+### Importación estándar
 ```powershell
 Import-PowershaiSettings
 ```
 
-### Importando do OneDrive
+### Importando desde OneDrive
 ```powershell
 $Env:POWERSHAI_EXPORT_DIR = "C:\Users\MyUserName\OneDrive\Powershai"
 Import-PowershaiSettings
 ```
-Importa as configurações que foram exportadas para um diretório alternativo (one drive).
+Importa las configuraciones que fueron exportadas a un directorio alternativo (one drive).
 
 ## PARAMETERS <!--!= @#Params !-->
 
@@ -60,10 +63,22 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
+### -v1
+Forza la importación de la versión 1
 
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

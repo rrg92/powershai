@@ -7,76 +7,109 @@ powershai: true
 # Get-OpenAiTextCompletion
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
 Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [<CommonParameters>]
-
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenAiTextCompletion [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] 
-[<CommonParameters>]
+Get-OpenAiTextCompletion [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -MaxTokens
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 3
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Parameter Set: (Todos)
-Type: Object
+Conjunto de Parámetros: (Todos)
+Tipo: 
 Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -model
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 2
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Parameter Set: (Todos)
-Type: Object
+Conjunto de Parámetros: (Todos)
+Tipo: 
 Aliases: 
-Accepted Values: 
-Required: false
-Position: 2
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -prompt
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 0
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Parameter Set: (Todos)
-Type: Object
+Conjunto de Parámetros: (Todos)
+Tipo: 
 Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 ### -temperature
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Aliases:
+Valores Aceitos:
+Necessário: falso
+Posição: 1
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
-Parameter Set: (Todos)
-Type: Object
+Conjunto de Parámetros: (Todos)
+Tipo: 
 Aliases: 
-Accepted Values: 
-Required: false
-Position: 1
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
+Valores Aceitos: 
+Necessário: falso
+Posição: nomeado
+Valor Padrão: None
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

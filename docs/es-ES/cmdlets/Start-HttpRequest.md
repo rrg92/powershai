@@ -6,118 +6,179 @@ powershai: true
 
 # Start-HttpRequest
 
-## SINOPSIS <!--!= @#Synop !-->
+## SYNOPSIS <!--!= @#Synop !-->
+Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
 
-Inicia una solicitud HTTP [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] [[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
-
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Start-HttpRequest [[-url] <Object>] [[-data] <Object>] [[-method] <Object>] [[-contentType] <Object>] [[-Encoding] <Object>] 
-[[-headers] <Object>] [[-MaxConnections] <Object>] [<CommonParameters>]
+Start-HttpRequest [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
 ### -Encoding
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: false
 Posición: 4
-Valor por Defecto: 
-Aceptar entrada de canalización: false
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín: false
 ```
 
 ### -MaxConnections
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: false
 Posición: 6
-Valor por Defecto: 
-Aceptar entrada de canalización: false
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín: false
 ```
 
 ### -contentType
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: false
 Posición: 3
-Valor por Defecto: 
-Aceptar entrada de canalización: false
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín: false
 ```
 
 ### -data
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: false
 Posición: 1
-Valor por Defecto: 
-Aceptar entrada de canalización: false
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín: false
 ```
 
 ### -headers
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: false
 Posición: 5
-Valor por Defecto: 
-Aceptar entrada de canalización: false
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín: false
 ```
 
 ### -method
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: false
 Posición: 2
-Valor por Defecto: 
-Aceptar entrada de canalización: false
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín: false
 ```
 
 ### -url
-
-```yml
-Conjunto de Parámetros: (Todos)
+Conjunto de parámetros: (Todos)
 Tipo: Object
-Alias: 
-Valores Aceptados: 
+Alias:
+Valores aceptados:
 Requerido: false
 Posición: 0
-Valor por Defecto: 
-Aceptar entrada de canalización: false
-Aceptar caracteres comodín: 
+Valor predeterminado:
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín:
+
+```yml
+Conjunto de parámetros: (Todos)
+Tipo: 
+Alias: 
+Valores aceptados: 
+Requerido: false
+Posición: nombrado
+Valor predeterminado: Ninguno
+Aceptar entrada de tubería: false
+Aceptar caracteres comodín: false
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

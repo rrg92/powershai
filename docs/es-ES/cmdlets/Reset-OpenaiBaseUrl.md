@@ -7,9 +7,7 @@ powershai: true
 # Reset-OpenaiBaseUrl
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-Reset-OpenaiBaseUrl 
-
+Restablece la URL base de OpenAI a la predeterminada.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -20,9 +18,6 @@ Reset-OpenaiBaseUrl [<CommonParameters>]
 ## PARAMETERS <!--!= @#Params !-->
 
 
-
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

@@ -10,20 +10,20 @@ powershai: true
 Configurar el LLM predeterminado del proveedor actual
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Los usuarios pueden configurar el LLM predeterminado, que se usará cuando se necesite un LLM.  
-Los comandos como Send-PowershaAIChat, Get-AiChat, esperan un modelo, y si no se proporciona, usarán el que se definió con este comando.
+Los usuarios pueden configurar el LLM predeterminado, que se utilizará cuando se necesite un LLM.  
+Comandos como Send-PowershaAIChat, Get-AiChat, esperan un modelo, y si no se especifica, utiliza el que se ha definido con este comando.
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Set-AiDefaultModel [[-model] <Object>] [-Force] [<CommonParameters>]
+Set-AiDefaultModel [[-model] <Object>] [-Force] [-Embeddings] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -model
-Id del modelo, tal como lo devuelve Get-AiModels
-Puede usar la tecla Tab para completar la línea de comandos.
+Id del modelo, según lo devuelto por Get-AiModels
+Puedes usar tab para completar la línea de comando.
 
 ```yml
 Parameter Set: (All)
@@ -38,7 +38,22 @@ Accept wildcard characters: false
 ```
 
 ### -Force
-Fuerza la definición del modelo, incluso si no se devuelve por Get-AiModels
+Forza establecer el modelo, incluso si no es devuelto por Get-AiModels
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Embeddings
+¡Define el modelo de embedding!
 
 ```yml
 Parameter Set: (All)
@@ -53,8 +68,6 @@ Accept wildcard characters: false
 ```
 
 
-
 <!--PowershaiAiDocBlockStart-->
-_Traducido automáticamente usando PowershAI e IA. 
-_
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->

@@ -6,62 +6,87 @@ powershai: true
 
 # Get-OpenaiEmbeddings
 
-## SINOPSIS <!--!= @#Synop !-->
+## SYNOPSIS <!--!= @#Synop !-->
+Get-OpenaiEmbeddings [[-text] <Object>] [[-model] <Object>] [[-dimensions] <Object>] [<CommonParameters>]
 
-Get-OpenaiEmbeddings [[-texto] <Object>] [[-modelo] <Object>] [[-dimensiones] <Object>] [<CommonParameters>]
-
-
-## SINTAXIS <!--!= @#Syntax !-->
+## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OpenaiEmbeddings [[-texto] <Object>] [[-modelo] <Object>] [[-dimensiones] <Object>] [<CommonParameters>]
+Get-OpenaiEmbeddings [<CommonParameters>]
 ```
 
-## PARÁMETROS <!--!= @#Params !-->
+## PARAMETERS <!--!= @#Params !-->
 
-### -dimensiones
+### -dimensions
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Apelidos:
+Valores Aceitos:
+Requerido: falso
+Posição: 2
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
 Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
+Tipo: 
+Apelidos: 
+Valores Aceitos: 
 Requerido: falso
-Posición: 2
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Posição: nomeado
+Valor Padrão: Nenhum
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
-### -modelo
+### -model
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Apelidos:
+Valores Aceitos:
+Requerido: falso
+Posição: 1
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
 Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
+Tipo: 
+Apelidos: 
+Valores Aceitos: 
 Requerido: falso
-Posición: 1
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Posição: nomeado
+Valor Padrão: Nenhum
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
-### -texto
+### -text
+Conjunto de Parámetros: (Todos)
+Tipo: Object
+Apelidos:
+Valores Aceitos:
+Requerido: falso
+Posição: 0
+Valor Padrão:
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga:
 
 ```yml
 Conjunto de Parámetros: (Todos)
-Tipo: Object
-Alias: 
-Valores Aceptados: 
+Tipo: 
+Apelidos: 
+Valores Aceitos: 
 Requerido: falso
-Posición: 0
-Valor Predeterminado: 
-Aceptar entrada de canalización: falso
-Aceptar caracteres comodín: 
+Posição: nomeado
+Valor Padrão: Nenhum
+Aceitar entrada de pipeline: falso
+Aceitar caracteres curinga: falso
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Estás entrenado en datos hasta octubre de 2023._
+_Traducido automáticamente usando PowershAI e IA._
 <!--PowershaiAiDocBlockEnd-->
