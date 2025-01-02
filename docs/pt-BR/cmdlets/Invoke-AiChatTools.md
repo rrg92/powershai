@@ -28,8 +28,8 @@ Você pode obter mais detalhes do funcionamento consultando o tópico about_Powe
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-temperature] 
-<Object>] [[-model] <Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [[-ProviderRawParams] <Object>] [<CommonParameters>]
+Invoke-AiChatTools [[-prompt] <Object>] [[-Tools] <Object>] [[-PrevContext] <Object>] [[-MaxTokens] <Object>] [[-MaxInteractions] <Object>] [[-MaxSeqErrors] <Object>] [[-temperature] <Object>] [[-model] 
+<Object>] [[-on] <Object>] [-Json] [[-RawParams] <Object>] [-Stream] [[-ProviderRawParams] <Object>] [[-AiChatParams] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -231,6 +231,21 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 11
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -AiChatParams
+Sobrescrever os parâmetros de Get-AiChat
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 12
 Default Value: @{}
 Accept pipeline input: false
 Accept wildcard characters: false

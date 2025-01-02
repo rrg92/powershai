@@ -34,8 +34,8 @@ Apesar de suportar o Functon Calling, ela não executa qualquer código, e apena
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] 
-[[-StreamCallback] <Object>] [-IncludeRawResp] [[-Check] <Object>] [[-Retries] <Object>] [-ContentOnly] [[-ProviderRawParams] <Object>] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] 
+<Object>] [-IncludeRawResp] [[-Check] <Object>] [[-Retries] <Object>] [-ContentOnly] [[-ProviderRawParams] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->

@@ -15,8 +15,7 @@ Executa chamadas HTTP para o Gradio e já adiciona os headers comuns, como auten
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [[-MaxRedirects] <Object>] 
-[<CommonParameters>]
+Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [[-MaxRedirects] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
