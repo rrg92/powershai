@@ -381,6 +381,7 @@ foreach($SrcFile in $SourceFiles){
 			"Translate code comments. Dont translate powershell command names"
 			"Dont change or add some text. Just do translation of origal content. Keep tabs, spaces and line breaks as original."
 			"Dont translate that markdown git tags:[!IMPORTANT],[!INFO],[!WARNING],[!TIP],[!CAUTION],[!NOTE]"
+			"you must return same content translated, in same structure"
 		) -Join "`n"
 		
 		
