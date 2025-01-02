@@ -1457,6 +1457,9 @@ function Invoke-AiChatTools {
 		
 		,# Especifica raw params por provider. Será enviado ao Get-AiChat, portanto, é o mesmo funcionamento.
 			$ProviderRawParams = @{}
+			
+		,# Sobrescrever os parâmetros de Get-AiChat
+			$AiChatParams = @{}
 	)
 	
 	$ErrorActionPreference = "Stop";
@@ -1559,6 +1562,10 @@ function Invoke-AiChatTools {
 			#https://platform.openai.com/docs/guides/text-generation/json-mode
 			$Params.ResponseFormat = "json_object";
 			$Params.prompt += "s: Response in JSON";
+		}
+		
+		if($AiChatParams -and $AiChatParams.count){
+			$Params = HashTableMerge $Params $AiChatParams
 		}
 		
 		$AiInteraction.sent = $Params;
