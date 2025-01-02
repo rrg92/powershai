@@ -318,7 +318,7 @@ $e.ErrorRecord.ScriptStackTrace # Cela aide à trouver la ligne exacte où l'exc
 
 
 
-[exemple 0001]: examples/0001.md
+[l'exemple 0001]: examples/0001.md
 
 
 <!--PowershaiAiDocBlockStart-->
