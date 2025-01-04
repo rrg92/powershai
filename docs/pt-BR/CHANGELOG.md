@@ -29,6 +29,7 @@
 - Novo cmdlet `Reset-AiDefaultModel` para desmarcar o modelo padrão.
 - Adicionado os prâmetros `ProviderRawParams` a `Get-AiChat` e `Invoke-AiChat` para sobrescrever os parâmetros específicos na API, por provedor.
 - **HUGGINGFACE PROVIDER**: Adicionados novos testes usando um space Hugging Face exclusivo real mantido como um submódulo deste projeto. Isso permite testar vários aspectos ao mesmo tempo: sessões Gradio e integração Hugging Face.
+- **HUGGINGFACE PROVIDER**: Novo cmdlet: Find-HuggingFaceModel, para buscar modelos no hub baseado em alguns filtros!
 - **OPENAI PROVIDER**: Adicionado um novo cmdlet para gerar chamadas de ferramentas: `ConvertTo-OpenaiTool`, suportando ferramentas definidas em blocos de script.
 - **OLLAMA PROVIDER**: Novo cmdlet `Get-OllamaEmbeddings` para retornar embeddings usando Ollama.
 
