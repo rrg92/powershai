@@ -173,6 +173,32 @@ function Switch-PowershaiSetting {
 	}
 }
 
+function Remove-PowershaiSetting {
+	<#
+		.SYNOPSIS
+			Remove uma setting!
+	#>
+	[CmdletBinding(SupportsShouldProcess,ConfirmImpact="High")]
+	param(
+		$name
+	)
+	
+	if($name -eq "default"){
+		throw "POWERSHAI_REMOVE_SETTING_INVALID: Cannot remove default!"
+	}
+	
+	$SettingsStore = Get-PowershaiSettingsStore
+	$SettingSlot = $SettingsStore.settings[$name]
+	
+	if($SettingsStore.current -eq $name){
+		throw "POWERSHAI_REMOVE_SETTING_INUSE: Cannot remove $name because is currently used! Switch with Switch-PowershaiSetting"
+	}
+		
+	if($SettingSlot -and $PsCmdlet.ShouldProcess("$name","setting")){
+		$SettingsStore.settings.remove($name);
+	}
+}
+
 function Get-PowershaiSetting {
 	$SettingsStore = Get-PowershaiSettingsStore
 	
@@ -503,16 +529,42 @@ function Enter-AiProvider {
 	param(
 		$Provider
 		,$code
+		,#Executa no scope atual (o mesmo que usar com .).
+		 #Note que para fucnionar Enter-AiProvider também deve ser invocada usando com . 
+			[switch]$DotRun
 	)
+	
+	
+	$CurrentProvider = Get-AiCurrentProvider
+	$PrevProviderName = $CurrentProvider.name;
 	
 	$Provider = Get-AiProvider $provider;
 	
-	$null = $PROVIDER_CONTEXT.push($Provider)
+	verbose "Pushing to provider context stack..."
+	$null 	= $PROVIDER_CONTEXT.push($Provider)
+	
+	#switch to target provider!
+	#We must call de Set-AiProvider because it triggers some changes (updates alias, etc.)
+	verbose "Changing to provider $($Provider.name)";
+	Set-AiProvider $Provider.name;
 	
 	try {
-		. $Code;
+		#Run code in your own scope!
+		verbose "Running user code"
+		if($DotRun){
+			. $Code 
+		} else {
+			& $Code;
+		}
+		
+		verbose "User code ran"
 	} finally {
+		verbose "Popping provider context stack...";
 		$null = $PROVIDER_CONTEXT.pop();
+		
+		#set prev provider!
+		verbose "Swithing back to provider $PrevProviderName"
+		Set-AiProvider $PrevProviderName
 	}
 	
 	
@@ -622,7 +674,7 @@ function Get-AiProvider {
 	)
 	
 	if($provider -isnot [string]){
-		return $provider;
+		return $PROVIDERS[$provider.name]
 	}
 	
 	if(!$PROVIDERS.Contains($provider)){
@@ -649,6 +701,9 @@ function Get-AiProviders {
 		$ProviderInfo = [PSCustomObject](@{name = $_} + $Provider.info )
 		
 		$ProviderInfo | Add-Member Noteproperty Chat (Invoke-PowershaiProviderInterface "Chat" -Provider $Provider.name -CheckExists)
+		
+		$Credentials = @(Enter-AiProvider $_ { Get-AiCredentials })
+		$ProviderInfo | Add-Member Noteproperty Credentials ($Credentials.count)
 		
 		
 		SetType $ProviderInfo "AiProvider"
@@ -860,6 +915,9 @@ function Get-AiModels {
 	$Provider 	= Get-AiCurrentProvider;
 	$ProviderName = $Provider.name;
 	
+	$DefaultModel = Get-AiDefaultModel -NameOnly
+	$DefaultEmbeddingsModel = Get-AiDefaultModel -Embeddings -NameOnly
+	
 	$POWERSHAI_MODEL_CACHE.ModelList = $ModelList | %{  
 									
 									$POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$($_.name)"] = $_;
@@ -869,9 +927,14 @@ function Get-AiModels {
 
 										$ModelMeta = Get-AiModel -MetaDataOnly $_.name
 										
+										$IsDefault = $DefaultModel -eq $_.name;
+										$IsDefaultEmbeddings = $DefaultEmbeddingsModel -eq $_.name;
+										
 										$_ | Add-member -Force noteproperty tools $ModelMeta.tools;
 										$_ | Add-member -Force noteproperty embeddings $ModelMeta.embeddings;
 										$_ | Add-member -Force noteproperty cached $true
+										$_ | Add-member -Force noteproperty default $IsDefault
+										$_ | Add-member -Force noteproperty DefaultEmbeddings $IsDefaultEmbeddings
 									}
 
 									$_.name;
@@ -885,6 +948,33 @@ function Get-AiModels {
 	return $ModelList
 }
 
+
+function Get-AiModelSlot {
+<#
+	.SYNOPSIS
+		Obtém o slot de model settings. Deve ser usado por usuário avançados para alterar configurações de modelos!
+#>
+	param(
+		#nome do modelo 
+		$ModelName
+	)
+	
+	$ModelSettings = GetCurrentProviderData ModelSettings;
+	
+	if(!$ModelSettings){
+		$ModelSettings = @{}
+		SetCurrentProviderData ModelSettings $ModelSettings
+	}
+	
+	$ModelSlot = $ModelSettings[$ModelName]
+	
+	if(!$ModelSlot){
+		$ModelSlot = @{}
+		$ModelSettings[$ModelName] = $ModelSlot;
+	}
+	
+	return $ModelSlot;
+}
 
 function Get-AiModel {
 <#
@@ -937,12 +1027,21 @@ function Get-AiModel {
 		return $false;
 	}
 	
+	$ModelSlot = Get-AiModelSlot $ModelName;
 	
 	if($MetaDataOnly){
-		return @{
+		$opts = @{
 			tools 		= (IsModelInExpression $ModelName $ToolsExpresion)
 			embeddings 	= (IsModelInExpression $ModelName $EmbedExpression)
 		}
+		
+		@($opts.keys) | %{
+			if($ModelSlot.$_ -ne $null){
+				$opts.$_ = $ModelSlot.$_;
+			}
+		}
+		
+		return $opts;
 	}
 	
 	$CachedModel = $POWERSHAI_MODEL_CACHE.ByName["$ProviderName/$ModelName"]
@@ -966,6 +1065,53 @@ function Get-AiModel {
 	}
 	
 	return $CachedModel;
+}
+
+function Set-AiModel {
+<#
+	.SYNOPSIS
+		Altera opcoes de um model do provider atual
+	
+	.DESCRIPTION
+		Os models possuem configuracoes que podem ser modificadas e que alteram alguma feature ou característica.
+		Os parâmetros da função documentam as opcoes disponiveis e os efeitos.
+		Essa configuracoes fazem efeito somente na sesssão atual. Elas também são exportadas e importas quando se usa Export-PowershaiSettings (ou Import).
+		Estas opcoes definidas tem prioridade sobre as configuracoes default!
+#>	
+	[CmdletBinding()]
+	param(
+		#Nome do modelo
+			[Alias("model")]
+			$ModelName
+			
+		,#Habilita ou desabilita o suporte a tools
+			$tools = $null
+			
+		,#Habilita ou desabilita o suporte a embeddings 
+			$embeddings = $null
+			
+		,#Define opcoes que serão resetadas (tem prioridade sobre as demais opcoes).
+			[ValidateSet("tools","embeddings")]
+			[string[]]$Unset = @()
+	)
+	
+	$ModelSlot = Get-AiModelSlot $ModelName
+	
+	if($tools -ne $null){
+		$ModelSlot.tools = $tools
+	}
+	
+	if($embeddings -ne $null){
+		$ModelSlot.embeddings = $embeddings
+	}
+	
+	# resolve unset!
+	$Unset | %{
+		if($ModelSlot.Contains($_)){
+			$ModelSlot.Remove($_)
+		}
+	}
+	
 }
 
 
@@ -1063,6 +1209,33 @@ function  Reset-AiDefaultModel {
 	SetCurrentProviderData $SetSlot $null;
 }
 
+function Get-AiDefaultModel {
+<#
+	.SYNOPSIS 
+		Retorna o modelo default atual
+#>
+	param(
+		#Se especificado, retorna o embedding model default!
+			[switch]$embeddings
+		
+		,#Se especificado, retorna somente o nome!
+			[switch]$NameOnly
+	)
+	
+	$SetSlot = "DefaultModel"
+	
+	if($embeddings){
+		$SetSlot = "DefaultEmbeddingsModel"
+	}
+	
+	$ModelName = GetCurrentProviderData $SetSlot;
+	
+	if($NameOnly){
+		return $ModelName;
+	}
+	
+	Get-AiModel $ModelName
+}
 
 # Lista os ids de models para o arg completion!
 function GetModelsId {
@@ -1082,10 +1255,187 @@ function GetModelsId {
 }
 
 
-RegArgCompletion Set-AiDefaultModel model {
+RegArgCompletion Set-AiDefaultModel,Set-AiModel model,ModelName {
 	param($cmd,$param,$word,$ast,$fake)
 	
 	GetModelsId | ? {$_ -like "$word*"} | %{$_}
+}
+
+function New-AiChatResultToolCall {
+	<#
+		.SYNOPSIS
+			Cria uma nova tool call para ser usada em New-AiChatResult, parâmetro tool call
+	#>
+	param(
+		 $FunctionName
+		,$FunctionArgs
+		,$CallId
+	)
+	
+	if(!$CallId){
+		$CallId = New-OpenaiToolCallId
+	}
+	
+	if($FunctionArgs -isnot [string]){
+		$FunctionArgs = $FunctionArgs | ConvertTo-Json -Compress;
+	}
+	
+	$ToolCall = @{
+		id 			= $CallId
+		type 		= 'function'
+		function 	= @{
+				name 		= $FunctionName
+				arguments	= $FunctionArgs
+			}
+	}
+	
+	SetType $ToolCall "AiChatToolCall"
+	return $ToolCall;
+}
+
+function New-AiChatResultChoice {
+	<#
+		.SYNOPSIS
+			Cria um novo objeto chat tool choice para ser especificado em choices do parâmetro de New-AiChatResult
+	#>
+	param(
+		# chat.completion.choices[0].finish_reason
+		[ValidateSet("stop","length","content_filter","tool_calls")]
+		[string]
+		$FinishReason
+		
+		,# chat.completion.choices[0].message.role 
+		[ValidateSet("user","system","developer","assistant","tool")]
+		[string]
+		$role = "assistant"
+		
+		
+		,# conteúdo, em texto, da mensagem
+			$content = $null
+		
+		,# se finish_Reason é tools_calls , criar cada tool com New-AiChatToolCall e adicionar aqui!
+			$tools = $null
+	)
+
+	$Choice = @{
+		index 	= $null # será atualizado conforme ordem adicionado em New-AiChatToolChoice!
+		message = @{
+			role 	= $role 
+			content	= $content
+			refusal = $null
+		}
+		
+		logprops 		= $null
+		finish_reason 	= $FinishReason
+	}
+	
+	if($FinishReason -eq "tool_calls"){
+
+		if(!$tools){
+			throw "POWERSHAI_NEWCHATRESULT_CHOICE_EMPTYTOOLS: Finish reason is tool calls, not tool was informed!"
+		}
+		
+		$i = -1;
+		$IndexErrors = @();
+		foreach($tool in $tools){
+			$i++;
+			
+			if(-not(IsType $tool "AiChatToolCall")){
+				$IndexErrors += "tool $i is not correct type. Create with New-AiChatToolCall"
+			}
+		}
+		
+		if($IndexErrors){
+			$ErrorDetails = $IndexErrors -Join ",";
+			throw "POWERSHAI_NEWCHATRESULT_CHOICE_INVALIDTOOLS: $ErrorDetails";
+		}
+		
+		$Choice.message.tool_calls = $tools
+	} elseif($tools){
+		throw "POWERSHAI_NEWCHATRESULT_CHOICE_INVALIDTOOLS: Tools was informed but finish_reason is not tool!"
+	}	
+	
+	SetType $Choice "AiChatResultChoice"
+	return $Choice;
+}
+
+function New-AiChatResult {
+	<#
+		.SYNOPSIS
+			Cria um novo objeto AiChat, que é o objeto que deve ser retornado pela interface *_Chat 
+	#>
+	param(
+		#id interno da mensagem (chat.completion.id)
+		[Parameter(mandatory=$true)]
+		[string]
+		$id
+		
+		,#Nome do modelo de Ia  (chat.completion.model)
+		[Parameter(mandatory=$true)]
+		[string]
+		$model
+		
+		,# chat.completion.choices, criado com New-AiChatToolChoice
+		$choices
+		
+		,#  chat.completion.system_fingerprint
+		$SystemFingerprint = $null
+		
+		,#chat.completion.system_fingerprint
+			[int]$PromptTokens = $null
+			
+		,#chat.completion.completion_tokens
+			[int]$CompletionTokens = $null
+			
+		,#chat.completion.total_tokens
+			[int]$TotalTokens = $null
+	)
+	
+	if(!$Choices){
+		throw "POWERSHAI_NEWCHATRESULT_NOCHOICE: Must create at least 1 choice with New-AiChatResultChoice" 
+	}
+	
+	$ChoiceNum = 0;
+	$ChoiceErrors = @()
+	foreach($Choice in $Choices){
+		$Choice.index = $ChoiceNum++;
+		
+		#validate choice!
+		if(-not(IsType $Choice "AiChatResultChoice")){
+			$ChoiceErrors += "Invalid choice type $ChoiceNum"
+		}
+	}
+	
+
+	
+	if($ChoiceErrors){
+		$ErrorDetails = $ChoiceErrors -Join ","
+		throw "POWERSHAI_NEWCHATRESULT_INVALIDCHOICES: $ErrorDetails"
+	}
+	
+	$AiChat = @{
+		id 		= $id 
+		object	= "chat.completion"
+		created = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
+		model 	= $model 
+		choices = $Choices
+		usage 	= @{
+				prompt_tokens 				= $PromptTokens
+				completion_tokens 			= $CompletionTokens
+				total_tokens 				= $TotalTokens 
+				prompt_token_details		= $null
+				completion_tokens_details 	= $null
+			}
+		system_fingerprint = $SystemFingerprint
+	}
+	
+	if($AiChat.usage.total_tokens -eq $null -and $null -notin $PromptTokens,$CompletionTokens){
+		$AiChat.usage.total_tokens = $PromptTokens + $CompletionTokens
+	}
+	
+	SetType $AiChat "AiChatResult"
+	
+	return $AiChat;
 }
 
 
@@ -1272,7 +1622,15 @@ function Get-AiChat {
 	[void]$FuncParams.remove('ContentOnly');
 	[void]$FuncParams.remove('ProviderRawParams');
 	
-
+	function InvokeProviderChat {
+		$resp = Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+	
+		if(-not(Istype $resp "AiChatResult")){
+			throw "POWERSHAI_AICHAT_INVALIDRESULT: Result must be AiChatResult. This is a powershai/provider bug!"
+		}
+		
+		return $resp;
+	}
 	
 	if($Check){
 		if($Check -is [scriptblock]){
@@ -1282,10 +1640,10 @@ function Get-AiChat {
 		}
 
 		$resp = Enter-PowershaiRetry {
-			Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+			InvokeProviderChat
 		} -Retries $Retries -Expected $Check -ModifyResult $CheckModify
 	} else {
-		$resp = Invoke-PowershaiProviderInterface "Chat" -FuncParams $FuncParams;
+		$resp = InvokeProviderChat
 	}
 	
 	if($ContentOnly){

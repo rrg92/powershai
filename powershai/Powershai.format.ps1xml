@@ -31,6 +31,15 @@ https://learn.microsoft.com/en-us/powershell/scripting/developer/format/defaults
 							<TableColumnItem>
 								<PropertyName>embeddings</PropertyName>
 							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>default</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>DefaultEmbeddings</PropertyName>
+							</TableColumnItem>
+							
 						</TableColumnItems>
 					</TableRowEntry>
 				</TableRowEntries>
@@ -71,7 +80,45 @@ https://learn.microsoft.com/en-us/powershell/scripting/developer/format/defaults
 		</View>
 
 	
-	
+		<!-- Formato to AiModel -->
+		<View>
+			<Name>PowershaiProvider</Name>
+			<ViewSelectedBy>
+				<TypeName>PowershaiType:AiProvider</TypeName>
+			</ViewSelectedBy>
+			
+			<TableControl>
+				<AutoSize />
+				<TableRowEntries>
+					<TableRowEntry>
+						<TableColumnItems>
+							<TableColumnItem>
+								<PropertyName>name</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>url</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>desc</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>chat</PropertyName>
+							</TableColumnItem>
+							
+							<TableColumnItem>
+								<PropertyName>credentials</PropertyName>
+							</TableColumnItem>
+						</TableColumnItems>
+					</TableRowEntry>
+				</TableRowEntries>
+				 
+			</TableControl>
+			
+		</View>
+		
 	
 	</ViewDefinitions>
 </Configuration>

@@ -2,10 +2,11 @@ services:
     powershai-publish-test:
         build: .
         environment:
-            HF_API_TOKEN: $HF_API_TOKEN
+            HF_API_TOKEN: $TEST_HF_API_TOKEN
             OPENAI_API_KEY: $TEST_OPENAI_API_KEY
             GOOGLE_API_KEY: $TEST_GOOGLE_API_KEY
-            POWERSHAI_TEST_MODELS: google/gemini-1.5-flash-8b-latest,openai/gpt-4o-mini
+            CLAUDE_API_KEY: $TEST_CLAUDE_API_KEY
+            POWERSHAI_TEST_MODELS: $TEST_POWERSHAI_TEST_MODELS
         command: pwsh -NonInteractive -File ./util/publish-prepare.ps1 -Tests
 
         

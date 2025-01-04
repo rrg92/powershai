@@ -62,7 +62,7 @@ function Invoke-OpenaiApi {
 	
 	$MyParams = GetMyParams
 	
-	. Enter-AiProvider $Provider.name {
+	$RawResp = Enter-AiProvider $Provider.name {
 		$headers = @{}
 		
 		if($Token){
@@ -107,6 +107,7 @@ function Invoke-OpenaiApi {
 		verbose "ReqParams:`n$($ReqParams|out-string)"
 		try {
 			$RawResp 	= InvokeHttp @ReqParams
+			
 		} catch [System.Net.WebException] {
 			$ex = $_.exception;
 			
@@ -125,6 +126,7 @@ function Invoke-OpenaiApi {
 			throw;
 		}
 		verbose "RawResp: `n$($RawResp|out-string)"
+		return $RawResp;
 	}
 	
 	if($RawResp.stream){
@@ -437,7 +439,8 @@ function Get-OpenaiChat {
 	$Provider = GetNearestOpenaiProvider
 	
 	# Lock current provider!
-	. WithAiProvider $Provider {
+	. WithAiProvider -DotRun $Provider {
+
 			$CurrentProvider = Get-AiCurrentProvider;
 			
 			if(!$model){
@@ -588,7 +591,7 @@ function Get-OpenaiChat {
 							$CurrentCall.function.arguments += $ToolCall.function.arguments;
 						}
 					}
-						
+					
 						
 					$StreamData.answers += $Answer
 					& $StreamCallback $Answer
@@ -597,6 +600,7 @@ function Get-OpenaiChat {
 			
 			verbose "Body:$($body|out-string)"
 			$Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
+			
 			
 			
 			
@@ -615,7 +619,35 @@ function Get-OpenaiChat {
 				$OpenaiAnswer = $resp;
 			}
 			
-			return $OpenaiAnswer;	
+			$Choices = @();
+			foreach($choice in $OpenaiAnswer.choices){
+				
+				$tools = @()
+				foreach($call in $choice.message.tool_calls){
+					$tools += New-AiChatResultToolCall -FunctionName $call.function.name -FunctionArgs $call.function.arguments -CallId $call.id
+				}
+
+				$Choices += New-AiChatResultChoice -FinishReason $choice.finish_reason -role $choice.message.role -Content $choice.message.content -tools $tools
+			}
+			
+			if(!$OpenaiAnswer.id){
+				[string]$OpenaiAnswer.id = [guid]::NewGuid()
+			}
+			
+			$params = @{
+				id 		= $OpenaiAnswer.id
+				model 	= $OpenaiAnswer.model
+				choices = $Choices
+				SystemFingerprint 	= $OpenaiAnswer.system_fingerprint
+				PromptTokens 		= $OpenaiAnswer.usage.prompt_tokens
+				CompletionTokens 	= $OpenaiAnswer.usage.completion_tokens
+				TotalTokens 		= $OpenaiAnswer.usage.total_tokens
+			}
+			$ChatResult = New-AiChatResult @params
+			
+			
+			
+			return $ChatResult;	
 	}
 }
 

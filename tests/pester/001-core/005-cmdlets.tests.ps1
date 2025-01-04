@@ -12,21 +12,13 @@ Describe "Get-AiChat" -Tags "get-aichat" {
 			num = 0;
 		}
 		
-		$CustomMessaege = @{
-			model 	= "pester-test"
-			choices	= @(
-				@{
-					message = @{
-							content = "test123";
-						}
-				}
-			)
-		}
+		$CustomChoices  = New-AiChatResultChoice -FinishReason "stop" -Content "test123"
+		$CustomMessage = New-AiChatResult -id ([guid]::NewGuid().guid) -choices @($CustomChoices) -model "pester-test"
 		
 		# Control output!
 		Mock -module powershai openai_Chat {
 			
-			return $CustomMessaege
+			return $CustomMessage
 		}
 		
 		Mock -module powershai Get-AiModel {
@@ -62,7 +54,7 @@ Describe "Get-AiChat" -Tags "get-aichat" {
 	}
 	
 	It "Retry Logic, check like" {
-		$CustomMessaege.choices[0].message.content = "Powershai Test 123";
+		$CustomMessage.choices[0].message.content = "Powershai Test 123";
 		
 		{$resp = Get-AiChat -CheckLike "*Test*" -Retries 2} | Should -Not -Throw
 		Assert-MockCalled -ModuleName powershai openai_Chat -Times 1;
@@ -72,7 +64,7 @@ Describe "Get-AiChat" -Tags "get-aichat" {
 	}
 	
 	It "Retry Logic, check regex" {
-		$CustomMessaege.choices[0].message.content = "Powershai Test 123";
+		$CustomMessage.choices[0].message.content = "Powershai Test 123";
 		
 		{$resp = Get-AiChat -CheckRegex 'Test \d+' -Retries 2} | Should -Not -Throw
 		Assert-MockCalled -ModuleName powershai openai_Chat -Times 1;
@@ -82,7 +74,7 @@ Describe "Get-AiChat" -Tags "get-aichat" {
 	}
 	
 	It "Retry Logic, check json" {
-		$CustomMessaege.choices[0].message.content = @{
+		$CustomMessage.choices[0].message.content = @{
 			a = 1
 			b = "String"
 			c = @{
@@ -120,7 +112,7 @@ Describe "Get-AiChat" -Tags "get-aichat" {
 	
 	
 	It "Retry Logic, custom script" { 
-		$CustomMessaege.choices[0].message.content = "Test123";
+		$CustomMessage.choices[0].message.content = "Test123";
 		
 		$CheckScript  = {
 			$_.choices[0].message.content -eq "Test123";
@@ -130,7 +122,7 @@ Describe "Get-AiChat" -Tags "get-aichat" {
 		
 		
 		$CheckScript  = {
-			$_.model -ne $CustomMessaege.model
+			$_.model -ne $CustomMessage.model
 		}
 		{$resp = Get-AiChat -CheckJson $CheckScript -Retries 5} | Should -Throw
 		Assert-MockCalled -ModuleName powershai openai_Chat -Times 5;
@@ -162,6 +154,10 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 				}
 			)
 		}
+		
+		$FakeTool1 		= New-AiChatResultToolCall -FunctionName "Pester1" -FunctionArgs @{}			
+		$CustomChoices  = New-AiChatResultChoice -FinishReason "tool_calls" -Content "test123" -tools @($FakeTool1)
+		$CustomMessage 	= New-AiChatResult -id ([guid]::NewGuid().guid) -choices @($CustomChoices) -model "pester-test"
 		
 		# Control output!
 		Mock -module powershai openai_Chat {
@@ -333,25 +329,19 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 		
 		Describe "Check Args" {
 			BeforeAll {
-				$Tools.Clear();
+				$CustomMessage.choices[0].finish_reason = "tool_calls"
+				
 				$ToolArgs = @{
 					obj 	= [guid]::NewGuid().Guid
 					Param2 	= [guid]::NewGuid().Guid 
 					Param3 	= (Get-Random -Min 1 -Max 100)
 				}
 				
-				$null = $Tools.Add(@{
-					id = "call_pestertest"
-					type = "function"
-					function = @{
-						name 		= "Test2"
-						arguments 	= $ToolArgs | ConvertTo-Json -Compress
-					} 
-				})
+				$CallTest2 = New-AiChatResultToolCall -FunctionName "Test2" -FunctionArgs $ToolArgs
 				
-
-				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
-				$CustomMessage.choices[0].message.content 	= "";
+				$CustomMessage.choices[0].message.tool_calls = @(
+					$CallTest2
+				)
 				
 				$resp 	= Invoke-AiChatTools "teste" -tools $OpenaiTools
 			}
@@ -395,18 +385,14 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 		
 		Describe "No Args" {
 			BeforeAll {
-				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
-				$Tools.Clear();
-				$null = $Tools.Add(@{
-					id = "call_pestertest"
-					type = "function"
-					function = @{
-						name = "Test1"
-						arguments = '{}'
-					}
-				})
+				$CustomMessage.choices[0].finish_reason = "tool_calls"
+				$CallTest2 = New-AiChatResultToolCall -FunctionName "Test1" -FunctionArgs '{}'
 				
-				$resp 	= Invoke-AiChatTools "teste" -tools $OpenaiTools
+				$CustomMessage.choices[0].message.tool_calls = @(
+					$CallTest2
+				)
+				
+				$resp 	= Invoke-AiChatTools "teste" -tools $OpenaiTools;
 			}
 			
 			It "Max 2 interactions: user prompt and tool call result" {
@@ -423,10 +409,12 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 			
 			It "Inexistent function" {
 				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
-				$Tools[0].function = @{
-					name 		= "InexistenteTool"
-					arguments 	= @()
-				}
+				
+				$CallTest2 = New-AiChatResultToolCall -FunctionName "InexistenteTool" -FunctionArgs '{}'
+				
+				$CustomMessage.choices[0].message.tool_calls = @(
+					$CallTest2
+				)
 				
 				{ Invoke-AiChatTools "teste" -tools $OpenaiTools -MaxInteractions 2 } | Should -Throw
 			}
@@ -456,24 +444,17 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 				$ScriptBlockTools 	= Get-OpenaiToolFromScript $ToolsScriptBlock
 				$ScriptFileTools	= Get-OpenaiToolFromScript $ToolsScriptFile
 				
-
-				
-				$Tools.Clear();
-				$null = $Tools.Add(@{
-					id 			= "call_pestertest"
-					type 		= "function"
-					function 	= @{
-								name = "Test1"
-								arguments = '{}'
-					}
-				})
-				
 				
 			}
 			
 			It "Invoke ScriptBlock Tool" {
-				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
-				$Tools[0].function.name = "Test1";
+				$CustomMessage.choices[0].finish_reason = "tool_calls"
+				$CallTest1 = New-AiChatResultToolCall -FunctionName "Test1" -FunctionArgs '{}'
+				
+				$CustomMessage.choices[0].message.tool_calls = @(
+					$CallTest1
+				)
+				
 				$resp 	= Invoke-AiChatTools "teste" -tools $ScriptBlockTools,$ScriptFileTools -MaxInteractions 2
 				
 				
@@ -484,14 +465,15 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 			}
 			
 			It "Invoke ScriptFile Tool" {
-				$CustomMessage.choices[0].finish_reason 	= "tool_calls";
-				$Tools[0].function = @{
-					name 		= "ScriptFileTool1"
-					arguments 	= (@{ data = "teste" } | ConvertTo-Json -Compress)
-				}
+				$CustomMessage.choices[0].finish_reason = "tool_calls"
+				
+				$CallTest1 = New-AiChatResultToolCall -FunctionName "ScriptFileTool1" -FunctionArgs @{ data = "teste" }
+				
+				$CustomMessage.choices[0].message.tool_calls = @(
+					$CallTest1
+				)
 				
 				$resp 	= Invoke-AiChatTools "teste" -tools $ScriptBlockTools,$ScriptFileTools -MaxInteractions 2
-				
 				
 				$CallMsg 	= $resp.interactions[-1].sent.prompt[1]
 				$CallResult = $resp.interactions[-1].sent.prompt[2]
@@ -508,17 +490,12 @@ Describe "Invoke-AiChatTools" -Tags "invoke-chattools","chattools" {
 
 	Context "Get-OpenaiToolFromCommand" {
 		BeforeAll {
-			$Tools.Clear();
-			$CustomMessage.choices[0].finish_reason 	= "tool_calls";
-			$CustomMessage.choices[0].message.content 	= "";
-			$null = $Tools.Add(@{
-				id = "call_pestertest"
-				type = "function"
-				function = @{
-					name = "PesterTestTool1"
-					arguments = '{}'
-				}
-			})
+			$CustomMessage.choices[0].finish_reason = "tool_calls"
+			$CallTest1 = New-AiChatResultToolCall -FunctionName "PesterTestTool1" -FunctionArgs @{}
+			
+			$CustomMessage.choices[0].message.tool_calls = @(
+				$CallTest1
+			)
 			
 			[string]$CallToken = [guid]::NewGuid();
 			

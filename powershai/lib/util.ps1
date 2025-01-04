@@ -312,7 +312,10 @@ function RegArgCompletion {
 	
 	if(Get-Command -EA SilentlyContinue Register-ArgumentCompleter){
 		@($Command) | %{
-			Register-ArgumentCompleter -CommandName $_ -ParameterName $Parameter -ScriptBlock $Script
+			$CommandName = $_;
+			@($Parameter) | %{
+				Register-ArgumentCompleter -CommandName $CommandName -ParameterName $_ -ScriptBlock $Script
+			}
 		}
 	}
 }

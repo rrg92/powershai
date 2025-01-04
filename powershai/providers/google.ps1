@@ -70,7 +70,25 @@ function Invoke-GoogleApi {
 
 
 	verbose "ReqParams:`n$($ReqParams|out-string)"
-    $RawResp 	= InvokeHttp @ReqParams
+	try {
+		$RawResp 	= InvokeHttp @ReqParams
+	} catch [System.Net.WebException] {
+		$ex = $_.exception;
+		
+		if($ex.PowershaiDetails){
+			$ResponseError = $ex.PowershaiDetails.ResponseError.text;
+			
+			if($ResponseError){
+				$err = New-PowershaiError "POWERSHAI_GOOGLE_ERROR" "Error: $ResponseError" -Prop @{
+					HttpResponseText 	= $ResponseError
+					HttpResponse		= $ex.PowershaiDetails.ResponseError.Response
+				}
+				throw $err
+			}
+		}
+		
+		throw;
+	}
 	verbose "RawResp: `n$($RawResp|out-string)"
 
 	if($RawResp.stream){
@@ -121,6 +139,12 @@ function google_GetModels(){
 		$_.name = $_.name -replace '^models/',''
 	}
 	return $models;
+}
+
+function google_FormatPrompt {
+	param($model)
+	
+	return "🔷 $($model): ";
 }
 
 <#
@@ -455,7 +479,28 @@ function google_Chat {
 		$OpenaiAnswer = Convert-GoogleAnswerToOpenaiAnswer $resp
 	}
 	
-	return $OpenaiAnswer;
+	$Choices = @();
+	foreach($choice in $OpenaiAnswer.choices){
+		
+		$tools = @()
+		foreach($call in $choice.message.tool_calls){
+			$tools += New-AiChatResultToolCall -FunctionName $call.function.name -FunctionArgs $call.function.arguments -CallId $call.id
+		}
+
+		$Choices += New-AiChatResultChoice -FinishReason $choice.finish_reason -role $choice.message.role -Content $choice.message.content -tools $tools
+	}
+	
+	$params = @{
+		id 		= $OpenaiAnswer.id
+		model 	= $OpenaiAnswer.model
+		choices = $Choices
+		SystemFingerprint 	= $OpenaiAnswer.system_fingerprint
+		PromptTokens 		= $OpenaiAnswer.usage.prompt_tokens
+		CompletionTokens 	= $OpenaiAnswer.usage.completion_tokens
+		TotalTokens 		= $OpenaiAnswer.usage.total_tokens
+	}
+	
+	New-AiChatResult @params
 }
 
 <#

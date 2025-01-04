@@ -82,7 +82,6 @@ function ConvertTo-ClaudeMessage {
 	
 	[object[]]$messages = @(ConvertTo-OpenaiMessage $messages)
 	
-	
 	[object[]]$ContentMessages = @()
 	$SystemMessage = @()
 	
@@ -93,7 +92,7 @@ function ConvertTo-ClaudeMessage {
 		switch($m.role){
 			
 			"system" {
-				$SystemMessage += $m.content;
+				$SystemMessage += $m.content.text;
 			}
 			
 			default {
@@ -189,6 +188,7 @@ function claude_Chat {
 		,$RawParams	= @{}
 		,$StreamCallback = $null
 	)
+
 	
 	$Params = @{
 		messages 		= $prompt
@@ -229,14 +229,14 @@ function claude_Chat {
 			service_tier = $null
 			system_fingerprint = $null
 			usage = @{
-				completion_tokens 	= $null 
-				prompt_tokens 		= $null 
+				completion_tokens 	= $Answer.usage.output_tokens
+				prompt_tokens 		= $Answer.usage.input_tokens 
 				total_tokens 		= $null
 			}
 			
 			logprobs = $null
 			choices = @()
-			model = $StreamData.MessageMeta.model
+			model = $Answer.model
 		}
 		
 		$Result | Add-Member -Force ScriptMethod GetClaudeDetails {
@@ -245,12 +245,16 @@ function claude_Chat {
 			}
 		}.GetNewClosure()
 		
+		if($StreamData){
+			$Result.model = $StreamData.MessageMeta.model
+		}
+		
 	
 			
 		$NewChoice = @{
 			index 			= $Result.choices.length
 			logprobs 		= $null
-			finish_reason 	= $FinishReason
+			finish_reason 	= $Answer.stop_reason
 		}
 		
 		$Result.choices += $NewChoice;
@@ -258,12 +262,17 @@ function claude_Chat {
 		$Message = @{
 			role 		= "assistant"
 			refusal 	= $null
-			content 	= $Answer.delta.text
+			content 	= $null
+		}
+		
+		if($Answer.content){
+			$Message.content = $Answer.content[0].text
 		}
 			
 		if($StreamData){
 			$Result.object = "chat.completion.chunk"
 			$Result.id = $StreamData.ChunkId
+			$Message.content = $Answer.delta.text
 			$NewChoice.delta = $Message
 		} else {
 			$NewChoice.message = $Message
@@ -359,11 +368,62 @@ function claude_Chat {
 	} else {
 		$OpenaiAnswer = Convert-ClaudeToOpenaiAnswer $resp
 	}
+	
+	
+	
+	$Choices = @();
+	foreach($choice in $OpenaiAnswer.choices){
+		
+		#$tools = @()
+		#foreach($call in $_.message.tool_calls){
+		#	$tools += New-AiChatResultToolCall -FunctionName $call.function.name -FunctionArgs $call.function.arguments -CallId $call.id
+		#}
+		#
+		
+		$FinishReason = "stop";
+		
+		switch($choice.finish_reason){
+			"end_turn" {
+				$FinishReason = "stop"
+			}
+			
+			"max_tokens" {
+				$FinishReason = "length"
+			}
+			
+			"stop_sequence" {
+				$FinishReason = "stop"
+			}
+			
+			"tool_use" {
+				$FinishReason = "tool_calls"
+			}
+			
+			default {
+				verbose "Unkown claude finish reason: $($choice.finish_reason). Using default!";
+			}
+		}
+		
+	
+		$Choices += New-AiChatResultChoice -FinishReason $FinishReason -role $choice.message.role -Content $choice.message.content #-tools $tools
+	}
+	
+	$params = @{
+		id 		= $OpenaiAnswer.id
+		model 	= $OpenaiAnswer.model
+		choices = $Choices
+		SystemFingerprint 	= $OpenaiAnswer.system_fingerprint
+		PromptTokens 		= $OpenaiAnswer.usage.prompt_tokens
+		CompletionTokens 	= $OpenaiAnswer.usage.completion_tokens
+		TotalTokens 		= $OpenaiAnswer.usage.total_tokens
+	}
+			
+	$ChatResult = New-AiChatResult @params
+	
 
-	return $OpenaiAnswer;
+	return $ChatResult;
 	
 }
-
 
 function claude_GetModels() {
 	

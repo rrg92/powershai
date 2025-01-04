@@ -2361,7 +2361,7 @@ function Invoke-HuggingFaceInferenceApi {
 		,$params
 		,[switch]$Public
 		,#Forçar usar endpoint de chat completion 
-		 #Params deverá ser tratado como o mesmo params da Api da Openai (Veja o cmdle Get-OpenaiChat).
+		 #Params deverá ser o mesmo de Get-OpenaiChat!
 		 #Mais info: https://huggingface.co/blog/tgi-messages-api
 		 #So funciona com modelos que possuem um chat template!
 			[switch]$OpenaiChatCompletion
@@ -2370,27 +2370,23 @@ function Invoke-HuggingFaceInferenceApi {
 			$StreamCallback = $null
 	)
 	
-	$BaseUrl = "https://api-inference.huggingface.co/models/"
+	$BaseUrl = "https://api-inference.huggingface.co"
 	
 	
-	$FullUrl = $BaseUrl + $model
+	$FullUrl = $BaseUrl #+ $model
 	
 	if($OpenaiChatCompletion){
 		$FullUrl += "/v1/chat/completions"
 		
-		$NewParams = @{}
-		$params.keys | %{ $NewParams[$_] = $Params[$_] }
+		#Params will contains same parameter expected by Get-OpenaiChat!
+		$NewParams = HashTableMerge @{} $params;
 		
-		$NewParams.remove("messages");
-		
-		$OpenAiChat = @{
-			prompt 			= $Params.messages 
-			RawParams 		= $NewParams
+		$OpenAiChat = HashTableMerge @{
 			model 			= $model
-			StreamCallback 	= $StreamCallback
 			endpoint 		= $FullUrl
-		}
+		} $NewParams
 		
+		verbose "Getting from openaichat"
  		$result = Get-OpenaiChat @OpenAiChat
 		return $result;
 	}
@@ -2443,41 +2439,46 @@ function huggingface_Chat {
 		,$StreamCallback = $null
     )
 	
-	if($Functions){
-		throw "POWERSHAI_HUGGINGFACE_CHAT: Functions no supported";
+	$ChatParams = HashTableMerge @{} ([hashtable]$PsBoundParameters)
+	
+	# fix tools arguments!
+	$AllTools = @()
+	foreach($Tool in $ChatParams.functions){
+		$NewTool = HashTableMerge @{} $Tool
+		
+		if($NewTool.function -and !$NewTool.function.Contains('arguments')){
+			$NewTool.function.arguments = @{}
+		}
+		
+		$AllTools += $NewTool;
 	}
 	
-	$OriginalParams = $PsBoundParameters;
-	$OriginalParams.messages = $PsBoundParameters.prompt;
-	[void]$OriginalParams.remove("prompt");
-	[void]$OriginalParams.remove("StreamCallback");
-	
+	$ChatParams.functions = $AllTools;
+
 	$Params = @{
-		model 					= $model
 		OpenaiChatCompletion	= $true 
-		StreamCallback			= $StreamCallback
-		params 				 	= $OriginalParams
+		params 					= $ChatParams
 	}
 	
+	verbose "Invoking hugging face inference api"
 	Invoke-HuggingFaceInferenceApi @Params	
 }
 
 
+
+function Get-HuggingFaceModel {
 <#
 	.SYNOPSIS
 		Obtém informacoes de um model especifico
 #>
-function Get-HuggingFaceModel {
 	[CmdletBinding()]
 	param(
-		#Filtra por um space especifico
+		#Filtra por um model especifico
 		$Model
 	)
 	
 
 	$ResultModel = Invoke-HuggingFaceHub "models/$Model" -full
-	
-	$ResultModel | Add-Member -Force Noteproperty control $control
 	
 	SetType $ResultModel "HuggingFaceModel"
 	
@@ -2485,6 +2486,51 @@ function Get-HuggingFaceModel {
 	
 }
 Set-alias Get-HfModel Get-HuggingFaceModel
+
+function Find-HuggingFaceModel {
+<#
+	.SYNOPSIS
+		Procurar por um modelo específico no hub!
+		
+	.DESCRIPTION 
+		Basedo em https://huggingface.co/docs/hub/en/api#get-apimodels
+#>	
+	[CmdletBinding()]
+	param(
+		# pesquisa no nome do model
+		$search 
+		
+		,# filtro em tags
+		[Alias("tags")]
+		$filter = $null
+		
+		,# filtra autores especificos 
+		$author = $null
+		
+		,# sobrescreve parâmetros direto na api do hub!
+		$RawParams = @{}
+		
+		,#limit a busca 
+		$limit = 100
+		
+		,#ordena por uma propriedade especifica 
+		$sort = "downloads"
+	)
+	
+
+	$HubParams = HashTableMerge @{
+		filter 	= $filter 
+		author 	= $Author
+		search 	= $search
+		limit 	= $limit
+		sort 	= $sort
+	} $RawParams
+	
+	
+	
+	Invoke-HuggingFaceHub @HubParams -endpoint "models" 
+}
+
 
 <#
 	.SYNOPSIS
@@ -2748,5 +2794,7 @@ return @{
 	}
 	
 	IsOpenaiCompatible = $true
+	
+	DefaultModel = "meta-llama/Llama-3.2-11B-Vision-Instruct"
 }
 
