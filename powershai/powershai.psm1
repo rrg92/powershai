@@ -61,6 +61,11 @@ $ErrorActionPreference = "Stop";
 
 [string]$POWERSHAI_IMPORT_ID = [Guid]::NewGuid()
 
+# setting slot session-lived!
+if(!$Global:POWERSHAI_SESSION_SETTINGS){
+	$Global:POWERSHAI_SESSION_SETTINGS = @{}
+}
+
 . "$PsScriptRoot/lib/util.ps1"
 . "$PsScriptRoot/lib/http.ps1"
 . "$PsScriptRoot/AiCredentials.ps1"
@@ -100,6 +105,8 @@ $DEFAULT_SETTINGS_STORE = @{
 	
 
 }
+
+
 
 $POWERSHAI_SETTINGS 		= @{}
 $PROVIDERS 					= @{}
@@ -853,7 +860,7 @@ function GetProviderData {
 
 # altera configurações de um provider, dado a key e o valor.
 function SetProviderData {
-	param($name, $Key, $value)
+	param($name, $Key, $value, [switch]$Unset)
 	
 	$UserDefined = $POWERSHAI_SETTINGS.providers[$name];
 	
@@ -862,7 +869,11 @@ function SetProviderData {
 		$POWERSHAI_SETTINGS.providers[$name] = $UserDefined;
 	}
 	
-	$UserDefined[$key] = $value;
+	if($Unset){
+		$UserDefined.remove($key);
+	} else {
+		$UserDefined[$key] = $value;
+	}
 }
 
 # Obtém configurações do providerr atual, a partir de um akey
@@ -879,10 +890,11 @@ function SetCurrentProviderData {
 		$key,
 		$value
 		,[switch]$ContextProvider
+		,[switch]$Unset
 	)
 	
 	$Provider = Get-AiCurrentProvider -ContextProvider:$ContextProvider
-	SetProviderData -name $provider.name -key $key -value $value;
+	SetProviderData -name $provider.name -key $key -value $value -Unset:$Unset;
 }
 
 
@@ -958,6 +970,10 @@ function Get-AiModelSlot {
 		#nome do modelo 
 		$ModelName
 	)
+	
+	if(!$ModelName){
+		return;
+	}
 	
 	$ModelSettings = GetCurrentProviderData ModelSettings;
 	
@@ -1206,7 +1222,7 @@ function  Reset-AiDefaultModel {
 	}
 		
 	
-	SetCurrentProviderData $SetSlot $null;
+	SetCurrentProviderData -Unset $SetSlot $null;
 }
 
 function Get-AiDefaultModel {
@@ -1418,7 +1434,7 @@ function New-AiChatResult {
 		object	= "chat.completion"
 		created = [DateTimeOffset]::Now.ToUnixTimeMilliseconds()
 		model 	= $model 
-		choices = $Choices
+		choices = [object[]]@($Choices)
 		usage 	= @{
 				prompt_tokens 				= $PromptTokens
 				completion_tokens 			= $CompletionTokens
@@ -1542,6 +1558,7 @@ function Get-AiChat {
 			}
 	}
 
+	
 	$ModelName = $model;
 	if(!$ModelName){
 		$ModelName = GetCurrentProviderData DefaultModel
@@ -2021,6 +2038,7 @@ function Invoke-AiChatTools {
 				verbose "	Arguments: $FuncArgsRaw";
 				
 				#We assuming model sending something that can be converted...
+				
 				$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
 				
 				

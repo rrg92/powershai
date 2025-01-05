@@ -10,6 +10,16 @@
 #>
 
 
+if(!$POWERSHAI_SESSION_SETTINGS.AiCredentials){
+	$POWERSHAI_SESSION_SETTINGS.AiCredentials = @{}
+}
+
+$POWERSHAI_SESSION_SETTINGS.AiCredentials = HashTableMerge @{
+	Policy = "error"
+} $POWERSHAI_SESSION_SETTINGS.AiCredentials
+
+$POWERSHAI_AICREDENTIAL_SETTINGS = $POWERSHAI_SESSION_SETTINGS.AiCredentials
+
 function NewAiCredential {
 	$o = @{
 		name 		= $name 
@@ -420,6 +430,45 @@ function Get-AiCredentialEnvironmentVars {
 	}
 }
 
+
+function Set-AiDefaultCredentialPolicy {
+	<#
+		.SYNOPSIS
+			Define como Get-AiDefaultCredential irá considerar trazer a credential default
+			
+		.DESCRIPTION 
+			Get-AiDefaultCredential pode ter credenciais conflitantes: Múltiplas credenciais disponíveis como default. 
+			Se o comando não pode seguramente determinar a default, ele então usa a Policy definida aqui para deterinar o que fazer.  
+			
+			O objetivo é fazer com que o usuário tenha plena ciência de qual credencial está sendo escohida ou que, pelo menos, ele saiba que múltiplas credenciais podem estar disponíveis para escolha e qualquer uma delas pode ser escolhida.
+			
+			Por exemplo, quando se habilita credenciais via variável de ambiente, e quando há uma credencial defindia com Set-AiCredential, duas credenciais default serão possíveis: a defindia via environment e a com Set-AiCredential.  
+			O usuário pode ter, de maneira equivocada, ter definido uma credencial via variável de ambiente e esqueceu que  havia uma definida via cmdlet.  
+			Nesse cenário, o powershai não pode seguramente determinar qual credential é válida. Então, ele usa a policy para determinr.
+			
+			EStas policies são mantidas somente na sessão atual, e não são exportadas, ou seja, em scripts, o usuário deve sempre usar esse comando para definir o comportamento esperado. Isso é uma forma do usuário dar ciência (um ack) de que entende e aceita a política padrão.
+	#>
+	param(
+		#Define a policita. Valores:
+		#	error 		- dispara um erro se múltipla credenciais estão definidas 
+		#	warning 	- Retorna a primeira credencial da lista, e emite um warning 
+		#	first 		- Retorna a primeira, sem emitir warnings
+		#	script 		- Retorna a primeira resultante de um filtro com base em um script. O objeto $_ apontará para o objeto AiCredentialSource (Veja Get-AiDefaultCredential para detalhes deste objeto). Especifique o script no argumento seguinte.
+		[ValidateSet("error","warning","first","script")]
+		[string]$Policy
+	)
+	
+	$POWERSHAI_AICREDENTIAL_SETTINGS.policy = $policy;
+	
+	if($Policy -eq "script"){
+		if($Args[0] -isnot [scriptblock]){
+			throw "POWERSHAI_AICREDENTIAL_SETPOLICY: Script must be informed in next argument!";
+		}
+	
+		$POWERSHAI_AICREDENTIAL_SETTINGS.PolicyScript = $Args[0];
+	}
+}
+
 function Get-AiDefaultCredential {
 	<#
 		.SYNOPSIS
@@ -449,8 +498,7 @@ function Get-AiDefaultCredential {
 	$DefaultCredSet		= GetCurrentProviderData -Context DefaultCred
 	$CredStore 			= GetCurrentProviderData -Context CredStore
 	$AllCredentials 	= @($CredStore.keys)
-	$Policy 			= "error" 	#	todo: cmdlet to set this.
-									# Warning: just warn!
+	$Policy 			= $POWERSHAI_AICREDENTIAL_SETTINGS.policy
 									
 	$TempCred = GetCurrentProviderData -Context TempCredential
 	
@@ -545,9 +593,15 @@ function Get-AiDefaultCredential {
 		if($Policy -eq "warning"){
 			write-warning "Multiple credentials set. Using first.`n$Descriptions"
 		}
+		
+		if($Policy -eq "script"){
+			$Script = $POWERSHAI_AICREDENTIAL_SETTINGS.PolicyScript;
+			
+			verbose "Filtering sources using script"
+			$Sources = $Sources | ? $Script | %{ $_.desc += "|Filtered due Policy Script!"; $_ };
+			verbose "	Count after filter = $($sources.count)"
+		}
 	}
-	
-	
 	
 	$elegible = @($Sources)[0];
 	
