@@ -324,9 +324,7 @@ function google_Chat {
 				}
 				
 				default {
-					if($Candidate.finishReason){
-						$FinishReason = $Candidate.finishReason.toLower();
-					}
+					write-warning "Uknown google finish reason: $($Candidate.finishReason). Setting to stop!" 
 				}
 			}
 			
