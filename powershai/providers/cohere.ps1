@@ -9,6 +9,7 @@ function Invoke-CohereApi {
 		,$method = 'GET'
 		,$StreamCallback = $null
 		,$Token = $null
+		,$JsonDepth = 15
 	)
 
 	$Provider = Get-AiCurrentProvider -Context
@@ -37,6 +38,7 @@ function Invoke-CohereApi {
         url             = $url
         method          = $method
         Headers         = $headers
+		JsonDepth		= $JsonDepth
     }
 
 			
@@ -46,7 +48,26 @@ function Invoke-CohereApi {
 
 
 	verbose "ReqParams:`n$($ReqParams|out-string)"
-    $RawResp 	= InvokeHttp @ReqParams
+	try {
+		 $RawResp 	= InvokeHttp @ReqParams
+	} catch [System.Net.WebException] {
+		$ex = $_.exception;
+		
+		if($ex.PowershaiDetails){
+			$ResponseError = $ex.PowershaiDetails.ResponseError.text;
+			
+			if($ResponseError){
+				$err = New-PowershaiError "POWERSHAI_COHERE_ERROR" "Error: $ResponseError" -Prop @{
+					HttpResponseText 	= $ResponseError
+					HttpResponse		= $ex.PowershaiDetails.ResponseError.Response
+				}
+				throw $err
+			}
+		}
+		
+		throw;
+	}
+   
 	verbose "RawResp: `n$($RawResp|out-string)"
 
 	if($RawResp.stream){
@@ -66,6 +87,19 @@ function Get-CohereModels {
 }
 Set-Alias cohere_GetModels Get-CohereModels
 
+function Convert-OpenaiToolName2Cohere {
+	param($OpenaiName)
+	
+	$COhereName = $OpenaiName -replace '[^A-Za-z0-9_]',''
+	
+	# Prevent start with digit!
+	if($CohereName -match '^\d'){
+		$CohereName = "t" + $CohereName;
+	}
+		
+	return $CohereName;
+}
+
 function Convert-Openai2CohereMessage {
 	param($messages)
 	
@@ -74,10 +108,34 @@ function Convert-Openai2CohereMessage {
 	[object[]]$CohereMessages = @()
 	
 	foreach($m in $OpenAiMessages){
-		$CohereMessages += @{
-					content = $m.content
-					role = $m.role
+		
+		switch($m.role){
+			
+			"tool" {
+				$CohereMessage = $m;
+			}
+			
+			"assistant" {
+				$CohereMessage = HashTableMerge @{} $m;
+				$CohereMessage.remove("refusal");
+				
+				foreach($Call in $CohereMessage.tool_calls){
+					$Call.function.name = Convert-OpenaiToolName2Cohere $Call.function.name
 				}
+				
+			}
+			
+			default {
+				$CohereMessage = @{
+						content = $m.content
+						role = $m.role
+					}
+			}
+			
+			
+		}
+		
+		$CohereMessages += $CohereMessage 
 	}
 	
 	return $CohereMessages;
@@ -131,9 +189,9 @@ function Convert-CohereAnswerToOpenai {
 		service_tier = $null
 		system_fingerprint = $null
 		usage = @{
-			completion_tokens 	= $Answer.usageMetadata.candidatesTokenCount
-			prompt_tokens 		= $Answer.usageMetadata.promptTokenCount
-			total_tokens 		= $Answer.usageMetadata.totalTokenCount
+			completion_tokens 	= $Answer.usage.tokens.input_tokens
+			prompt_tokens 		= $Answer.usage.tokens.output_tokens
+			total_tokens 		= $null
 		}
 		
 		logprobs = $null
@@ -142,17 +200,11 @@ function Convert-CohereAnswerToOpenai {
 	}
 	
 	$OpenaiFinishReason = $null
-	
-	switch($Answer.finish_reason){
-		"COMPLETE" {
-			$OpenaiFinishReason = "stop"
-		}
-	}
-	
+
 	$NewChoice = @{
 		index 			= 0
 		logprobs 		= $null
-		finish_reason 	= $OpenaiFinishReason
+		finish_reason 	= $Answer.finish_reason
 	}
 			
 	$RespContent = $null
@@ -163,7 +215,7 @@ function Convert-CohereAnswerToOpenai {
 		content 	= $null
 	}
 			
-	$OpenAiTools = $null
+	$OpenAiTools = $Answer.message.tool_calls
 	if($OpenAiTools){
 		$Message.tool_calls = $OpenAiTools
 	}
@@ -174,7 +226,9 @@ function Convert-CohereAnswerToOpenai {
 		$Message.content 	= $Answer.delta.message.content.text;
 		$NewChoice.delta 	= $Message
 	} else {
-		$Message.content 	= $Answer.message.content[0].text;
+		if($Answer.message.content){
+			$Message.content 	= $Answer.message.content[0].text;
+		}
 		$NewChoice.message 	= $Message
 	}
 			
@@ -192,8 +246,45 @@ function cohere_Chat {
 		,$RawParams
 	)
 	
+	$AiChatParams 	= $ProviderFuncRawData.params;
+	$Tools 			= $AiChatParams.Functions;
+	
+	# fix tools arguments!
+	$AllTools = @()
+	$ToolMap = @{} #Maps cohere names to original name
+	foreach($Tool in $Tools){
+		$NewTool = HashTableMerge @{} $Tool
+		
+		if(!$NewTool.function){
+			continue;
+		}
+		
+		$OriginalCallName = $NewTool.function.name;
+		$CohereName = Convert-OpenaiToolName2Cohere $NewTool.function.name
+		
+		
+		$NewTool.function.name = $CohereName;
+		
+		$ToolMap[$CohereName] = $OriginalCallName
+		
+		if(!$NewTool.function.parameters){
+			$NewTool.function.parameters = @{
+					type = "object"
+				}
+		}
+		
+		
+		$AllTools += $NewTool;
+	}
+	
+	if(!$RawParams.tools){
+		$RawParams.tools = $AllTools
+	}
+	
 	$StreamData = @{
-		ChunkId = [guid]::NewGuid().Guid
+		ChunkId 	= [guid]::NewGuid().Guid
+		AllToolCalls 	= @()
+		CurrentToolCall	= $null
 	}
 	
 	
@@ -204,6 +295,10 @@ function cohere_Chat {
 			param($data)
 			
 			$line = @($data.line)[0];
+			
+			if(!$line){
+				return;
+			}
 			
 			if($line -like "event: *"){
 				$StreamData.CurrentEvent = $line.replace("event: ","");
@@ -239,6 +334,24 @@ function cohere_Chat {
 				& $UserScriptCallback $DeltaAnswer
 			}
 			
+			#https://docs.cohere.com/v2/reference/chat-stream#response.body.tool-call-start
+			if($StreamData.CurrentEvent -eq "tool-call-start"){
+				$ToolCallParams = @{
+					FunctionName = $Answer.delta.message.tool_calls.function.name
+					FunctionArgs = $Answer.delta.message.tool_calls.function.arguments
+					CallId 		 = $Answer.delta.message.tool_calls.id
+				}
+				$StreamData.CurrentToolCall = New-AiChatResultToolCall @ToolCallParams
+				$StreamData.AllToolCalls += $StreamData.CurrentToolCall
+			}
+			
+			if($StreamData.CurrentEvent -eq "tool-call-delta"){
+				$StreamData.CurrentToolCall.function.arguments +=  $Answer.delta.message.tool_calls.function.arguments
+			}
+			
+			if($StreamData.CurrentEvent -eq "tool-call-end"){}
+			
+			
 			if($StreamData.CurrentEvent -eq "message-end"){
 				$StreamData.OpenaiAnswer.choices[0].finish_reason = $Answer.delta.finish_reason;
 			}
@@ -249,12 +362,79 @@ function cohere_Chat {
 	$resp = Get-CohereChat -messages $prompt -model $model -RawParams $RawParams -StreamCallback $StreamScript
 	
 	if($resp.stream){
-		$Result = $StreamData.OpenaiAnswer;
+		
+		$StreamData.OpenaiAnswer.choices[0].message.tool_calls = $StreamData.AllToolCalls;
+		$OpenaiAnswer = $StreamData.OpenaiAnswer;
 	} else {
-		$Result = Convert-CohereAnswerToOpenai $resp
+		$OpenaiAnswer = Convert-CohereAnswerToOpenai $resp
 	}
 	
-	return $Result;
+	$Choices = @();
+	foreach($choice in $OpenaiAnswer.choices){
+		
+		$tools = @()
+		foreach($call in $choice.message.tool_calls){
+			#Map back!
+			$ToolRealName = $ToolMap[$call.function.name]
+			$CallArgs = $call.function.arguments;
+			
+			if(!$CallArgs){
+				$CallArgs = '{}'
+			}
+			
+			
+			$tools += New-AiChatResultToolCall -FunctionName $ToolRealName -FunctionArgs $CallArgs -CallId $call.id
+		}
+		
+	
+		switch( $choice.finish_reason){
+			"COMPLETE" {
+				$OpenaiFinishReason = "stop"
+			}
+			
+			"STOP_SEQUENCE" {
+				$OpenaiFinishReason = "stop"
+			}
+			
+			"MAX_TOKENS" {
+				$OpenaiFinishReason = "length"
+			}
+			
+			"ERROR" {
+				$OpenaiFinishReason = "stop"
+				write-warning "Cohere reported error when finished!!";
+			}
+			
+			"TOOL_CALL" {
+				$OpenaiFinishReason  = "tool_calls"
+			}
+			
+			default {
+				verbose "Unknown cohere complete length: $OpenaiFinishReason"
+				$OpenaiFinishReason = "stop"
+			}
+		}
+	
+
+		$Choices += New-AiChatResultChoice -FinishReason $OpenaiFinishReason -role $choice.message.role -Content $choice.message.content -tools $tools
+	}
+	
+	if(!$OpenaiAnswer.id){
+		[string]$OpenaiAnswer.id = [guid]::NewGuid()
+	}
+	
+	$params = @{
+		id 					= $OpenaiAnswer.id
+		model 				= $OpenaiAnswer.model
+		choices 			= $Choices
+		SystemFingerprint 	= $OpenaiAnswer.system_fingerprint
+		PromptTokens 		= $OpenaiAnswer.usage.prompt_tokens
+		CompletionTokens 	= $OpenaiAnswer.usage.completion_tokens
+		TotalTokens 		= $OpenaiAnswer.usage.total_tokens
+	}
+	$ChatResult = New-AiChatResult @params
+	
+	return $ChatResult;
 }
 
 
@@ -280,12 +460,16 @@ return @{
 	#Assume every openai model support tools.
 	ToolsModels = @(
 		"command-r-*"
+		"command-r"
+		"command-r7b*"
 		"ch4ai-*"
 	)
 	
 	EmbeddingsModels = @(
 		"embed-*"
 	)
+	
+	
 	
 	info = @{
 		desc	= "Cohere"

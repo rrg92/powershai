@@ -54,6 +54,9 @@ Function Start-HttpRequest {
 		
 		,#Max auto http redirect
 			$MaxRedirects = $null
+			
+		,#Json depth quando convertendo data em json 
+			 $JsonDepth = 5
 	)
 	$ErrorActionPreference = "Stop";
 
@@ -412,7 +415,7 @@ Function Start-HttpRequest {
 			
 			if($data -and $data.getType() -notin $Primitives){
 				verbose "Converting input object to json string..."
-				$data = $data | ConvertTo-Json -Depth 5;
+				$data = $data | ConvertTo-Json -Depth $JsonDepth;
 			}
 
 			verbose "Data to be send:`n$data"
@@ -797,6 +800,9 @@ function Invoke-Http {
 			
 		,#MaxRedirects 
 			$MaxRedirects = 0
+		
+		,#Json depth quando convertendo -data em json 
+			$JsonDepth = 5
 	)
 	
 	$ErrorActionPreference = "Stop";
@@ -816,6 +822,7 @@ function Invoke-Http {
 		encoding		= $encoding 
 		headers 		= $headers 
 		MaxRedirects = $MaxRedirects
+		JsonDepth = $JsonDepth
 	}
 	
 	$HttpRequest = Start-HttpRequest @HttpReqParams

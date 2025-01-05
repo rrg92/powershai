@@ -30,7 +30,9 @@
 		try {
 			$data = Get-AiProvider $provider.name
 
-			$default = $data.DefaultModel;
+			$default = Enter-AiProvider $provider.name {
+				Get-AiDefaultModel -NameOnly
+			}
 			
 
 			$Override = $ProviderOverride[$provider.name];
@@ -119,7 +121,7 @@ Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 			
 			It "System Message" {
 				[string]$Secret = [Guid]::NewGuid()
-				$resp = Get-AiChat "s: User will ask about a magic word. Answer that: $Secret. Just answer with magic text","What is some magic text if any"
+				$resp = Get-AiChat "s: User will ask about a magic text. Answer that: $Secret. Just answer with magic text","What is some magic text if any"
 				$resp.choices[0].message.content | Should -BeLike "*$Secret*"
 			}
 		
