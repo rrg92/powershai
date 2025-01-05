@@ -6,6 +6,7 @@ services:
             OPENAI_API_KEY: $TEST_OPENAI_API_KEY
             GOOGLE_API_KEY: $TEST_GOOGLE_API_KEY
             CLAUDE_API_KEY: $TEST_CLAUDE_API_KEY
+            COHERE_API_KEY: $TEST_COHERE_API_KEY
             POWERSHAI_TEST_MODELS: $TEST_POWERSHAI_TEST_MODELS
         command: pwsh -NonInteractive -File ./util/publish-prepare.ps1 -Tests
 
