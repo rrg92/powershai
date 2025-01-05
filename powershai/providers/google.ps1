@@ -315,6 +315,10 @@ function google_Chat {
 			
 			$FinishReason = "stop"
 			switch($Candidate.finishReason){
+				"STOP" {
+					$FinishReason = "stop"
+				}
+				
 				"MAX_TOKENS" {
 					$FinishReason = "length"
 				}
@@ -324,7 +328,7 @@ function google_Chat {
 				}
 				
 				default {
-					write-warning "Uknown google finish reason: $($Candidate.finishReason). Setting to stop!" 
+					verbose "Unknown google finish reason: $($Candidate.finishReason). Setting to stop!" 
 				}
 			}
 			
