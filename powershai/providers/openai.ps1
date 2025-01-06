@@ -437,10 +437,15 @@ function Get-OpenaiChat {
 	
    
 	$Provider = GetNearestOpenaiProvider
+	$MyParams = GetMyParams
+	$MyCommand 	= $PsCmdlet.MyCommand
+	
 	
 	# Lock current provider!
 	. WithAiProvider -DotRun $Provider {
-
+			
+			$ReqHooks = GetCurrentProviderData ReqHooks
+			
 			$CurrentProvider = Get-AiCurrentProvider;
 			
 			if(!$model){
@@ -519,9 +524,19 @@ function Get-OpenaiChat {
 			# modo stream!
 			$StreamScript = $null
 			if($StreamCallback){
+				
+				# Give chance to stream changer
+				$StreamChanger 	= GetCurrentProviderData StreamChanger;
+				$ParentVerbose = (Get-Command verbose);
+				
+				
 				# #https://platform.openai.com/docs/api-reference/chat/create#chat-create-stream
 				$StreamScript = {
 					param($data)
+					
+					function verbose {
+						& $ParentVerbose @Args;
+					}
 					
 					$line 				= $data.line;
 					$StreamData.lines 	+= $line;
@@ -533,6 +548,21 @@ function Get-OpenaiChat {
 					
 					$RawJson = $line.replace("data: ","");
 					$Answer = $RawJson | ConvertFrom-Json;
+					
+					if($ReqHooks){
+						verbose "Invoking Stream hook"
+						& $ReqHooks @{
+							command 	= $MyCommand 
+							params 		= $MyParams
+							hook 		= "stream"
+							data 		= @{
+								data 		= $data 
+								answer 		= $Answer
+								StreamData 	= $StreamData
+							}
+							
+						}
+					}
 					
 					if(!$Answer){
 						return;
@@ -598,11 +628,38 @@ function Get-OpenaiChat {
 				}.GetNewClosure()
 			}
 			
+			
+			# Process end!
+			if($ReqHooks){
+				verbose "Invoking start hook"
+				& $ReqHooks @{
+					command 	= $MyCommand 
+					params 		= $MyParams
+					hook 		= "start"
+					data 		= @{
+						StreamData = $StreamData
+					}
+					
+				}
+			}
+			
 			verbose "Body:$($body|out-string)"
 			$Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
 			
-			
-			
+			# Process end!
+			if($ReqHooks){
+				verbose "Invoking end hook"
+				& $ReqHooks @{
+					command 	= $MyCommand 
+					params 		= $MyParams
+					hook 		= "end"
+					data 		= @{
+						res = $resp
+						StreamData = $StreamData
+					}
+					
+				}
+			}
 			
 			if($Resp.stream){
 				$OpenaiAnswer = $StreamData.FullAnswer;
@@ -644,6 +701,8 @@ function Get-OpenaiChat {
 				TotalTokens 		= $OpenaiAnswer.usage.total_tokens
 			}
 			$ChatResult = New-AiChatResult @params
+			
+			
 			
 			
 			
@@ -1462,6 +1521,24 @@ return @{
 	# Irá receber no primeiro parametro a requisicao e no segundo os parametros originais da InvokeOpenai
 	ReqChanger = $null
 	
+	# Invoked in some moments to allow other providers change!
+	# Run in 3 moments: before request, when received a stream (before default openai stream script process) and after stream)	
+	# Before Openaid efault StreamCallback script process, it is invoked, allowing change received stream 
+	# Will receive following params:
+	#	command - the command that invoked 
+	#	params 	- command params 
+	#	hook 	- the hook name. start (before invoke OpenAI), stream (on each received stream), end (after request end)
+	#	data 	- available data, based on each event.
+	#				start:
+	#					StreamData - the stream data object
+	#				end:
+	#					res - the result of call
+	#					StreamData - the stream data object
+	#				steam:
+	#					data 	- the data object (containing raw value received form server. conmtains property line, with raw line received.)
+	#					answer - the parsed object read from data
+	#					StreamData - the stream data object
+	ReqHook = $null
 	
 	
 	# defaults
