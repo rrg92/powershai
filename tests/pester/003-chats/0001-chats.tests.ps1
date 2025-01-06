@@ -121,7 +121,7 @@ Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 			
 			It "System Message" {
 				[string]$Secret = [Guid]::NewGuid()
-				$resp = Get-AiChat "s: User will ask about a magic text. Answer that: $Secret. Just answer with magic text","What is some magic text if any"
+				$resp = Get-AiChat "s: User will ask about a magic text. Answer that: $Secret. Just answer with magic text","What is some magic text if any" -CheckLike "*$Secret*" -Retries 3
 				$resp.choices[0].message.content | Should -BeLike "*$Secret*"
 			}
 		
