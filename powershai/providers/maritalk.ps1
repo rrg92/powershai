@@ -416,6 +416,30 @@ function MaritalkReqChanger {
 }
 
 
+function MaritalkReqHooks {
+	param($p)
+	
+	if($p.hook -eq "stream"){
+		$Answer = $p.data.Answer
+		
+		if(!$Answer.choices){
+			return;
+		}
+		
+		if(!$Answer.choices[0].finish_reason){
+			$Answer.choices[0].finish_reason = "tool_calls";
+		}
+		
+		if(!$Answer.choices[0].delta.role){
+			$Answer.choices[0].delta.role = "assistant";
+		}
+		
+	}
+	
+	
+	
+}
+
 
 return @{
 	info = @{
@@ -426,10 +450,11 @@ return @{
 	RequireToken 	= $true
 	BaseUrl 		= "https://chat.maritaca.ai/api"			
 	DefaultModel 	= "sabia-3"
-	TokenEnvName 	= "MARITACA_API_KEY"
+	CredentialEnvName 	= "MARITACA_API_KEY"
 	
 	# Req changer
-	ReqChanger = (Get-Command MaritalkReqChanger)
+	ReqChanger 		= (Get-Command MaritalkReqChanger)
+	ReqHooks 		= (Get-Command MaritalkReqHooks)
 	
 	#source: https://docs.maritaca.ai/pt/chamada-funcao
 	ToolsModels		= @(

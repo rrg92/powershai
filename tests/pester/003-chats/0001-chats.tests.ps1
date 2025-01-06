@@ -339,7 +339,8 @@ Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 				
 				It "Invoke Tool2, no args" {
 					Mock PesterProcessTool -Parameter { $data.name -eq "TestTool2" }
-					$resp = ia -Lines "call tool TestTool2";
+					$resp = ia -Lines "call tool TestTool2, with no args!";
+					
 					Assert-MockCalled PesterProcessTool -Times 1
 				}
 				
