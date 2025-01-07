@@ -19,6 +19,8 @@
 			$Provider = $Provider -replace '^-','';
 		}
 		
+		write-warning "Overrides from environment provider $($Provider) Model $($model)"
+		
 		$ProviderOverride[$Provider] = @{
 			model = $Model
 			enabled = $enabled
@@ -44,6 +46,7 @@
 			
 			if($Override.model){
 				$default = $Override.model;
+				write-warning "model overrided: $default";
 			}
 			
 			if(!$default){
@@ -195,16 +198,17 @@ Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 			Context "Chat Memory" -Tag "chatmemo" {
 				
 				BeforeAll {
+					Powershay {Reset-PowershaiCurrentChat}
 					$SecretGuid = [Guid]::NewGuid().Guid;
 				}
 				
 				It "Send secret memory" {
+					
 					ia "This is a secret data: $SecretGuid","I will ask about it later"
 				}
 				
 				It "Return secret memory" {
 					$lines = ia -Lines "What is the secret data? Return just secret data in first line" 
-					write-host $Lines;
 					@($lines -Join "`n") | Should -BeLike  "*$SecretGuid*"
 				}
 

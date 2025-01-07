@@ -959,3 +959,25 @@ function GetParamCallAlias {
 		return $matches[1];
 	}
 }
+
+
+function Bytes2Human {
+	param (
+		[int64]$bytes
+	)
+	
+	if ($bytes -lt 1024) {
+		return "$bytes B"
+	}
+
+	$units = @("KB", "MB", "GB", "TB", "PB", "EB")
+	$index = 0
+	$value = $bytes / 1024
+
+	while ($value -ge 1024 -and $index -lt ($units.Count - 1)) {
+		$value /= 1024
+		$index++
+	}
+
+	return "{0:N2} {1}" -f $value, $units[$index]
+}

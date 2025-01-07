@@ -32,6 +32,9 @@
 - **HUGGINGFACE PROVIDER**: Novo cmdlet: Find-HuggingFaceModel, para buscar modelos no hub baseado em alguns filtros!
 - **OPENAI PROVIDER**: Adicionado um novo cmdlet para gerar chamadas de ferramentas: `ConvertTo-OpenaiTool`, suportando ferramentas definidas em blocos de script.
 - **OLLAMA PROVIDER**: Novo cmdlet `Get-OllamaEmbeddings` para retornar embeddings usando Ollama.
+- **OLLAMA PROVIDER**: Novo cmdlet `Update-OllamaModel` para baixar models ollama (pull) diretamente do powershai
+- **OLLAMA PROVIDER**: Deteccção automática de tools usando os metadados do ollama
+- **OLLAMA PROVIDER**: Cache de metadasos de models e novo cmdlet `Reset-OllamaPowershaiCache` para limpar o cache, permitindo consultar muitos detalhes dos modelos ollama, enquanto mantém performance para o uso repetido do comando
 
 ### Changed <!--AiDoc:Translator:IgnoreLine-->
 - **BREAKING CHANGE**: O parâmetro do Chat `ContextFormatter` foi renomeado para `PromptBuilder`.
@@ -47,6 +50,7 @@
 - **HUGGING FACE PROVIDER**: Pequeno ajustes na forma de inserir o token nas requisições da API.
 - **OPENAI PROVIDER**: `Get-OpenaiToolFromCommand` e `Get-OpenaiToolFromScript` agora usam `ConvertTo-OpenaiTool` para centralizar a conversão de comando para ferramenta OpenAI.
 - **GROQ PROVIDER**: Atualizado o modelo padrão de `llama-3.1-70b-versatile` para `llama-3.2-70b-versatile`.
+- **OLLAMA PROVIDER**: Get-AiModels agora inclui modelos que suportam tools, pois o provider usa o endpoint /api/show para obter mais detalhes dos modelos, o que permite checar pelo suporte a tools
 
 ## [v0.6.6] - 2024-11-25
 
