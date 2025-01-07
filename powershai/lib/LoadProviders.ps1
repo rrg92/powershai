@@ -47,4 +47,18 @@ if(!$POWERSHAI_SETTINGS.provider){
 
 SetCurrentProviderCred
 
+# Point all provider settings to same!
+$PowerShaiSettingsStore = Get-PowershaiSettingsStore
+
+@($PowerShaiSettingsStore.settings.keys) | %{
+	$SettingSlot = $PowerShaiSettingsStore.settings[$_]
+	
+	if($SettingSlot){
+		verbose "Updating provider setting for setting $_";
+		$SettingSlot.providers = $PROVIDERS;
+	}
+}
+
+
+
 $DEFAULT_PROVIDERS = $PROVIDERS;

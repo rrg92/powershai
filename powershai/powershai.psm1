@@ -171,6 +171,7 @@ function Switch-PowershaiSetting {
 		$TargetProvider = $OldUserSetting.provider;
 	}
 	
+	
 	if($TargetProvider -and (Test-Path "Function:Set-AiProvider") -and $PROVIDERS[$TargetProvider]){
 		Set-AiProvider $TargetProvider;
 	}
@@ -276,10 +277,30 @@ function UpgradePowershaiSettingsStore {
 	UpdatePowershaiSettingsStore $NewSettingsStore;
 	$Global:POWERSHAI_SETTINGS = $null
 	
-
+	
 	Switch-PowershaiSetting $NewSettingsStore.current;
 }
 
+function Enter-PowershaiSetting {
+	<#
+		.SYNOPSIS
+			Execute um código sob uma setting específica
+	#>
+	param($setting, $script)
+	
+	$SettingsStore = Get-PowershaiSettingsStore
+	
+	$CurrentName = $SettingsStore.current;
+	
+	Switch-PowershaiSetting $setting
+	
+	try {
+		& $script
+	} finally {
+		Switch-PowershaiSetting $CurrentName
+	}
+	
+}
 
 
 # misc functions...
@@ -942,8 +963,14 @@ function Get-AiModels {
 										$IsDefault = $DefaultModel -eq $_.name;
 										$IsDefaultEmbeddings = $DefaultEmbeddingsModel -eq $_.name;
 										
-										$_ | Add-member -Force noteproperty tools $ModelMeta.tools;
-										$_ | Add-member -Force noteproperty embeddings $ModelMeta.embeddings;
+										if($_.tools -eq $null){
+											$_ | Add-member -Force noteproperty tools $ModelMeta.tools;
+										}
+										
+										if($_.embeddings -eq $null){
+											$_ | Add-member -Force noteproperty embeddings $ModelMeta.embeddings;
+										}
+										
 										$_ | Add-member -Force noteproperty cached $true
 										$_ | Add-member -Force noteproperty default $IsDefault
 										$_ | Add-member -Force noteproperty DefaultEmbeddings $IsDefaultEmbeddings
@@ -1050,6 +1077,7 @@ function Get-AiModel {
 			tools 		= (IsModelInExpression $ModelName $ToolsExpresion)
 			embeddings 	= (IsModelInExpression $ModelName $EmbedExpression)
 		}
+		
 		
 		@($opts.keys) | %{
 			if($ModelSlot.$_ -ne $null){
@@ -2628,6 +2656,30 @@ function Get-PowershaiSettingsSize {
 	
 	$Current.GetEnumerator() | %{ [PsCustomObject]@{ key = $_.key; length = (len $_.value) } }
 }
+
+$PowershaiConfirmPreferenceVar = Get-Variable ConfirmPreference;
+function Invoke-PowershaiConfirmed {
+	<#
+		.SYNOPSIS
+			Executa um scriptblock, sempre aceitando qualquer confirmação independente de ConfirmPreference 
+	#>
+	[CmdletBinding()]
+	param($script)
+	
+	$CurrentConfirm = $PowershaiConfirmPreferenceVar.Value;
+	
+	try {
+		$PowershaiConfirmPreferenceVar.Value = "none";
+		& $script
+	} finally {
+		$PowershaiConfirmPreferenceVar.Value = $CurrentConfirm
+	}
+	
+	
+}
+Set-Alias PowershaiConfirmed Invoke-PowershaiConfirmed
+Set-Alias Powershay Invoke-PowershaiConfirmed
+
 
 
 
