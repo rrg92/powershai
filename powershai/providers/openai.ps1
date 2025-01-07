@@ -439,7 +439,7 @@ function Get-OpenaiChat {
 	$Provider = GetNearestOpenaiProvider
 	$MyParams = GetMyParams
 	$MyCommand 	= $PsCmdlet.MyCommand
-	
+	$HookUserData = @{}
 	
 	# Lock current provider!
 	. WithAiProvider -DotRun $Provider {
@@ -552,6 +552,7 @@ function Get-OpenaiChat {
 					if($ReqHooks){
 						verbose "Invoking Stream hook"
 						& $ReqHooks @{
+							UserData 	= $HookUserData
 							command 	= $MyCommand 
 							params 		= $MyParams
 							hook 		= "stream"
@@ -633,6 +634,7 @@ function Get-OpenaiChat {
 			if($ReqHooks){
 				verbose "Invoking start hook"
 				& $ReqHooks @{
+					UserData 	= $HookUserData
 					command 	= $MyCommand 
 					params 		= $MyParams
 					hook 		= "start"
@@ -650,6 +652,7 @@ function Get-OpenaiChat {
 			if($ReqHooks){
 				verbose "Invoking end hook"
 				& $ReqHooks @{
+					UserData 	= $HookUserData
 					command 	= $MyCommand 
 					params 		= $MyParams
 					hook 		= "end"
@@ -1528,6 +1531,7 @@ return @{
 	#	command - the command that invoked 
 	#	params 	- command params 
 	#	hook 	- the hook name. start (before invoke OpenAI), stream (on each received stream), end (after request end)
+	#	UserData - Hashtable with user data.
 	#	data 	- available data, based on each event.
 	#				start:
 	#					StreamData - the stream data object
