@@ -4,21 +4,22 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Get-HuggingFaceModel
+# Convert-OpenaiToolName2Cohere
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Obtém informacoes de um model especifico
+
+Convert-OpenaiToolName2Cohere [[-OpenaiName] <Object>]
+
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HuggingFaceModel [[-Model] <Object>] [<CommonParameters>]
+Convert-OpenaiToolName2Cohere [[-OpenaiName] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -Model
-Filtra por um model especifico
+### -OpenaiName
 
 ```yml
 Parameter Set: (All)
@@ -26,8 +27,8 @@ Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
-Position: 1
+Position: 0
 Default Value: 
 Accept pipeline input: false
-Accept wildcard characters: false
+Accept wildcard characters: 
 ```

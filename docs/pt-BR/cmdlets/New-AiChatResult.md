@@ -4,48 +4,51 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Invoke-OllamaApi
+# New-AiChatResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Base para invocar a API do ollama (parte da api que nao é compativel com a openai)
+Cria um novo objeto AiChat, que é o objeto que deve ser retornado pela interface *_Chat
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-OllamaApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-token] <Object>] [[-StreamCallback] <Object>] [-GetRawResp] [<CommonParameters>]
+New-AiChatResult [-id] <String> [-model] <String> [[-choices] <Object>] [[-SystemFingerprint] <Object>] [[-PromptTokens] <Int32>] [[-CompletionTokens] <Int32>] [[-TotalTokens] <Int32>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -endpoint
+### -id
+id interno da mensagem (chat.completion.id)
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: String
 Aliases: 
 Accepted Values: 
-Required: false
+Required: true
 Position: 1
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -body
+### -model
+Nome do modelo de Ia  (chat.completion.model)
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: String
 Aliases: 
 Accepted Values: 
-Required: false
+Required: true
 Position: 2
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -method
+### -choices
+chat.completion.choices, criado com New-AiChatToolChoice
 
 ```yml
 Parameter Set: (All)
@@ -54,12 +57,13 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 3
-Default Value: POST
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -token
+### -SystemFingerprint
+chat.completion.system_fingerprint
 
 ```yml
 Parameter Set: (All)
@@ -68,16 +72,17 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 4
-Default Value: $Env:OLLAMA_API_KEY
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -StreamCallback
+### -PromptTokens
+chat.completion.system_fingerprint
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: Int32
 Aliases: 
 Accepted Values: 
 Required: false
@@ -87,16 +92,32 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -GetRawResp
+### -CompletionTokens
+chat.completion.completion_tokens
 
 ```yml
 Parameter Set: (All)
-Type: SwitchParameter
+Type: Int32
 Aliases: 
 Accepted Values: 
 Required: false
-Position: named
-Default Value: False
+Position: 6
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -TotalTokens
+chat.completion.total_tokens
+
+```yml
+Parameter Set: (All)
+Type: Int32
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 7
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```

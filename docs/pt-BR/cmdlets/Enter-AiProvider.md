@@ -35,7 +35,7 @@ Você pode combinar város Enter-AiProviders aninhados;
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Enter-AiProvider [[-Provider] <Object>] [[-code] <Object>] [<CommonParameters>]
+Enter-AiProvider [[-Provider] <Object>] [[-code] <Object>] [-DotRun] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -64,6 +64,22 @@ Accepted Values:
 Required: false
 Position: 2
 Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -DotRun
+Executa no scope atual (o mesmo que usar com .).
+Note que para fucnionar Enter-AiProvider também deve ser invocada usando com .
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
 Accept pipeline input: false
 Accept wildcard characters: false
 ```

@@ -4,64 +4,24 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Invoke-CohereApi
+# Find-HuggingFaceModel
 
 ## SYNOPSIS <!--!= @#Synop !-->
+Procurar por um modelo específico no hub!
 
-Invoke-CohereApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-StreamCallback] <Object>] [[-Token] <Object>] [[-JsonDepth] <Object>] [<CommonParameters>]
-
+## DESCRIPTION <!--!= @#Desc !-->
+Basedo em https://huggingface.co/docs/hub/en/api#get-apimodels
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-CohereApi [[-endpoint] <Object>] [[-body] <Object>] [[-method] <Object>] [[-StreamCallback] <Object>] [[-Token] <Object>] [[-JsonDepth] <Object>] [<CommonParameters>]
+Find-HuggingFaceModel [[-search] <Object>] [[-filter] <Object>] [[-author] <Object>] [[-RawParams] <Object>] [[-limit] <Object>] [[-sort] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -JsonDepth
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 5
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
-```
-
-### -StreamCallback
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 3
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
-```
-
-### -Token
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 4
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
-```
-
-### -body
+### -search
+pesquisa no nome do model
 
 ```yml
 Parameter Set: (All)
@@ -72,33 +32,80 @@ Required: false
 Position: 1
 Default Value: 
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
 ```
 
-### -endpoint
+### -filter
+filtro em tags
 
 ```yml
 Parameter Set: (All)
 Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 0
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: 
-```
-
-### -method
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
+Aliases: tags
 Accepted Values: 
 Required: false
 Position: 2
 Default Value: 
 Accept pipeline input: false
-Accept wildcard characters: 
+Accept wildcard characters: false
+```
+
+### -author
+filtra autores especificos
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 3
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -RawParams
+sobrescreve parâmetros direto na api do hub!
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 4
+Default Value: @{}
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -limit
+limit a busca
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 5
+Default Value: 100
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -sort
+ordena por uma propriedade especifica
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 6
+Default Value: downloads
+Accept pipeline input: false
+Accept wildcard characters: false
 ```

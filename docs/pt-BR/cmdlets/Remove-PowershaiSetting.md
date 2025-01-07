@@ -4,23 +4,20 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Get-OllamaEmbeddings
+# Remove-PowershaiSetting
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Obtém os embeddings usando um modelo de IA que suporta embeddings (Endpoint /api/embed)
-
-## DESCRIPTION <!--!= @#Desc !-->
-Mais info: https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings
+Remove uma setting!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OllamaEmbeddings [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+Remove-PowershaiSetting [[-name] <Object>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -text
+### -name
 
 ```yml
 Parameter Set: (All)
@@ -34,17 +31,29 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -model
-o modelo a ser usado 
-use Get-AiModels para uma lista de modelos que suportam embeddings!
+### -WhatIf
 
 ```yml
 Parameter Set: (All)
-Type: Object
-Aliases: 
+Type: SwitchParameter
+Aliases: wi
 Accepted Values: 
 Required: false
-Position: 2
+Position: named
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Confirm
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: cf
+Accepted Values: 
+Required: false
+Position: named
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false

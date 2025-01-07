@@ -4,21 +4,20 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Get-HuggingFaceModel
+# Enter-PowershaiSetting
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Obtém informacoes de um model especifico
+Execute um código sob uma setting específica
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HuggingFaceModel [[-Model] <Object>] [<CommonParameters>]
+Enter-PowershaiSetting [[-setting] <Object>] [[-script] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -Model
-Filtra por um model especifico
+### -setting
 
 ```yml
 Parameter Set: (All)
@@ -27,6 +26,20 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 1
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -script
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 2
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false

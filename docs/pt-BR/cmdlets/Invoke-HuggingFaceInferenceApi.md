@@ -62,7 +62,7 @@ Accept wildcard characters: false
 
 ### -OpenaiChatCompletion
 Forçar usar endpoint de chat completion 
-Params deverá ser tratado como o mesmo params da Api da Openai (Veja o cmdle Get-OpenaiChat).
+Params deverá ser o mesmo de Get-OpenaiChat!
 Mais info: https://huggingface.co/blog/tgi-messages-api
 So funciona com modelos que possuem um chat template!
 

@@ -4,23 +4,20 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Get-OllamaEmbeddings
+# New-AiChatResultToolCall
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Obtém os embeddings usando um modelo de IA que suporta embeddings (Endpoint /api/embed)
-
-## DESCRIPTION <!--!= @#Desc !-->
-Mais info: https://github.com/ollama/ollama/blob/main/docs/api.md#generate-embeddings
+Cria uma nova tool call para ser usada em New-AiChatResult, parâmetro tool call
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OllamaEmbeddings [[-text] <Object>] [[-model] <Object>] [<CommonParameters>]
+New-AiChatResultToolCall [[-FunctionName] <Object>] [[-FunctionArgs] <Object>] [[-CallId] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -text
+### -FunctionName
 
 ```yml
 Parameter Set: (All)
@@ -34,9 +31,7 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -model
-o modelo a ser usado 
-use Get-AiModels para uma lista de modelos que suportam embeddings!
+### -FunctionArgs
 
 ```yml
 Parameter Set: (All)
@@ -45,6 +40,20 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 2
+Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -CallId
+
+```yml
+Parameter Set: (All)
+Type: Object
+Aliases: 
+Accepted Values: 
+Required: false
+Position: 3
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false

@@ -4,18 +4,18 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Get-OllamaModel
+# Update-OllamaModel
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Obtém detalhes de um modulo (/api/show)
+Atualiza (ou baixa) um modelo do ollama (api/pull)
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Mais info em https://github.com/ollama/ollama/blob/main/docs/api.md#show-model-information
+Mais info em https://github.com/ollama/ollama/blob/main/docs/api.md#pull-a-model
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-OllamaModel [[-model] <Object>] [<CommonParameters>]
+Update-OllamaModel [[-model] <Object>] [-Print] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -31,6 +31,20 @@ Accepted Values:
 Required: false
 Position: 1
 Default Value: 
+Accept pipeline input: false
+Accept wildcard characters: false
+```
+
+### -Print
+
+```yml
+Parameter Set: (All)
+Type: SwitchParameter
+Aliases: 
+Accepted Values: 
+Required: false
+Position: named
+Default Value: False
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
