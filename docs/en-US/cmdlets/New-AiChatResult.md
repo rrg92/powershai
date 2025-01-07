@@ -4,51 +4,51 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Invoke-GradioHttp
+# New-AiChatResult
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
-
-## DESCRIPTION <!--!= @#Desc !-->
-Executes HTTP calls to Gradio and automatically adds common headers, such as authentication, etc.
+Creates a new AiChat object, which is the object that should be returned by the *_Chat interface
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [[-MaxRedirects] <Object>] [<CommonParameters>]
+New-AiChatResult [-id] <String> [-model] <String> [[-choices] <Object>] [[-SystemFingerprint] <Object>] [[-PromptTokens] <Int32>] [[-CompletionTokens] <Int32>] [[-TotalTokens] <Int32>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -url
+### -id
+internal message id (chat.completion.id)
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: String
 Aliases: 
 Accepted Values: 
-Required: false
+Required: true
 Position: 1
 Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -method
+### -model
+AI model name (chat.completion.model)
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: String
 Aliases: 
 Accepted Values: 
-Required: false
+Required: true
 Position: 2
-Default Value: GET
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -data
+### -choices
+chat.completion.choices, created with New-AiChatToolChoice
 
 ```yml
 Parameter Set: (All)
@@ -62,7 +62,8 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -ContentType
+### -SystemFingerprint
+chat.completion.system_fingerprint
 
 ```yml
 Parameter Set: (All)
@@ -71,16 +72,17 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 4
-Default Value: application/json
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -StreamCallback
+### -PromptTokens
+chat.completion.system_fingerprint
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: Int32
 Aliases: 
 Accepted Values: 
 Required: false
@@ -90,11 +92,12 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -token
+### -CompletionTokens
+chat.completion.completion_tokens
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: Int32
 Aliases: 
 Accepted Values: 
 Required: false
@@ -104,11 +107,12 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -MaxRedirects
+### -TotalTokens
+chat.completion.total_tokens
 
 ```yml
 Parameter Set: (All)
-Type: Object
+Type: Int32
 Aliases: 
 Accepted Values: 
 Required: false

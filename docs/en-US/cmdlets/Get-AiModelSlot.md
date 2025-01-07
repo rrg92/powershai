@@ -4,21 +4,21 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Get-HuggingFaceModel
+# Get-AiModelSlot
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Gets information about a specific model
+Gets the model settings slot. Should be used by advanced users to change model settings!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HuggingFaceModel [[-Model] <Object>] [<CommonParameters>]
+Get-AiModelSlot [[-ModelName] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -Model
-Filters by a specific model
+### -ModelName
+model name
 
 ```yml
 Parameter Set: (All)

@@ -7,37 +7,35 @@ powershai: true
 # Get-AiChat
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Sends messages to an LLM and returns the response
+Sends messages to a LLM and returns the response
 
 ## DESCRIPTION <!--!= @#Desc !-->
-This is the most basic Chat method provided by PowershAI.  
-With this function, you can send a message to an LLM from the current provider.  
+This is the most basic form of Chat promoted by PowershAI.  
+With this function, you can send a message to a LLM from the current provider.  
 
-This function is a lower-level, standardized way to access an LLM that powershai provides.  
-It does not manage history or context. It is useful for invoking simple prompts that do not require multiple interactions as in a Chat. 
-Although it supports Function Calling, it does not execute any code, and only returns the model's response.
+This function is a lower-level, standardized way to access a LLM that powershai provides.  
+It does not manage history or context. It is useful for invoking simple prompts that do not require multiple interactions like in a Chat. 
+Although it supports Function Calling, it does not execute any code and only returns the model's response.
 
 
 
 ** INFORMATION FOR PROVIDERS
-
-The provider must implement the Chat function for this functionality to be available. 
-The chat function must return an object with the response with the same specification as the OpenAI, Chat Completion function.
-The following links serve as a basis:
-
-https://platform.openai.com/docs/guides/chat-completions
-https://platform.openai.com/docs/api-reference/chat/object (return without streaming)
-The provider must implement the parameters of this function. 
-See the documentation for each parameter for details and how to map to a provider;
-
-When the model does not support one of the informed parameters (that is, there is no equivalent functionality, or that can be implemented in an equivalent way) an error should be returned.
-Parameters that are not passed to the provider will have a description informing!
+	The provider must implement the Chat function for this functionality to be available. 
+	The chat function must return an object with the response following the same specification as OpenAI's Chat Completion function.
+	The following links serve as a basis:
+		https://platform.openai.com/docs/guides/chat-completions
+		https://platform.openai.com/docs/api-reference/chat/object (non-streaming return)
+	The provider must implement the parameters of this function. 
+	Refer to the documentation for each parameter for details and how to map to a provider;
+	
+	When the model does not support one of the provided parameters (that is, there is no equivalent functionality, or it cannot be implemented in an equivalent manner), an error should be returned.
+	Parameters that are not passed to the provider will have a description informing!
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] 
-[[-StreamCallback] <Object>] [-IncludeRawResp] [[-Check] <Object>] [[-Retries] <Object>] [-ContentOnly] [[-ProviderRawParams] <Object>] [<CommonParameters>]
+Get-AiChat [[-prompt] <Object>] [[-temperature] <Object>] [[-model] <Object>] [[-MaxTokens] <Object>] [[-ResponseFormat] <Object>] [[-Functions] <Object>] [[-RawParams] <Object>] [[-StreamCallback] <Object>] 
+[-IncludeRawResp] [[-Check] <Object>] [[-Retries] <Object>] [-ContentOnly] [[-ProviderRawParams] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -103,12 +101,10 @@ Accept wildcard characters: false
 ```
 
 ### -ResponseFormat
-Response format
-Acceptable formats, and behavior, should follow the same as OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format
-Shortcuts:
-
-"json"|"json_object", is equivalent to {"type": "json_object"}
-object must specify a schema as if it were passed directly to the Openai API, in the response_format.json_schema field
+Response format The acceptable formats and behavior must follow the same as OpenAI: https://platform.openai.com/docs/api-reference/chat/create#chat-create-response_format  
+Shortcuts:  
+	"json"|"json_object", is equivalent to {"type": "json_object"}  
+	The object must specify a schema as if it were passed directly to the OpenAI API, in the response_format.json_schema field  
 
 ```yml
 Parameter Set: (All)
@@ -122,11 +118,11 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -Functions
-List of tools that should be invoked!
-You can use commands like Get-OpenaiTool*, to easily transform powershell functions into the expected format!
-If the model invokes the function, the response, both in stream and normal, must also follow the OpenAI tool calling model.
-This parameter must follow the same schema as the OpenAI Function Calling: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools
+### -Functions  
+List of tools that must be invoked!  
+You can use commands like Get-OpenaiTool*, to easily transform PowerShell functions into the expected format!  
+If the model invokes the function, the response, both in stream and normal, must also follow the OpenAI tool calling model.  
+This parameter must follow the same schema as OpenAI's Function Calling: https://platform.openai.com/docs/api-reference/chat/create#chat-create-tools  
 
 ```yml
 Parameter Set: (All)
@@ -140,9 +136,9 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -RawParams
-Specify direct parameters from the provider's API.
-This will overwrite the values that were calculated and generated based on the other parameters.
+### -RawParams  
+Specify direct parameters for the provider's API.  
+This will overwrite the values that were calculated and generated based on other parameters.  
 
 ```yml
 Parameter Set: (All)
@@ -156,12 +152,12 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -StreamCallback
-Enables Stream mode
-You must specify a ScriptBlock that will be invoked for each text generated by the LLM.
-The script must receive a parameter that represents each segment, in the same streaming format returned
-This parameter is an object that will contain the choices property, which is in the same schema returned by OpenAI streaming:
-https://platform.openai.com/docs/api-reference/chat/streaming
+### -StreamCallback  
+Enables Stream mode  
+You must specify a ScriptBlock that will be invoked for each text generated by the LLM.  
+The script must receive a parameter that represents each snippet, in the same streaming format returned.  
+	This parameter is an object that will contain the choices property, which is in the same schema returned by OpenAI's streaming:  
+		https://platform.openai.com/docs/api-reference/chat/streaming  
 
 ```yml
 Parameter Set: (All)
@@ -175,9 +171,9 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -IncludeRawResp
-Include the API response in a field called IncludeRawResp
-The following parameter is not passed to the provider!
+### -IncludeRawResp  
+Include the API response in a field called IncludeRawResp  
+ The following parameters are not passed to the provider!  
 
 ```yml
 Parameter Set: (All)
@@ -191,10 +187,10 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -Check
-Validates the response and if it is not as expected, tries again!
-Can be a string or a scriptblock
-It is not passed to the provider!
+### -Check  
+Validates the response and if it is not as expected, tries again!  
+It can be a string or a script block  
+It is not passed to the provider!  
 
 ```yml
 Parameter Set: (All)
@@ -208,9 +204,9 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -Retries
-Max attempts if Check fails
-It is not passed to the provider!
+### -Retries  
+Max attempts if Check fails  
+It is not passed to the provider!  
 
 ```yml
 Parameter Set: (All)
@@ -224,9 +220,8 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -ContentOnly
-Returns only the text of the response.
-It is not passed to the provider!
+### -ContentOnly  Returns only the text of the response.  
+Not passed to the provider!
 
 ```yml
 Parameter Set: (All)
@@ -241,8 +236,8 @@ Accept wildcard characters: false
 ```
 
 ### -ProviderRawParams
-Specifies raw params per provider. This takes precedence over -RawParams (if 2 parameters with the same name (and path) are specified).
-You must specify a hashtable and each key is the provider name. Then, the value of each key is the same as you would specify in -RawParams.
+Specifies raw params by provider. This takes precedence over -RawParams (if 2 parameters with the same name (and path) are specified).  
+You must specify a hashtable and each key is the name of the provider. Then, the value of each key is the same as you would specify in -RawParams.
 
 ```yml
 Parameter Set: (All)
@@ -258,6 +253,5 @@ Accept wildcard characters: false
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI
-_
+_Automatically translated using PowershAI and AI._
 <!--PowershaiAiDocBlockEnd-->

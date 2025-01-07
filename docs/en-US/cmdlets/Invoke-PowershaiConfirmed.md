@@ -4,21 +4,20 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Get-HuggingFaceModel
+# Invoke-PowershaiConfirmed
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Gets information about a specific model
+Executes a scriptblock, always accepting any confirmation regardless of ConfirmPreference
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Get-HuggingFaceModel [[-Model] <Object>] [<CommonParameters>]
+Invoke-PowershaiConfirmed [[-script] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -Model
-Filters by a specific model
+### -script
 
 ```yml
 Parameter Set: (All)

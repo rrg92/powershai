@@ -7,7 +7,10 @@ powershai: true
 # Get-OllamaTags
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Get-OllamaTags [<CommonParameters>]
+Lists the tags of ollama. Equivalent to the endpoint /api/tags
+
+## DESCRIPTION <!--!= @#Desc !-->
+More info at https://github.com/ollama/ollama/blob/main/docs/api.md#list-local-models
 
 ## SYNTAX <!--!= @#Syntax !-->
 
@@ -19,6 +22,5 @@ Get-OllamaTags [<CommonParameters>]
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI
-_
+_Automatically translated using PowershAI and AI._
 <!--PowershaiAiDocBlockEnd-->

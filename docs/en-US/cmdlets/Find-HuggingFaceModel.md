@@ -4,23 +4,24 @@ schema: 2.0.0
 powershai: true
 ---
 
-# Invoke-GradioHttp
+# Find-HuggingFaceModel
 
 ## SYNOPSIS <!--!= @#Synop !-->
-
+Search for a specific model in the hub!
 
 ## DESCRIPTION <!--!= @#Desc !-->
-Executes HTTP calls to Gradio and automatically adds common headers, such as authentication, etc.
+Based on https://huggingface.co/docs/hub/en/api#get-apimodels
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-GradioHttp [[-url] <Object>] [[-method] <Object>] [[-data] <Object>] [[-ContentType] <Object>] [[-StreamCallback] <Object>] [[-token] <Object>] [[-MaxRedirects] <Object>] [<CommonParameters>]
+Find-HuggingFaceModel [[-search] <Object>] [[-filter] <Object>] [[-author] <Object>] [[-RawParams] <Object>] [[-limit] <Object>] [[-sort] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
-### -url
+### -search
+search in the model name
 
 ```yml
 Parameter Set: (All)
@@ -34,21 +35,23 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -method
+### -filter
+filter on tags
 
 ```yml
 Parameter Set: (All)
 Type: Object
-Aliases: 
+Aliases: tags
 Accepted Values: 
 Required: false
 Position: 2
-Default Value: GET
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -data
+### -author
+filter specific authors
 
 ```yml
 Parameter Set: (All)
@@ -62,7 +65,8 @@ Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -ContentType
+### -RawParams
+overrides parameters directly in the hub API!
 
 ```yml
 Parameter Set: (All)
@@ -71,12 +75,13 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 4
-Default Value: application/json
+Default Value: @{}
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -StreamCallback
+### -limit
+limit the search
 
 ```yml
 Parameter Set: (All)
@@ -85,12 +90,13 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 5
-Default Value: 
+Default Value: 100
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
-### -token
+### -sort
+sort by a specific property
 
 ```yml
 Parameter Set: (All)
@@ -99,21 +105,7 @@ Aliases:
 Accepted Values: 
 Required: false
 Position: 6
-Default Value: 
-Accept pipeline input: false
-Accept wildcard characters: false
-```
-
-### -MaxRedirects
-
-```yml
-Parameter Set: (All)
-Type: Object
-Aliases: 
-Accepted Values: 
-Required: false
-Position: 7
-Default Value: 
+Default Value: downloads
 Accept pipeline input: false
 Accept wildcard characters: false
 ```

@@ -7,41 +7,32 @@ powershai: true
 # Set-OllamaUrl
 
 ## SYNOPSIS <!--!= @#Synop !-->
-Set-OllamaUrl [[-url] <Object>]
+Changes the ollama URL. Format protocol://address:port
 
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Set-OllamaUrl [<CommonParameters>]
+Set-OllamaUrl [[-url] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
 
 ### -url
-Parameter Set: (All)
-Type: Object
-Aliases:
-Accepted Values:
-Required: false
-Position: 0
-Default Value:
-Accept pipeline input: false
-Accept wildcard characters:
+Specify only the base URL (the url before /v1 or /api).
 
 ```yml
 Parameter Set: (All)
-Type: 
+Type: Object
 Aliases: 
 Accepted Values: 
 Required: false
-Position: named
-Default Value: None
+Position: 1
+Default Value: 
 Accept pipeline input: false
 Accept wildcard characters: false
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI
-_
+_Automatically translated using PowershAI and AI._
 <!--PowershaiAiDocBlockEnd-->

@@ -1,4 +1,5 @@
-﻿---
+﻿```markdown
+---
 external help file: powershai-help.xml
 schema: 2.0.0
 powershai: true
@@ -13,8 +14,8 @@ https://huggingface.co/docs/hub/en/api
 ## SYNTAX <!--!= @#Syntax !-->
 
 ```
-Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] [[-limit] <Object>] [[-sort] <Object>] [-Desc] 
-[-full] [-config] [[-RawParams] <Object>] [-Public] [[-Token] <Object>] [<CommonParameters>]
+Invoke-HuggingFaceHub [[-endpoint] <Object>] [[-search] <Object>] [[-author] <Object>] [[-filter] <Object>] [[-direction] <Object>] [[-limit] <Object>] [[-sort] <Object>] [-Desc] [-full] [-config] [[-RawParams] 
+<Object>] [-Public] [[-Token] <Object>] [<CommonParameters>]
 ```
 
 ## PARAMETERS <!--!= @#Params !-->
@@ -189,7 +190,7 @@ Accept wildcard characters: false
 ```
 
 ### -Token
-Uses a specific token
+uses a specific token
 
 ```yml
 Parameter Set: (All)
@@ -200,11 +201,10 @@ Required: false
 Position: 9
 Default Value: 
 Accept pipeline input: false
-Accept wildcard characters: false
+```Accept wildcard characters: false
 ```
 
 
 <!--PowershaiAiDocBlockStart-->
-_Automatically translated using PowershAI and AI
-_
+_Automatically translated using PowershAI and AI._
 <!--PowershaiAiDocBlockEnd-->
