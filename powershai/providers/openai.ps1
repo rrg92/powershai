@@ -1483,10 +1483,10 @@ function openai_GetEmbeddings {
 
 	
 	$i = -1;
-	$resp.embeddings | %{
+	$resp.data | %{
 		$i++;
 		$emb = @{
-			embeddings = $_
+			embeddings = $_.embedding
 		}
 		
 		if($IncludeText){
@@ -1547,7 +1547,7 @@ return @{
 	
 	# defaults
 	DefaultModel 	= "gpt-4o-mini"
-	DefultEmbeddingsModel = "text-embedding-3-small"
+	DefaultEmbeddingsModel = "text-embedding-3-small"
 	info = @{
 		desc	= "OpenAI"
 		url 	= "https://openai.com/"

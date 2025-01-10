@@ -2,6 +2,12 @@
 
 ## [Unreleased] <!--AiDoc:Translator:IgnoreLine-->
 
+## [v0.7.1]
+
+### Fixed <!--AiDoc:Translator:IgnoreLine-->
+- Issue #36: Chats were being recreated every time, preventing the proper maintenance of history when using multiple chats!
+- **OPENAI PROVIDER**: Fix result of Get-AiEmbeddings when used with OpenAI
+
 ## [v0.7.0]
 
 ### Fixed <!--AiDoc:Translator:IgnoreLine-->

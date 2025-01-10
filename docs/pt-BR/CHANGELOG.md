@@ -2,6 +2,12 @@
 
 ## [Unreleased] <!--AiDoc:Translator:IgnoreLine-->
 
+## [v0.7.1]
+
+### Fixed <!--AiDoc:Translator:IgnoreLine-->
+- Issue #36: Chats estavam sendo recriados toda vez, evitando manter o histórico corretamente ao usar múltiplos chat! 
+- **OPENAI PROVIDER**: Corrigido resultado de `Get-AiEmbeddings`
+
 ## [v0.7.0]
 
 ### Fixed <!--AiDoc:Translator:IgnoreLine-->
