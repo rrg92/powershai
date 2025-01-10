@@ -199,7 +199,7 @@ function New-PowershaiChat {
 	# Create chat!
 	$Chats = $POWERSHAI_SETTINGS.chats;
 	
-	if(!$Chats -isnot [hashtable]){
+	if($Chats -isnot [hashtable]){
 		$Chats = @{};
 		$POWERSHAI_SETTINGS.chats = $Chats;
 	}

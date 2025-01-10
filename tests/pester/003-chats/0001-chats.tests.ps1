@@ -91,6 +91,35 @@ AfterAll {
 	Switch-PowershaiSetting default
 }
 
+
+Describe "Basic Chat Cmdlets Tests" -Tag "chats:core" {
+	
+	Context "Multiple Chats Creation/Remove" {
+		BeforeAll {
+			New-PowershaiChat default -Recreate
+			$ChatAtivo = Get-PowershaiChat .
+			Get-PowershaiChat "*" | ? {$_.id -ne $ChatAtivo.id} | %{ Remove-PowershaiChat $_.id };
+			$ChatName1 = "powershai-tests-multiple-1"
+			$ChatName2 = "powershai-tests-multiple-2"
+			$chat1 = New-PowershaiChat $ChatName1
+			$chat2 = New-PowershaiChat $ChatName2
+			$CreatedChats = Get-PowershaiChat * | ?{$_.id -like "powershai-tests-multiple-*"};
+		}
+		
+		It "Must exists two chats"  {
+			@($CreatedChats).count | Should -Be 2
+		}
+		
+		It "Must exist no chat" {
+			#remove 
+			New-PowershaiChat default -Recreate
+			$CreatedChats | %{ Remove-PowershaiChat $_.id };
+			@(Get-PowershaiChat * | ?{$_.id -like "powershai-tests-multiple-*"}).count | Should -Be 0;
+		}
+	}
+	
+}
+
 # TODO: SAVE settings in memory toe asy restore!
 Context "Provider Chats" -Tag "chats" -Foreach $TestModels {
 
