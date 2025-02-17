@@ -119,6 +119,10 @@ function Convert-Openai2CohereMessage {
 				$CohereMessage = HashTableMerge @{} $m;
 				$CohereMessage.remove("refusal");
 				
+				if($CohereMessage.tool_calls -and $CohereMessage.content -eq $null){
+					$CohereMessage.Remove("content");
+				}
+				
 				foreach($Call in $CohereMessage.tool_calls){
 					$Call.function.name = Convert-OpenaiToolName2Cohere $Call.function.name
 				}
