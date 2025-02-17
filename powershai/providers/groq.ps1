@@ -50,6 +50,10 @@ function groq_Chat {
 			$GroqMessage.remove("refusal");
 		}
 		
+		if($GroqMessage.role -eq "system" -and $GroqMessage.content -isnot [string]){
+			$GroqMessage.content = $GroqMessage.content.text;
+		}
+		
 		[void]$GroqMessages.Add($GroqMessage)
 	}
 	
