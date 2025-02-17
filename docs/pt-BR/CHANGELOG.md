@@ -2,6 +2,16 @@
 
 ## [Unreleased] <!--AiDoc:Translator:IgnoreLine-->
 
+## [v0.7.2]
+
+### Added <!--AiDoc:Translator:IgnoreLine-->
+- **GROQ PROVIDER**: Adicionado groq aos testes automáticos
+
+### Fixed <!--AiDoc:Translator:IgnoreLine-->
+- Issue #39: Corrigido erro no provider groq, relacioando a system messages 
+- **COHERE PROVIDER**: Corrigido erro relacionado a mensagens do modelo quando tinham respostas de tool calls.
+
+
 ## [v0.7.1]
 
 ### Fixed <!--AiDoc:Translator:IgnoreLine-->
@@ -86,3 +96,5 @@
 [v0.6.6]: https://github.com/rrg92/powershai/releases/tag/v0.6.6
 [v0.6.5]: https://github.com/rrg92/powershai/releases/tag/v0.6.5
 [v0.7.0]: https://github.com/rrg92/powershai/releases/tag/v0.7.0
+[v0.7.1]: https://github.com/rrg92/powershai/releases/tag/v0.7.1
+[v0.7.2]: https://github.com/rrg92/powershai/releases/tag/v0.7.2

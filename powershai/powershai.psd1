@@ -1,6 +1,6 @@
 ﻿@{
     PowerShellVersion 	= "3.0.0"
-    ModuleVersion  		= "0.7.1"
+    ModuleVersion  		= "0.7.2"
 	RootModule 			= 'powershai.psm1'
 	Author				= 'Rodrigo Ribeiro Gomes'
 	Description 		= "Access AI capabilities directly from PowerShell"
