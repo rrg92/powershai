@@ -625,7 +625,7 @@ return @{
 	RequireToken 		= $true
 	ApiVersion 			= "v1"
 	BaseUrl 			= "https://generativelanguage.googleapis.com"
-	DefaultModel 		= "gemini-1.5-flash"
+	DefaultModel 		= "gemini-2.0-flash"
 	CredentialEnvName 	= "GOOGLE_API_KEY"
 	
 	#Assume every openai model support tools.

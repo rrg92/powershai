@@ -20,5 +20,6 @@ jobs:
           COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
           CLAUDE_API_KEY: ${{ secrets.CLAUDE_API_KEY }}
           MARITACA_API_KEY: ${{ secrets.MARITACA_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           POWERSHAI_TEST_MODELS: ${{ vars.POWERSHAI_TEST_MODELS }}
         run: ./util/publish-prepare.ps1 -Tests
