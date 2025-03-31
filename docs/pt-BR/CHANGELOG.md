@@ -2,6 +2,17 @@
 
 ## [Unreleased] <!--AiDoc:Translator:IgnoreLine-->
 
+## [v0.7.3]
+### Added <!--AiDoc:Translator:IgnoreLine-->
+- **HUGGINGFACE PROVUDER**: Adicionado parâmetro -DisableRetry de Get-GradioInfo
+- **HUGGINGFACE PROVUDER**: Adicionado parâmetros GradioServerRoot em Get-HuggingFaceSpace e ServerRoot em Connect-HuggingFaceSpaceGradio
+- **HUGGINGFACE PROVUDER**: Adicionado lógica para detectar se o space do hugging face usa Gradio 5 e ajustar o server root
+- **HUGGINGFACE PROVUDER**: Adicionado spaces privados aos testes do provider
+
+### Fixed <!--AiDoc:Translator:IgnoreLine-->
+- **HUGGINGFACE PROVUDER**: Corrigido problema de autenticação em spaces privados
+
+
 ## [v0.7.2]
 
 ### Added <!--AiDoc:Translator:IgnoreLine-->
