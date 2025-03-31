@@ -60,7 +60,7 @@ function Invoke-GradioHttp {
 	$token = ResolveHuggingFaceToken -token $token
 	
 	if($token){
-		$headers["Authorization"] = $token
+		$headers["Authorization"] = "Bearer $token"
 	}
 	
 	$ReqParams = @{
@@ -286,7 +286,7 @@ function Send-GradioApi {
 	$token = ResolveHuggingFaceToken -token $token
 	
 	if($token){
-		$headers = @{Authorization = $token}
+		$headers = @{Authorization = "Bearer $token"}
 	}
 	
 	$ApiEvent | Add-Member Noteproperty update @{
@@ -597,6 +597,8 @@ function Get-GradioInfo {
 	param(
 		[Parameter(ValueFromPipeline=$true)]
 		$AppUrl = "."
+		
+		,[switch]$DisableRetry
 	)
 	
 	if($AppUrl -eq "."){
@@ -621,6 +623,11 @@ function Get-GradioInfo {
 			return $result;
 			break;
 		} catch {
+			
+			if($DisableRetry){
+				throw;
+			}
+			
 			$LeftTries--;
 			$e = $_.Exception;
 			
@@ -686,11 +693,14 @@ function New-GradioSession {
 		,#Nome unico que identifica esta sessao!
 			$Name = $Null
 			
-		,#Diretório onde fazer o donwload dos arqiovpos 
+		,#Diretório onde fazer o donwload dos arquivos 
 			$DownloadPath = $null
 			
 		,#Force recreate
 			[switch]$Force 
+			
+		,#Desativa o retry do gradio info 
+			[switch]$DisableRetry
 	)
 	
 	$Session = [PsCustomObject]@{
@@ -734,7 +744,7 @@ function New-GradioSession {
 	}
 
 	verbose "Check app info...";
-	$Session.info = Get-GradioInfo $AppUrl;
+	$Session.info = Get-GradioInfo $AppUrl -DisableRetry:$DisableRetry;
 	
 	$AppUrl = $session.info.RealAppUrl
 	$Session.AppUrl = $AppUrl
@@ -2554,6 +2564,9 @@ function Get-HuggingFaceSpace {
 		,#Não cria uma sessão gradio automatica.
 		 #Por padrao, em spaces gradios, ele ja cria uma gradio session!
 			[switch]$NoGradioSession
+			
+		,#Espeficia um path alternativo para o gradio AppUrl
+			$GradioServerRoot = $null
 	)
 	
 	begin {
@@ -2584,13 +2597,28 @@ function Get-HuggingFaceSpace {
 				GradioSession = $null
 			}
 			
+
+			
 			$ResultSpace | Add-Member -Force Noteproperty control $control
 			
 			SetType $ResultSpace "HuggingFaceSpace"
 			
 			if(!$NoGradioSession -and $ResultSpace.sdk -eq "gradio") {
+				
+				if(!$GradioServerRoot -and $ResultSpace.cardData.sdk_version -match '^(\d+)\.'){
+					$GradioMajorVersion = $matches[1];
+					
+					verbose "Checking Gradio SDK Version: $GradioMajorVersion"
+					
+					if($GradioMajorVersion -ge 5){
+						$GradioServerRoot = "gradio_api"
+					}
+					
+					verbose "Set GradioServerRoot to $GradioServerRoot due to Gradio Version $GradioMajorVersion";
+				}
+			
 				try {
-					$GradioSession = $ResultSpace | Connect-HuggingFaceSpaceGradio
+					$GradioSession = $ResultSpace | Connect-HuggingFaceSpaceGradio -ServerRoot $GradioServerRoot
 					verbose "	Conected to session: $($GradioSession.SessionId)"
 				} catch {
 					write-warning "Failed connect gradio. USe Connect-HuggingFaceSpaceGradio. Error: $_";
@@ -2746,6 +2774,9 @@ function Connect-HuggingFaceSpaceGradio {
 	
 		,#Force connect 
 			[switch]$Force
+			
+		,#Server root do gradio 
+			$ServerRoot = $null
 	)
 	
 	$Space = Get-HuggingFaceSpace $Space;
@@ -2774,8 +2805,19 @@ function Connect-HuggingFaceSpaceGradio {
 	}
 	
 	$GradioHost = $Space.Host;
+	
+	$DisableRetry = $false;
+	
+	if($ServerRoot -like "http*"){
+		$GradioHost = $ServerRoot;
+		$DisableRetry = $true;
+	} elseif($ServerRoot){
+		$GradioHost += "/" + $ServerRoot;
+		$DisableRetry = $true;
+	}
+	
 	verbose "Creating session: $GradioHost"
-	$GradioSession = New-GradioSession -Name $SessionName -AppUrl $GradioHost -Force;
+	$GradioSession = New-GradioSession -Name $SessionName -AppUrl $GradioHost -Force -DisableRetry:$DisableRetry;
 
 	verbose "Generated Session: $SessionName";
 
