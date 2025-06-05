@@ -55,9 +55,12 @@ Function Start-HttpRequest {
 		,#Max auto http redirect
 			$MaxRedirects = $null
 			
-		,#Json depth quando convertendo data em json 
-			 $JsonDepth = 5
-	)
+                ,#Json depth quando convertendo data em json
+                         $JsonDepth = 5
+
+                ,#Permite especificar o content-type de campos individuais
+                        $FieldContentTypes = @{}
+        )
 	$ErrorActionPreference = "Stop";
 
 	
@@ -359,15 +362,17 @@ Function Start-HttpRequest {
 						'name="'+$FieldName+'"'
 					)
 					
-					$BodyLines += "--$boundary"
-					$FieldContentType = $null
+                                $BodyLines += "--$boundary"
+                                $FieldContentType = $FieldContentTypes[$FieldName]
 					
 					# É u file?
-					if($FieldValue -is [IO.FileInfo]){
-						$file = $FieldValue;
-						$FileNamedEnc = $IsoEnc.GetString($SendEncoding.GetBytes($File.name));
-						$ContentDisposition += 'filename="'+$FileNamedEnc+'"'
-						$FieldContentType = "application/octet-stream"
+                                        if($FieldValue -is [IO.FileInfo]){
+                                                $file = $FieldValue;
+                                                $FileNamedEnc = $IsoEnc.GetString($SendEncoding.GetBytes($File.name));
+                                                $ContentDisposition += 'filename="'+$FileNamedEnc+'"'
+                                                if(!$FieldContentType){
+                                                        $FieldContentType = "application/octet-stream"
+                                                }
 
 						#Isso aqui tambem funcionaria!
 						verbose "	Reading file raw binary content"
@@ -801,9 +806,11 @@ function Invoke-Http {
 		,#MaxRedirects 
 			$MaxRedirects = 0
 		
-		,#Json depth quando convertendo -data em json 
-			$JsonDepth = 5
-	)
+                ,#Json depth quando convertendo -data em json
+                        $JsonDepth = 5
+
+                ,$FieldContentTypes = @{}
+        )
 	
 	$ErrorActionPreference = "Stop";
 	
@@ -823,6 +830,7 @@ function Invoke-Http {
 		headers 		= $headers 
 		MaxRedirects = $MaxRedirects
 		JsonDepth = $JsonDepth
+                FieldContentTypes = $FieldContentTypes
 	}
 	
 	$HttpRequest = Start-HttpRequest @HttpReqParams
@@ -1263,15 +1271,17 @@ Function Invoke-HttpOld {
 							'name="'+$FieldName+'"'
 						)
 						
-						$BodyLines += "--$boundary"
-						$FieldContentType = $null
+                                            $BodyLines += "--$boundary"
+                                            $FieldContentType = $FieldContentTypes[$FieldName]
 						
 						# É u file?
-						if($FieldValue -is [IO.FileInfo]){
-							$file = $FieldValue;
-							$FileNamedEnc = $IsoEnc.GetString($SendEncoding.GetBytes($File.name));
-							$ContentDisposition += 'filename="'+$FileNamedEnc+'"'
-							$FieldContentType = "application/octet-stream"
+                                                if($FieldValue -is [IO.FileInfo]){
+                                                        $file = $FieldValue;
+                                                        $FileNamedEnc = $IsoEnc.GetString($SendEncoding.GetBytes($File.name));
+                                                        $ContentDisposition += 'filename="'+$FileNamedEnc+'"'
+                                                        if(!$FieldContentType){
+                                                                $FieldContentType = "application/octet-stream"
+                                                        }
 
 							#Isso aqui tambem funcionaria!
 							verbose "	Reading file raw binary content"
