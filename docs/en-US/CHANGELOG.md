@@ -2,6 +2,8 @@
 
 ## [Unreleased] <!--AiDoc:Translator:IgnoreLine-->
 
+- Issue #49: Start-HttpRequest now accepts `-FieldContentTypes` to set per-field content type
+
 ## [v0.7.3]
 
 ### Added <!--AiDoc:Translator:IgnoreLine-->
