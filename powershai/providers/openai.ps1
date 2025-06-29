@@ -483,9 +483,6 @@ function Get-OpenaiChat {
 			
 			
 			
-			if($RawParams){
-				$RawParams.keys | %{ $Body[$_] = $RawParams[$_] }
-			}
 			
 			if($ResponseFormat){
 				$Body.response_format = $ResponseFormat
@@ -496,13 +493,16 @@ function Get-OpenaiChat {
 				$Body.tool_choice = "auto";
 			}
 			
-			if($StreamCallback){
-				$body.stream = $true;
-				$body.stream_options = @{include_usage = $true};
-			}
+                        if($StreamCallback){
+                                $body.stream = $true;
+                                $body.stream_options = @{include_usage = $true};
+                        }
 
-			
-			$StreamData = @{
+                        if($RawParams){
+                                $Body = HashTableMerge $Body $RawParams
+                        }
+
+                        $StreamData = @{
 				#Todas as respostas enviadas!
 				answers = @()
 				
