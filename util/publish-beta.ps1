@@ -4,6 +4,7 @@
 [CmdletBinding()]
 param(
 	$ApiKey = $Env:PSGALERY_KEY
+	,[switch]$Publish
 )
 
 $ErrorActionPreference = "Stop";
