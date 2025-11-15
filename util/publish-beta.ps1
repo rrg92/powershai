@@ -51,11 +51,14 @@ if(!$LastTaggedVersion){
 
 $BetaVersion = [Version]($LastTaggedVersion.replace("beta-",""))
 $CurrentManifest.Guid = 'a7e32bd5-be37-4d35-befc-411c81e2bea7'
+$CurrentManifest.Description = 'Beta, unstable, unstested version of powershai with latest stuff!'
 $CurrentManifest.ModuleVersion = $BetaVersion
 $PSData = $CurrentManifest.PrivateData.PSData
 $CurrentManifest.PrivateData.Remove("PSData");
 
 New-ModuleManifest @CurrentManifest @PSData -Path "$BetaTempPath/powershai-beta.psd1"
+
+
 
 # testa se o modulo foi importado normalmente!
 import-module -force $BetaTempPath 
