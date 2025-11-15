@@ -647,6 +647,7 @@ function Get-OpenaiChat {
 			
 			verbose "Body:$($body|out-string)"
 			$Resp = InvokeOpenai -endpoint $endpoint -body $Body -StreamCallback $StreamScript
+
 			
 			# Process end!
 			if($ReqHooks){

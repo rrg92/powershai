@@ -1359,6 +1359,7 @@ function New-AiChatResultChoice {
 		
 		,# se finish_Reason é tools_calls , criar cada tool com New-AiChatToolCall e adicionar aqui!
 			$tools = $null
+			
 	)
 
 	$Choice = @{
@@ -1372,6 +1373,7 @@ function New-AiChatResultChoice {
 		logprops 		= $null
 		finish_reason 	= $FinishReason
 	}
+	
 	
 	if($FinishReason -eq "tool_calls"){
 
@@ -1395,8 +1397,6 @@ function New-AiChatResultChoice {
 		}
 		
 		$Choice.message.tool_calls = $tools
-	} elseif($tools){
-		throw "POWERSHAI_NEWCHATRESULT_CHOICE_INVALIDTOOLS: Tools was informed but finish_reason is not tool!"
 	}	
 	
 	SetType $Choice "AiChatResultChoice"
@@ -2009,6 +2009,9 @@ function Invoke-AiChatTools {
 		
 			$ToolCalls = $AnswerMessage.tool_calls
 			
+			
+			[Collections.ArrayList]$ToolsResults = @()
+			
 			verbose "TotalToolsCals: $($ToolCalls.count)"
 			foreach($ToolCall in $ToolCalls){
 				$CallType = $ToolCall.type;
@@ -2148,12 +2151,17 @@ function Invoke-AiChatTools {
 				
 				# Add tool and its answer!
 				# Add current message to original message to provided previous context!
-				$Message.AddRange(@(
-					$ToolCallMsg
-					$FuncResp
-				))
-				
+				$null = $ToolsResults.Add($FuncResp);
 			}
+			
+			if($ToolsResults.length){
+				$null = $Message.AddRange(@(
+					$ToolCallMsg
+					$ToolsResults
+				))
+			}
+			
+			
 			
 			#Start sending again...
 			continue;
