@@ -4,6 +4,10 @@
 ![YouTube Channel Subscribers](https://img.shields.io/youtube/channel/subscribers/UCtNVhWslzx_yjbIX8JIYang)
 ![YouTube Channel Views](https://img.shields.io/youtube/channel/views/UCtNVhWslzx_yjbIX8JIYang)
 
+  
+
+![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/powershai-beta)
+![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/powershai-beta)
 
 # PowershAI
 
