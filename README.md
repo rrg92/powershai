@@ -6,8 +6,8 @@
 
   
 
-![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/powershai-beta)
-![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/powershai-beta)
+![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/powershai-beta?label=powershai-beta)
+![PowerShell Gallery Downloads](https://img.shields.io/powershellgallery/dt/powershai-beta?label=beta%20donwloads)
 
 # PowershAI
 
