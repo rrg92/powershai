@@ -1,0 +1,21 @@
+name: Publicar
+on: 
+    push:
+        tags:
+            - beta-*
+
+jobs:
+
+  Publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Fetch tags
+        run: git fetch --prune --unshallow --tags
+      - name: Publish
+        shell: pwsh
+        env:
+          PSGALERY_KEY: ${{ secrets.PSGALERY_KEY }}
+        run: ./util/publish-beta.ps1 -Publish
+        
