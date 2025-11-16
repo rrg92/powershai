@@ -24,8 +24,12 @@ if(-not(Get-Command verbose -EA SilentlyContinue)){
 
 # helper to . source call 
 function NewHttpChangeReq {
+	
+	
 	# Check all call sto ChangeReq to see events
-	$ReqChanger = Get-Command -EA SilentlyContinue PowershaiHttpFilter;
+	$ReqChanger = Get-Item -EA SilentlyContinue Function:\PowershaiHttpFilter
+	
+	
 	$CmdLetParams = @{}
 	$cs = Get-PSCallStack
 	$MyParent = $cs[1].InvocationInfo.MyCommand
@@ -239,7 +243,7 @@ Function Start-HttpRequest {
 	
 	. NewHttpChangeReq
 
-
+	$HttpRequest.ChangeReq = Get-Item Function:\ChangeReq;
 	ChangeReq "CreateStart"
 
 	verbose "  Creating WebRequest method... Url: $url. Method: $Method ContentType: $ContentType";
@@ -582,7 +586,10 @@ function Get-HttpResponse {
 		error 		= $null
 	};
 	
-	. NewHttpChangeReq
+	function ChangeReq {
+		& $HttpRequest.ChangeReq @Args
+	}
+	
 	ChangeReq "GetStart"
 	
 	try {
@@ -812,7 +819,11 @@ function Close-HttpRequest {
 
 	$ErrorActionPreference = "Continue";
 	
-	. NewHttpChangeReq
+	function ChangeReq {
+		& $HttpRequest.ChangeReq @Args
+	}
+	
+	
 	ChangeReq "CloseStart"
 	
 	if($Force){
