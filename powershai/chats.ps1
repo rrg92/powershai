@@ -831,6 +831,9 @@ function Send-PowershaiChat {
 		,# Alterar o contexto formatter pra este
 		 # Veha mais sobre em Format-PowershaiContext
 			$FormatterFunc = $null
+
+		,# Lista de skills para carregar sob demanda no loop de tools.
+			$Skills = $null
 			
 		,# Parametros do contexto formatter alterado.
 			$FormatterParams = $null
@@ -1244,83 +1247,156 @@ function Send-PowershaiChat {
 				$ChatParams = $DirectParams +  @{
 					prompt 			= $FullPrompt
 					Tools 			= $ToolList
+					Skills			= $Skills
 					
 					
 					on 			= @{
-								
-								send = {
-									if($VerboseEnabled){
-										write-host -ForegroundColor DarkYellow "-- waiting model... --";
-									}
+							send = {
+								if($VerboseEnabled){
+									write-host -ForegroundColor DarkYellow "-- waiting model... --";
 								}
-								
-								stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
-								answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
+							}
 
-								
-								func = {
-									param($interaction)
-									
-									$ans 		= $interaction.rawAnswer;
-									$model 		= $ans.model;
-									$funcName 	= $interaction.toolResults[-1].name
-									
-									
-									if($PassThru){
-										$MainCmdlet.WriteObject(@{event="func";interaction=$interaction});
-										return;
-									}
-									
-									if($ChatUserParams.PrintToolCalls -like "Name*"){
-										write-host -ForegroundColor Blue "$funcName{" -NoNewLine
-									
-										if($ChatUserParams.PrintToolCalls -eq "NameArgs"){
-												write-host ""
-												write-host "Args:"
-												$ToolArgs = $interaction.toolResults[-1].obj;
-												write-host ($ToolArgs|fl|out-string)
-										} else {
-												write-host -ForegroundColor Blue -NoNewLine ...
-										}
-									
-									}
+							stream = {param($inter,$evt) WriteModelAnswer $inter $evt}
+							answer = {param($inter,$evt) WriteModelAnswer $inter $evt}
+
+							func = {
+								param($interaction)
+
+								$funcName = $interaction.toolResults[-1].name
+								$IsSkillTool = $funcName -in @("activate_skill","read_skill_file","execute_skill_script","execute_powershell_command")
+
+								if($PassThru){
+									$MainCmdlet.WriteObject(@{event="func";interaction=$interaction});
+									return;
 								}
-								
-								funcresult = {
-									param($interaction, $evt)
-									
-									# format using same formatter!
-									$FuncResp = $evt.params.ToolResult.resp
-									$FuncResp.content = Format-PowershaiContext $FuncResp.content;
-									
-									$LastResult = $funcName = $interaction.toolResults[-1].resp.content;
-									
-									if($PassThru){
-										$MainCmdlet.WriteObject(@{event="funcresult";interaction=$interaction});
-										return;
-									}
-									
-									if($ChatUserParams.PrintToolsResults){
-										write-host "Result:"
-										write-host $LastResult
-									}
-									
+
+								if($IsSkillTool){
+									return;
 								}
-						
-								exec = {
-									param($interaction)
-									
-									if($PassThru){
-										$MainCmdlet.WriteObject(@{event="exec";interaction=$interaction});
-										return;
-									}
-									
-									if($ChatUserParams.PrintToolCalls -like "Name*"){
-										write-host -ForegroundColor Blue "}"
+
+								if($ChatUserParams.PrintToolCalls -like "Name*"){
+									write-host -ForegroundColor Blue "$funcName{" -NoNewLine
+
+									if($ChatUserParams.PrintToolCalls -eq "NameArgs"){
 										write-host ""
+										write-host "Args:"
+										$ToolArgs = $interaction.toolResults[-1].obj;
+										write-host ($ToolArgs|fl|out-string)
+									} else {
+										write-host -ForegroundColor Blue -NoNewLine ...
 									}
-
 								}
+							}
+
+							funcresult = {
+								param($interaction, $evt)
+
+								# format using same formatter!
+								$FuncResp = $evt.params.ToolResult.resp
+								$FuncResp.content = Format-PowershaiContext $FuncResp.content;
+
+								$LastResult = $interaction.toolResults[-1].resp.content;
+
+								if($PassThru){
+									$MainCmdlet.WriteObject(@{event="funcresult";interaction=$interaction});
+									return;
+								}
+
+								if($ChatUserParams.PrintToolsResults){
+									write-host "Result:"
+									write-host $LastResult
+								}
+							}
+
+							exec = {
+								param($interaction)
+								$funcName = $interaction.toolResults[-1].name
+								$IsSkillTool = $funcName -in @("activate_skill","read_skill_file","execute_skill_script","execute_powershell_command")
+
+								if($PassThru){
+									$MainCmdlet.WriteObject(@{event="exec";interaction=$interaction});
+									return;
+								}
+
+								if($IsSkillTool){
+									return;
+								}
+
+								if($ChatUserParams.PrintToolCalls -like "Name*"){
+									write-host -ForegroundColor Blue "}"
+									write-host ""
+								}
+							}
+
+							skill = {
+								param($interaction, $evt)
+
+								$SkillInfo = $evt.params.Skill
+								$SkillAction = [string]$SkillInfo.action
+								$SkillName = [string]$SkillInfo.skill
+
+								if($PassThru){
+									$MainCmdlet.WriteObject(@{event="skill";interaction=$interaction;evt=$evt});
+									return;
+								}
+
+								if($ChatUserParams.PrintToolCalls -like "Name*"){
+									write-host -ForegroundColor DarkMagenta "skill:$SkillName ($SkillAction){" -NoNewLine
+
+									if($ChatUserParams.PrintToolCalls -eq "NameArgs"){
+										write-host ""
+										write-host "Args:"
+										$ToolArgs = $interaction.toolResults[-1].obj;
+										write-host ($ToolArgs|fl|out-string)
+									} else {
+										write-host -ForegroundColor DarkMagenta -NoNewLine ...
+									}
+								}
+							}
+
+							skillresult = {
+								param($interaction, $evt)
+
+								$FuncResp = $evt.params.ToolResult.resp
+								$FuncResp.content = Format-PowershaiContext $FuncResp.content;
+								$LastResult = $interaction.toolResults[-1].resp.content;
+
+								if($PassThru){
+									$MainCmdlet.WriteObject(@{event="skillresult";interaction=$interaction;evt=$evt});
+									return;
+								}
+
+								if($ChatUserParams.PrintToolsResults){
+									write-host "Skill result:"
+									write-host $LastResult
+								}
+							}
+
+							skillerror = {
+								param($interaction, $evt)
+
+								if($PassThru){
+									$MainCmdlet.WriteObject(@{event="skillerror";interaction=$interaction;evt=$evt});
+									return;
+								}
+
+								write-host -ForegroundColor Red "Skill execution error"
+							}
+
+							skillexec = {
+								param($interaction, $evt)
+
+								if($PassThru){
+									$MainCmdlet.WriteObject(@{event="skillexec";interaction=$interaction;evt=$evt});
+									return;
+								}
+
+								if($ChatUserParams.PrintToolCalls -like "Name*"){
+									write-host -ForegroundColor DarkMagenta "}"
+									write-host ""
+								}
+							}
 						}
 				}
 				
