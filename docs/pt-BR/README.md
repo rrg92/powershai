@@ -206,6 +206,53 @@ io "5 numeros aleatorios, com seu valor escrito por extenso"
 **IMPORTANTE: Note que nem todo provider pode suportar este modo, pois o modelo precisa ser capaz de suportar JSON! Caso receba erros, confirme se o mesmo comando funciona com um modelo da OpenAI. Você pode abrir uma issue também**
 
 
+#### Skills (Agent Skills)
+
+O PowershAI suporta skills no formato `SKILL.md`, com descoberta automática e carregamento sob demanda durante o chat.
+
+Fluxo recomendado:
+
+1. Descobrir as skills disponíveis com `Get-AiSkills`.
+2. Passar a lista no `Send-PowershaiChat -Skills`.
+3. Deixar o modelo ativar a skill necessária com `activate_skill` quando fizer sentido.
+
+Exemplo básico:
+
+```powershell
+# Descobre skills em uma pasta raiz (cada subpasta com SKILL.md vira uma skill)
+$Skills = Get-AiSkills -Path .\my-skills
+
+# Envia prompt e permite que o modelo carregue skills sob demanda
+ia -Skills $Skills "Preciso organizar logs de build e gerar um resumo de erros"
+```
+
+Exemplo com autorização automática de scripts de skill e comandos PowerShell:
+
+```powershell
+$Skills = Get-AiSkills -Path .\my-skills
+
+# Autoriza scripts: skill/script, skill/*, */*
+# Autoriza comandos por wildcard (matching com -like)
+Invoke-AiChatTools -Prompt "Use a skill apropriada para coletar diagnostico local" -Skills $Skills -AuthorizedSkillsScripts @("diagnostics/*") -AuthorizedPowershellCommands @("Get-ChildItem*","Get-Process*","git status")
+```
+
+Durante a execução, o modelo pode usar tools nativas de skill:
+
+- `activate_skill`: carrega o conteúdo completo da skill.
+- `read_skill_file`: lê arquivos da skill sob demanda.
+- `execute_skill_script`: executa script `.ps1` da skill.
+- `execute_powershell_command`: executa comando PowerShell genérico.
+
+No `Send-PowershaiChat`, eventos de skill seguem o mesmo padrão de eventos de tools:
+
+- `skill`
+- `skillresult`
+- `skillerror`
+- `skillexec`
+
+Isso permite customizar saída no host e telemetria no mesmo fluxo já usado para function calling.
+
+
 ### Salvando configurações  
 
 O PowershAI permite ajustar uma série de configurações, como parâmetros de chats, tokens de autenticação, etc.  

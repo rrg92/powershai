@@ -205,6 +205,53 @@ io "5 random numbers, with their value written in full"
 **IMPORTANT: Note that not every provider can support this mode, as the model needs to be able to support JSON! If you receive errors, confirm if the same command works with an OpenAI model. You can also open an issue**
 
 
+#### Skills (Agent Skills)
+
+PowershAI supports skills in `SKILL.md` format, with automatic discovery and on-demand loading during chat.
+
+Recommended flow:
+
+1. Discover available skills with `Get-AiSkills`.
+2. Pass the list to `Send-PowershaiChat -Skills`.
+3. Let the model activate the required skill with `activate_skill` when needed.
+
+Basic example:
+
+```powershell
+# Discover skills from a root folder (each subfolder with SKILL.md becomes a skill)
+$Skills = Get-AiSkills -Path .\my-skills
+
+# Send prompt and let the model load skills on demand
+ia -Skills $Skills "I need to organize build logs and produce an error summary"
+```
+
+Example with automatic authorization for skill scripts and PowerShell commands:
+
+```powershell
+$Skills = Get-AiSkills -Path .\my-skills
+
+# Authorize scripts: skill/script, skill/*, */*
+# Authorize commands via wildcard (matching with -like)
+Invoke-AiChatTools -Prompt "Use the best skill to collect local diagnostics" -Skills $Skills -AuthorizedSkillsScripts @("diagnostics/*") -AuthorizedPowershellCommands @("Get-ChildItem*","Get-Process*","git status")
+```
+
+During execution, the model can call built-in skill tools:
+
+- `activate_skill`: loads full skill instructions.
+- `read_skill_file`: reads skill files on demand.
+- `execute_skill_script`: runs a skill `.ps1` script.
+- `execute_powershell_command`: runs a generic PowerShell command.
+
+In `Send-PowershaiChat`, skill events follow the same event system already used by tools:
+
+- `skill`
+- `skillresult`
+- `skillerror`
+- `skillexec`
+
+This lets you keep the same host output and telemetry pattern used for function calling.
+
+
 ### Saving Settings  
 
 PowershAI allows you to adjust a number of settings, such as chat parameters, authentication tokens, etc.  

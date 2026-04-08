@@ -1824,6 +1824,18 @@ function Invoke-AiChatTools {
 		 # Você pode passar um array de objetos do tipo OpenaiTool.
 		 # Se uma mesma funcoes estiver definida em mais de 1 tool, a primeira encontrada na ordem definida será usada!
 			$Tools		= $null
+
+		,# Lista de skills no formato retornado por Get-AiSkills.
+		 # Estas skills sao enviadas ao modelo por uma tool nativa chamada activate_skill.
+			$Skills		= $null
+
+		,# Lista de autorizacoes para execucao automatica de scripts de skills.
+		 # Formato: skill/script, skill/*, */*
+			[string[]]$AuthorizedSkillsScripts = @()
+
+		,# Lista de comandos PowerShell autorizados automaticamente (wildcards suportados).
+		 # Exemplo: Get-ChildItem*, git status, *
+			[string[]]$AuthorizedPowershellCommands = @()
 			
 		,$PrevContext		= $null
 		,# máx output!
@@ -1848,6 +1860,10 @@ function Invoke-AiChatTools {
 		# 	stream: disparado quando uma resposta foi enviada (pelo stream) e -DifferentStreamEvent
 		# 	beforeAnswer: Disparado após todas as respostas. Util quando usado em stream!
 		# 	afterAnswer: Disparado antes de iniciar as respostas. Util quando usado em stream!
+		# 	skill: disparado antes de executar uma tool nativa de skill.
+		# 	skillresult: disparado quando uma tool nativa de skill conclui com sucesso.
+		# 	skillerror: disparado quando uma tool nativa de skill falha.
+		# 	skillexec: disparado ao final da execucao da tool nativa de skill (sucesso ou erro).
 			$on				= @{} 	
 									
 		,# Envia o response_format = "json", forçando o modelo a devolver um json.
@@ -1883,6 +1899,185 @@ function Invoke-AiChatTools {
 			} else {
 				$FunctionMap[$FunctionName] = @{
 					SrcBox = $Toolbox
+				}
+			}
+		}
+	}
+
+	$SkillMap = @{}
+	$SkillNames = @()
+	$SkillCatalog = @()
+	$SkillScriptsCatalog = @()
+	foreach($Skill in @($Skills)){
+		if(!$Skill){
+			continue
+		}
+
+		$SkillName = [string]$Skill.name
+		if([string]::IsNullOrWhiteSpace($SkillName)){
+			continue
+		}
+
+		if($SkillMap[$SkillName]){
+			write-warning "POWERSHAI_AISKILL_DUPLICATE_NAME: $SkillName"
+			continue
+		}
+
+		$SkillMap[$SkillName] = $Skill
+		$SkillNames += $SkillName
+
+		$SkillDescription = [string]$Skill.description
+		if([string]::IsNullOrWhiteSpace($SkillDescription)){
+			$SkillDescription = ""
+		}
+
+		$SkillLocation = [string]$Skill.location
+		if($SkillLocation){
+			$SkillCatalog += "- ${SkillName}: $SkillDescription (location: $SkillLocation)"
+		} else {
+			$SkillCatalog += "- ${SkillName}: $SkillDescription"
+		}
+
+		$SkillScripts = @($Skill.resources | Where-Object { $_ -and $_ -match '(?i)\.ps1$' })
+		foreach($SkillScript in $SkillScripts){
+			$ScriptNorm = ([string]$SkillScript).Replace('\\','/')
+			$SkillScriptsCatalog += "- ${SkillName}/${ScriptNorm}"
+		}
+	}
+
+	if($SkillNames.Count){
+		$SkillNames = @($SkillNames | Sort-Object -Unique)
+		$SkillCatalog = @($SkillCatalog | Sort-Object)
+		$SkillScriptsCatalog = @($SkillScriptsCatalog | Sort-Object -Unique)
+		$AvailableScriptTargets = @("- (none)")
+		if($SkillScriptsCatalog.Count){
+			$AvailableScriptTargets = $SkillScriptsCatalog
+		}
+
+		$ActivateSkillDescription = @(
+			"Load full instructions for a discovered skill."
+			"Use this when a user task matches one skill description."
+			"Available skills:"
+			$SkillCatalog
+		) -join "`n"
+
+		$OpenaiTools += @{
+			type = "function"
+			function = @{
+				name = "activate_skill"
+				description = $ActivateSkillDescription
+				parameters = @{
+					type = "object"
+					properties = @{
+						name = @{
+							type = "string"
+							description = "Name of the skill to activate"
+							enum = @($SkillNames)
+						}
+					}
+					required = @("name")
+					additionalProperties = $false
+				}
+			}
+		}
+
+		$ReadSkillFileDescription = @(
+			"Read a file from the selected skill directory and return its content on demand."
+			"Use this when skill instructions reference scripts, references, templates, or assets."
+			"Paths must be relative to the skill directory."
+		) -join "`n"
+
+		$OpenaiTools += @{
+			type = "function"
+			function = @{
+				name = "read_skill_file"
+				description = $ReadSkillFileDescription
+				parameters = @{
+					type = "object"
+					properties = @{
+						skill = @{
+							type = "string"
+							description = "Skill name owning the target file"
+							enum = @($SkillNames)
+						}
+						path = @{
+							type = "string"
+							description = "Relative path inside skill directory"
+						}
+					}
+					required = @("skill","path")
+					additionalProperties = $false
+				}
+			}
+		}
+
+		$ExecuteScriptDescription = @(
+			"Execute a PowerShell script resource from an available skill."
+			"By default, execution asks user authorization via prompt."
+			"Use AuthorizedSkillsScripts to auto-authorize patterns like skill/script, skill/*, */*."
+			"Available script targets:"
+			$AvailableScriptTargets
+		) -join "`n"
+
+		$OpenaiTools += @{
+			type = "function"
+			function = @{
+				name = "execute_skill_script"
+				description = $ExecuteScriptDescription
+				parameters = @{
+					type = "object"
+					properties = @{
+						skill = @{
+							type = "string"
+							description = "Skill name owning the script"
+							enum = @($SkillNames)
+						}
+						script = @{
+							type = "string"
+							description = "Relative path of script inside skill directory"
+						}
+						args = @{
+							type = "object"
+							description = "Named arguments passed to script"
+							additionalProperties = $true
+						}
+					}
+					required = @("skill","script")
+					additionalProperties = $false
+				}
+			}
+		}
+
+		$ExecuteCommandDescription = @(
+			"Execute a generic PowerShell command."
+			"Prefer skill scripts when available, but use this for dynamic commands required by skill instructions."
+			"By default, execution asks user authorization via prompt unless matched by AuthorizedPowershellCommands."
+		) -join "`n"
+
+		$OpenaiTools += @{
+			type = "function"
+			function = @{
+				name = "execute_powershell_command"
+				description = $ExecuteCommandDescription
+				parameters = @{
+					type = "object"
+					properties = @{
+						skill = @{
+							type = "string"
+							description = "Optional skill context for working directory"
+							enum = @($SkillNames)
+						}
+						command = @{
+							type = "string"
+							description = "PowerShell command to execute"
+						}
+						workingDirectory = @{
+							type = "string"
+							description = "Optional working directory"
+						}
+					}
+					required = @("command")
+					additionalProperties = $false
 				}
 			}
 		}
@@ -2038,44 +2233,149 @@ function Invoke-AiChatTools {
 				$FuncName = $FuncCall.name
 				verbose "	FuncName: $FuncName"
 
-				# acha a tool na lista!
-				$FunctionInfo = $FunctionMap[$FuncName]
-				
-				if(!$FunctionInfo){
-					throw "POWERSHAI_CHATTOOLS_NOFUNCTIONMAP: Function $FuncName was invoked, but no function map found. This can be PowershAI bug or LLM incorrect call!"
+				$FuncArgsRaw =  $FuncCall.arguments
+				if([string]::IsNullOrWhiteSpace([string]$FuncArgsRaw)){
+					$FuncArgsRaw = "{}"
 				}
-				
-				$SrcToolbox = $FunctionInfo.SrcBox;
-				$NoSplatArgs = $false;
-				if($SrcToolbox.map){
-					try {
-						$MapResult = (& $SrcToolbox.map $FuncName $SrcToolbox)
-						$TheFunc = $MapResult.Func
-						$NoSplatArgs = $MapResult.NoSplatArgs;
-					} catch {
-						write-warning "POWERSHAI_CHATTOOLS_PSMAP_ERROR: ChatTools failed get command name for tool $FuncName"
-						throw
+
+				verbose "	Arguments: $FuncArgsRaw";
+				$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
+
+				$ArgsHash = @{};
+				$funcArgs.psobject.properties | %{ $ArgsHash[$_.Name] = $_.Value  };
+
+				$IsActivateSkill = $FuncName -eq "activate_skill"
+				$IsExecuteSkillScript = $FuncName -eq "execute_skill_script"
+				$IsReadSkillFile = $FuncName -eq "read_skill_file"
+				$IsExecutePowershellCommand = $FuncName -eq "execute_powershell_command"
+				$IsSkillTool = $false
+				$SkillEventData = $null
+
+				if($IsActivateSkill){
+					$SkillName = [string]$ArgsHash.name
+					$SkillData = $SkillMap[$SkillName]
+					if(!$SkillData){
+						throw "POWERSHAI_AISKILL_NOTFOUND: $SkillName"
 					}
-				} else {
-					$TheFunc = $FuncName
+
+					$IsSkillTool = $true
+					$SkillEventData = @{
+						action = "activate"
+						skill = $SkillName
+					}
+
+					$TheFunc = "Invoke-AiSkill"
+					$NoSplatArgs = $false
+					$ArgsHash = @{ Skill = $SkillData }
+				}
+				elseif($IsExecuteSkillScript){
+					$SkillName = [string]$ArgsHash.skill
+					$ScriptTarget = [string]$ArgsHash.script
+					$ScriptArgs = $ArgsHash.args
+					if($ScriptArgs -isnot [hashtable]){
+						$ScriptArgs = HashTableMerge @{} $ScriptArgs
+					}
+
+					$SkillData = $SkillMap[$SkillName]
+					if(!$SkillData){
+						throw "POWERSHAI_AISKILL_NOTFOUND: $SkillName"
+					}
+
+					$IsSkillTool = $true
+					$SkillEventData = @{
+						action = "execute_script"
+						skill = $SkillName
+						script = $ScriptTarget
+					}
+
+					$TheFunc = "Invoke-AiSkill"
+					$NoSplatArgs = $false
+					$ArgsHash = @{
+						Skill = $SkillData
+						Script = $ScriptTarget
+						ScriptArgs = $ScriptArgs
+						AuthorizedSkillsScripts = $AuthorizedSkillsScripts
+					}
+				}
+				elseif($IsReadSkillFile){
+					$SkillName = [string]$ArgsHash.skill
+					$TargetPath = [string]$ArgsHash.path
+					$SkillData = $SkillMap[$SkillName]
+					if(!$SkillData){
+						throw "POWERSHAI_AISKILL_NOTFOUND: $SkillName"
+					}
+
+					$IsSkillTool = $true
+					$SkillEventData = @{
+						action = "read_file"
+						skill = $SkillName
+						path = $TargetPath
+					}
+
+					$TheFunc = "Get-AiSkillFileContent"
+					$NoSplatArgs = $false
+					$ArgsHash = @{
+						Skill = $SkillData
+						Path = $TargetPath
+					}
+				}
+				elseif($IsExecutePowershellCommand){
+					$SkillName = [string]$ArgsHash.skill
+					$Command = [string]$ArgsHash.command
+					$WorkingDirectory = [string]$ArgsHash.workingDirectory
+
+					$SkillData = $null
+					if($SkillName){
+						$SkillData = $SkillMap[$SkillName]
+						if(!$SkillData){
+							throw "POWERSHAI_AISKILL_NOTFOUND: $SkillName"
+						}
+					}
+
+					$IsSkillTool = $true
+					$SkillEventData = @{
+						action = "execute_command"
+						skill = $SkillName
+						command = $Command
+						workingDirectory = $WorkingDirectory
+					}
+
+					$TheFunc = "Invoke-AiPowershellCommand"
+					$NoSplatArgs = $false
+					$ArgsHash = @{
+						Skill = $SkillData
+						Command = $Command
+						WorkingDirectory = $WorkingDirectory
+						AuthorizedPowershellCommands = $AuthorizedPowershellCommands
+					}
+				}
+				else {
+					# acha a tool na lista!
+					$FunctionInfo = $FunctionMap[$FuncName]
+					
+					if(!$FunctionInfo){
+						throw "POWERSHAI_CHATTOOLS_NOFUNCTIONMAP: Function $FuncName was invoked, but no function map found. This can be PowershAI bug or LLM incorrect call!"
+					}
+					
+					$SrcToolbox = $FunctionInfo.SrcBox;
+					$NoSplatArgs = $false;
+					if($SrcToolbox.map){
+						try {
+							$MapResult = (& $SrcToolbox.map $FuncName $SrcToolbox)
+							$TheFunc = $MapResult.Func
+							$NoSplatArgs = $MapResult.NoSplatArgs;
+						} catch {
+							write-warning "POWERSHAI_CHATTOOLS_PSMAP_ERROR: ChatTools failed get command name for tool $FuncName"
+							throw
+						}
+					} else {
+						$TheFunc = $FuncName
+					}
 				}
 				
 				if(!$TheFunc){
 					throw "POWERSHAI_CHATTOOLS_NOFUNCTION: No function name was returned by map of $FuncName. This can be a bug of Powershai or LLM wrong call."
 				}
-				
-				#Here wil have all that we need1
-				$FuncArgsRaw =  $FuncCall.arguments
-				verbose "	Arguments: $FuncArgsRaw";
-				
-				#We assuming model sending something that can be converted...
-				
-				$funcArgs = $FuncArgsRaw | ConvertFrom-Json;
-				
-				
-				#Then, we can call the function!
-				$ArgsHash = @{};
-				$funcArgs.psobject.properties | %{ $ArgsHash[$_.Name] = $_.Value  };
 				
 				$CurrentToolResult = @{ 
 					hash 	= $ArgsHash
@@ -2086,6 +2386,14 @@ function Invoke-AiChatTools {
 				}
 				
 				$AiInteraction.toolResults += $CurrentToolResult
+
+				if($IsSkillTool){
+					$CurrentToolResult.skill = $SkillEventData
+					& $emit "skill" $AiInteraction @{
+						ToolResult = $CurrentToolResult
+						Skill = $SkillEventData
+					}
+				}
 				
 				& $emit "func" $AiInteraction @{
 					ToolResult = $CurrentToolResult
@@ -2106,6 +2414,12 @@ function Invoke-AiChatTools {
 				
 				if($FuncError){
 					& $emit "error" $AiInteraction
+					if($IsSkillTool){
+						& $emit "skillerror" $AiInteraction @{
+							ToolResult = $CurrentToolResult
+							Skill = $SkillEventData
+						}
+					}
 					
 					#Add curent error to this object to caller debug...
 					$AiInteraction.error = $_;
@@ -2137,6 +2451,12 @@ function Invoke-AiChatTools {
 					& $emit "funcresult" $AiInteraction @{
 						ToolResult 	= $CurrentToolResult
 					}
+					if($IsSkillTool){
+						& $emit "skillresult" $AiInteraction @{
+							ToolResult = $CurrentToolResult
+							Skill = $SkillEventData
+						}
+					}
 					
 					if($FuncResp.content -isnot [string]){
 						$FuncResp.content = $FuncResp.content | out-string;
@@ -2148,6 +2468,12 @@ function Invoke-AiChatTools {
 				}
 
 				& $emit "exec" $AiInteraction
+				if($IsSkillTool){
+					& $emit "skillexec" $AiInteraction @{
+						ToolResult = $CurrentToolResult
+						Skill = $SkillEventData
+					}
+				}
 				
 				# Add tool and its answer!
 				# Add current message to original message to provided previous context!
@@ -2695,6 +3021,8 @@ Set-Alias Powershay Invoke-PowershaiConfirmed
 
 ############## Module Init steps!
 
+
+. "$PSScriptRoot/skills.ps1"
 
 . "$PSScriptRoot/chats.ps1"
 
